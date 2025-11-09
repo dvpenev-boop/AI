@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bathroom Tile Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Bathroom Tile Calculator</h1>
+      <p class="lead">Enter dimensions (millimetres) and get tile counts plus a layout preview.</p>
+    </header>
+
+    <section class="grid">
+      <form id="calc-form" class="card form-card" novalidate>
+        <h2>Room & Tile Parameters</h2>
+
+        <fieldset>
+          <legend>Floor</legend>
+          <div class="row">
+            <label>Floor width (mm)
+              <input type="number" id="floor-width" required min="100" step="10" value="3000">
+            </label>
+            <label>Floor length (mm)
+              <input type="number" id="floor-length" required min="100" step="10" value="2000">
+            </label>
+          </div>
+          <div class="row">
+            <label>Floor tile width (mm)
+              <input type="number" id="floor-tile-w" required min="10" step="1" value="300">
+            </label>
+            <label>Floor tile length (mm)
+              <input type="number" id="floor-tile-l" required min="10" step="1" value="300">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Walls</legend>
+          <div class="row">
+            <label>Wall height (mm)
+              <input type="number" id="wall-height" required min="100" step="10" value="2400">
+            </label>
+          </div>
+          <div class="row">
+            <label>Wall tile width (mm)
+              <input type="number" id="wall-tile-w" required min="10" step="1" value="200">
+            </label>
+            <label>Wall tile height (mm)
+              <input type="number" id="wall-tile-h" required min="10" step="1" value="200">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Door (to subtract from wall area)</legend>
+          <div class="row">
+            <label>Door width (mm)
+              <input type="number" id="door-w" min="0" step="10" value="800">
+            </label>
+            <label>Door height (mm)
+              <input type="number" id="door-h" min="0" step="10" value="2100">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Options</legend>
+          <div class="row">
+            <label>Waste allowance (%)
+              <input type="number" id="waste" min="0" max="100" step="1" value="10">
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="btn primary">Calculate</button>
+          <button type="reset" class="btn">Reset</button>
+        </div>
+      </form>
+
+      <aside class="card result-card">
+        <h2>Results</h2>
+        <div id="results" class="results">
+          <div class="result-item"><strong>Floor tiles (raw):</strong> <span id="floor-raw">—</span></div>
+          <div class="result-item"><strong>Floor tiles (with waste):</strong> <span id="floor-waste">—</span></div>
+          <div class="result-item"><strong>Wall tiles (raw):</strong> <span id="wall-raw">—</span></div>
+          <div class="result-item"><strong>Wall tiles (with waste):</strong> <span id="wall-waste">—</span></div>
+          <div class="result-item total"><strong>Total tiles:</strong> <span id="total-tiles">—</span></div>
+        </div>
+
+        <div class="visualization" aria-hidden="false">
+          <h3>Layout Preview</h3>
+          <div class="viz-grid">
+            <figure>
+              <figcaption>Floor</figcaption>
+              <svg id="viz-floor" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"></svg>
+            </figure>
+            <figure>
+              <figcaption>Walls (unwrapped)</figcaption>
+              <svg id="viz-walls" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"></svg>
+            </figure>
+          </div>
+        </div>
+
+      </aside>
+    </section>
+
+    <footer class="foot">
+      <small>All measurements are in millimetres. Counts are rounded up to whole tiles. Default waste allowance: 10%.</small>
+    </footer>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
