@@ -49,8 +49,25 @@
                     <TextBlock DockPanel.Dock="Top" Text="{Binding CurrentReport.Title}" 
                                FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                     
-                    <Button DockPanel.Dock="Top" Content="+ Добави секция" 
-                            Command="{Binding AddSectionCommand}" Margin="0,0,0,10"/>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <Button Content="+ Добави секция" 
+                                Command="{Binding AddSectionCommand}" 
+                                Margin="0,0,0,5"
+                                Padding="5"
+                                Background="#4CAF50"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontWeight="SemiBold"/>
+                        <Button Content="🗑 Изтрий секция" 
+                                Command="{Binding DeleteSectionCommand}"
+                                Padding="5"
+                                Background="#F44336"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontWeight="SemiBold"/>
+                    </StackPanel>
                     
                     <ListBox ItemsSource="{Binding CurrentReport.Sections}"
                              SelectedItem="{Binding SelectedSection}"

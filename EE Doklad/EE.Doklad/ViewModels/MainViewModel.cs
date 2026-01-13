@@ -169,6 +169,74 @@ namespace EE.Doklad.ViewModels
             InsertSection(dialog.SectionNumber, dialog.SectionName, newSection);
         }
 
+        [RelayCommand]
+        private void DeleteSection()
+        {
+            if (SelectedSection == null)
+            {
+                MessageBox.Show("Моля, изберете секция за изтриване.", 
+                    "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Потвърждение за изтриване
+            var result = MessageBox.Show(
+                $"Сигурни ли сте, че искате да изтриете секцията?\n\n{SelectedSection.Title}",
+                "Потвърждение за изтриване",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            // Запазваме индекса на секцията, която ще изтрием
+            int deletedIndex = CurrentReport.Sections.IndexOf(SelectedSection);
+
+            // Премахваме секцията
+            CurrentReport.Sections.Remove(SelectedSection);
+
+            // Преномерираме всички останали секции
+            RenumberSections();
+
+            // Селектираме следващата секция (или предишната, ако сме изтрили последната)
+            if (CurrentReport.Sections.Any())
+            {
+                if (deletedIndex < CurrentReport.Sections.Count)
+                {
+                    SelectedSection = CurrentReport.Sections[deletedIndex];
+                }
+                else
+                {
+                    SelectedSection = CurrentReport.Sections.Last();
+                }
+            }
+            else
+            {
+                SelectedSection = null;
+            }
+
+            CurrentReport.IsDirty = true;
+        }
+
+        /// <summary>
+        /// Преномерира всички секции последователно от 1 нагоре
+        /// </summary>
+        private void RenumberSections()
+        {
+            for (int i = 0; i < CurrentReport.Sections.Count; i++)
+            {
+                var section = CurrentReport.Sections[i];
+                section.Order = i; // Order е 0-based
+
+                // Извличаме заглавието без номер
+                var titleWithoutNumber = System.Text.RegularExpressions.Regex.Replace(
+                    section.Title, @"^\d+\.\s*", "");
+                
+                // Обновяваме Title с новия номер (1-based)
+                section.Title = $"{i + 1}. {titleWithoutNumber}";
+            }
+        }
+
         /// <summary>
         /// Вмъква нова секция на конкретна позиция (номер) и преномерира всички секции след нея
         /// </summary>
