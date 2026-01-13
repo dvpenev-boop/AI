@@ -68,3 +68,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.genruntimeconfig.ca
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\ref\EE.Doklad.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.g.cs

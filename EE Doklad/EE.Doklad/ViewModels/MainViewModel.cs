@@ -131,9 +131,8 @@ namespace EE.Doklad.ViewModels
         [RelayCommand]
         private void AddSection()
         {
-            // Показваме диалог за въвеждане на име на новата секция
-            var nextNumber = CurrentReport.Sections.Count + 1;
-            var dialog = new Views.AddSectionDialog(nextNumber);
+            // Показваме диалог за вмъкване на секция с избор на позиция
+            var dialog = new Views.InsertSectionDialog(CurrentReport.Sections.Count);
             
             if (dialog.ShowDialog() != true)
                 return;
@@ -166,12 +165,58 @@ namespace EE.Doklad.ViewModels
                 newSection = new Section();
             }
 
-            // Задаваме име и ред
-            newSection.Title = dialog.FullSectionTitle;
-            newSection.Order = CurrentReport.Sections.Count;
-            
-            CurrentReport.Sections.Add(newSection);
-            SelectedSection = newSection;
+            // Вмъкваме секцията на желаната позиция с автоматично преномериране
+            InsertSection(dialog.SectionNumber, dialog.SectionName, newSection);
+        }
+
+        /// <summary>
+        /// Вмъква нова секция на конкретна позиция (номер) и преномерира всички секции след нея
+        /// </summary>
+        /// <param name="number">Желан номер на новата секция (1-based)</param>
+        /// <param name="title">Заглавие на секцията (без номер)</param>
+        /// <param name="section">Секцията за вмъкване (може да е с копирана структура)</param>
+        private void InsertSection(int number, string title, Section section)
+        {
+            // Валидация
+            if (number < 1 || number > CurrentReport.Sections.Count + 1)
+            {
+                MessageBox.Show($"Невалиден номер на секция: {number}", 
+                    "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Задаваме заглавието и Order
+            section.Title = $"{number}. {title}";
+            section.Order = number - 1; // Order е 0-based индекс
+
+            // Преномерираме всички секции от тази позиция нататък (изместваме с +1)
+            for (int i = 0; i < CurrentReport.Sections.Count; i++)
+            {
+                if (CurrentReport.Sections[i].Order >= section.Order)
+                {
+                    CurrentReport.Sections[i].Order++;
+                    
+                    // Обновяваме Title с новия номер
+                    var oldTitle = CurrentReport.Sections[i].Title;
+                    var titleWithoutNumber = System.Text.RegularExpressions.Regex.Replace(
+                        oldTitle, @"^\d+\.\s*", "");
+                    CurrentReport.Sections[i].Title = $"{CurrentReport.Sections[i].Order + 1}. {titleWithoutNumber}";
+                }
+            }
+
+            // Вмъкваме новата секция на правилната позиция в ObservableCollection
+            CurrentReport.Sections.Insert(section.Order, section);
+
+            // Сортираме колекцията по Order (за да сме сигурни че е правилно подредена)
+            var sortedSections = CurrentReport.Sections.OrderBy(s => s.Order).ToList();
+            CurrentReport.Sections.Clear();
+            foreach (var s in sortedSections)
+            {
+                CurrentReport.Sections.Add(s);
+            }
+
+            // Селектираме новата секция автоматично
+            SelectedSection = section;
             CurrentReport.IsDirty = true;
         }
 
