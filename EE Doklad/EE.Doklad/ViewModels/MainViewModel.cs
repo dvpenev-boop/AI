@@ -131,14 +131,113 @@ namespace EE.Doklad.ViewModels
         [RelayCommand]
         private void AddSection()
         {
-            var newSection = new Section
+            // Показваме диалог за въвеждане на име на новата секция
+            var nextNumber = CurrentReport.Sections.Count + 1;
+            var dialog = new Views.AddSectionDialog(nextNumber);
+            
+            if (dialog.ShowDialog() != true)
+                return;
+
+            Section newSection;
+
+            // Ако има избрана секция с таблици, питаме дали да копираме формата
+            if (SelectedSection != null && SelectedSection.Tables.Any())
             {
-                Title = $"Секция {CurrentReport.Sections.Count + 1}",
-                Order = CurrentReport.Sections.Count
-            };
+                var result = MessageBox.Show(
+                    $"Желаете ли да копирате формата (таблици и структура) от секция '{SelectedSection.Title}'?",
+                    "Копиране на формат",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Копираме формата на избраната секция
+                    newSection = CopySectionFormat(SelectedSection);
+                }
+                else
+                {
+                    // Създаваме празна секция
+                    newSection = new Section();
+                }
+            }
+            else
+            {
+                // Създаваме празна секция
+                newSection = new Section();
+            }
+
+            // Задаваме име и ред
+            newSection.Title = dialog.FullSectionTitle;
+            newSection.Order = CurrentReport.Sections.Count;
+            
             CurrentReport.Sections.Add(newSection);
             SelectedSection = newSection;
             CurrentReport.IsDirty = true;
+        }
+
+        /// <summary>
+        /// Копира формата на секция (таблици, колони, структура) без да копира данните
+        /// </summary>
+        private Section CopySectionFormat(Section sourceSection)
+        {
+            var newSection = new Section
+            {
+                StaticText = sourceSection.StaticText
+            };
+
+            // Копираме всички таблици от източника
+            foreach (var sourceTable in sourceSection.Tables)
+            {
+                Table newTable;
+                
+                // Създаваме същия тип таблица (Fixed или Dynamic)
+                if (sourceTable.IsDynamic)
+                {
+                    newTable = new DynamicTable();
+                }
+                else
+                {
+                    newTable = new FixedTable();
+                }
+
+                // Копираме заглавието и колоните
+                newTable.Title = sourceTable.Title;
+                newTable.ColumnHeaders = new List<string>(sourceTable.ColumnHeaders);
+
+                // Копираме структурата на редовете (без данни)
+                foreach (var sourceRow in sourceTable.Rows)
+                {
+                    var newRow = new Row();
+                    foreach (var sourceCell in sourceRow.Cells)
+                    {
+                        newRow.Cells.Add(new Cell
+                        {
+                            // Копираме типа на клетката и етикета, но не и стойността
+                            Type = sourceCell.Type,
+                            Value = sourceCell.Type == CellType.Text && !string.IsNullOrEmpty(sourceCell.Value) && IsLabel(sourceCell.Value) 
+                                ? sourceCell.Value  // Запазваме етикети (напр. "Показател", "Мерна единица")
+                                : "" // Изчистваме данни
+                        });
+                    }
+                    newTable.Rows.Add(newRow);
+                }
+
+                newSection.Tables.Add(newTable);
+            }
+
+            return newSection;
+        }
+
+        /// <summary>
+        /// Определя дали стойността е етикет (неизменяемо име) или данни (които да се изчистят)
+        /// </summary>
+        private bool IsLabel(string value)
+        {
+            // Етикетите обикновено са в първата колона или са измерни единици
+            var labels = new[] { "Показател", "Стойност", "Мерна единица", "Обект", 
+                "Отопляема площ", "Отопляем обем", "кв.м", "куб.м", "м", "бр.", "%", "W", "kW" };
+            
+            return labels.Any(label => value.Contains(label, StringComparison.OrdinalIgnoreCase));
         }
 
         private Report CreateSampleReport()
