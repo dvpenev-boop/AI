@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Добавяне на нова секция"
-        Height="280"
-        Width="450"
+        Height="500"
+        Width="650"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#F5F5F5">

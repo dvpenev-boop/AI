@@ -48,7 +48,11 @@ E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\runtimes\win-x86\native\libwi
 E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\runtimes\win-x86\native\qpdf.dll
 E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\runtimes\win-x86\native\zlib1.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.csproj.AssemblyReference.cache
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\MainWindow.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\App.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad_MarkupCompile.cache
@@ -66,7 +70,3 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\refint\EE.Doklad.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.pdb
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.genruntimeconfig.cache
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\ref\EE.Doklad.dll
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.baml
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.g.cs
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.baml
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.g.cs
