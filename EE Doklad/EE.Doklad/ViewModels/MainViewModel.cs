@@ -143,6 +143,17 @@ namespace EE.Doklad.ViewModels
             int desiredNumber = dialog.SectionNumber;
             string title = dialog.SectionName;
 
+            // Защита: не позволяваме вмъкване преди Челната страница (секция 1)
+            if (desiredNumber < 2)
+            {
+                MessageBox.Show(
+                    "Не може да вмъквате секции преди Челната страница.\nМоля изберете номер 2 или по-голям.",
+                    "Невалидна позиция",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             // Проверяваме дали има избрана секция с таблици
             if (SelectedSection != null && SelectedSection.Tables.Any())
             {
@@ -163,14 +174,14 @@ namespace EE.Doklad.ViewModels
                 else
                 {
                     // Създаваме празна секция
-                    var newSection = new Section();
+                    var newSection = new Section { Type = SectionType.Normal };
                     InsertSection(desiredNumber, title, newSection);
                 }
             }
             else
             {
                 // Няма избрана секция или няма таблици - създаваме празна секция
-                var newSection = new Section();
+                var newSection = new Section { Type = SectionType.Normal };
                 InsertSection(desiredNumber, title, newSection);
             }
 
@@ -184,6 +195,17 @@ namespace EE.Doklad.ViewModels
             {
                 MessageBox.Show("Моля, изберете секция за изтриване.", 
                     "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Защита: Челната страница не може да се изтрие
+            if (SelectedSection.Type == SectionType.CoverPage)
+            {
+                MessageBox.Show(
+                    "Челната страница не може да се изтрие.\nТя е задължителна част от документа.",
+                    "Защитена секция",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
@@ -368,10 +390,27 @@ namespace EE.Doklad.ViewModels
                 Title = "Енергиен доклад 2026"
             };
 
-            // Предефинирани 20 секции за енергиен доклад
+            // Първа секция винаги е Челна страница (CoverPage)
+            var coverPage = new Section
+            {
+                Type = SectionType.CoverPage,
+                Title = "1. Челна страница",
+                Order = 0,
+                CoverPageData = new CoverPageData
+                {
+                    CompanyName = "Примерна фирма ООД",
+                    LicenseNumber = "№ 1234/2025",
+                    ObjectName = "Жилищна сграда",
+                    ObjectAddress = "гр. София, ул. Примерна 1",
+                    Phase = ProjectPhase.Tehnicheski,
+                    ManagerName = "Иван Иванов"
+                }
+            };
+            report.Sections.Add(coverPage);
+
+            // Останалите 19 секции (нормални секции)
             var sectionTitles = new[]
             {
-                "1. Челна страница",
                 "2. Удостоверения",
                 "3. Съдържание",
                 "4. Въведение",
@@ -397,13 +436,14 @@ namespace EE.Doklad.ViewModels
             {
                 var section = new Section
                 {
+                    Type = SectionType.Normal,
                     Title = sectionTitles[i],
                     StaticText = $"Попълнете данните за секция: {sectionTitles[i]}",
-                    Order = i
+                    Order = i + 1  // +1 защото CoverPage е на Order=0
                 };
 
                 // Добавяме примерна таблица само за секция 5 (Общи данни)
-                if (i == 4) // индекс 4 = "5. Общи данни"
+                if (i == 3) // индекс 3 в новия масив = "5. Общи данни"
                 {
                     var table = new FixedTable
                     {

@@ -3,10 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EE.Doklad"
+        xmlns:local="clr-namespace:EE.Doklad.Views"
         xmlns:vm="clr-namespace:EE.Doklad.ViewModels"
+        xmlns:converters="clr-namespace:EE.Doklad.Converters"
         mc:Ignorable="d"
         Title="EE Доклад - Енергиен доклад" Height="700" Width="1200">
+    
+    <Window.Resources>
+        <converters:SectionTypeToVisibilityConverter x:Key="SectionTypeToVisibilityConverter"/>
+    </Window.Resources>
     
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -78,42 +83,8 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
 
             <!-- Дясна панел - съдържание на секцията -->
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="20" DataContext="{Binding SelectedSection}">
-                    <TextBlock Text="Избрана секция" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
-                    
-                    <TextBlock Text="Заглавие:"/>
-                    <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15"/>
-                    
-                    <TextBlock Text="Статичен текст:"/>
-                    <TextBox Text="{Binding StaticText, UpdateSourceTrigger=PropertyChanged}" 
-                             Height="80" TextWrapping="Wrap" AcceptsReturn="True" 
-                             VerticalScrollBarVisibility="Auto" Margin="0,5,0,15"/>
-                    
-                    <TextBlock Text="Таблици:" FontWeight="Bold" Margin="0,10,0,10"/>
-                    
-                    <ItemsControl ItemsSource="{Binding Tables}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Margin="0,0,0,15">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                        <DataGrid ItemsSource="{Binding Rows}" 
-                                                  AutoGenerateColumns="False" 
-                                                  CanUserAddRows="False"
-                                                  HeadersVisibility="Column">
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Кол. 1" Binding="{Binding Cells[0].Value}" Width="*"/>
-                                                <DataGridTextColumn Header="Кол. 2" Binding="{Binding Cells[1].Value}" Width="*"/>
-                                                <DataGridTextColumn Header="Кол. 3" Binding="{Binding Cells[2].Value}" Width="*"/>
-                                            </DataGrid.Columns>
-                                        </DataGrid>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" x:Name="ContentScrollViewer">
+                <!-- Content се задава динамично от code-behind -->
             </ScrollViewer>
         </Grid>
     </Grid>
