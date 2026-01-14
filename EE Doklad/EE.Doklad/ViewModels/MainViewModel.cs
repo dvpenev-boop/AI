@@ -131,42 +131,50 @@ namespace EE.Doklad.ViewModels
         [RelayCommand]
         private void AddSection()
         {
-            // Показваме диалог за вмъкване на секция с избор на позиция
-            var dialog = new Views.InsertSectionDialog(CurrentReport.Sections.Count);
+            int nextNumber = CurrentReport.Sections.Count + 1;
+            int maxNumber = CurrentReport.Sections.Count;
+            
+            var dialog = new Views.InsertSectionDialog(nextNumber, maxNumber);
             
             if (dialog.ShowDialog() != true)
                 return;
 
-            Section newSection;
+            // Вземаме данните от диалога
+            int desiredNumber = dialog.SectionNumber;
+            string title = dialog.SectionName;
 
-            // Ако има избрана секция с таблици, питаме дали да копираме формата
+            // Проверяваме дали има избрана секция с таблици
             if (SelectedSection != null && SelectedSection.Tables.Any())
             {
                 var result = MessageBox.Show(
-                    $"Желаете ли да копирате формата (таблици и структура) от секция '{SelectedSection.Title}'?",
-                    "Копиране на формат",
+                    $"Искате ли да копирате структурата (таблици и колони) от текущата секция?\n\n" +
+                    $"Текуща секция: {SelectedSection.Title}\n" +
+                    $"Нова секция: {desiredNumber}. {title}",
+                    "Копиране на структура",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    // Копираме формата на избраната секция
-                    newSection = CopySectionFormat(SelectedSection);
+                    // Копираме структурата на текущата секция
+                    var newSection = CopySectionFormat(SelectedSection);
+                    InsertSection(desiredNumber, title, newSection);
                 }
                 else
                 {
                     // Създаваме празна секция
-                    newSection = new Section();
+                    var newSection = new Section();
+                    InsertSection(desiredNumber, title, newSection);
                 }
             }
             else
             {
-                // Създаваме празна секция
-                newSection = new Section();
+                // Няма избрана секция или няма таблици - създаваме празна секция
+                var newSection = new Section();
+                InsertSection(desiredNumber, title, newSection);
             }
 
-            // Вмъкваме секцията на желаната позиция с автоматично преномериране
-            InsertSection(dialog.SectionNumber, dialog.SectionName, newSection);
+            CurrentReport.IsDirty = true;
         }
 
         [RelayCommand]
