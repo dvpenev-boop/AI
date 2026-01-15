@@ -143,11 +143,11 @@ namespace EE.Doklad.ViewModels
             int desiredNumber = dialog.SectionNumber;
             string title = dialog.SectionName;
 
-            // Защита: не позволяваме вмъкване преди Челната страница (секция 1)
-            if (desiredNumber < 2)
+            // Защита: не позволяваме вмъкване преди системните секции (1 и 2)
+            if (desiredNumber < 3)
             {
                 MessageBox.Show(
-                    "Не може да вмъквате секции преди Челната страница.\nМоля изберете номер 2 или по-голям.",
+                    "Не може да вмъквате секции преди системните секции (Челна страница и Удостоверения).\nМоля изберете номер 3 или по-голям.",
                     "Невалидна позиция",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -198,11 +198,11 @@ namespace EE.Doklad.ViewModels
                 return;
             }
 
-            // Защита: Челната страница не може да се изтрие
-            if (SelectedSection.Type == SectionType.CoverPage)
+            // Защита: системните секции не могат да се изтрият
+            if (SelectedSection.IsSystemSection)
             {
                 MessageBox.Show(
-                    "Челната страница не може да се изтрие.\nТя е задължителна част от документа.",
+                    "Системните секции (Челна страница и Удостоверения) не могат да се изтриват.\nТе са задължителна част от документа.",
                     "Защитена секция",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -408,10 +408,19 @@ namespace EE.Doklad.ViewModels
             };
             report.Sections.Add(coverPage);
 
-            // Останалите 19 секции (нормални секции)
+            // Втора секция: Удостоверения (системна секция №2)
+            var certificates = new Section
+            {
+                Type = SectionType.Certificates,
+                Title = "2. Удостоверения",
+                Order = 1,
+                CertificatesData = new CertificatesSectionData()
+            };
+            report.Sections.Add(certificates);
+
+            // Останалите секции (нормални секции от №3 нагоре)
             var sectionTitles = new[]
             {
-                "2. Удостоверения",
                 "3. Съдържание",
                 "4. Въведение",
                 "5. Общи данни",
@@ -439,11 +448,11 @@ namespace EE.Doklad.ViewModels
                     Type = SectionType.Normal,
                     Title = sectionTitles[i],
                     StaticText = $"Попълнете данните за секция: {sectionTitles[i]}",
-                    Order = i + 1  // +1 защото CoverPage е на Order=0
+                    Order = i + 2  // +2 защото CoverPage=0, Certificates=1
                 };
 
                 // Добавяме примерна таблица само за секция 5 (Общи данни)
-                if (i == 3) // индекс 3 в новия масив = "5. Общи данни"
+                if (i == 2) // индекс 2 в новия масив = "5. Общи данни"
                 {
                     var table = new FixedTable
                     {

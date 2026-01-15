@@ -8,8 +8,9 @@ namespace EE.Doklad.Models
     /// </summary>
     public enum SectionType
     {
-        Normal,      // Обикновена секция с таблици и текст
-        CoverPage    // Челна страница (фиксирана на позиция №1)
+        Normal,         // Обикновена секция с таблици и текст
+        CoverPage,      // Челна страница (фиксирана на позиция №1)
+        Certificates    // Удостоверения (фиксирана на позиция №2)
     }
 
     /// <summary>
@@ -42,6 +43,16 @@ namespace EE.Doklad.Models
         /// </summary>
         public CoverPageData? CoverPageData { get; set; }
 
+        /// <summary>
+        /// Данни за секция "Удостоверения" (само за Certificates секции)
+        /// </summary>
+        public CertificatesSectionData? CertificatesData { get; set; }
+
         public int Order { get; set; }
+
+        /// <summary>
+        /// Дали секцията е системна и не може да се изтрие/премести
+        /// </summary>
+        public bool IsSystemSection => Type == SectionType.CoverPage || Type == SectionType.Certificates;
     }
 }

@@ -62,6 +62,23 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = coverPageEditor;
         }
+        else if (section.Type == ModelSectionType.Certificates)
+        {
+            // Показваме Certificates Editor
+            if (section.CertificatesData == null)
+                section.CertificatesData = new Models.CertificatesSectionData
+                {
+                    Title = "Удостоверения",
+                    CertificateAttachment = new Models.AttachmentData(),
+                    InsuranceAttachment = new Models.AttachmentData()
+                };
+            
+            var certificatesEditor = new CertificatesSectionEditor
+            {
+                DataContext = section.CertificatesData
+            };
+            ContentScrollViewer.Content = certificatesEditor;
+        }
         else
         {
             // Показваме Normal Section Editor
