@@ -50,6 +50,13 @@ namespace EE.Doklad.Services
                                         continue;
                                     }
 
+                                    // Ако е Certificates секция, рендерираме удостоверенията
+                                    if (section.Type == SectionType.Certificates && section.CertificatesData != null)
+                                    {
+                                        GenerateCertificates(column, section.CertificatesData);
+                                        continue;
+                                    }
+
                                     // Заглавие на секцията (само за Normal секции)
                                     column.Item().Text(section.Title).Bold().FontSize(14);
                                     column.Item().PaddingBottom(5);
@@ -240,6 +247,113 @@ namespace EE.Doklad.Services
                     });
                 });
             }
+        }
+
+        /// <summary>
+        /// Генерира страниците с удостоверения (Certificate и Insurance)
+        /// </summary>
+        private void GenerateCertificates(ColumnDescriptor column, CertificatesSectionData data)
+        {
+            // Certificate attachment
+            if (data.CertificateAttachment?.HasAttachment == true)
+            {
+                RenderAttachment(column, "Удостоверение за регистрация", data.CertificateAttachment);
+            }
+
+            // Insurance attachment
+            if (data.InsuranceAttachment?.HasAttachment == true)
+            {
+                RenderAttachment(column, "Застрахователна полица", data.InsuranceAttachment);
+            }
+        }
+
+        /// <summary>
+        /// Рендерира един attachment като отделна страница
+        /// </summary>
+        private void RenderAttachment(ColumnDescriptor column, string title, AttachmentData attachment)
+        {
+            // Заглавие
+            column.Item()
+                .PaddingBottom(10)
+                .Text(title)
+                .Bold()
+                .FontSize(16);
+
+            // Име на файла
+            column.Item()
+                .PaddingBottom(5)
+                .Text($"Файл: {attachment.FileName}")
+                .FontSize(10)
+                .FontColor(Colors.Grey.Darken1);
+
+            // Предупреждение за multi-page PDF
+            if (!string.IsNullOrEmpty(attachment.MultiPageWarning))
+            {
+                column.Item()
+                    .PaddingBottom(10)
+                    .Text(attachment.MultiPageWarning)
+                    .FontSize(9)
+                    .FontColor(Colors.Orange.Darken2);
+            }
+
+            // Рендериране на съдържанието
+            if (attachment.Bytes != null && attachment.Bytes.Length > 0)
+            {
+                try
+                {
+                    // За изображения - директно рендериране
+                    if (attachment.ContentType?.StartsWith("image/") == true)
+                    {
+                        column.Item()
+                            .PaddingBottom(20)
+                            .AlignCenter()
+                            .MaxWidth(500)
+                            .Image(attachment.Bytes);
+                    }
+                    // За PDF - показваме placeholder (TODO: PDF rendering)
+                    else if (attachment.ContentType == "application/pdf")
+                    {
+                        column.Item()
+                            .PaddingBottom(20)
+                            .AlignCenter()
+                            .Width(400)
+                            .Height(300)
+                            .Border(2)
+                            .BorderColor(Colors.Blue.Lighten2)
+                            .Background(Colors.Blue.Lighten5)
+                            .AlignMiddle()
+                            .AlignCenter()
+                            .Column(col =>
+                            {
+                                col.Item().Text("📄 PDF документ").FontSize(18).FontColor(Colors.Blue.Darken2);
+                                col.Item().PaddingTop(10).Text(attachment.FileName).FontSize(12);
+                                col.Item().PaddingTop(5).Text("(Прегледът на PDF не е наличен в експорта)").FontSize(9).FontColor(Colors.Grey.Medium);
+                            });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Ако има грешка, показваме error placeholder
+                    column.Item()
+                        .PaddingBottom(20)
+                        .AlignCenter()
+                        .Width(400)
+                        .Height(200)
+                        .Border(2)
+                        .BorderColor(Colors.Red.Lighten2)
+                        .Background(Colors.Red.Lighten5)
+                        .AlignMiddle()
+                        .AlignCenter()
+                        .Column(col =>
+                        {
+                            col.Item().Text("⚠️ Грешка при рендериране").FontSize(14).FontColor(Colors.Red.Darken2);
+                            col.Item().PaddingTop(5).Text(ex.Message).FontSize(9).FontColor(Colors.Grey.Medium);
+                        });
+                }
+            }
+
+            // Page break след всяко удостоверение
+            column.Item().PageBreak();
         }
 
         private string GetPhaseText(ProjectPhase phase)

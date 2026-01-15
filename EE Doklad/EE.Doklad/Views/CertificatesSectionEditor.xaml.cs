@@ -135,12 +135,22 @@ namespace EE.Doklad.Views
         {
             var data = DataContext as CertificatesSectionData;
             UpdatePreview(CertificateImage, CertificatePlaceholder, data?.CertificateAttachment);
+            
+            // Управление на Visibility на предупреждението
+            CertificateWarning.Visibility = !string.IsNullOrEmpty(data?.CertificateAttachment?.MultiPageWarning)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void UpdateInsurancePreview()
         {
             var data = DataContext as CertificatesSectionData;
             UpdatePreview(InsuranceImage, InsurancePlaceholder, data?.InsuranceAttachment);
+            
+            // Управление на Visibility на предупреждението
+            InsuranceWarning.Visibility = !string.IsNullOrEmpty(data?.InsuranceAttachment?.MultiPageWarning)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void UpdatePreview(Image imageControl, UIElement placeholder, AttachmentData? attachment)
