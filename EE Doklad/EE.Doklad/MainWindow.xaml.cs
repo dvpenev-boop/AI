@@ -33,6 +33,19 @@ public partial class MainWindow : Window
     {
         // Актуализираме UI при първоначално зареждане
         UpdateSectionContent();
+
+        // Enable mouse wheel scrolling on ContentScrollViewer
+        ContentScrollViewer.PreviewMouseWheel += (s, args) =>
+        {
+            var scrollViewer = (ScrollViewer)s;
+            if (scrollViewer.ScrollableHeight > 0)
+            {
+                double newOffset = scrollViewer.VerticalOffset - (args.Delta / 3.0);
+                newOffset = System.Math.Max(0, System.Math.Min(newOffset, scrollViewer.ScrollableHeight));
+                scrollViewer.ScrollToVerticalOffset(newOffset);
+                args.Handled = true;
+            }
+        };
     }
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

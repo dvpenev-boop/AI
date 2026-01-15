@@ -83,7 +83,12 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
 
             <!-- Дясна панел - съдържание на секцията -->
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" x:Name="ContentScrollViewer">
+            <ScrollViewer Grid.Column="2" 
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          x:Name="ContentScrollViewer"
+                          Focusable="True"
+                          PanningMode="VerticalOnly">
                 <!-- Content се задава динамично от code-behind -->
             </ScrollViewer>
         </Grid>
