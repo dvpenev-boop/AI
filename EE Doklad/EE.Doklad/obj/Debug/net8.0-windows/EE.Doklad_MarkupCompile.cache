@@ -1,5 +1,5 @@
 ﻿EE.Doklad
-1.0.0.0
+
 
 winexe
 C#
@@ -12,9 +12,9 @@ TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR
 E:\AI\EE Doklad\EE.Doklad\App.xaml
 6-650953150
 
-241955857052
+22-1876490933
 2011224425538
 MainWindow.xaml;Views\AddSectionDialog.xaml;Views\CertificatesSectionEditor.xaml;Views\CoverPageEditor.xaml;Views\InsertSectionDialog.xaml;Views\ObjectDataSectionEditor.xaml;
 
-True
+False
 

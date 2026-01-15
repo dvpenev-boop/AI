@@ -57,6 +57,13 @@ namespace EE.Doklad.Services
                                         continue;
                                     }
 
+                                    // Ако е ObjectData секция, рендерираме данните за обекта
+                                    if (section.Type == SectionType.ObjectData && section.ObjectDataSectionData != null)
+                                    {
+                                        GenerateObjectData(column, section.ObjectDataSectionData);
+                                        continue;
+                                    }
+
                                     // Заглавие на секцията (само за Normal секции)
                                     column.Item().Text(section.Title).Bold().FontSize(14);
                                     column.Item().PaddingBottom(5);
@@ -347,6 +354,204 @@ namespace EE.Doklad.Services
 
             // Page break след всяко удостоверение
             column.Item().PageBreak();
+        }
+
+        /// <summary>
+        /// Генерира страницата с данни за обекта
+        /// </summary>
+        private void GenerateObjectData(ColumnDescriptor column, ObjectDataSectionData data)
+        {
+            // Заглавие
+            column.Item()
+                .PaddingBottom(10)
+                .Text(data.Title)
+                .Bold()
+                .FontSize(16);
+
+            // Описание (ако има)
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item()
+                    .PaddingBottom(10)
+                    .Text(data.Description)
+                    .FontSize(10);
+            }
+
+            // ТАБЛИЦА 1: Данни за обекта
+            column.Item()
+                .PaddingBottom(5)
+                .Text("Данни за обекта:")
+                .SemiBold()
+                .FontSize(12);
+
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(1);
+                    columns.RelativeColumn(1);
+                });
+
+                // Редове с данни
+                var rows = new[]
+                {
+                    ("Наименование на сграда", data.BuildingName ?? "-"),
+                    ("Адрес", data.Address ?? "-"),
+                    ("Тип сграда", data.BuildingType ?? "-"),
+                    ("Собственост", data.Ownership ?? "-"),
+                    ("Година на построяване", data.YearOfConstruction ?? "-"),
+                    ("Брой обитатели", data.NumberOfOccupants ?? "-")
+                };
+
+                foreach (var (label, value) in rows)
+                {
+                    tbl.Cell()
+                        .Border(1)
+                        .Background(Colors.Grey.Lighten4)
+                        .Padding(5)
+                        .Text(label)
+                        .SemiBold();
+
+                    tbl.Cell()
+                        .Border(1)
+                        .Padding(5)
+                        .Text(value);
+                }
+            });
+
+            column.Item().PaddingBottom(15);
+
+            // ТАБЛИЦА 2: Графици на сградата
+            column.Item()
+                .PaddingBottom(5)
+                .Text("Графици на сградата:")
+                .SemiBold()
+                .FontSize(12);
+
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(1.5f);
+                    columns.RelativeColumn(1f);
+                    columns.RelativeColumn(1f);
+                    columns.RelativeColumn(1f);
+                });
+
+                // Заголовък - График на обитаване
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("График на обитаване (ч./ден)")
+                    .SemiBold();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Работни дни")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Събота")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Неделя")
+                    .SemiBold()
+                    .AlignCenter();
+
+                // Данни - График на обитаване
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("");
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("24")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("24")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("24")
+                    .AlignCenter();
+
+                // Заголовък - График на отопление
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("График на отопление (ч./ден)")
+                    .SemiBold();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Работни дни")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Събота")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Неделя")
+                    .SemiBold()
+                    .AlignCenter();
+
+                // Данни - График на отопление
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("");
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("12")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("24")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("24")
+                    .AlignCenter();
+            });
+
+            column.Item().PaddingBottom(15);
         }
 
         private string GetPhaseText(ProjectPhase phase)
