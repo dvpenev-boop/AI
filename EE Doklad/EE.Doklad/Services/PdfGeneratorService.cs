@@ -279,13 +279,6 @@ namespace EE.Doklad.Services
                 .Bold()
                 .FontSize(16);
 
-            // Име на файла
-            column.Item()
-                .PaddingBottom(5)
-                .Text($"Файл: {attachment.FileName}")
-                .FontSize(10)
-                .FontColor(Colors.Grey.Darken1);
-
             // Предупреждение за multi-page PDF
             if (!string.IsNullOrEmpty(attachment.MultiPageWarning))
             {
