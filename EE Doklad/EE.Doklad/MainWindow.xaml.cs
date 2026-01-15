@@ -92,6 +92,18 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = certificatesEditor;
         }
+        else if (section.Type == ModelSectionType.ObjectData)
+        {
+            // Показваме ObjectData Editor
+            if (section.ObjectDataSectionData == null)
+                section.ObjectDataSectionData = new Models.ObjectDataSectionData();
+            
+            var objectDataEditor = new ObjectDataSectionEditor
+            {
+                DataContext = section.ObjectDataSectionData
+            };
+            ContentScrollViewer.Content = objectDataEditor;
+        }
         else
         {
             // Показваме Normal Section Editor

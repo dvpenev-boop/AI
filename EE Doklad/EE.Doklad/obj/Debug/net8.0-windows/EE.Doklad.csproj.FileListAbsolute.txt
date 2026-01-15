@@ -51,11 +51,13 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.csproj.AssemblyRefe
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CertificatesSectionEditor.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ObjectDataSectionEditor.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\MainWindow.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddSectionDialog.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CertificatesSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoverPageEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ObjectDataSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\App.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad_MarkupCompile.cache

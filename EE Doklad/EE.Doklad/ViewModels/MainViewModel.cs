@@ -143,11 +143,11 @@ namespace EE.Doklad.ViewModels
             int desiredNumber = dialog.SectionNumber;
             string title = dialog.SectionName;
 
-            // Защита: не позволяваме вмъкване преди системните секции (1 и 2)
-            if (desiredNumber < 3)
+            // Защита: не позволяваме вмъкване преди системните секции (1-5)
+            if (desiredNumber < 6)
             {
                 MessageBox.Show(
-                    "Не може да вмъквате секции преди системните секции (Челна страница и Удостоверения).\nМоля изберете номер 3 или по-голям.",
+                    "Не може да вмъквате секции преди системните секции (Челна страница, Удостоверения, Съдържание, Въведение, Данни за обекта).\nМоля изберете номер 6 или по-голям.",
                     "Невалидна позиция",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -418,12 +418,49 @@ namespace EE.Doklad.ViewModels
             };
             report.Sections.Add(certificates);
 
-            // Останалите секции (нормални секции от №3 нагоре)
-            var sectionTitles = new[]
+            // Останалите обикновени секции (№3, 4, и до №5)
+            var earlyTitles = new[]
             {
                 "3. Съдържание",
-                "4. Въведение",
-                "5. Общи данни",
+                "4. Въведение"
+            };
+
+            for (int i = 0; i < earlyTitles.Length; i++)
+            {
+                var section = new Section
+                {
+                    Type = SectionType.Normal,
+                    Title = earlyTitles[i],
+                    StaticText = $"Попълнете данните за секция: {earlyTitles[i]}",
+                    Order = i + 2  // +2 защото CoverPage=0, Certificates=1
+                };
+                report.Sections.Add(section);
+            }
+
+            // Пета секция: Данни за обекта (системна секция №5)
+            var objectData = new Section
+            {
+                Type = SectionType.ObjectData,
+                Title = "5. Данни за обекта",
+                Order = 4,
+                ObjectDataSectionData = new ObjectDataSectionData
+                {
+                    Title = "Данни за обекта",
+                    BuildingName = "Жилищна сграда",
+                    Address = "гр. София, ул. Примерна 1",
+                    BuildingType = "Жилищна сграда",
+                    Ownership = "Частна собственост",
+                    YearOfConstruction = "–",
+                    NumberOfOccupants = "–",
+                    OccupancySchedule = "24 ч./ден за всички дни",
+                    HeatingSchedule = "24 ч./ден за всички дни"
+                }
+            };
+            report.Sections.Add(objectData);
+
+            // Останалите секции (нормални секции от №6 нагоре)
+            var laterTitles = new[]
+            {
                 "6. Външни стени",
                 "7. Покрив",
                 "8. Под",
@@ -441,56 +478,15 @@ namespace EE.Doklad.ViewModels
                 "20. Заключение"
             };
 
-            for (int i = 0; i < sectionTitles.Length; i++)
+            for (int i = 0; i < laterTitles.Length; i++)
             {
                 var section = new Section
                 {
                     Type = SectionType.Normal,
-                    Title = sectionTitles[i],
-                    StaticText = $"Попълнете данните за секция: {sectionTitles[i]}",
-                    Order = i + 2  // +2 защото CoverPage=0, Certificates=1
+                    Title = laterTitles[i],
+                    StaticText = $"Попълнете данните за секция: {laterTitles[i]}",
+                    Order = i + 5  // +5 защото CoverPage=0, Certificates=1, ..., ObjectData=4
                 };
-
-                // Добавяме примерна таблица само за секция 5 (Общи данни)
-                if (i == 2) // индекс 2 в новия масив = "5. Общи данни"
-                {
-                    var table = new FixedTable
-                    {
-                        Title = "Основни данни за сградата",
-                        ColumnHeaders = new() { "Показател", "Стойност", "Мерна единица" }
-                    };
-
-                    table.Rows.Add(new Row
-                    {
-                        Cells = new()
-                        {
-                            new Cell { Value = "Обект" },
-                            new Cell { Value = "" },
-                            new Cell { Value = "-" }
-                        }
-                    });
-                    table.Rows.Add(new Row
-                    {
-                        Cells = new()
-                        {
-                            new Cell { Value = "Отопляема площ" },
-                            new Cell { Value = "", Type = CellType.Number },
-                            new Cell { Value = "кв.м" }
-                        }
-                    });
-                    table.Rows.Add(new Row
-                    {
-                        Cells = new()
-                        {
-                            new Cell { Value = "Отопляем обем" },
-                            new Cell { Value = "", Type = CellType.Number },
-                            new Cell { Value = "куб.м" }
-                        }
-                    });
-
-                    section.Tables.Add(table);
-                }
-
                 report.Sections.Add(section);
             }
 

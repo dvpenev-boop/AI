@@ -1,0 +1,253 @@
+<UserControl x:Class="EE.Doklad.Views.ObjectDataSectionEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <!-- Заглавие -->
+            <TextBlock Text="{Binding Title, FallbackValue='Данни за обекта'}"
+                       FontSize="18" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,15"/>
+
+            <!-- Описание (свободен текст) -->
+            <TextBlock Text="Описание:"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,5"/>
+            
+            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                     MinHeight="80"
+                     Padding="10"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     FontSize="11"
+                     Margin="0,0,0,20"
+                     BorderBrush="#E0E0E0"
+                     BorderThickness="1"/>
+
+            <!-- ТАБЛИЦА 1: Данни за обекта -->
+            <TextBlock Text="Данни за обекта:"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Margin="0,0,0,10"/>
+
+            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
+                <StackPanel>
+                    <!-- Row 0: Наименование на сграда -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Наименование на сграда" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <TextBox Grid.Column="1" Text="{Binding BuildingName, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                     BorderThickness="0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 1: Адрес -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Адрес" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <TextBox Grid.Column="1" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                     BorderThickness="0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 2: Тип сграда -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Тип сграда" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <TextBox Grid.Column="1" Text="{Binding BuildingType, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                     BorderThickness="0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 3: Собственост -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Собственост" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <TextBox Grid.Column="1" Text="{Binding Ownership, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                     BorderThickness="0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 4: Година на построяване -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Година на построяване" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <TextBox Grid.Column="1" Text="{Binding YearOfConstruction, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                     BorderThickness="0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 5: Брой обитатели -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Брой обитатели" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <TextBox Grid.Column="1" Text="{Binding NumberOfOccupants, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                     BorderThickness="0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ТАБЛИЦА 2: Графици на сградата -->
+            <TextBlock Text="Графици на сградата:"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Margin="0,20,0,10"/>
+
+            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
+                <StackPanel>
+                    <!-- Row 0: График обитаване - заглавия -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="#D0D0D0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="График на обитаване (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 1: График обитаване - входни полета -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Background="White"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 2: График отопление - заглавия -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="#D0D0D0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="График на отопление (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 3: График отопление - входни полета -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Background="White"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Всички полета могат да бъдат редактирани. Ако няма налична информация, напишете '–'."
+                       Foreground="Gray"
+                       FontSize="11"
+                       Margin="0,10,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

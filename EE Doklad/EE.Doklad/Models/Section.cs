@@ -10,7 +10,8 @@ namespace EE.Doklad.Models
     {
         Normal,         // Обикновена секция с таблици и текст
         CoverPage,      // Челна страница (фиксирана на позиция №1)
-        Certificates    // Удостоверения (фиксирана на позиция №2)
+        Certificates,   // Удостоверения (фиксирана на позиция №2)
+        ObjectData      // Данни за обекта (фиксирана на позиция №3)
     }
 
     /// <summary>
@@ -48,11 +49,16 @@ namespace EE.Doklad.Models
         /// </summary>
         public CertificatesSectionData? CertificatesData { get; set; }
 
+        /// <summary>
+        /// Данни за раздел "Данни за обекта" (само за ObjectData секции)
+        /// </summary>
+        public ObjectDataSectionData? ObjectDataSectionData { get; set; }
+
         public int Order { get; set; }
 
         /// <summary>
         /// Дали секцията е системна и не може да се изтрие/премести
         /// </summary>
-        public bool IsSystemSection => Type == SectionType.CoverPage || Type == SectionType.Certificates;
+        public bool IsSystemSection => Type == SectionType.CoverPage || Type == SectionType.Certificates || Type == SectionType.ObjectData;
     }
 }
