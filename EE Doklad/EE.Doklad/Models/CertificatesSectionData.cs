@@ -14,9 +14,12 @@ namespace EE.Doklad.Models
         private string? _contentType;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasAttachment))]
+        [NotifyPropertyChangedFor(nameof(MultiPageWarning))]
         private byte[]? _bytes;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(MultiPageWarning))]
         private int _sourcePageCount;
 
         /// <summary>
