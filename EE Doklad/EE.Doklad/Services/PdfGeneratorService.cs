@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EE.Doklad.Models;
@@ -13,6 +14,8 @@ namespace EE.Doklad.Services
     /// </summary>
     public class PdfGeneratorService
     {
+        private record TocItem(string Title, int Page);
+
         public PdfGeneratorService()
         {
             // QuestPDF лиценз (Community за некомерсиална употреба)
@@ -23,130 +26,208 @@ namespace EE.Doklad.Services
         {
             try
             {
-                var document = Document.Create(container =>
+                // Първо събираме секциите и определяме коя е TOC (Съдържание)
+                var sections = report.Sections.OrderBy(s => s.Order).ToList();
+                int tocIndex = sections.FindIndex(s => s.Title?.Trim() == "Съдържание" || s.Title?.ToLower().Contains("съдържание") == true);
+
+                var pageNumbers = new int[sections.Count];
+
+                var tocItemsPlaceholder = sections
+                    .Select(section => new TocItem(section.Title ?? string.Empty, 0))
+                    .ToList();
+
+                int tocPageCount = tocIndex >= 0
+                    ? GetPageCount(CreateTocDocument(report, tocItemsPlaceholder))
+                    : 0;
+
+                int currentPage = 1;
+                for (int i = 0; i < sections.Count; i++)
+                {
+                    pageNumbers[i] = currentPage;
+
+                    if (i == tocIndex)
+                    {
+                        currentPage += tocPageCount;
+                        continue;
+                    }
+
+                    currentPage += GetPageCount(CreateSectionDocument(report, sections[i]));
+                }
+
+                var tocItems = sections
+                    .Select((section, idx) => new TocItem(section.Title ?? string.Empty, pageNumbers[idx]))
+                    .ToList();
+
+                var docWithToc = Document.Create(container =>
                 {
                     container.Page(page =>
                     {
-                        page.Size(PageSizes.A4);
-                        page.Margin(2, Unit.Centimetre);
-                        page.PageColor(Colors.White);
-                        page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
-
-                        page.Header()
-                            .Text(report.Title)
-                            .Justify()
-                            .SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
-
-                        page.Content()
-                            .PaddingVertical(1, Unit.Centimetre)
-                            .Column(column =>
+                        ConfigurePage(page, report, column =>
+                        {
+                            for (int i = 0; i < sections.Count; i++)
                             {
-                                var sections = report.Sections.OrderBy(s => s.Order).ToList();
-                                for (int i = 0; i < sections.Count; i++)
+                                var section = sections[i];
+                                if (i == tocIndex)
                                 {
-                                    var section = sections[i];
-                                    // Ако е Челна страница, рендерираме специален layout
-                                    if (section.Type == SectionType.CoverPage && section.CoverPageData != null)
-                                    {
-                                        GenerateCoverPage(column, section.CoverPageData);
-                                        column.Item().PageBreak(); // Нова страница след челната
-                                        continue;
-                                    }
-
-                                    // Ако е Certificates секция, рендерираме удостоверенията
-                                    if (section.Type == SectionType.Certificates && section.CertificatesData != null)
-                                    {
-                                        GenerateCertificates(column, section.CertificatesData);
-                                        column.Item().PageBreak();
-                                        continue;
-                                    }
-
-                                    // Ако е ObjectData секция, рендерираме данните за обекта
-                                    if (section.Type == SectionType.ObjectData && section.ObjectDataSectionData != null)
-                                    {
-                                        GenerateObjectData(column, section.ObjectDataSectionData);
-                                        column.Item().PageBreak();
-                                        continue;
-                                    }
-
-                                    // Заглавие на секцията (само за Normal секции)
-                                    column.Item().Text(section.Title)
-                                        .Justify()
-                                        .Bold().FontSize(14);
-                                    column.Item().PaddingBottom(5);
-
-                                    // Статичен текст
-                                    if (!string.IsNullOrWhiteSpace(section.StaticText))
-                                    {
-                                        column.Item().Text(section.StaticText)
-                                            .Justify();
-                                        column.Item().PaddingBottom(10);
-                                    }
-
-                                    // Таблици
-                                    foreach (var table in section.Tables)
-                                    {
-                                        column.Item().Text(table.Title)
-                                            .Justify()
-                                            .SemiBold().FontSize(12);
-                                        column.Item().PaddingBottom(3);
-
-                                        column.Item().Table(tbl =>
-                                        {
-                                            // Дефиниране на колони
-                                            tbl.ColumnsDefinition(columns =>
-                                            {
-                                                foreach (var _ in table.ColumnHeaders)
-                                                {
-                                                    columns.RelativeColumn();
-                                                }
-                                            });
-
-                                            // Header
-                                            foreach (var header in table.ColumnHeaders)
-                                            {
-                                                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3)
-                                                    .Padding(5).Text(header).Bold();
-                                            }
-
-                                            // Редове
-                                            foreach (var row in table.Rows)
-                                            {
-                                                foreach (var cell in row.Cells)
-                                                {
-                                                    tbl.Cell().Border(1).Padding(5).Text(cell.Value);
-                                                }
-                                            }
-                                        });
-
-                                        column.Item().PaddingBottom(15);
-                                    }
-
-                                    // Добавяме page break след ВСЯКА секция, освен последната
-                                    if (i < sections.Count - 1)
-                                    {
-                                        column.Item().PageBreak();
-                                    }
+                                    ComposeToc(column, tocItems);
+                                    column.Item().PageBreak();
+                                    continue;
                                 }
-                            });
 
-                        page.Footer()
-                            .AlignCenter()
-                            .Text(x =>
-                            {
-                                x.Span("Страница ");
-                                x.CurrentPageNumber();
-                                x.Span(" от ");
-                                x.TotalPages();
-                            });
+                                ComposeSectionContent(column, section);
+
+                                if (i < sections.Count - 1)
+                                {
+                                    column.Item().PageBreak();
+                                }
+                            }
+                        });
                     });
                 });
 
-                document.GeneratePdf(outputPath);
+                docWithToc.GeneratePdf(outputPath);
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Грешка при генериране на PDF: {ex.Message}", ex);
+            }
+        }
+
+        private IDocument CreateSectionDocument(Report report, Section section)
+        {
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    ConfigurePage(page, report, column => ComposeSectionContent(column, section));
+                });
+            });
+        }
+
+        private IDocument CreateTocDocument(Report report, IReadOnlyList<TocItem> tocItems)
+        {
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    ConfigurePage(page, report, column => ComposeToc(column, tocItems));
+                });
+            });
+        }
+
+        private int GetPageCount(IDocument document)
+        {
+            return document.GenerateImages().Count();
+        }
+
+        private void ConfigurePage(PageDescriptor page, Report report, Action<ColumnDescriptor> contentComposer)
+        {
+            page.Size(PageSizes.A4);
+            page.Margin(2, Unit.Centimetre);
+            page.PageColor(Colors.White);
+            page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+
+            page.Header()
+                .Text(report.Title)
+                .Justify()
+                .SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
+
+            page.Content()
+                .PaddingVertical(1, Unit.Centimetre)
+                .Column(column => contentComposer(column));
+
+            page.Footer()
+                .AlignCenter()
+                .Text(x =>
+                {
+                    x.Span("Страница ");
+                    x.CurrentPageNumber();
+                    x.Span(" от ");
+                    x.TotalPages();
+                });
+        }
+
+        private void ComposeToc(ColumnDescriptor column, IReadOnlyList<TocItem> tocItems)
+        {
+            column.Item().Text("Съдържание").FontSize(16).Bold().AlignCenter();
+            column.Item().PaddingTop(10);
+            foreach (var item in tocItems)
+            {
+                if (string.IsNullOrWhiteSpace(item.Title))
+                {
+                    continue;
+                }
+
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Text(item.Title).FontSize(12);
+                    row.ConstantItem(40).AlignRight().Text(item.Page.ToString()).FontSize(12);
+                });
+            }
+        }
+
+        private void ComposeSectionContent(ColumnDescriptor column, Section section)
+        {
+            if (section.Type == SectionType.CoverPage && section.CoverPageData != null)
+            {
+                GenerateCoverPage(column, section.CoverPageData);
+                return;
+            }
+
+            if (section.Type == SectionType.Certificates && section.CertificatesData != null)
+            {
+                GenerateCertificates(column, section.CertificatesData);
+                return;
+            }
+
+            if (section.Type == SectionType.ObjectData && section.ObjectDataSectionData != null)
+            {
+                GenerateObjectData(column, section.ObjectDataSectionData);
+                return;
+            }
+
+            column.Item().Text(section.Title)
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(section.StaticText))
+            {
+                column.Item().Text(section.StaticText)
+                    .Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            foreach (var table in section.Tables)
+            {
+                column.Item().Text(table.Title)
+                    .Justify()
+                    .SemiBold().FontSize(12);
+                column.Item().PaddingBottom(3);
+
+                column.Item().Table(tbl =>
+                {
+                    tbl.ColumnsDefinition(columns =>
+                    {
+                        foreach (var _ in table.ColumnHeaders)
+                        {
+                            columns.RelativeColumn();
+                        }
+                    });
+                    foreach (var header in table.ColumnHeaders)
+                    {
+                        tbl.Cell().Border(1).Background(Colors.Grey.Lighten3)
+                            .Padding(5).Text(header).Bold();
+                    }
+                    foreach (var row in table.Rows)
+                    {
+                        foreach (var cell in row.Cells)
+                        {
+                            tbl.Cell().Border(1).Padding(5).Text(cell.Value);
+                        }
+                    }
+                });
+                column.Item().PaddingBottom(15);
             }
         }
 

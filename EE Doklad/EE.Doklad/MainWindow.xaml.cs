@@ -66,6 +66,32 @@ public partial class MainWindow : Window
 
         var section = viewModel.SelectedSection;
 
+        // Проверка за Секция 3 "Съдържание" (може да е по Type или Title)
+        // Ако имате специален SectionType за съдържание, използвайте него. Тук ще проверим по Title и/или номер.
+        // Пример: ако секцията е трета и/или има заглавие "Съдържание"
+        if ((section.Title?.Trim() == "Съдържание" || section.Title?.ToLower().Contains("съдържание") == true) || (viewModel.CurrentReport?.Sections?.IndexOf(section) == 2))
+        {
+            // Показваме само информационно съобщение
+            var infoPanel = new StackPanel { Margin = new Thickness(40, 80, 40, 0), HorizontalAlignment = HorizontalAlignment.Center };
+            infoPanel.Children.Add(new TextBlock
+            {
+                Text = "Секция 3 \"Съдържание\"",
+                FontSize = 18,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 20),
+                TextAlignment = TextAlignment.Center
+            });
+            infoPanel.Children.Add(new TextBlock
+            {
+                Text = "Генерира се автоматично.",
+                FontSize = 15,
+                Foreground = Brushes.DimGray,
+                TextAlignment = TextAlignment.Center
+            });
+            ContentScrollViewer.Content = infoPanel;
+            return;
+        }
+
         if (section.Type == ModelSectionType.CoverPage && section.CoverPageData != null)
         {
             // Показваме CoverPage Editor
@@ -107,7 +133,7 @@ public partial class MainWindow : Window
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor
-            if (section.Title.Contains("Въведение"))
+            if (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Въведение"))
             {
                 var introEditor = new Views.IntroSectionEditor
                 {
