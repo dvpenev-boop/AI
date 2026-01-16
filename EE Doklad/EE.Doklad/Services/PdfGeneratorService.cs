@@ -12,26 +12,158 @@ namespace EE.Doklad.Services
     /// <summary>
     /// Сервиз за генериране на PDF доклади с фиксиран layout
     /// </summary>
+    public class PdfGeneratorService
+    {
+        public record TocItem(string Title, int Page);
 
-        public class PdfGeneratorService
+        private readonly Dictionary<string, int> _pageCountCache = new(StringComparer.Ordinal);
+
+        private int GetPageCount(IDocument document)
         {
-            public record TocItem(string Title, int Page);
+            return document.GenerateImages().Count();
+        }
 
-            private int GetPageCount(IDocument document)
+        private int GetTocPageCount(Report report, IReadOnlyList<TocItem> tocItems)
+        {
+            var cacheKey = CreateTocCacheKey(report, tocItems);
+            if (_pageCountCache.TryGetValue(cacheKey, out var cached))
             {
-                return document.GenerateImages().Count();
+                return cached;
             }
 
-            private IDocument CreateTocDocument(Report report, IReadOnlyList<TocItem> tocItems)
+            var count = GetPageCount(CreateTocDocument(report, tocItems));
+            _pageCountCache[cacheKey] = count;
+            return count;
+        }
+
+        private int GetSectionPageCount(Report report, Section section)
+        {
+            var cacheKey = CreateSectionCacheKey(report, section);
+            if (_pageCountCache.TryGetValue(cacheKey, out var cached))
             {
-                return Document.Create(container =>
+                return cached;
+            }
+
+            var count = GetPageCount(CreateSectionDocument(report, section));
+            _pageCountCache[cacheKey] = count;
+            return count;
+        }
+
+        private IDocument CreateTocDocument(Report report, IReadOnlyList<TocItem> tocItems)
+        {
+            return Document.Create(container =>
+            {
+                container.Page(page =>
                 {
-                    container.Page(page =>
-                    {
-                        ConfigurePage(page, report, column => ComposeToc(column, tocItems));
-                    });
+                    ConfigurePage(page, report, column => ComposeToc(column, tocItems));
                 });
+            });
+        }
+
+        private IDocument CreateSectionDocument(Report report, Section section)
+        {
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    ConfigurePage(page, report, column => ComposeSectionContent(column, section));
+                });
+            });
+        }
+
+        private static string CreateTocCacheKey(Report report, IReadOnlyList<TocItem> tocItems)
+        {
+            var hash = new HashCode();
+            hash.Add(report.Title ?? string.Empty);
+            foreach (var item in tocItems)
+            {
+                hash.Add(item.Title ?? string.Empty);
             }
+
+            return $"toc:{hash.ToHashCode()}";
+        }
+
+        private static string CreateSectionCacheKey(Report report, Section section)
+        {
+            var hash = new HashCode();
+            hash.Add(report.Title ?? string.Empty);
+            hash.Add(section.Type);
+            hash.Add(section.Title ?? string.Empty);
+            hash.Add(section.StaticText ?? string.Empty);
+            hash.Add(section.Order);
+
+            hash.Add(section.Tables.Count);
+            foreach (var table in section.Tables)
+            {
+                hash.Add(table.Title ?? string.Empty);
+                hash.Add(table.ColumnHeaders.Count);
+                foreach (var header in table.ColumnHeaders)
+                {
+                    hash.Add(header ?? string.Empty);
+                }
+                hash.Add(table.Rows.Count);
+                foreach (var row in table.Rows)
+                {
+                    hash.Add(row.Cells.Count);
+                    foreach (var cell in row.Cells)
+                    {
+                        hash.Add(cell.Value ?? string.Empty);
+                    }
+                }
+            }
+
+            if (section.CoverPageData != null)
+            {
+                hash.Add(section.CoverPageData.CompanyName ?? string.Empty);
+                hash.Add(section.CoverPageData.ObjectName ?? string.Empty);
+                hash.Add(section.CoverPageData.ObjectAddress ?? string.Empty);
+                hash.Add(section.CoverPageData.LicenseNumber ?? string.Empty);
+                hash.Add(section.CoverPageData.ManagerName ?? string.Empty);
+                hash.Add(section.CoverPageData.LogoPath ?? string.Empty);
+                hash.Add(section.CoverPageData.Phase);
+                hash.Add(section.CoverPageData.Developers.Count);
+                foreach (var developer in section.CoverPageData.Developers)
+                {
+                    hash.Add(developer.Name ?? string.Empty);
+                    hash.Add(developer.Position ?? string.Empty);
+                }
+            }
+
+            if (section.CertificatesData != null)
+            {
+                AddAttachmentToHash(hash, section.CertificatesData.CertificateAttachment);
+                AddAttachmentToHash(hash, section.CertificatesData.InsuranceAttachment);
+            }
+
+            if (section.ObjectDataSectionData != null)
+            {
+                hash.Add(section.ObjectDataSectionData.Title ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.Description ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.BuildingName ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.Address ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.BuildingType ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.Ownership ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.YearOfConstruction ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.NumberOfOccupants ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.OccupancySchedule ?? string.Empty);
+                hash.Add(section.ObjectDataSectionData.HeatingSchedule ?? string.Empty);
+            }
+
+            return $"section:{hash.ToHashCode()}";
+        }
+
+        private static void AddAttachmentToHash(HashCode hash, AttachmentData? attachment)
+        {
+            if (attachment == null)
+            {
+                return;
+            }
+
+            hash.Add(attachment.FileName ?? string.Empty);
+            hash.Add(attachment.ContentType ?? string.Empty);
+            hash.Add(attachment.Bytes?.Length ?? 0);
+            hash.Add(attachment.SourcePageCount);
+        }
 
         public PdfGeneratorService()
         {
@@ -52,41 +184,22 @@ namespace EE.Doklad.Services
                     .ToList();
 
                 int tocPageCount = tocIndex >= 0
-                    ? GetPageCount(CreateTocDocument(report, tocItemsPlaceholder))
+                    ? GetTocPageCount(report, tocItemsPlaceholder)
                     : 0;
 
-                // 2. Render full document with TOC placeholder, count pages for each section
                 var pageNumbers = new int[sections.Count];
                 int currentPage = 1;
-
-                var docPreview = Document.Create(container =>
+                for (int i = 0; i < sections.Count; i++)
                 {
-                    container.Page(page =>
+                    pageNumbers[i] = currentPage;
+                    if (i == tocIndex)
                     {
-                        ConfigurePage(page, report, column =>
-                        {
-                            for (int i = 0; i < sections.Count; i++)
-                            {
-                                pageNumbers[i] = currentPage;
-                                if (i == tocIndex)
-                                {
-                                    column.Item().Text("Съдържание (генерира се автоматично)").FontSize(16).Bold().AlignCenter();
-                                    column.Item().PageBreak();
-                                    currentPage += tocPageCount;
-                                    continue;
-                                }
-                                ComposeSectionContent(column, sections[i]);
-                                if (i < sections.Count - 1)
-                                {
-                                    column.Item().PageBreak();
-                                    currentPage++;
-                                }
-                            }
-                        });
-                    });
-                });
-                // Render preview to get page count
-                docPreview.GenerateImages();
+                        currentPage += tocPageCount;
+                        continue;
+                    }
+
+                    currentPage += GetSectionPageCount(report, sections[i]);
+                }
 
                 var tocItems = sections
                     .Select((section, idx) => new TocItem(section.Title ?? string.Empty, pageNumbers[idx]))
