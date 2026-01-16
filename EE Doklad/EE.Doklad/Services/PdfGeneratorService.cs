@@ -40,8 +40,10 @@ namespace EE.Doklad.Services
                             .PaddingVertical(1, Unit.Centimetre)
                             .Column(column =>
                             {
-                                foreach (var section in report.Sections.OrderBy(s => s.Order))
+                                var sections = report.Sections.OrderBy(s => s.Order).ToList();
+                                for (int i = 0; i < sections.Count; i++)
                                 {
+                                    var section = sections[i];
                                     // Ако е Челна страница, рендерираме специален layout
                                     if (section.Type == SectionType.CoverPage && section.CoverPageData != null)
                                     {
@@ -54,6 +56,7 @@ namespace EE.Doklad.Services
                                     if (section.Type == SectionType.Certificates && section.CertificatesData != null)
                                     {
                                         GenerateCertificates(column, section.CertificatesData);
+                                        column.Item().PageBreak();
                                         continue;
                                     }
 
@@ -61,6 +64,7 @@ namespace EE.Doklad.Services
                                     if (section.Type == SectionType.ObjectData && section.ObjectDataSectionData != null)
                                     {
                                         GenerateObjectData(column, section.ObjectDataSectionData);
+                                        column.Item().PageBreak();
                                         continue;
                                     }
 
@@ -110,6 +114,12 @@ namespace EE.Doklad.Services
                                         });
 
                                         column.Item().PaddingBottom(15);
+                                    }
+
+                                    // Добавяме page break след ВСЯКА секция, освен последната
+                                    if (i < sections.Count - 1)
+                                    {
+                                        column.Item().PageBreak();
                                     }
                                 }
                             });
