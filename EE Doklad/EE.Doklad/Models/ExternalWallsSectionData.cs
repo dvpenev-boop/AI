@@ -37,20 +37,69 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private string _name = "Тип стена";
 
-        [ObservableProperty]
-        private double _area;
+        public double Area
+        {
+            get
+            {
+                return FacadeEast + FacadeNorth + FacadeWest + FacadeSouth + FacadeNorthEast + FacadeNorthWest + FacadeSouthWest + FacadeSouthEast;
+            }
+        }
 
-        [ObservableProperty]
-        private double _facadeEast;
+    [ObservableProperty]
+    private double _facadeEast;
 
-        [ObservableProperty]
-        private double _facadeNorth;
+    [ObservableProperty]
+    private double _facadeNorth;
 
-        [ObservableProperty]
-        private double _facadeWest;
+    [ObservableProperty]
+    private double _facadeWest;
 
-        [ObservableProperty]
-        private double _facadeSouth;
+    [ObservableProperty]
+    private double _facadeSouth;
+
+    [ObservableProperty]
+    private double _facadeNorthEast;
+
+    [ObservableProperty]
+    private double _facadeNorthWest;
+
+    [ObservableProperty]
+    private double _facadeSouthWest;
+
+    [ObservableProperty]
+    private double _facadeSouthEast;
+        partial void OnFacadeEastChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeNorthChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeWestChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeSouthChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeNorthEastChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeNorthWestChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeSouthWestChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
+        partial void OnFacadeSouthEastChanged(double value)
+        {
+            OnPropertyChanged(nameof(Area));
+        }
 
         [ObservableProperty]
         private double _rsi = DefaultRsi;

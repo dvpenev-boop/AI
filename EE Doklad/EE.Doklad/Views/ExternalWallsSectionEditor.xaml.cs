@@ -10,6 +10,16 @@ namespace EE.Doklad.Views
 {
     public partial class ExternalWallsSectionEditor : UserControl
     {
+        // Позволява въвеждане на дробни числа с точка или запетая
+        private void SummaryGrid_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            // Позволява само цифри, точка и запетая
+            char input = e.Text.FirstOrDefault();
+            if (!char.IsDigit(input) && input != '.' && input != ',')
+            {
+                e.Handled = true;
+            }
+        }
         private const int MaxWallTypes = 8;
 
         public ExternalWallsSectionEditor()
@@ -97,8 +107,9 @@ namespace EE.Doklad.Views
                 return;
             }
 
-            wallType.SchemeAttachment ??= new AttachmentData();
-            LoadImage(wallType.SchemeAttachment, filePath);
+            var newAttachment = new AttachmentData();
+            LoadImage(newAttachment, filePath);
+            wallType.SchemeAttachment = newAttachment;
         }
 
         private void RemoveScheme_Click(object sender, RoutedEventArgs e)
@@ -113,10 +124,7 @@ namespace EE.Doklad.Views
                 return;
             }
 
-            wallType.SchemeAttachment.FileName = null;
-            wallType.SchemeAttachment.Bytes = null;
-            wallType.SchemeAttachment.ContentType = null;
-            wallType.SchemeAttachment.SourcePageCount = 0;
+            wallType.SchemeAttachment = new AttachmentData();
         }
 
         private void FacadeToggle_Changed(object sender, RoutedEventArgs e)

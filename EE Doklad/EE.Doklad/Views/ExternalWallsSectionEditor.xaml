@@ -50,7 +50,8 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       HeadersVisibility="Column"
-                      Margin="0,0,0,20">
+                      Margin="0,0,0,20"
+                      PreviewTextInput="SummaryGrid_PreviewTextInput">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="№" Binding="{Binding Index}" IsReadOnly="True" Width="40"/>
                     <DataGridTextColumn Header="Тип стена" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
@@ -60,6 +61,10 @@
                     <DataGridTextColumn x:Name="NorthColumn" Header="С" Binding="{Binding FacadeNorth, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
                     <DataGridTextColumn x:Name="WestColumn" Header="З" Binding="{Binding FacadeWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
                     <DataGridTextColumn x:Name="SouthColumn" Header="Ю" Binding="{Binding FacadeSouth, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                        <DataGridTextColumn x:Name="NorthEastColumn" Header="СИ" Binding="{Binding FacadeNorthEast, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                        <DataGridTextColumn x:Name="NorthWestColumn" Header="СЗ" Binding="{Binding FacadeNorthWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                        <DataGridTextColumn x:Name="SouthWestColumn" Header="ЮЗ" Binding="{Binding FacadeSouthWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                        <DataGridTextColumn x:Name="SouthEastColumn" Header="ЮИ" Binding="{Binding FacadeSouthEast, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
 
