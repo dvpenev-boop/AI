@@ -52,7 +52,7 @@
               "target": "Package",
               "version": "[13.0.4, )"
             },
-            "PDFsharp-MigraDoc": {
+            "PdfSharp-MigraDoc": {
               "target": "Package",
               "version": "[6.2.4, )"
             },

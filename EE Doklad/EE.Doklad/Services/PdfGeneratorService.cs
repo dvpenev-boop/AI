@@ -34,6 +34,7 @@ namespace EE.Doklad.Services
 
                         page.Header()
                             .Text(report.Title)
+                            .Justify()
                             .SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
 
                         page.Content()
@@ -69,20 +70,25 @@ namespace EE.Doklad.Services
                                     }
 
                                     // Заглавие на секцията (само за Normal секции)
-                                    column.Item().Text(section.Title).Bold().FontSize(14);
+                                    column.Item().Text(section.Title)
+                                        .Justify()
+                                        .Bold().FontSize(14);
                                     column.Item().PaddingBottom(5);
 
                                     // Статичен текст
                                     if (!string.IsNullOrWhiteSpace(section.StaticText))
                                     {
-                                        column.Item().Text(section.StaticText);
+                                        column.Item().Text(section.StaticText)
+                                            .Justify();
                                         column.Item().PaddingBottom(10);
                                     }
 
                                     // Таблици
                                     foreach (var table in section.Tables)
                                     {
-                                        column.Item().Text(table.Title).SemiBold().FontSize(12);
+                                        column.Item().Text(table.Title)
+                                            .Justify()
+                                            .SemiBold().FontSize(12);
                                         column.Item().PaddingBottom(3);
 
                                         column.Item().Table(tbl =>
@@ -154,6 +160,7 @@ namespace EE.Doklad.Services
                 .AlignCenter()
                 .PaddingBottom(20)
                 .Text("ЕНЕРГИЕН ДОКЛАД")
+                .Justify()
                 .Bold()
                 .FontSize(24);
 
@@ -181,6 +188,7 @@ namespace EE.Doklad.Services
                         .AlignMiddle()
                         .AlignCenter()
                         .Text("(Лого)")
+                        .Justify()
                         .FontColor(Colors.Grey.Medium);
                 }
             }
@@ -197,30 +205,31 @@ namespace EE.Doklad.Services
                     .AlignMiddle()
                     .AlignCenter()
                     .Text("(Лого)")
+                    .Justify()
                     .FontColor(Colors.Grey.Medium);
             }
 
             // Данни за фирмата
             column.Item().PaddingBottom(10).Column(col =>
             {
-                col.Item().Text("ФИРМА").Bold().FontSize(12);
-                col.Item().Text(data.CompanyName).FontSize(14);
-                col.Item().Text(data.LicenseNumber).FontSize(12).FontColor(Colors.Grey.Darken1);
+                col.Item().Text("ФИРМА").Justify().Bold().FontSize(12);
+                col.Item().Text(data.CompanyName).Justify().FontSize(14);
+                col.Item().Text(data.LicenseNumber).Justify().FontSize(12).FontColor(Colors.Grey.Darken1);
             });
 
             // Данни за обекта
             column.Item().PaddingBottom(10).Column(col =>
             {
-                col.Item().Text("ОБЕКТ").Bold().FontSize(12);
-                col.Item().Text(data.ObjectName).FontSize(14);
-                col.Item().Text(data.ObjectAddress).FontSize(12);
+                col.Item().Text("ОБЕКТ").Justify().Bold().FontSize(12);
+                col.Item().Text(data.ObjectName).Justify().FontSize(14);
+                col.Item().Text(data.ObjectAddress).Justify().FontSize(12);
             });
 
             // Фаза на проектиране
             column.Item().PaddingBottom(10).Row(row =>
             {
-                row.RelativeItem().Text("ФАЗА: ").Bold().FontSize(12);
-                row.RelativeItem().Text(GetPhaseText(data.Phase)).FontSize(12);
+                row.RelativeItem().Text("ФАЗА: ").Justify().Bold().FontSize(12);
+                row.RelativeItem().Text(GetPhaseText(data.Phase)).Justify().FontSize(12);
             });
 
             // Управител
@@ -228,9 +237,12 @@ namespace EE.Doklad.Services
             {
                 column.Item().PaddingTop(20).PaddingBottom(10).Column(col =>
                 {
-                    col.Item().Text("УПРАВИТЕЛ").Bold().FontSize(12);
-                    col.Item().Text(data.ManagerName).FontSize(12);
-                    col.Item().PaddingTop(10).BorderTop(1).Width(200).Text("(подпис и печат)").FontSize(9).FontColor(Colors.Grey.Medium);
+                    col.Item().Text("УПРАВИТЕЛ").Justify().Bold().FontSize(12);
+                    col.Item().Text(data.ManagerName).Justify().FontSize(12);
+                    col.Item().PaddingTop(10).BorderTop(1).Width(200)
+                        .Text("(подпис и печат)")
+                        .Justify()
+                        .FontSize(9).FontColor(Colors.Grey.Medium);
                 });
             }
 
@@ -239,7 +251,7 @@ namespace EE.Doklad.Services
             {
                 column.Item().PaddingTop(20).Column(col =>
                 {
-                    col.Item().Text("РАЗРАБОТИЛ ЕКИП").Bold().FontSize(12);
+                    col.Item().Text("РАЗРАБОТИЛ ЕКИП").Justify().Bold().FontSize(12);
                     col.Item().PaddingTop(5).Table(tbl =>
                     {
                         tbl.ColumnsDefinition(columns =>
@@ -293,6 +305,7 @@ namespace EE.Doklad.Services
             column.Item()
                 .PaddingBottom(10)
                 .Text(title)
+                .Justify()
                 .Bold()
                 .FontSize(16);
 
@@ -302,6 +315,7 @@ namespace EE.Doklad.Services
                 column.Item()
                     .PaddingBottom(10)
                     .Text(attachment.MultiPageWarning)
+                    .Justify()
                     .FontSize(9)
                     .FontColor(Colors.Orange.Darken2);
             }
@@ -335,9 +349,17 @@ namespace EE.Doklad.Services
                             .AlignCenter()
                             .Column(col =>
                             {
-                                col.Item().Text("📄 PDF документ").FontSize(18).FontColor(Colors.Blue.Darken2);
-                                col.Item().PaddingTop(10).Text(attachment.FileName).FontSize(12);
-                                col.Item().PaddingTop(5).Text("(Прегледът на PDF не е наличен в експорта)").FontSize(9).FontColor(Colors.Grey.Medium);
+                                col.Item().Text("📄 PDF документ")
+                                    .Justify()
+                                    .FontSize(18).FontColor(Colors.Blue.Darken2);
+                                col.Item().PaddingTop(10)
+                                    .Text(attachment.FileName)
+                                    .Justify()
+                                    .FontSize(12);
+                                col.Item().PaddingTop(5)
+                                    .Text("(Прегледът на PDF не е наличен в експорта)")
+                                    .Justify()
+                                    .FontSize(9).FontColor(Colors.Grey.Medium);
                             });
                     }
                 }
@@ -356,8 +378,13 @@ namespace EE.Doklad.Services
                         .AlignCenter()
                         .Column(col =>
                         {
-                            col.Item().Text("⚠️ Грешка при рендериране").FontSize(14).FontColor(Colors.Red.Darken2);
-                            col.Item().PaddingTop(5).Text(ex.Message).FontSize(9).FontColor(Colors.Grey.Medium);
+                            col.Item().Text("⚠️ Грешка при рендериране")
+                                .Justify()
+                                .FontSize(14).FontColor(Colors.Red.Darken2);
+                            col.Item().PaddingTop(5)
+                                .Text(ex.Message)
+                                .Justify()
+                                .FontSize(9).FontColor(Colors.Grey.Medium);
                         });
                 }
             }
@@ -375,6 +402,7 @@ namespace EE.Doklad.Services
             column.Item()
                 .PaddingBottom(10)
                 .Text(data.Title)
+                .Justify()
                 .Bold()
                 .FontSize(16);
 
@@ -384,6 +412,7 @@ namespace EE.Doklad.Services
                 column.Item()
                     .PaddingBottom(10)
                     .Text(data.Description)
+                    .Justify()
                     .FontSize(10);
             }
 
@@ -391,6 +420,7 @@ namespace EE.Doklad.Services
             column.Item()
                 .PaddingBottom(5)
                 .Text("Данни за обекта:")
+                .Justify()
                 .SemiBold()
                 .FontSize(12);
 
@@ -435,6 +465,7 @@ namespace EE.Doklad.Services
             column.Item()
                 .PaddingBottom(5)
                 .Text("Графици на сградата:")
+                .Justify()
                 .SemiBold()
                 .FontSize(12);
 
