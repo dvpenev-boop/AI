@@ -106,9 +106,21 @@ public partial class MainWindow : Window
         }
         else
         {
-            // Показваме Normal Section Editor
-            var normalEditor = CreateNormalSectionEditor(section);
-            ContentScrollViewer.Content = normalEditor;
+            // Ако е секция 4. Въведение, показваме IntroSectionEditor
+            if (section.Title.Contains("Въведение"))
+            {
+                var introEditor = new Views.IntroSectionEditor
+                {
+                    DataContext = section
+                };
+                ContentScrollViewer.Content = introEditor;
+            }
+            else
+            {
+                // Показваме Normal Section Editor
+                var normalEditor = CreateNormalSectionEditor(section);
+                ContentScrollViewer.Content = normalEditor;
+            }
         }
     }
 
