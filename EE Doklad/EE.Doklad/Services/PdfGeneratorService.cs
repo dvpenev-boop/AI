@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using EE.Doklad.Models;
@@ -15,6 +16,40 @@ namespace EE.Doklad.Services
     public class PdfGeneratorService
     {
         public record TocItem(string Title, int Page);
+
+        private const string AreaFormat = "0.000";
+        private const string ThicknessFormat = "0.000";
+        private const string LambdaFormat = "0.000";
+        private const string UValueFormat = "0.000";
+        private const string RValueFormat = "0.000";
+    private const string GenericNumberFormat = "0.000";
+
+        private static string FormatNumber(double value, string format)
+        {
+            return value.ToString(format, CultureInfo.InvariantCulture);
+        }
+
+        private static string FormatCellValue(Cell cell)
+        {
+            if (cell.Type != CellType.Number)
+            {
+                return cell.Value ?? string.Empty;
+            }
+
+            var raw = cell.Value?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(raw))
+            {
+                return string.Empty;
+            }
+
+            var normalized = raw.Replace(" ", string.Empty).Replace(',', '.');
+            if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
+            {
+                return parsed.ToString(GenericNumberFormat, CultureInfo.InvariantCulture);
+            }
+
+            return raw;
+        }
 
         private readonly Dictionary<string, int> _pageCountCache = new(StringComparer.Ordinal);
 
@@ -135,14 +170,14 @@ namespace EE.Doklad.Services
                 AddAttachmentToHash(hash, section.CertificatesData.InsuranceAttachment);
             }
 
-            if (section.ExternalWallsSectionData != null)
+            if (section.ExternalWallsSectionData is { } externalWallsData)
             {
-                hash.Add(section.ExternalWallsSectionData.Title ?? string.Empty);
-                hash.Add(section.ExternalWallsSectionData.Description ?? string.Empty);
-                hash.Add(section.ExternalWallsSectionData.ShowFacadeDistribution);
-                hash.Add(section.ExternalWallsSectionData.WallTypes.Count);
+                hash.Add(externalWallsData.Title ?? string.Empty);
+                hash.Add(externalWallsData.Description ?? string.Empty);
+                hash.Add(externalWallsData.ShowFacadeDistribution);
+                hash.Add(externalWallsData.WallTypes.Count);
 
-                foreach (var wallType in section.ExternalWallsSectionData.WallTypes)
+                foreach (var wallType in externalWallsData.WallTypes)
                 {
                     hash.Add(wallType.Index);
                     hash.Add(wallType.Name ?? string.Empty);
@@ -335,9 +370,9 @@ namespace EE.Doklad.Services
                 return;
             }
 
-            if (section.Type == SectionType.ExternalWalls && section.ExternalWallsSectionData != null)
+            if (section.Type == SectionType.ExternalWalls && section.ExternalWallsSectionData is { } externalWallsData)
             {
-                GenerateExternalWalls(column, section.ExternalWallsSectionData);
+                GenerateExternalWalls(column, externalWallsData);
                 return;
             }
 
@@ -378,7 +413,7 @@ namespace EE.Doklad.Services
                     {
                         foreach (var cell in row.Cells)
                         {
-                            tbl.Cell().Border(1).Padding(5).Text(cell.Value);
+                            tbl.Cell().Border(1).Padding(5).Text(FormatCellValue(cell));
                         }
                     }
                 });
@@ -441,15 +476,15 @@ namespace EE.Doklad.Services
                     var index = wallType.Index > 0 ? wallType.Index : data.WallTypes.IndexOf(wallType) + 1;
                     tbl.Cell().Border(1).Padding(5).Text(index.ToString());
                     tbl.Cell().Border(1).Padding(5).Text(wallType.Name);
-                    tbl.Cell().Border(1).Padding(5).Text(wallType.Area.ToString("0.###"));
-                    tbl.Cell().Border(1).Padding(5).Text(wallType.Uw.ToString("0.###"));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(wallType.Area, AreaFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(wallType.Uw, UValueFormat));
 
                     if (showFacade)
                     {
-                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeEast.ToString("0.###"));
-                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeNorth.ToString("0.###"));
-                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeWest.ToString("0.###"));
-                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeSouth.ToString("0.###"));
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber(wallType.FacadeEast, AreaFormat));
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber(wallType.FacadeNorth, AreaFormat));
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber(wallType.FacadeWest, AreaFormat));
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber(wallType.FacadeSouth, AreaFormat));
                     }
                 }
             });
@@ -483,13 +518,13 @@ namespace EE.Doklad.Services
                             foreach (var layer in wallType.Layers)
                             {
                                 tbl.Cell().Border(1).Padding(5).Text(layer.Material);
-                                tbl.Cell().Border(1).Padding(5).Text(layer.Thickness.ToString("0.###"));
-                                tbl.Cell().Border(1).Padding(5).Text(layer.Lambda.ToString("0.###"));
-                                tbl.Cell().Border(1).Padding(5).Text(layer.R.ToString("0.###"));
+                                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(layer.Thickness, ThicknessFormat));
+                                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(layer.Lambda, LambdaFormat));
+                                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(layer.R, RValueFormat));
                             }
                         });
 
-                        col.Item().PaddingTop(5).Text($"Rsi={wallType.Rsi:0.###} | Rse={wallType.Rse:0.###} | Rw={wallType.Rw:0.###} | Rtotal={wallType.Rtotal:0.###} | Uw={wallType.Uw:0.###}")
+                        col.Item().PaddingTop(5).Text($"Rsi={FormatNumber(wallType.Rsi, RValueFormat)} | Rse={FormatNumber(wallType.Rse, RValueFormat)} | Rw={FormatNumber(wallType.Rw, RValueFormat)} | Rtotal={FormatNumber(wallType.Rtotal, RValueFormat)} | Uw={FormatNumber(wallType.Uw, UValueFormat)}")
                             .FontSize(10).SemiBold();
                     });
 

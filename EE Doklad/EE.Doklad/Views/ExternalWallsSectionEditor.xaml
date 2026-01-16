@@ -50,21 +50,20 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       HeadersVisibility="Column"
-                      Margin="0,0,0,20"
-                      PreviewTextInput="SummaryGrid_PreviewTextInput">
+                      Margin="0,0,0,20">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="№" Binding="{Binding Index}" IsReadOnly="True" Width="40"/>
                     <DataGridTextColumn Header="Тип стена" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridTextColumn Header="A (m²)" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="90"/>
-                    <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding Uw, StringFormat=0.###}" IsReadOnly="True" Width="90"/>
-                    <DataGridTextColumn x:Name="EastColumn" Header="И" Binding="{Binding FacadeEast, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                    <DataGridTextColumn x:Name="NorthColumn" Header="С" Binding="{Binding FacadeNorth, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                    <DataGridTextColumn x:Name="WestColumn" Header="З" Binding="{Binding FacadeWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                    <DataGridTextColumn x:Name="SouthColumn" Header="Ю" Binding="{Binding FacadeSouth, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                        <DataGridTextColumn x:Name="NorthEastColumn" Header="СИ" Binding="{Binding FacadeNorthEast, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                        <DataGridTextColumn x:Name="NorthWestColumn" Header="СЗ" Binding="{Binding FacadeNorthWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                        <DataGridTextColumn x:Name="SouthWestColumn" Header="ЮЗ" Binding="{Binding FacadeSouthWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
-                        <DataGridTextColumn x:Name="SouthEastColumn" Header="ЮИ" Binding="{Binding FacadeSouthEast, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                    <DataGridTextColumn Header="A (m²)" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding Uw, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                    <DataGridTextColumn x:Name="EastColumn" Header="И" Binding="{Binding FacadeEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="NorthColumn" Header="С" Binding="{Binding FacadeNorth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="WestColumn" Header="З" Binding="{Binding FacadeWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="SouthColumn" Header="Ю" Binding="{Binding FacadeSouth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                        <DataGridTextColumn x:Name="NorthEastColumn" Header="СИ" Binding="{Binding FacadeNorthEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                        <DataGridTextColumn x:Name="NorthWestColumn" Header="СЗ" Binding="{Binding FacadeNorthWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                        <DataGridTextColumn x:Name="SouthWestColumn" Header="ЮЗ" Binding="{Binding FacadeSouthWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                        <DataGridTextColumn x:Name="SouthEastColumn" Header="ЮИ" Binding="{Binding FacadeSouthEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -81,15 +80,15 @@
 
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                     <TextBlock Text="Rsi:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBox Width="60" Text="{Binding Rsi, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Margin="0,0,10,0"/>
+                                    <TextBox Width="60" Text="{Binding Rsi, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
                                     <TextBlock Text="Rse:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBox Width="60" Text="{Binding Rse, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Margin="0,0,10,0"/>
+                                    <TextBox Width="60" Text="{Binding Rse, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
                                     <TextBlock Text="Rw:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding Rw, StringFormat=0.###}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="{Binding Rw, StringFormat=0.000}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                     <TextBlock Text="Rtotal:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding Rtotal, StringFormat=0.###}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="{Binding Rtotal, StringFormat=0.000}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                     <TextBlock Text="Uw:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding Uw, StringFormat=0.###}" VerticalAlignment="Center" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Uw, StringFormat=0.000}" VerticalAlignment="Center" FontWeight="Bold"/>
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal">
@@ -101,9 +100,9 @@
                                                   Margin="0,0,0,5">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                                <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="90"/>
-                                                <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="90"/>
-                                                <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.###}" IsReadOnly="True" Width="90"/>
+                                                <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                                                <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                                                <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <StackPanel Orientation="Horizontal">

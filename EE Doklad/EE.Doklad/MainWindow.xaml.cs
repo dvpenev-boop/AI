@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using EE.Doklad.Models;
 using EE.Doklad.ViewModels;
 using EE.Doklad.Views;
 using ModelSection = EE.Doklad.Models.Section;
@@ -242,10 +243,23 @@ public partial class MainWindow : Window
             // Динамично добавяме колони
             for (int i = 0; i < table.ColumnHeaders.Count && i < 3; i++)
             {
+                bool isNumericColumn = table.Rows.Any(row => row.Cells.Count > i && row.Cells[i].Type == CellType.Number);
+
+                var binding = new Binding($"Cells[{i}].Value")
+                {
+                    UpdateSourceTrigger = UpdateSourceTrigger.LostFocus
+                };
+
+                if (isNumericColumn)
+                {
+                    binding.Converter = (IValueConverter?)Application.Current.TryFindResource("FlexibleDoubleConverter");
+                    binding.StringFormat = "0.000";
+                }
+
                 dataGrid.Columns.Add(new DataGridTextColumn
                 {
                     Header = $"Кол. {i + 1}",
-                    Binding = new Binding($"Cells[{i}].Value"),
+                    Binding = binding,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star)
                 });
             }
