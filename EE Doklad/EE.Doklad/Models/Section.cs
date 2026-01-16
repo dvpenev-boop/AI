@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
+using EE.Doklad.Models;
 
 namespace EE.Doklad.Models
 {
@@ -58,7 +59,7 @@ namespace EE.Doklad.Models
         /// <summary>
         /// Данни за раздел "Външни стени" (само за ExternalWalls секции)
         /// </summary>
-    public global::EE.Doklad.Models.ExternalWallsSectionData? ExternalWallsSectionData { get; set; }
+    public ExternalWallsSectionData? ExternalWallsSectionData { get; set; }
 
         public int Order { get; set; }
 

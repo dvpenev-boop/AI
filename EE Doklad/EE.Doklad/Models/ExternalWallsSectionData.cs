@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace EE.Doklad.Models
 {
+    // Типове за секция "Външни стени".
     /// <summary>
     /// Данни за раздел "Външни стени"
     /// </summary>
