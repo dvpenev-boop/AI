@@ -30,26 +30,34 @@ namespace EE.Doklad.ViewModels
         private void AddWarmRoof()
         {
             int count = RoofTypes.Count(x => x.Mode == RoofMode.Warm) + 1;
-            RoofTypes.Add(new RoofType
+            var roofType = new RoofType
             {
                 Number = RoofTypes.Count + 1,
                 Name = $"Топъл покрив тип {count}",
                 Mode = RoofMode.Warm,
                 WarmDetail = new WarmRoofDetail()
-            });
+            };
+            // Null protection
+            if (roofType.WarmDetail == null)
+                roofType.WarmDetail = new WarmRoofDetail();
+            RoofTypes.Add(roofType);
             OnPropertyChanged(nameof(RoofTypes));
         }
 
         private void AddColdRoof()
         {
             int count = RoofTypes.Count(x => x.Mode == RoofMode.Cold) + 1;
-            RoofTypes.Add(new RoofType
+            var roofType = new RoofType
             {
                 Number = RoofTypes.Count + 1,
                 Name = $"Студен покрив тип {count}",
                 Mode = RoofMode.Cold,
                 ColdDetail = new ColdRoofDetail()
-            });
+            };
+            // Null protection
+            if (roofType.ColdDetail == null)
+                roofType.ColdDetail = new ColdRoofDetail();
+            RoofTypes.Add(roofType);
             OnPropertyChanged(nameof(RoofTypes));
         }
 
