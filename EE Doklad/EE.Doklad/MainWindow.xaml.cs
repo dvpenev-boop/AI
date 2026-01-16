@@ -145,6 +145,26 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = externalWallsEditor;
         }
+        else if (section.Type == ModelSectionType.Roof ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Покрив")))
+        {
+            if (section.RoofSectionData == null)
+                section.RoofSectionData = new Models.RoofSectionData();
+
+            section.Type = ModelSectionType.Roof;
+
+            var roofSectionView = new RoofSectionView
+            {
+                DataContext = new ViewModels.RoofSectionViewModel()
+            };
+            // Свържи ViewModel с модела
+            if (roofSectionView.DataContext is ViewModels.RoofSectionViewModel vm)
+            {
+                vm.Description = section.RoofSectionData.Description;
+                // Може да се добави синхронизация на RoofTypes при нужда
+            }
+            ContentScrollViewer.Content = roofSectionView;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

@@ -1,3 +1,6 @@
+    // TODO (Етап 2):
+    // Тук да се добави engine за изчисление на Ur за студен покрив по методиката (λекв, Rse1=Rsi2, итерация за температури и крайно Ur)
+    // След имплементация, U в обобщаващата таблица за студен покрив да се попълва автоматично.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -350,8 +353,9 @@ namespace EE.Doklad.Services
             }
         }
 
-        private void ComposeSectionContent(ColumnDescriptor column, Section section)
+    private void ComposeSectionContent(ColumnDescriptor column, Section section)
         {
+
             if (section.Type == SectionType.CoverPage && section.CoverPageData != null)
             {
                 GenerateCoverPage(column, section.CoverPageData);
@@ -376,50 +380,138 @@ namespace EE.Doklad.Services
                 return;
             }
 
-            column.Item().Text(section.Title)
-                .Justify()
-                .Bold().FontSize(14);
-            column.Item().PaddingBottom(5);
-
-            if (!string.IsNullOrWhiteSpace(section.StaticText))
+            if (section.Type == SectionType.Roof && section.RoofSectionData is { } roofData)
             {
-                column.Item().Text(section.StaticText)
-                    .Justify();
-                column.Item().PaddingBottom(10);
+                GenerateRoofSection(column, roofData);
+                return;
             }
+        }
+        // --- Roof Section PDF ---
+    private void GenerateRoofSection(ColumnDescriptor column, RoofSectionData data)
+    {
+        column.Item().Text("Покрив").Justify().Bold().FontSize(14);
+        column.Item().PaddingBottom(5);
 
-            foreach (var table in section.Tables)
+        if (!string.IsNullOrWhiteSpace(data.Description))
+        {
+            column.Item().Text(data.Description).Justify();
+            column.Item().PaddingBottom(10);
+        }
+
+        column.Item().Text("Покрив по типове").SemiBold().FontSize(12);
+        column.Item().PaddingBottom(3);
+
+        // Summary table
+        column.Item().Table(tbl =>
+        {
+            tbl.ColumnsDefinition(columns =>
             {
-                column.Item().Text(table.Title)
-                    .Justify()
-                    .SemiBold().FontSize(12);
-                column.Item().PaddingBottom(3);
+                columns.ConstantColumn(25);
+                columns.RelativeColumn(3);
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("№").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Тип покрив").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Режим").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("U (W/m²K)").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("A (m²)").Bold();
 
+            foreach (var roofType in data.RoofTypes)
+            {
+                tbl.Cell().Border(1).Padding(5).Text(roofType.Number.ToString());
+                tbl.Cell().Border(1).Padding(5).Text(roofType.Name);
+                tbl.Cell().Border(1).Padding(5).Text(roofType.Mode == RoofMode.Warm ? "Топъл" : "Студен");
+                tbl.Cell().Border(1).Padding(5).Text(
+                    roofType.Mode == RoofMode.Warm
+                        ? (roofType.U.HasValue ? FormatNumber((double)roofType.U.Value, UValueFormat) : "")
+                        : "Неизчислено (Етап 2)");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)roofType.A, AreaFormat));
+            }
+        });
+
+        foreach (var roofType in data.RoofTypes)
+        {
+            column.Item().PaddingTop(10).Text($"{roofType.Name}").Justify().Bold().FontSize(12);
+            if (roofType.Mode == RoofMode.Warm && roofType.WarmDetail != null)
+            {
+                // Warm roof detail
+                column.Item().Text("Слоеве").SemiBold().FontSize(11);
                 column.Item().Table(tbl =>
                 {
                     tbl.ColumnsDefinition(columns =>
                     {
-                        foreach (var _ in table.ColumnHeaders)
-                        {
-                            columns.RelativeColumn();
-                        }
+                        columns.RelativeColumn(3);
+                        columns.RelativeColumn();
+                        columns.RelativeColumn();
+                        columns.RelativeColumn();
                     });
-                    foreach (var header in table.ColumnHeaders)
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Материал").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("δ (m)").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("λ (W/mK)").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("R=δ/λ").Bold();
+                    foreach (var layer in roofType.WarmDetail.Layers)
                     {
-                        tbl.Cell().Border(1).Background(Colors.Grey.Lighten3)
-                            .Padding(5).Text(header).Bold();
-                    }
-                    foreach (var row in table.Rows)
-                    {
-                        foreach (var cell in row.Cells)
-                        {
-                            tbl.Cell().Border(1).Padding(5).Text(FormatCellValue(cell));
-                        }
+                        tbl.Cell().Border(1).Padding(5).Text(layer.Material);
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)layer.Thickness, ThicknessFormat));
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)layer.Lambda, LambdaFormat));
+                        tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)layer.R, RValueFormat));
                     }
                 });
-                column.Item().PaddingBottom(15);
+                column.Item().Text($"Rsi = {FormatNumber((double)roofType.WarmDetail.Rsi, RValueFormat)} m²K/W, Rse = {FormatNumber((double)roofType.WarmDetail.Rse, RValueFormat)} m²K/W").FontSize(10);
+            }
+            else if (roofType.Mode == RoofMode.Cold && roofType.ColdDetail != null)
+            {
+                // Cold roof detail (Stage 1: all inputs, no Ur)
+                var cold = roofType.ColdDetail;
+                column.Item().Text("Геометрия на подпокривното пространство").SemiBold().FontSize(11);
+                column.Item().Text($"V′ = {FormatNumber((double)cold.Vp, AreaFormat)} m³, A′ = {FormatNumber((double)cold.Ap, AreaFormat)} m², δвс = {(cold.Deltavc.HasValue ? FormatNumber((double)cold.Deltavc.Value, ThicknessFormat) : "-")} m").FontSize(10);
+                column.Item().Text("Площи на огражденията").SemiBold().FontSize(11);
+                column.Item().Text($"A1 = {FormatNumber((double)cold.A1, AreaFormat)} m², A2 = {FormatNumber((double)cold.A2, AreaFormat)} m², Aw = {FormatNumber((double)cold.Aw, AreaFormat)} m²").FontSize(10);
+                column.Item().Text("Вентилация").SemiBold().FontSize(11);
+                column.Item().Text($"Тип: {(cold.SpaceType == ColdRoofSpaceType.Sealed ? "уплътнено" : "неуплътнено")}, n = {FormatNumber((double)cold.n, GenericNumberFormat)} h⁻¹, V = {FormatNumber((double)cold.V, AreaFormat)} m³").FontSize(10);
+                column.Item().Text("Температури").SemiBold().FontSize(11);
+                column.Item().Text($"θi = {FormatNumber((double)cold.Ti, "0.0")} B0C, θe = {FormatNumber((double)cold.Te, "0.0")} B0C").FontSize(10);
+                // Layer tables for U1, U2, Uw
+                column.Item().Text("Таванска плоча (U1)").SemiBold().FontSize(11);
+                ComposeRoofLayerTable(column, cold.U1, "Rsi1", cold.U1.Rsi, "Rse1", cold.U1.Rse, cold.U1.RsiEditable, cold.U1.RseEditable);
+                column.Item().Text("Покривна плоча (U2)").SemiBold().FontSize(11);
+                ComposeRoofLayerTable(column, cold.U2, "Rsi2", cold.U2.Rsi, "Rse2", cold.U2.Rse, cold.U2.RsiEditable, cold.U2.RseEditable);
+                column.Item().Text("Вертикални ограждения (Uw)").SemiBold().FontSize(11);
+                ComposeRoofLayerTable(column, cold.Uw, "Rsiw", cold.Uw.Rsi, "Rsew", cold.Uw.Rse, cold.Uw.RsiEditable, cold.Uw.RseEditable);
+                column.Item().Text("U = Неизчислено (Етап 2)").FontColor(Colors.Grey.Darken1).FontSize(10);
             }
         }
+    }
+
+    private void ComposeRoofLayerTable(ColumnDescriptor column, RoofLayerTable table, string rsiLabel, decimal rsi, string rseLabel, decimal rse, bool rsiEditable, bool rseEditable)
+    {
+        column.Item().Table(tbl =>
+        {
+            tbl.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn(3);
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Материал").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("δ (m)").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("λ (W/mK)").Bold();
+            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("R=δ/λ").Bold();
+            foreach (var layer in table.Layers)
+            {
+                tbl.Cell().Border(1).Padding(5).Text(layer.Material);
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)layer.Thickness, ThicknessFormat));
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)layer.Lambda, LambdaFormat));
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber((double)layer.R, RValueFormat));
+            }
+        });
+        column.Item().Text($"{rsiLabel} = {FormatNumber((double)rsi, RValueFormat)} m²K/W, {rseLabel} = {FormatNumber((double)rse, RValueFormat)} m²K/W").FontSize(10);
+    }
+
+        // ...existing code...
 
         private void GenerateExternalWalls(ColumnDescriptor column, ExternalWallsSectionData data)
         {
