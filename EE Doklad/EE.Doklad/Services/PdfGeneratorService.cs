@@ -12,9 +12,26 @@ namespace EE.Doklad.Services
     /// <summary>
     /// Сервиз за генериране на PDF доклади с фиксиран layout
     /// </summary>
-    public class PdfGeneratorService
-    {
-        private record TocItem(string Title, int Page);
+
+        public class PdfGeneratorService
+        {
+            public record TocItem(string Title, int Page);
+
+            private int GetPageCount(IDocument document)
+            {
+                return document.GenerateImages().Count();
+            }
+
+            private IDocument CreateTocDocument(Report report, IReadOnlyList<TocItem> tocItems)
+            {
+                return Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        ConfigurePage(page, report, column => ComposeToc(column, tocItems));
+                    });
+                });
+            }
 
         public PdfGeneratorService()
         {
@@ -26,12 +43,10 @@ namespace EE.Doklad.Services
         {
             try
             {
-                // Първо събираме секциите и определяме коя е TOC (Съдържание)
                 var sections = report.Sections.OrderBy(s => s.Order).ToList();
                 int tocIndex = sections.FindIndex(s => s.Title?.Trim() == "Съдържание" || s.Title?.ToLower().Contains("съдържание") == true);
 
-                var pageNumbers = new int[sections.Count];
-
+                // 1. Render TOC placeholder to get its page count
                 var tocItemsPlaceholder = sections
                     .Select(section => new TocItem(section.Title ?? string.Empty, 0))
                     .ToList();
@@ -40,24 +55,44 @@ namespace EE.Doklad.Services
                     ? GetPageCount(CreateTocDocument(report, tocItemsPlaceholder))
                     : 0;
 
+                // 2. Render full document with TOC placeholder, count pages for each section
+                var pageNumbers = new int[sections.Count];
                 int currentPage = 1;
-                for (int i = 0; i < sections.Count; i++)
+
+                var docPreview = Document.Create(container =>
                 {
-                    pageNumbers[i] = currentPage;
-
-                    if (i == tocIndex)
+                    container.Page(page =>
                     {
-                        currentPage += tocPageCount;
-                        continue;
-                    }
-
-                    currentPage += GetPageCount(CreateSectionDocument(report, sections[i]));
-                }
+                        ConfigurePage(page, report, column =>
+                        {
+                            for (int i = 0; i < sections.Count; i++)
+                            {
+                                pageNumbers[i] = currentPage;
+                                if (i == tocIndex)
+                                {
+                                    column.Item().Text("Съдържание (генерира се автоматично)").FontSize(16).Bold().AlignCenter();
+                                    column.Item().PageBreak();
+                                    currentPage += tocPageCount;
+                                    continue;
+                                }
+                                ComposeSectionContent(column, sections[i]);
+                                if (i < sections.Count - 1)
+                                {
+                                    column.Item().PageBreak();
+                                    currentPage++;
+                                }
+                            }
+                        });
+                    });
+                });
+                // Render preview to get page count
+                docPreview.GenerateImages();
 
                 var tocItems = sections
                     .Select((section, idx) => new TocItem(section.Title ?? string.Empty, pageNumbers[idx]))
                     .ToList();
 
+                // 3. Render final document with real TOC
                 var docWithToc = Document.Create(container =>
                 {
                     container.Page(page =>
@@ -73,9 +108,7 @@ namespace EE.Doklad.Services
                                     column.Item().PageBreak();
                                     continue;
                                 }
-
                                 ComposeSectionContent(column, section);
-
                                 if (i < sections.Count - 1)
                                 {
                                     column.Item().PageBreak();
@@ -84,40 +117,12 @@ namespace EE.Doklad.Services
                         });
                     });
                 });
-
                 docWithToc.GeneratePdf(outputPath);
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Грешка при генериране на PDF: {ex.Message}", ex);
             }
-        }
-
-        private IDocument CreateSectionDocument(Report report, Section section)
-        {
-            return Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    ConfigurePage(page, report, column => ComposeSectionContent(column, section));
-                });
-            });
-        }
-
-        private IDocument CreateTocDocument(Report report, IReadOnlyList<TocItem> tocItems)
-        {
-            return Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    ConfigurePage(page, report, column => ComposeToc(column, tocItems));
-                });
-            });
-        }
-
-        private int GetPageCount(IDocument document)
-        {
-            return document.GenerateImages().Count();
         }
 
         private void ConfigurePage(PageDescriptor page, Report report, Action<ColumnDescriptor> contentComposer)
