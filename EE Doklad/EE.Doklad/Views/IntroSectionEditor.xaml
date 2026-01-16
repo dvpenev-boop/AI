@@ -14,8 +14,23 @@
                        FontWeight="Bold" 
                        Margin="0,0,0,20"/>
 
-            <!-- Таблица с проверени елементи -->
-            <TextBlock Text="Таблица 1: Проверени елементи в проекта" 
+            <!-- Текстова част - ОТГОРЕ -->
+            <TextBlock Text="Описание на извършените дейности" 
+                       FontSize="14" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,10"/>
+
+            <TextBox Text="{Binding StaticText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Height="200"
+                     Padding="10"
+                     FontSize="12"
+                     Margin="0,0,0,20"/>
+
+            <!-- Таблица с проверени елементи - ОТДОЛУ -->
+            <TextBlock Text="Проверени елементи в проекта" 
                        FontSize="14" 
                        FontWeight="Bold" 
                        Margin="0,0,0,10"/>
@@ -28,7 +43,7 @@
                       HeadersVisibility="Column"
                       IsReadOnly="False"
                       Height="300"
-                      Margin="0,0,0,20">
+                      Margin="0">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Проверени елементи в проекта" 
                                         Binding="{Binding Cells[0].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
@@ -40,21 +55,6 @@
                                         MinWidth="250"/>
                 </DataGrid.Columns>
             </DataGrid>
-
-            <!-- Текстова част -->
-            <TextBlock Text="Текстова част:" 
-                       FontSize="14" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,10"/>
-
-            <TextBox Text="{Binding StaticText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     TextWrapping="Wrap"
-                     AcceptsReturn="True"
-                     VerticalScrollBarVisibility="Auto"
-                     Height="200"
-                     Padding="10"
-                     FontSize="12"
-                     Margin="0"/>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -497,7 +497,7 @@ namespace EE.Doklad.ViewModels
             // Добавяме таблицата с проверени елементи
             var introTable = new FixedTable
             {
-                Title = "Таблица 1: Проверени елементи в проекта",
+                Title = "Проверени елементи в проекта",
                 ColumnHeaders = new List<string> { "Проверени елементи в проекта", "Констатации" }
             };
 
