@@ -15,4 +15,11 @@
     <PackageReference Include="QuestPDF" Version="2025.12.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Models\ExternalWallsSectionData.cs" />
+    <Compile Include="Models\ExternalWallsSectionData.cs" />
+    <Page Remove="Views\ExternalWallsSectionEditor.xaml" />
+    <Page Include="Views\ExternalWallsSectionEditor.xaml" />
+  </ItemGroup>
+
 </Project>

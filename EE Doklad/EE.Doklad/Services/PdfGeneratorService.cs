@@ -135,6 +135,37 @@ namespace EE.Doklad.Services
                 AddAttachmentToHash(hash, section.CertificatesData.InsuranceAttachment);
             }
 
+            if (section.ExternalWallsSectionData != null)
+            {
+                hash.Add(section.ExternalWallsSectionData.Title ?? string.Empty);
+                hash.Add(section.ExternalWallsSectionData.Description ?? string.Empty);
+                hash.Add(section.ExternalWallsSectionData.ShowFacadeDistribution);
+                hash.Add(section.ExternalWallsSectionData.WallTypes.Count);
+
+                foreach (var wallType in section.ExternalWallsSectionData.WallTypes)
+                {
+                    hash.Add(wallType.Index);
+                    hash.Add(wallType.Name ?? string.Empty);
+                    hash.Add(wallType.Area);
+                    hash.Add(wallType.FacadeEast);
+                    hash.Add(wallType.FacadeNorth);
+                    hash.Add(wallType.FacadeWest);
+                    hash.Add(wallType.FacadeSouth);
+                    hash.Add(wallType.Rsi);
+                    hash.Add(wallType.Rse);
+
+                    hash.Add(wallType.Layers.Count);
+                    foreach (var layer in wallType.Layers)
+                    {
+                        hash.Add(layer.Material ?? string.Empty);
+                        hash.Add(layer.Thickness);
+                        hash.Add(layer.Lambda);
+                    }
+
+                    AddAttachmentToHash(hash, wallType.SchemeAttachment);
+                }
+            }
+
             if (section.ObjectDataSectionData != null)
             {
                 hash.Add(section.ObjectDataSectionData.Title ?? string.Empty);
@@ -304,6 +335,12 @@ namespace EE.Doklad.Services
                 return;
             }
 
+            if (section.Type == SectionType.ExternalWalls && section.ExternalWallsSectionData != null)
+            {
+                GenerateExternalWalls(column, section.ExternalWallsSectionData);
+                return;
+            }
+
             column.Item().Text(section.Title)
                 .Justify()
                 .Bold().FontSize(14);
@@ -347,6 +384,130 @@ namespace EE.Doklad.Services
                 });
                 column.Item().PaddingBottom(15);
             }
+        }
+
+        private void GenerateExternalWalls(ColumnDescriptor column, ExternalWallsSectionData data)
+        {
+            column.Item().Text(data.Title)
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description)
+                    .Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            var showFacade = data.ShowFacadeDistribution;
+
+            column.Item().Text("Фасади / Външни стени")
+                .Justify()
+                .SemiBold().FontSize(12);
+            column.Item().PaddingBottom(3);
+
+            column.Item().Table(tbl =>
+            {
+                int facadeColumns = showFacade ? 4 : 0;
+                int columnCount = 4 + facadeColumns;
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.ConstantColumn(25);
+                    columns.RelativeColumn(3);
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
+                    for (int i = 0; i < facadeColumns; i++)
+                    {
+                        columns.RelativeColumn();
+                    }
+                });
+
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("№").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Тип стена").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("A (m²)").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("U (W/m²K)").Bold();
+
+                if (showFacade)
+                {
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("И").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("С").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("З").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Ю").Bold();
+                }
+
+                foreach (var wallType in data.WallTypes.Take(8))
+                {
+                    var index = wallType.Index > 0 ? wallType.Index : data.WallTypes.IndexOf(wallType) + 1;
+                    tbl.Cell().Border(1).Padding(5).Text(index.ToString());
+                    tbl.Cell().Border(1).Padding(5).Text(wallType.Name);
+                    tbl.Cell().Border(1).Padding(5).Text(wallType.Area.ToString("0.###"));
+                    tbl.Cell().Border(1).Padding(5).Text(wallType.Uw.ToString("0.###"));
+
+                    if (showFacade)
+                    {
+                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeEast.ToString("0.###"));
+                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeNorth.ToString("0.###"));
+                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeWest.ToString("0.###"));
+                        tbl.Cell().Border(1).Padding(5).Text(wallType.FacadeSouth.ToString("0.###"));
+                    }
+                }
+            });
+
+            foreach (var wallType in data.WallTypes.Take(8))
+            {
+                var index = wallType.Index > 0 ? wallType.Index : data.WallTypes.IndexOf(wallType) + 1;
+                column.Item().PaddingTop(10).Text($"СТЕНА ТИП {index}")
+                    .Justify()
+                    .Bold().FontSize(12);
+
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Table(tbl =>
+                        {
+                            tbl.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn();
+                                columns.RelativeColumn();
+                                columns.RelativeColumn();
+                            });
+
+                            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Материал").Bold();
+                            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("δ (m)").Bold();
+                            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("λ (W/mK)").Bold();
+                            tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("R=δ/λ").Bold();
+
+                            foreach (var layer in wallType.Layers)
+                            {
+                                tbl.Cell().Border(1).Padding(5).Text(layer.Material);
+                                tbl.Cell().Border(1).Padding(5).Text(layer.Thickness.ToString("0.###"));
+                                tbl.Cell().Border(1).Padding(5).Text(layer.Lambda.ToString("0.###"));
+                                tbl.Cell().Border(1).Padding(5).Text(layer.R.ToString("0.###"));
+                            }
+                        });
+
+                        col.Item().PaddingTop(5).Text($"Rsi={wallType.Rsi:0.###} | Rse={wallType.Rse:0.###} | Rw={wallType.Rw:0.###} | Rtotal={wallType.Rtotal:0.###} | Uw={wallType.Uw:0.###}")
+                            .FontSize(10).SemiBold();
+                    });
+
+                    row.ConstantItem(180).Border(1).Padding(5).AlignMiddle().AlignCenter()
+                        .Element(container => RenderWallScheme(container, wallType.SchemeAttachment));
+                });
+            }
+        }
+
+        private void RenderWallScheme(IContainer container, AttachmentData? attachment)
+        {
+            if (attachment?.Bytes != null && attachment.Bytes.Length > 0 && attachment.ContentType != "application/pdf")
+            {
+                container.Image(attachment.Bytes);
+                return;
+            }
+
+            container.AlignCenter().AlignMiddle().Text("Схема").FontSize(9).FontColor(Colors.Grey.Medium);
         }
 
         /// <summary>

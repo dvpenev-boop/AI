@@ -1,0 +1,140 @@
+<UserControl x:Class="EE.Doklad.Views.ExternalWallsSectionEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="900">
+
+    <UserControl.Resources>
+        <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
+        <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <TextBlock Text="{Binding Title, FallbackValue='Външни стени'}"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Margin="0,0,0,15"/>
+
+            <TextBlock Text="Описание:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                     MinHeight="80"
+                     Padding="10"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     FontSize="11"
+                     Margin="0,0,0,20"
+                     BorderBrush="#E0E0E0"
+                     BorderThickness="1"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Добави тип стена" Margin="0,0,10,0" Padding="6,4"
+                        Background="#4CAF50" Foreground="White" BorderThickness="0"
+                        Click="AddWallType_Click"/>
+                <Button Content="Премахни тип" Margin="0,0,10,0" Padding="6,4"
+                        Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveWallType_Click"/>
+                <CheckBox x:Name="FacadeToggle" Content="Покажи разпределение по фасади" VerticalAlignment="Center"
+                          IsChecked="{Binding ShowFacadeDistribution, UpdateSourceTrigger=PropertyChanged}"
+                          Checked="FacadeToggle_Changed" Unchecked="FacadeToggle_Changed"/>
+            </StackPanel>
+
+            <TextBlock Text="Обобщаваща таблица: Фасади / Външни стени"
+                       FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <DataGrid x:Name="SummaryGrid"
+                      ItemsSource="{Binding WallTypes}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,0,0,20">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="№" Binding="{Binding Index}" IsReadOnly="True" Width="40"/>
+                    <DataGridTextColumn Header="Тип стена" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="A (m²)" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="90"/>
+                    <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding Uw, StringFormat=0.###}" IsReadOnly="True" Width="90"/>
+                    <DataGridTextColumn x:Name="EastColumn" Header="И" Binding="{Binding FacadeEast, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                    <DataGridTextColumn x:Name="NorthColumn" Header="С" Binding="{Binding FacadeNorth, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                    <DataGridTextColumn x:Name="WestColumn" Header="З" Binding="{Binding FacadeWest, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                    <DataGridTextColumn x:Name="SouthColumn" Header="Ю" Binding="{Binding FacadeSouth, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="60"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <ItemsControl ItemsSource="{Binding WallTypes}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,10">
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Index, StringFormat=СТЕНА ТИП {0}}" FontWeight="Bold" FontSize="13"/>
+                                    <Button DockPanel.Dock="Right" Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                            Tag="{Binding}" Click="RemoveWallType_Click"/>
+                                </DockPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Rsi:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBox Width="60" Text="{Binding Rsi, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Rse:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBox Width="60" Text="{Binding Rse, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Rw:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding Rw, StringFormat=0.###}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Rtotal:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding Rtotal, StringFormat=0.###}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Uw:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding Uw, StringFormat=0.###}" VerticalAlignment="Center" FontWeight="Bold"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Width="520">
+                                        <DataGrid ItemsSource="{Binding Layers}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserAddRows="False"
+                                                  HeadersVisibility="Column"
+                                                  Margin="0,0,0,5">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                                <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="90"/>
+                                                <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=PropertyChanged, StringFormat=0.###}" Width="90"/>
+                                                <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.###}" IsReadOnly="True" Width="90"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                                    Tag="{Binding}" Click="AddLayer_Click"/>
+                                            <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                                    Tag="{Binding}" Click="RemoveLayer_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <Border BorderBrush="#AAAAAA" BorderThickness="1" Margin="20,0,0,0" Padding="8" Width="220" Height="220">
+                                        <StackPanel>
+                                            <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                            <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="130" VerticalAlignment="Center">
+                                                <Grid>
+                                                    <Image Stretch="Uniform"
+                                                           Visibility="{Binding SchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                                           Source="{Binding SchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                                    <TextBlock Text="Няма изображение" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Visibility="{Binding SchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                                                </Grid>
+                                            </Border>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                                                <Button Content="Качи" Padding="6,2" Margin="0,0,8,0" Background="#2196F3" Foreground="White" BorderThickness="0"
+                                                        Tag="{Binding}" Click="UploadScheme_Click"/>
+                                                <Button Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                                        Tag="{Binding}" Click="RemoveScheme_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

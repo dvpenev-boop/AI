@@ -11,7 +11,8 @@ namespace EE.Doklad.Models
         Normal,         // Обикновена секция с таблици и текст
         CoverPage,      // Челна страница (фиксирана на позиция №1)
         Certificates,   // Удостоверения (фиксирана на позиция №2)
-        ObjectData      // Данни за обекта (фиксирана на позиция №3)
+        ObjectData,     // Данни за обекта (фиксирана на позиция №3)
+        ExternalWalls   // Външни стени (секция №6)
     }
 
     /// <summary>
@@ -53,6 +54,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Данни за обекта" (само за ObjectData секции)
         /// </summary>
         public ObjectDataSectionData? ObjectDataSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Външни стени" (само за ExternalWalls секции)
+        /// </summary>
+    public global::EE.Doklad.Models.ExternalWallsSectionData? ExternalWallsSectionData { get; set; }
 
         public int Order { get; set; }
 

@@ -574,6 +574,27 @@ namespace EE.Doklad.ViewModels
                     StaticText = $"Попълнете данните за секция: {laterTitles[i]}",
                     Order = i + 5  // +5 защото CoverPage=0, Certificates=1, ..., ObjectData=4
                 };
+
+                if (laterTitles[i].Contains("Външни стени"))
+                {
+                    var externalWallsData = new ExternalWallsSectionData
+                    {
+                        Title = "Външни стени",
+                        Description = "Попълнете данните за външните стени."
+                    };
+                    var wallType = new ExternalWallType { Index = 1, Name = "Тип стена 1" };
+                    wallType.Layers.Add(new ExternalWallLayer
+                    {
+                        Material = "Тухла",
+                        Thickness = 0.25,
+                        Lambda = 0.7
+                    });
+                    externalWallsData.WallTypes.Add(wallType);
+
+                    section.Type = SectionType.ExternalWalls;
+                    section.ExternalWallsSectionData = externalWallsData;
+                    section.StaticText = string.Empty;
+                }
                 report.Sections.Add(section);
             }
 

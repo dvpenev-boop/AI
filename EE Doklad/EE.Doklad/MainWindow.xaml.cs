@@ -130,6 +130,20 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = objectDataEditor;
         }
+        else if (section.Type == ModelSectionType.ExternalWalls ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Външни стени")))
+        {
+            if (section.ExternalWallsSectionData == null)
+                section.ExternalWallsSectionData = new Models.ExternalWallsSectionData();
+
+            section.Type = ModelSectionType.ExternalWalls;
+
+            var externalWallsEditor = new ExternalWallsSectionEditor
+            {
+                DataContext = section.ExternalWallsSectionData
+            };
+            ContentScrollViewer.Content = externalWallsEditor;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

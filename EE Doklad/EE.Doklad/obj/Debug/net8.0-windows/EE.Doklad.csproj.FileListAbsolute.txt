@@ -94,3 +94,5 @@ E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\MigraDoc.Rendering.dll
 E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\MigraDoc.RtfRendering.dll
 E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\System.Security.Cryptography.Pkcs.dll
 E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ExternalWallsSectionEditor.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ExternalWallsSectionEditor.baml
