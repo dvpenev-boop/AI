@@ -54,6 +54,24 @@ namespace EE.Doklad.Services
             return raw;
         }
 
+        // Returns the localized name for a climate zone (1-9)
+        private static string GetClimateZoneName(int zone)
+        {
+            return zone switch
+            {
+                1 => "Северно Черноморие",
+                2 => "Добруджа",
+                3 => "Северна България – поречието на р. Дунав",
+                4 => "Северна България - централна част",
+                5 => "Южно Черноморие",
+                6 => "Южна България – централна част",
+                7 => "София и Подбалканската долина",
+                8 => "Южна България",
+                9 => "Югозападна България",
+                _ => string.Empty
+            };
+        }
+
         private readonly Dictionary<string, int> _pageCountCache = new(StringComparer.Ordinal);
 
         private int GetPageCount(IDocument document)
@@ -263,6 +281,9 @@ namespace EE.Doklad.Services
                 hash.Add(section.ObjectDataSectionData.NumberOfOccupants ?? string.Empty);
                 hash.Add(section.ObjectDataSectionData.OccupancySchedule ?? string.Empty);
                 hash.Add(section.ObjectDataSectionData.HeatingSchedule ?? string.Empty);
+                // Include ClimateZone and derived HeatingSeasonInfo so cache updates when they change
+                hash.Add(section.ObjectDataSectionData.ClimateZone);
+                hash.Add(section.ObjectDataSectionData.HeatingSeasonInfo ?? string.Empty);
             }
 
             return $"section:{hash.ToHashCode()}";
@@ -1019,6 +1040,31 @@ namespace EE.Doklad.Services
                         .Padding(5)
                         .Text(value);
                 }
+
+                // Допълнителни редове: Климатична зона и Отоплителен сезон
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten4)
+                    .Padding(5)
+                    .Text("Климатична зона")
+                    .SemiBold();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text($"{data.ClimateZone} - {GetClimateZoneName(data.ClimateZone)}");
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten4)
+                    .Padding(5)
+                    .Text("Отоплителен сезон")
+                    .SemiBold();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.HeatingSeasonInfo ?? "-");
             });
 
             column.Item().PaddingBottom(15);
