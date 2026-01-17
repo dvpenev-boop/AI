@@ -1,0 +1,22 @@
+<Window x:Class="EE.Doklad.Views.RoofTypeSelectionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Избор на тип покрив"
+        Height="200"
+        Width="360"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Изберете начин на изчисление за покрива:" FontWeight="Bold" Margin="0,0,0,10"/>
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,10">
+            <Button Content="Топъл покрив" Height="30" Margin="0,0,0,8" Click="WarmRoof_Click"/>
+            <Button Content="Студен покрив" Height="30" Click="ColdRoof_Click"/>
+        </StackPanel>
+        <Button Grid.Row="2" Content="Отказ" Width="80" HorizontalAlignment="Right" Click="Cancel_Click"/>
+    </Grid>
+</Window>

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
@@ -9,71 +8,180 @@ namespace EE.Doklad.ViewModels
 {
     public class RoofSectionViewModel : INotifyPropertyChanged
     {
-    public event PropertyChangedEventHandler? PropertyChanged;
-        public ObservableCollection<RoofType> RoofTypes { get; set; } = new();
-        public string Description { get; set; } = string.Empty;
+        private readonly RoofSectionData _data;
 
-    public ICommand AddWarmRoofCommand { get; }
-    public ICommand AddColdRoofCommand { get; }
-    public ICommand RemoveRoofTypeCommand { get; }
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public System.Collections.ObjectModel.ObservableCollection<RoofType> RoofTypes => _data.RoofTypes;
+        
+        public System.Collections.ObjectModel.ObservableCollection<RoofType> WarmRoofs => _data.WarmRoofs;
+        
+        public System.Collections.ObjectModel.ObservableCollection<RoofType> ColdRoofs => _data.ColdRoofs;
+
+        public string Description
+        {
+            get => _data.Description;
+            set
+            {
+                if (_data.Description != value)
+                {
+                    _data.Description = value;
+                    OnPropertyChanged(nameof(Description));
+                }
+            }
+        }
+
+        public ICommand RemoveRoofTypeCommand { get; }
 
         public int WarmRoofLimit => 6;
         public int ColdRoofLimit => 3;
 
+        private RoofType? _selectedRoofType;
+        public RoofType? SelectedRoofType
+        {
+            get => _selectedRoofType;
+            set
+            {
+                if (_selectedRoofType != value)
+                {
+                    _selectedRoofType = value;
+                    OnPropertyChanged(nameof(SelectedRoofType));
+                }
+            }
+        }
+
         public RoofSectionViewModel()
+            : this(new RoofSectionData())
         {
-            AddWarmRoofCommand = new RelayCommand(_ => AddWarmRoof(), _ => CanAddWarmRoof());
-            AddColdRoofCommand = new RelayCommand(_ => AddColdRoof(), _ => CanAddColdRoof());
+        }
+
+        public RoofSectionViewModel(RoofSectionData data)
+        {
+            _data = data;
+            
             RemoveRoofTypeCommand = new RelayCommand(param => RemoveRoofType(param as RoofType));
+            
+            // Първо синхронизираме колекциите преди да закачим събитието
+            SyncTypeCollections();
+            
+            // След това закачаме събитието за бъдещи промени
+            _data.RoofTypes.CollectionChanged += RoofTypes_CollectionChanged;
         }
 
-        private void AddWarmRoof()
+        private void RoofTypes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            int count = RoofTypes.Count(x => x.Mode == RoofMode.Warm) + 1;
+            SyncTypeCollections();
+        }
+
+        private void SyncTypeCollections()
+        {
+            _data.WarmRoofs.Clear();
+            _data.ColdRoofs.Clear();
+
+            foreach (var roofType in _data.RoofTypes)
+            {
+                if (roofType.Mode == RoofMode.Warm)
+                {
+                    _data.WarmRoofs.Add(roofType);
+                }
+                else if (roofType.Mode == RoofMode.Cold)
+                {
+                    _data.ColdRoofs.Add(roofType);
+                }
+            }
+            
+            OnPropertyChanged(nameof(WarmRoofs));
+            OnPropertyChanged(nameof(ColdRoofs));
+        }
+
+        public bool TryAddRoof(RoofMode mode, out string? error)
+        {
+            error = null;
+
+            if (mode == RoofMode.Warm && RoofTypes.Count(x => x.Mode == RoofMode.Warm) >= WarmRoofLimit)
+            {
+                error = $"Максимум {WarmRoofLimit} топли покрива.";
+                return false;
+            }
+
+            if (mode == RoofMode.Cold && RoofTypes.Count(x => x.Mode == RoofMode.Cold) >= ColdRoofLimit)
+            {
+                error = $"Максимум {ColdRoofLimit} студени покрива.";
+                return false;
+            }
+
             var roofType = new RoofType
             {
                 Number = RoofTypes.Count + 1,
-                Name = $"Топъл покрив тип {count}",
-                Mode = RoofMode.Warm,
-                WarmDetail = new WarmRoofDetail()
+                Name = $"Покрив тип {RoofTypes.Count + 1}",
+                Mode = mode,
+                IsSeed = false,
+                Area = 0
             };
-            // Null protection
-            if (roofType.WarmDetail == null)
+
+            if (mode == RoofMode.Warm)
+            {
                 roofType.WarmDetail = new WarmRoofDetail();
-            RoofTypes.Add(roofType);
-            OnPropertyChanged(nameof(RoofTypes));
-        }
-
-        private void AddColdRoof()
-        {
-            int count = RoofTypes.Count(x => x.Mode == RoofMode.Cold) + 1;
-            var roofType = new RoofType
+                if (!roofType.WarmDetail.Layers.Any())
+                {
+                    roofType.WarmDetail.Layers.Add(new RoofLayer());
+                }
+            }
+            else if (mode == RoofMode.Cold)
             {
-                Number = RoofTypes.Count + 1,
-                Name = $"Студен покрив тип {count}",
-                Mode = RoofMode.Cold,
-                ColdDetail = new ColdRoofDetail()
-            };
-            // Null protection
-            if (roofType.ColdDetail == null)
                 roofType.ColdDetail = new ColdRoofDetail();
+                if (!roofType.ColdDetail.U1.Layers.Any())
+                    roofType.ColdDetail.U1.Layers.Add(new RoofLayer());
+                if (!roofType.ColdDetail.U2.Layers.Any())
+                    roofType.ColdDetail.U2.Layers.Add(new RoofLayer());
+                if (!roofType.ColdDetail.Uw.Layers.Any())
+                    roofType.ColdDetail.Uw.Layers.Add(new RoofLayer());
+            }
+
+            SelectedRoofType = roofType;
             RoofTypes.Add(roofType);
             OnPropertyChanged(nameof(RoofTypes));
+            return true;
         }
-
-        private bool CanAddWarmRoof() => RoofTypes.Count(x => x.Mode == RoofMode.Warm) < WarmRoofLimit;
-        private bool CanAddColdRoof() => RoofTypes.Count(x => x.Mode == RoofMode.Cold) < ColdRoofLimit;
 
         private void RemoveRoofType(RoofType? roofType)
         {
-            if (roofType != null)
+            if (roofType == null)
             {
-                RoofTypes.Remove(roofType);
-                // Re-number
-                int i = 1;
-                foreach (var r in RoofTypes)
-                    r.Number = i++;
-                OnPropertyChanged(nameof(RoofTypes));
+                return;
+            }
+
+            var removedIndex = RoofTypes.IndexOf(roofType);
+            RoofTypes.Remove(roofType);
+            UpdateIndexes();
+            SelectedRoofType = GetNextSelection(removedIndex);
+            OnPropertyChanged(nameof(RoofTypes));
+        }
+
+        private RoofType? GetNextSelection(int removedIndex)
+        {
+            if (!RoofTypes.Any())
+            {
+                return null;
+            }
+
+            if (removedIndex < RoofTypes.Count && removedIndex >= 0)
+            {
+                return RoofTypes[removedIndex];
+            }
+
+            return RoofTypes.LastOrDefault();
+        }
+
+        private void UpdateIndexes()
+        {
+            for (int i = 0; i < RoofTypes.Count; i++)
+            {
+                RoofTypes[i].Number = i + 1;
+                if (string.IsNullOrWhiteSpace(RoofTypes[i].Name))
+                {
+                    RoofTypes[i].Name = $"Покрив тип {i + 1}";
+                }
             }
         }
 

@@ -7,6 +7,7 @@ namespace EE.Doklad.Views
 {
     public class RoofDetailTemplateSelector : DataTemplateSelector
     {
+        public DataTemplate? UnselectedRoofTemplate { get; set; }
         public DataTemplate? WarmRoofTemplate { get; set; }
         public DataTemplate? ColdRoofTemplate { get; set; }
 
@@ -15,6 +16,8 @@ namespace EE.Doklad.Views
             if (item is RoofType roofType)
             {
                 var fe = container as FrameworkElement;
+                if (roofType.Mode == RoofMode.Unselected)
+                    return UnselectedRoofTemplate ?? fe?.FindResource("UnselectedRoofDetailTemplate") as DataTemplate;
                 if (roofType.Mode == RoofMode.Warm)
                     return WarmRoofTemplate ?? fe?.FindResource("WarmRoofDetailTemplate") as DataTemplate;
                 if (roofType.Mode == RoofMode.Cold)

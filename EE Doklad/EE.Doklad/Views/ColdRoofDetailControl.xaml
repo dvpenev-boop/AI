@@ -1,0 +1,136 @@
+<UserControl x:Class="EE.Doklad.Views.ColdRoofDetailControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:EE.Doklad.Models"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+    </UserControl.Resources>
+    <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
+        <StackPanel>
+            <DockPanel Margin="0,0,0,10">
+                <Button DockPanel.Dock="Right" Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveDetail_Click"/>
+                <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" FontWeight="Bold" FontSize="13"/>
+            </DockPanel>
+
+            <TextBlock Text="Геометрия на подпокривното пространство" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="V′ (m³):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.Vp, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
+                <TextBlock Text="A′ (m²):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.Ap, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
+                <TextBlock Text="δвс (m):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.Deltavc, StringFormat=0.000, TargetNullValue='—'}" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <TextBlock Text="Площи" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="A1 (m²):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.A1, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
+                <TextBlock Text="A2 (m²):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.A2, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
+                <TextBlock Text="Aw (m²):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.Aw, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}"/>
+            </StackPanel>
+
+            <TextBlock Text="Вентилация" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Тип:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox Width="140" SelectedValuePath="Tag" SelectedValue="{Binding ColdDetail.SpaceType, UpdateSourceTrigger=PropertyChanged}">
+                    <ComboBoxItem Content="уплътнено" Tag="{x:Static models:ColdRoofSpaceType.Sealed}"/>
+                    <ComboBoxItem Content="неуплътнено" Tag="{x:Static models:ColdRoofSpaceType.Unsealed}"/>
+                </ComboBox>
+                <TextBlock Text="n (h⁻¹):" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Width="60" Text="{Binding ColdDetail.N, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Margin="0,0,10,0"/>
+                <TextBlock Text="V (m³):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.V, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}"/>
+            </StackPanel>
+
+            <TextBlock Text="Температури" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="θi (°C):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.Ti, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" Margin="0,0,10,0"/>
+                <TextBlock Text="θe (°C):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="80" Text="{Binding ColdDetail.Te, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}"/>
+            </StackPanel>
+
+            <TextBlock Text="Таванска плоча (U1)" FontWeight="Bold" Margin="0,6,0,4"/>
+            <DataGrid ItemsSource="{Binding ColdDetail.U1.Layers}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
+                        Click="AddU1Layer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveU1Layer_Click"/>
+                <TextBlock Text="U1:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.U1.Uw, StringFormat=0.000}" VerticalAlignment="Center" FontWeight="Bold"/>
+            </StackPanel>
+
+            <TextBlock Text="Покривна плоча (U2)" FontWeight="Bold" Margin="0,6,0,4"/>
+            <DataGrid ItemsSource="{Binding ColdDetail.U2.Layers}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
+                        Click="AddU2Layer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveU2Layer_Click"/>
+                <TextBlock Text="U2:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.U2.Uw, StringFormat=0.000}" VerticalAlignment="Center" FontWeight="Bold"/>
+            </StackPanel>
+
+            <TextBlock Text="Вертикални ограждения (Uw)" FontWeight="Bold" Margin="0,6,0,4"/>
+            <DataGrid ItemsSource="{Binding ColdDetail.Uw.Layers}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
+                        Click="AddUwLayer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveUwLayer_Click"/>
+                <TextBlock Text="Uw:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.Uw.Uw, StringFormat=0.000}" VerticalAlignment="Center" FontWeight="Bold"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <Button Content="Изчисли" Width="100" Background="#2196F3" Foreground="White" BorderThickness="0"
+                        Click="Calculate_Click"/>
+                <TextBlock Text="Ur:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.Ur, StringFormat=0.000, TargetNullValue='—'}" VerticalAlignment="Center" FontWeight="Bold"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

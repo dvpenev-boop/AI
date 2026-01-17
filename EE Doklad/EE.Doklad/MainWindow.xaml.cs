@@ -155,14 +155,8 @@ public partial class MainWindow : Window
 
             var roofSectionView = new RoofSectionView
             {
-                DataContext = new ViewModels.RoofSectionViewModel()
+                DataContext = new ViewModels.RoofSectionViewModel(section.RoofSectionData)
             };
-            // Свържи ViewModel с модела
-            if (roofSectionView.DataContext is ViewModels.RoofSectionViewModel vm)
-            {
-                vm.Description = section.RoofSectionData.Description;
-                // Може да се добави синхронизация на RoofTypes при нужда
-            }
             ContentScrollViewer.Content = roofSectionView;
         }
         else
