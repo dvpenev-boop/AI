@@ -7,6 +7,7 @@
     <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
     <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
     <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     <!-- Unselected Roof Detail Template -->
     <DataTemplate x:Key="UnselectedRoofDetailTemplate">
         <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
@@ -128,7 +129,8 @@
                     <TextBlock Text="θi (°C):" VerticalAlignment="Center" Margin="0,0,5,0"/>
                     <TextBox Width="80" Text="{Binding ColdDetail.Ti, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" Margin="0,0,10,0"/>
                     <TextBlock Text="θe (°C):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <TextBox Width="80" Text="{Binding ColdDetail.Te, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}"/>
+                    <TextBox Width="80" Text="{Binding ColdDetail.Te, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" IsReadOnly="{Binding ColdDetail.ManualTeInput, Converter={StaticResource InverseBooleanConverter}}"/>
+                    <CheckBox Content="Ръчно въвеждане" Margin="10,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ColdDetail.ManualTeInput, Mode=TwoWay}"/>
                 </StackPanel>
 
                 <TextBlock Text="Таванска плоча (U1)" FontWeight="Bold" Margin="0,6,0,4"/>

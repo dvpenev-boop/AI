@@ -174,6 +174,9 @@ namespace EE.Doklad.Models
 
     public partial class ColdRoofDetail : ObservableObject
     {
+        // Позволява ръчно въвеждане на Te
+        [ObservableProperty]
+        private bool _manualTeInput = false;
         // 5.1 Geometry
         [ObservableProperty]
         private double _vp;

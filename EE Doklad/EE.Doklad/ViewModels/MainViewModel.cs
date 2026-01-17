@@ -66,7 +66,10 @@ namespace EE.Doklad.ViewModels
                     {
                         if (roofType.Mode == EE.Doklad.Models.RoofMode.Cold && roofType.ColdDetail != null)
                         {
-                            roofType.ColdDetail.Te = EE.Doklad.ViewModels.RoofSectionViewModel.GetTeForClimateZone(climateZone);
+                            if (!roofType.ColdDetail.ManualTeInput)
+                            {
+                                roofType.ColdDetail.Te = EE.Doklad.ViewModels.RoofSectionViewModel.GetTeForClimateZone(climateZone);
+                            }
                         }
                     }
                 }
