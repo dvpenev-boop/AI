@@ -250,7 +250,12 @@ namespace EE.Doklad.Models
 
         partial void OnAwChanged(double value) => InvalidateCalculation();
 
-        partial void OnSpaceTypeChanged(ColdRoofSpaceType value) => InvalidateCalculation();
+        partial void OnSpaceTypeChanged(ColdRoofSpaceType value)
+        {
+            // Автоматично задаване на n според избрания тип
+            N = value == ColdRoofSpaceType.Sealed ? 0.1 : 0.3;
+            InvalidateCalculation();
+        }
 
         partial void OnNChanged(double value) => InvalidateCalculation();
 
