@@ -26,9 +26,51 @@ namespace EE.Doklad.ViewModels
         {
             _storageService = new ReportStorageService();
             _pdfService = new PdfGeneratorService();
-            
+
             // Създаваме примерен доклад при старт
             CurrentReport = CreateSampleReport();
+
+            // Закачаме обработчик за промяна на климатичната зона
+            AttachClimateZoneHandler();
+        }
+
+        private void AttachClimateZoneHandler()
+        {
+            // Намираме секцията "Данни за обекта"
+            var objectSection = CurrentReport?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData);
+            if (objectSection?.ObjectDataSectionData != null)
+            {
+                objectSection.ObjectDataSectionData.PropertyChanged += ObjectDataSectionData_PropertyChanged;
+            }
+        }
+
+        private void ObjectDataSectionData_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(EE.Doklad.Models.ObjectDataSectionData.ClimateZone))
+            {
+                if (CurrentReport?.Sections == null)
+                    return;
+
+                var objectSection = CurrentReport.Sections.FirstOrDefault(s => s.Type == SectionType.ObjectData);
+                int climateZone = 1;
+                if (objectSection?.ObjectDataSectionData != null)
+                {
+                    climateZone = objectSection.ObjectDataSectionData.ClimateZone;
+                }
+                // Обновяваме Te за всички студени покриви във всички RoofSectionData секции
+                foreach (var roofSection in CurrentReport.Sections)
+                {
+                    var data = roofSection.RoofSectionData;
+                    if (data?.RoofTypes == null) continue;
+                    foreach (var roofType in data.RoofTypes)
+                    {
+                        if (roofType.Mode == EE.Doklad.Models.RoofMode.Cold && roofType.ColdDetail != null)
+                        {
+                            roofType.ColdDetail.Te = EE.Doklad.ViewModels.RoofSectionViewModel.GetTeForClimateZone(climateZone);
+                        }
+                    }
+                }
+            }
         }
 
         [RelayCommand]

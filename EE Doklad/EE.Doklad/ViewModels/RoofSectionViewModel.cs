@@ -4,10 +4,31 @@ using System.Linq;
 using System.Windows.Input;
 using EE.Doklad.Models;
 
+
+
+
 namespace EE.Doklad.ViewModels
 {
     public class RoofSectionViewModel : INotifyPropertyChanged
     {
+        // Връща температура θe според климатична зона (по-ниската от диапазона)
+    public static double GetTeForClimateZone(int climateZone)
+        {
+            // Зона 1 и 5: +4°C (по-ниската)
+            // Зона 3 и 4: +2°C
+            // Зона 2 и 6: +1°C
+            // Зона 7: 0°C
+            // Зона 8 и 9: +3°C
+            return climateZone switch
+            {
+                1 or 5 => 4.0,
+                3 or 4 => 2.0,
+                2 or 6 => 1.0,
+                7 => 0.0,
+                8 or 9 => 3.0,
+                _ => 4.0 // по подразбиране
+            };
+        }
         private readonly RoofSectionData _data;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -119,15 +140,7 @@ namespace EE.Doklad.ViewModels
                 Area = 0
             };
 
-            if (mode == RoofMode.Warm)
-            {
-                roofType.WarmDetail = new WarmRoofDetail();
-                if (!roofType.WarmDetail.Layers.Any())
-                {
-                    roofType.WarmDetail.Layers.Add(new RoofLayer());
-                }
-            }
-            else if (mode == RoofMode.Cold)
+            if (mode == RoofMode.Cold)
             {
                 roofType.ColdDetail = new ColdRoofDetail();
                 if (!roofType.ColdDetail.U1.Layers.Any())
@@ -136,6 +149,28 @@ namespace EE.Doklad.ViewModels
                     roofType.ColdDetail.U2.Layers.Add(new RoofLayer());
                 if (!roofType.ColdDetail.Uw.Layers.Any())
                     roofType.ColdDetail.Uw.Layers.Add(new RoofLayer());
+
+                // Автоматично попълване на θe за студен покрив
+                var mainVM = System.Windows.Application.Current?.MainWindow?.DataContext as MainViewModel;
+                int climateZone = 1;
+                if (mainVM?.CurrentReport?.Sections != null)
+                {
+                    var objectSection = mainVM.CurrentReport.Sections.FirstOrDefault(s => s.Type == SectionType.ObjectData);
+                    if (objectSection?.ObjectDataSectionData != null)
+                    {
+                        climateZone = objectSection.ObjectDataSectionData.ClimateZone;
+                    }
+                }
+                double te = GetTeForClimateZone(climateZone);
+                roofType.ColdDetail.Te = te;
+            }
+            else if (mode == RoofMode.Warm)
+            {
+                roofType.WarmDetail = new WarmRoofDetail();
+                if (!roofType.WarmDetail.Layers.Any())
+                {
+                    roofType.WarmDetail.Layers.Add(new RoofLayer());
+                }
             }
 
             SelectedRoofType = roofType;
