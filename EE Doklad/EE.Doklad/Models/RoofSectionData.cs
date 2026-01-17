@@ -174,6 +174,29 @@ namespace EE.Doklad.Models
 
     public partial class ColdRoofDetail : ObservableObject
     {
+        /// <summary>
+        /// Температура на повърхността, граничеща с въздушния слой в подкровното пространство (откъм сградата)
+        /// </summary>
+        public double? ThetaSe1
+        {
+            get
+            {
+                if (ThetaU == null || (U1?.Uw ?? 0) <= 0) return null;
+                return ThetaU + 0.1 * (U1?.Uw ?? 0) * (Ti - ThetaU.Value);
+            }
+        }
+
+        /// <summary>
+        /// Температура на повърхността, граничеща с въздушния слой в подкровното пространство (откъм външния въздух)
+        /// </summary>
+        public double? ThetaSi2
+        {
+            get
+            {
+                if (ThetaU == null || (U2?.Uw ?? 0) <= 0) return null;
+                return ThetaU - 0.17 * (U2?.Uw ?? 0) * (ThetaU.Value - Te);
+            }
+        }
         // Позволява ръчно въвеждане на Te
         [ObservableProperty]
         private bool _manualTeInput = false;
@@ -260,6 +283,8 @@ namespace EE.Doklad.Models
             }
             // При всяка промяна на слоевете, преизчисляваме ThetaU
             OnPropertyChanged(nameof(ThetaU));
+            OnPropertyChanged(nameof(ThetaSe1));
+            OnPropertyChanged(nameof(ThetaSi2));
         }
 
         partial void OnVpChanged(double value)
@@ -267,6 +292,8 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(Deltavc));
             InvalidateCalculation();
             OnPropertyChanged(nameof(ThetaU));
+            OnPropertyChanged(nameof(ThetaSe1));
+            OnPropertyChanged(nameof(ThetaSi2));
         }
 
         partial void OnApChanged(double value)
@@ -274,12 +301,14 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(Deltavc));
             InvalidateCalculation();
             OnPropertyChanged(nameof(ThetaU));
+            OnPropertyChanged(nameof(ThetaSe1));
+            OnPropertyChanged(nameof(ThetaSi2));
         }
 
 
-    partial void OnA1Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
-    partial void OnA2Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
-    partial void OnAwChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnA1Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnA2Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnAwChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
 
         partial void OnSpaceTypeChanged(ColdRoofSpaceType value)
         {
@@ -287,13 +316,15 @@ namespace EE.Doklad.Models
             N = value == ColdRoofSpaceType.Sealed ? 0.1 : 0.3;
             InvalidateCalculation();
             OnPropertyChanged(nameof(ThetaU));
+            OnPropertyChanged(nameof(ThetaSe1));
+            OnPropertyChanged(nameof(ThetaSi2));
         }
 
 
-    partial void OnNChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
-    partial void OnVChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
-    partial void OnTiChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
-    partial void OnTeChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnNChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnVChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnTiChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnTeChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
 
         public void CalculateUr()
         {
