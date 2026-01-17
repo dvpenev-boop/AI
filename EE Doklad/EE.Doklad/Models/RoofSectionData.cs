@@ -227,46 +227,73 @@ namespace EE.Doklad.Models
             Uw.PropertyChanged += LayerTable_PropertyChanged;
         }
 
+        /// <summary>
+        /// Температура на въздуха в подкровното пространство (Θu)
+        /// </summary>
+        public double? ThetaU
+        {
+            get
+            {
+                // Проверка за валидност на данните
+                if ((U1?.Uw ?? 0) <= 0 && (U2?.Uw ?? 0) <= 0 && (Uw?.Uw ?? 0) <= 0) return null;
+                double a1 = A1;
+                double a2 = A2;
+                double aw = Aw;
+                double u1 = U1?.Uw ?? 0;
+                double u2 = U2?.Uw ?? 0;
+                double uw = Uw?.Uw ?? 0;
+                double n = N;
+                double v = V;
+                double ti = Ti;
+                double te = Te;
+                double numerator = ti * u1 * a1 + te * u2 * a2 + te * uw * aw + te * 0.33 * n * v;
+                double denominator = u1 * a1 + u2 * a2 + uw * aw + 0.33 * n * v;
+                return denominator != 0 ? numerator / denominator : (double?)null;
+            }
+        }
+
         private void LayerTable_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(RoofLayerTable.Uw))
             {
                 InvalidateCalculation();
             }
+            // При всяка промяна на слоевете, преизчисляваме ThetaU
+            OnPropertyChanged(nameof(ThetaU));
         }
 
         partial void OnVpChanged(double value)
         {
             OnPropertyChanged(nameof(Deltavc));
             InvalidateCalculation();
+            OnPropertyChanged(nameof(ThetaU));
         }
 
         partial void OnApChanged(double value)
         {
             OnPropertyChanged(nameof(Deltavc));
             InvalidateCalculation();
+            OnPropertyChanged(nameof(ThetaU));
         }
 
-        partial void OnA1Changed(double value) => InvalidateCalculation();
 
-        partial void OnA2Changed(double value) => InvalidateCalculation();
-
-        partial void OnAwChanged(double value) => InvalidateCalculation();
+    partial void OnA1Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnA2Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnAwChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
 
         partial void OnSpaceTypeChanged(ColdRoofSpaceType value)
         {
             // Автоматично задаване на n според избрания тип
             N = value == ColdRoofSpaceType.Sealed ? 0.1 : 0.3;
             InvalidateCalculation();
+            OnPropertyChanged(nameof(ThetaU));
         }
 
-        partial void OnNChanged(double value) => InvalidateCalculation();
 
-        partial void OnVChanged(double value) => InvalidateCalculation();
-
-        partial void OnTiChanged(double value) => InvalidateCalculation();
-
-        partial void OnTeChanged(double value) => InvalidateCalculation();
+    partial void OnNChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnVChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnTiChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
+    partial void OnTeChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); }
 
         public void CalculateUr()
         {
