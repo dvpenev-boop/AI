@@ -60,17 +60,25 @@
                 <TextBox Width="80" Text="{Binding ColdDetail.Te, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" IsReadOnly="{Binding ColdDetail.ManualTeInput, Converter={StaticResource InverseBooleanConverter}}"/>
                 <CheckBox Content="Ръчно въвеждане" Margin="10,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ColdDetail.ManualTeInput, Mode=TwoWay}"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Θu (Температура в подкровното пространство):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBlock Text="{Binding ColdDetail.ThetaU, StringFormat=0.00, TargetNullValue='—'}" VerticalAlignment="Center" FontWeight="Bold"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Θse1 (Темп. на повърхност към възд. слой, вътрешна):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBlock Text="{Binding ColdDetail.ThetaSe1, StringFormat=0.00, TargetNullValue='—'}" VerticalAlignment="Center" FontWeight="Bold"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Θsi2 (Темп. на повърхност към възд. слой, външна):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBlock Text="{Binding ColdDetail.ThetaSi2, StringFormat=0.00, TargetNullValue='—'}" VerticalAlignment="Center" FontWeight="Bold"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10" VerticalAlignment="Center">
+                <TextBlock Text="Θu:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.ThetaU, StringFormat=0.00, TargetNullValue='—'}" FontWeight="Bold" Margin="0,0,15,0"/>
+                <TextBlock Text="Θse1:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.ThetaSe1, StringFormat=0.00, TargetNullValue='—'}" FontWeight="Bold" Margin="0,0,15,0"/>
+                <TextBlock Text="Θsi2:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.ThetaSi2, StringFormat=0.00, TargetNullValue='—'}" FontWeight="Bold" Margin="0,0,15,0"/>
+                <TextBlock Text="λвъздух:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.LambdaAir, StringFormat=0.0000, TargetNullValue='—'}" Margin="0,0,15,0"/>
+                <TextBlock Text="Pr:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.Prandtl, StringFormat=0.00, TargetNullValue='—'}" Margin="0,0,15,0"/>
+                <TextBlock Text="Gr:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.Grashof, StringFormat=0.00, TargetNullValue='—'}" Margin="0,0,15,0"/>
+                <TextBlock Text="Gr·Pr:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.GrPr, StringFormat=0.00, TargetNullValue='—'}" Margin="0,0,15,0"/>
+                <TextBlock Text="εk:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.EpsilonK, StringFormat=0.000, TargetNullValue='—'}" Margin="0,0,15,0"/>
+                <TextBlock Text="λекв:" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ColdDetail.LambdaEk, StringFormat=0.0000, TargetNullValue='—'}" FontWeight="Bold"/>
             </StackPanel>
 
             <TextBlock Text="Таванска плоча (U1)" FontWeight="Bold" Margin="0,6,0,4"/>

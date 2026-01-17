@@ -175,6 +175,124 @@ namespace EE.Doklad.Models
     public partial class ColdRoofDetail : ObservableObject
     {
         /// <summary>
+        /// Кинематичен вискозитет на въздуха (ν), изчислен по методиката (Sutherland's formula)
+        /// </summary>
+        public double? KinematicViscosity
+        {
+            get
+            {
+                // Температура в K
+                if (ThetaU == null) return null;
+                double T = ThetaU.Value + 273.15;
+                // Sutherland's formula for air (μ in kg/(m·s))
+                double mu = 1.458e-6 * Math.Pow(T, 1.5) / (T + 110.4); // динамичен вискозитет
+                double rho = 101325 / (287.058 * T); // плътност на въздуха (p=101325 Pa, R=287.058 J/kgK)
+                return mu / rho; // кинематичен вискозитет ν = μ/ρ
+            }
+        }
+
+        /// <summary>
+        /// Топлопроводност на въздуха (λ), изчислена по методиката (примерна формула)
+        /// </summary>
+        public double? LambdaAir
+        {
+            get
+            {
+                if (ThetaU == null) return null;
+                double T = ThetaU.Value + 273.15;
+                // Примерна формула за λ на въздуха (W/mK)
+                return 2.334e-3 + 7.322e-5 * T; // λ = 0.002334 + 0.00007322*T
+            }
+        }
+
+        /// <summary>
+        /// Критерий на Прандтъл (Pr), изчислен по методиката
+        /// </summary>
+        public double? Prandtl
+        {
+            get
+            {
+                if (ThetaU == null) return null;
+                double T = ThetaU.Value + 273.15;
+                // Cp = 1005 J/kgK (прибл.), μ и λ както по-горе
+                double mu = 1.458e-6 * Math.Pow(T, 1.5) / (T + 110.4);
+                double lambda = 2.334e-3 + 7.322e-5 * T;
+                double Cp = 1005.0;
+                double Pr = (mu * Cp) / lambda;
+                return Pr;
+            }
+        }
+
+        /// <summary>
+        /// Коефициент на обемно разширение β
+        /// </summary>
+        public double? Beta
+        {
+            get
+            {
+                if (ThetaU == null) return null;
+                double T = ThetaU.Value + 273.15;
+                return 1.0 / T;
+            }
+        }
+
+        /// <summary>
+        /// Критерий на Грасхоф (Gr)
+        /// </summary>
+        public double? Grashof
+        {
+            get
+            {
+                if (ThetaU == null || ThetaSe1 == null || ThetaSi2 == null || Deltavc == null || KinematicViscosity == null || Beta == null) return null;
+                double g = 9.81;
+                double delta = Deltavc.Value;
+                double dT = ThetaSe1.Value - ThetaSi2.Value;
+                double v = KinematicViscosity.Value;
+                double beta = Beta.Value;
+                return (g * beta * Math.Pow(delta, 3) * dT) / (v * v);
+            }
+        }
+
+        /// <summary>
+        /// Gr.Pr произведение
+        /// </summary>
+        public double? GrPr
+        {
+            get
+            {
+                if (Grashof == null || Prandtl == null) return null;
+                return Grashof.Value * Prandtl.Value;
+            }
+        }
+
+        /// <summary>
+        /// Корекционен коефициент εk
+        /// </summary>
+        public double? EpsilonK
+        {
+            get
+            {
+                if (GrPr == null) return null;
+                double grpr = GrPr.Value;
+                if (grpr < 1e3) return 1.0;
+                if (grpr < 1e6) return 0.105 * Math.Pow(grpr, 0.25);
+                if (grpr < 1e10) return 0.4 * Math.Pow(grpr, 0.25);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Еквивалентен коефициент на топлопроводност на въздушния слой λекв
+        /// </summary>
+        public double? LambdaEk
+        {
+            get
+            {
+                if (LambdaAir == null || EpsilonK == null) return null;
+                return LambdaAir.Value * EpsilonK.Value;
+            }
+    }
+        /// <summary>
         /// Температура на повърхността, граничеща с въздушния слой в подкровното пространство (откъм сградата)
         /// </summary>
         public double? ThetaSe1
