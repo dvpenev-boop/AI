@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {}
+    "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {}
   },
   "projects": {
-    "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
+    "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
+        "projectUniqueName": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
         "projectName": "EE.Doklad",
-        "projectPath": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
+        "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
         "packagesPath": "C:\\Users\\dimit\\.nuget\\packages\\",
-        "outputPath": "e:\\AI\\EE Doklad\\EE.Doklad\\obj\\",
+        "outputPath": "E:\\AI\\EE Doklad\\EE.Doklad\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\dimit\\AppData\\Roaming\\NuGet\\NuGet.Config"

@@ -361,6 +361,26 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private bool _isCalculated;
 
+        /// <summary>
+        /// Изчислена стойност на Rse1 = Rsi2 (за визуализация)
+        /// </summary>
+        public double? Rse1Rsi2 => CalculateRse1Rsi2();
+
+        /// <summary>
+        /// Изчислена стойност на U1 (за визуализация)
+        /// </summary>
+        public double? U1Calculated => CalculateU1();
+
+        /// <summary>
+        /// Изчислена стойност на U2 (за визуализация)
+        /// </summary>
+        public double? U2Calculated => CalculateU2();
+
+        /// <summary>
+        /// Изчислена стойност на Uw (за визуализация)
+        /// </summary>
+        public double? UwCalculated => CalculateUw();
+
         public ColdRoofDetail()
         {
             U1.PropertyChanged += LayerTable_PropertyChanged;
@@ -399,10 +419,14 @@ namespace EE.Doklad.Models
             {
                 InvalidateCalculation();
             }
-            // При всяка промяна на слоевете, преизчисляваме ThetaU
+            // При всяка промяна на слоевете, преизчисляваме ThetaU и изчислените стойности
             OnPropertyChanged(nameof(ThetaU));
             OnPropertyChanged(nameof(ThetaSe1));
             OnPropertyChanged(nameof(ThetaSi2));
+            OnPropertyChanged(nameof(Rse1Rsi2));
+            OnPropertyChanged(nameof(U1Calculated));
+            OnPropertyChanged(nameof(U2Calculated));
+            OnPropertyChanged(nameof(UwCalculated));
         }
 
         partial void OnVpChanged(double value)
@@ -412,6 +436,10 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(ThetaU));
             OnPropertyChanged(nameof(ThetaSe1));
             OnPropertyChanged(nameof(ThetaSi2));
+            OnPropertyChanged(nameof(Rse1Rsi2));
+            OnPropertyChanged(nameof(U1Calculated));
+            OnPropertyChanged(nameof(U2Calculated));
+            OnPropertyChanged(nameof(UwCalculated));
         }
 
         partial void OnApChanged(double value)
@@ -421,12 +449,16 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(ThetaU));
             OnPropertyChanged(nameof(ThetaSe1));
             OnPropertyChanged(nameof(ThetaSi2));
+            OnPropertyChanged(nameof(Rse1Rsi2));
+            OnPropertyChanged(nameof(U1Calculated));
+            OnPropertyChanged(nameof(U2Calculated));
+            OnPropertyChanged(nameof(UwCalculated));
         }
 
 
-    partial void OnA1Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
-    partial void OnA2Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
-    partial void OnAwChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnA1Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U1Calculated)); }
+    partial void OnA2Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U2Calculated)); }
+    partial void OnAwChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(UwCalculated)); }
 
         partial void OnSpaceTypeChanged(ColdRoofSpaceType value)
         {
@@ -441,14 +473,98 @@ namespace EE.Doklad.Models
 
     partial void OnNChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
     partial void OnVChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
-    partial void OnTiChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
-    partial void OnTeChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
+    partial void OnTiChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U1Calculated)); }
+    partial void OnTeChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U2Calculated)); }
 
+        /// <summary>
+        /// Изчисляване на Rse1 = Rsi2 по формула: δвс / (2 * λекв)
+        /// </summary>
+        public double? CalculateRse1Rsi2()
+        {
+            if (Deltavc == null || LambdaEk == null || LambdaEk <= 0) return null;
+            return Deltavc.Value / (2.0 * LambdaEk.Value);
+        }
+
+        /// <summary>
+        /// Изчисляване на U1 по формула: 1 / (0.10 + Σ(δj/λj) + Rse1)
+        /// </summary>
+        public double? CalculateU1()
+        {
+            double rse1 = CalculateRse1Rsi2() ?? 0;
+            if (rse1 <= 0) return null;
+
+            // Σ(δj/λj) за всички слоеве в U1
+            double sumLayers = U1.Layers.Sum(layer => layer.R);
+            
+            double denominator = 0.10 + sumLayers + rse1;
+            return denominator > 0 ? 1.0 / denominator : null;
+        }
+
+        /// <summary>
+        /// Изчисляване на U2 по формула: 1 / (Rsi2 + Σ(δj/λj) + 0.04)
+        /// </summary>
+        public double? CalculateU2()
+        {
+            double rsi2 = CalculateRse1Rsi2() ?? 0;
+            if (rsi2 <= 0) return null;
+
+            // Σ(δj/λj) за всички слоеве в U2
+            double sumLayers = U2.Layers.Sum(layer => layer.R);
+            
+            double denominator = rsi2 + sumLayers + 0.04;
+            return denominator > 0 ? 1.0 / denominator : null;
+        }
+
+        /// <summary>
+        /// Изчисляване на Uw по формула: 1 / (Σ(δj/λj) + 0.13 + 0.04)
+        /// </summary>
+        public double? CalculateUw()
+        {
+            // Σ(δj/λj) за всички слоеве в Uw
+            double sumLayers = Uw.Layers.Sum(layer => layer.R);
+            
+            double denominator = sumLayers + 0.13 + 0.04;
+            return denominator > 0 ? 1.0 / denominator : null;
+        }
+
+        /// <summary>
+        /// Изчисляване на Ur по формула: 1 / (1/U1 + A1/(A2*U2 + Aw*Uw + 0.33*n*V))
+        /// </summary>
         public void CalculateUr()
         {
-            var uValues = new[] { U1.Uw, U2.Uw, Uw.Uw }.Where(value => value > 0).ToList();
-            Ur = uValues.Count > 0 ? uValues.Average() : null;
-            IsCalculated = uValues.Count > 0;
+            double? u1 = CalculateU1();
+            double? u2 = CalculateU2();
+            double? uw = CalculateUw();
+
+            if (u1 == null || u2 == null || uw == null || 
+                u1 <= 0 || u2 <= 0 || uw <= 0 || 
+                A1 <= 0 || A2 <= 0 || Aw <= 0)
+            {
+                InvalidateCalculation();
+                return;
+            }
+
+            // Изчисление на знаменателя: A2*U2 + Aw*Uw + 0.33*n*V
+            double innerDenominator = (A2 * u2.Value) + (Aw * uw.Value) + (0.33 * N * V);
+            
+            if (innerDenominator <= 0)
+            {
+                InvalidateCalculation();
+                return;
+            }
+
+            // Изчисление на: 1/U1 + A1/(A2*U2 + Aw*Uw + 0.33*n*V)
+            double sum = (1.0 / u1.Value) + (A1 / innerDenominator);
+            
+            if (sum <= 0)
+            {
+                InvalidateCalculation();
+                return;
+            }
+
+            // Изчисление на Ur
+            Ur = 1.0 / sum;
+            IsCalculated = true;
             OnPropertyChanged(nameof(Ur));
         }
 
