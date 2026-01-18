@@ -87,6 +87,9 @@
                 <TextBlock Text="Rse = Rse1 = " VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding ColdDetail.U1.Rse, StringFormat=0.0000}" VerticalAlignment="Center" Foreground="Gray" FontSize="11" FontWeight="Bold"/>
             </StackPanel>
+            <!-- Нов ред: U1 (фиксиран за θse1) -->
+            <TextBlock Text="U1 (фиксиран за θse1):" Margin="0,0,5,0" FontSize="11" Foreground="#1976D2"/>
+            <TextBlock Text="{Binding ColdDetail.U1ForTheta, StringFormat=0.000, TargetNullValue='—'}" Margin="0,0,0,6" FontWeight="Bold" FontSize="11" Foreground="#1976D2"/>
             <DataGrid ItemsSource="{Binding ColdDetail.U1.Layers}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
@@ -114,6 +117,9 @@
                 <TextBlock Text="{Binding ColdDetail.U2.Rsi, StringFormat=0.0000}" VerticalAlignment="Center" Foreground="Gray" FontSize="11" FontWeight="Bold" Margin="0,0,15,0"/>
                 <TextBlock Text="Rse = 0.04" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
             </StackPanel>
+            <!-- Нов ред: U2 (фиксиран за θsi2) -->
+            <TextBlock Text="U2 (фиксиран за θsi2):" Margin="0,0,5,0" FontSize="11" Foreground="#1976D2"/>
+            <TextBlock Text="{Binding ColdDetail.U2ForTheta, StringFormat=0.000, TargetNullValue='—'}" Margin="0,0,0,6" FontWeight="Bold" FontSize="11" Foreground="#1976D2"/>
             <DataGrid ItemsSource="{Binding ColdDetail.U2.Layers}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"

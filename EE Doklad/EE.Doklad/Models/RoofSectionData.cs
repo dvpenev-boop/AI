@@ -499,7 +499,9 @@ namespace EE.Doklad.Models
             {
                 InvalidateCalculation();
             }
-            // Само маркираме че има промяна, без автоматично преизчисление
+            // Обнови U1ForTheta и U2ForTheta при промяна на слоевете
+            OnPropertyChanged(nameof(U1ForTheta));
+            OnPropertyChanged(nameof(U2ForTheta));
         }
 
         partial void OnVpChanged(double value)
