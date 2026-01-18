@@ -1,4 +1,4 @@
-    // TODO (Етап 2):
+// TODO (Етап 2):
     // Тук да се добави engine за изчисление на Ur за студен покрив по методиката (λекв, Rse1=Rsi2, итерация за температури и крайно Ur)
     // След имплементация, U в обобщаващата таблица за студен покрив да се попълва автоматично.
 using System;
@@ -558,25 +558,57 @@ namespace EE.Doklad.Services
             }
             else if (roofType.Mode == RoofMode.Cold && roofType.ColdDetail != null)
             {
-                // Cold roof detail (Stage 1: all inputs, no Ur)
                 var cold = roofType.ColdDetail;
-                column.Item().Text("Геометрия на подпокривното пространство").SemiBold().FontSize(11);
-                column.Item().Text($"V′ = {FormatNumber(cold.Vp, AreaFormat)} m³, A′ = {FormatNumber(cold.Ap, AreaFormat)} m², δвс = {(cold.Deltavc.HasValue ? FormatNumber(cold.Deltavc.Value, ThicknessFormat) : "-")} m").FontSize(10);
-                column.Item().Text("Площи на огражденията").SemiBold().FontSize(11);
-                column.Item().Text($"A1 = {FormatNumber(cold.A1, AreaFormat)} m², A2 = {FormatNumber(cold.A2, AreaFormat)} m², Aw = {FormatNumber(cold.Aw, AreaFormat)} m²").FontSize(10);
-                column.Item().Text("Вентилация").SemiBold().FontSize(11);
-                column.Item().Text($"Тип: {(cold.SpaceType == ColdRoofSpaceType.Sealed ? "уплътнено" : "неуплътнено")}, n = {FormatNumber(cold.N, GenericNumberFormat)} h⁻¹, V = {FormatNumber(cold.V, AreaFormat)} m³").FontSize(10);
-                column.Item().Text("Температури").SemiBold().FontSize(11);
-                column.Item().Text($"θi = {FormatNumber(cold.Ti, "0.0")}°C, θe = {FormatNumber(cold.Te, "0.0")}°C").FontSize(10);
-                // Layer tables for U1, U2, Uw
+                // --- Всички изчислени величини в една таблица ---
+                column.Item().PaddingTop(8).Text("Изчислени коефициенти и междинни стойности").FontSize(11).SemiBold();
+                column.Item().Table(tbl =>
+                {
+                    tbl.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn();
+                    });
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Параметър").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Стойност").Bold();
+                    tbl.Cell().Border(1).Padding(5).Text("λекв");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.LambdaEk.HasValue ? FormatNumber(cold.LambdaEk.Value, LambdaFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Rse1 = Rsi2");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.Rse1Rsi2.HasValue ? FormatNumber(cold.Rse1Rsi2.Value, RValueFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("U1 (фиксиран за θse1)");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.U1ForTheta.HasValue ? FormatNumber(cold.U1ForTheta.Value, UValueFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("U1 (изчислен)");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.U1Calculated.HasValue ? FormatNumber(cold.U1Calculated.Value, UValueFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("U2 (фиксиран за θsi2)");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.U2ForTheta.HasValue ? FormatNumber(cold.U2ForTheta.Value, UValueFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("U2 (изчислен)");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.U2Calculated.HasValue ? FormatNumber(cold.U2Calculated.Value, UValueFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Uw (изчислен)");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.UwCalculated.HasValue ? FormatNumber(cold.UwCalculated.Value, UValueFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Θu");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.ThetaU.HasValue ? FormatNumber(cold.ThetaU.Value, "0.00") : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Θse1");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.ThetaSe1.HasValue ? FormatNumber(cold.ThetaSe1.Value, "0.00") : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Θsi2");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.ThetaSi2.HasValue ? FormatNumber(cold.ThetaSi2.Value, "0.00") : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Gr");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.Grashof.HasValue ? FormatNumber(cold.Grashof.Value, GenericNumberFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Pr");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.Prandtl.HasValue ? FormatNumber(cold.Prandtl.Value, GenericNumberFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("Gr·Pr");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.GrPr.HasValue ? FormatNumber(cold.GrPr.Value, GenericNumberFormat) : "—");
+                    tbl.Cell().Border(1).Padding(5).Text("εk");
+                    tbl.Cell().Border(1).Padding(5).Text(cold.EpsilonK.HasValue ? FormatNumber(cold.EpsilonK.Value, GenericNumberFormat) : "—");
+                    // Краен резултат Ur с Bold
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Ur (краен)").Bold();
+                    tbl.Cell().Border(1).Padding(5).Text(cold.Ur.HasValue ? FormatNumber(cold.Ur.Value, UValueFormat) : "—").Bold();
+                });
+                // --- Детайли за слоевете ---
                 column.Item().Text("Таванска плоча (U1)").SemiBold().FontSize(11);
                 ComposeRoofLayerTable(column, cold.U1, "Rsi1", cold.U1.Rsi, "Rse1", cold.U1.Rse, cold.U1.RsiEditable, cold.U1.RseEditable);
                 column.Item().Text("Покривна плоча (U2)").SemiBold().FontSize(11);
                 ComposeRoofLayerTable(column, cold.U2, "Rsi2", cold.U2.Rsi, "Rse2", cold.U2.Rse, cold.U2.RsiEditable, cold.U2.RseEditable);
                 column.Item().Text("Вертикални ограждения (Uw)").SemiBold().FontSize(11);
                 ComposeRoofLayerTable(column, cold.Uw, "Rsiw", cold.Uw.Rsi, "Rsew", cold.Uw.Rse, cold.Uw.RsiEditable, cold.Uw.RseEditable);
-                column.Item().Text(cold.IsCalculated && cold.Ur is { } urValue ? $"U = {FormatNumber(urValue, UValueFormat)}" : "U = —")
-                    .FontColor(Colors.Grey.Darken1).FontSize(10);
             }
         }
     }
