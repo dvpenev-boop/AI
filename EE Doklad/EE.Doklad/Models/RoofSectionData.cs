@@ -292,29 +292,74 @@ namespace EE.Doklad.Models
                 return LambdaAir.Value * EpsilonK.Value;
             }
     }
-        /// <summary>
-        /// Температура на повърхността, граничеща с въздушния слой в подкровното пространство (откъм сградата)
-        /// </summary>
-        public double? ThetaSe1
+        // --- U1/U2 за изчисление на θse1 и θsi2 (фиксирани съпротивления) ---
+        public double? U1ForTheta
         {
             get
             {
-                if (ThetaU == null || (U1?.Uw ?? 0) <= 0) return null;
-                return ThetaU + 0.1 * (U1?.Uw ?? 0) * (Ti - ThetaU.Value);
+                // За таванска плоча (U1) при θse1: Rsi = 0.10, Rse = 0.17
+                double sumLayers = U1.Layers.Sum(l => l.R);
+                double denominator = 0.10 + sumLayers + 0.10;
+                return denominator > 0 ? 1.0 / denominator : null;
             }
         }
 
-        /// <summary>
-        /// Температура на повърхността, граничеща с въздушния слой в подкровното пространство (откъм външния въздух)
-        /// </summary>
-        public double? ThetaSi2
+        public double? U2ForTheta
         {
             get
             {
-                if (ThetaU == null || (U2?.Uw ?? 0) <= 0) return null;
-                return ThetaU - 0.17 * (U2?.Uw ?? 0) * (ThetaU.Value - Te);
+                // За покривна плоча (U2) при θsi2: Rsi = 0.04, Rse = 0.10
+                double sumLayers = U2.Layers.Sum(l => l.R);
+                double denominator = 0.04 + sumLayers + 0.10;
+                return denominator > 0 ? 1.0 / denominator : null;
             }
         }
+
+        // --- Реални U1/U2 с изчислени съпротивления (за Ur и доклада) ---
+        public double? U1Actual
+        {
+            get
+            {
+                double sumLayers = U1.Layers.Sum(l => l.R);
+                double rse1 = Rse1Rsi2 ?? 0.0;
+                double denominator = 0.10 + sumLayers + rse1;
+                return denominator > 0 ? 1.0 / denominator : null;
+            }
+        }
+
+        public double? U2Actual
+        {
+            get
+            {
+                double sumLayers = U2.Layers.Sum(l => l.R);
+                double rsi2 = Rse1Rsi2 ?? 0.0;
+                double denominator = rsi2 + sumLayers + 0.04;
+                return denominator > 0 ? 1.0 / denominator : null;
+            }
+        }
+
+        // --- Помощни методи за изчисление на θse1 и θsi2 ---
+        public double? ThetaSe1Fixed
+        {
+            get
+            {
+                if (ThetaU == null || U1ForTheta == null) return null;
+                return ThetaU + 0.1 * U1ForTheta.Value * (Ti - ThetaU.Value);
+            }
+        }
+
+        public double? ThetaSi2Fixed
+        {
+            get
+            {
+                if (ThetaU == null || U2ForTheta == null) return null;
+                return ThetaU - 0.17 * U2ForTheta.Value * (ThetaU.Value - Te);
+            }
+        }
+
+        // Оставяме старите ThetaSe1/ThetaSi2 за съвместимост, но ги насочваме към новите фиксирани варианти
+        public double? ThetaSe1 => ThetaSe1Fixed;
+        public double? ThetaSi2 => ThetaSi2Fixed;
         // Позволява ръчно въвеждане на Te
         [ObservableProperty]
         private bool _manualTeInput = false;
@@ -527,34 +572,14 @@ namespace EE.Doklad.Models
         }
 
         /// <summary>
-        /// Изчисляване на U1 по формула: 1 / (0.10 + Σ(δj/λj) + Rse1)
+        /// Изчисляване на U1 (реален) по формула: 1 / (0.10 + Σ(δj/λj) + Rse1)
         /// </summary>
-        public double? CalculateU1()
-        {
-            double rse1 = CalculateRse1Rsi2() ?? 0;
-            if (rse1 <= 0) return null;
-
-            // Σ(δj/λj) за всички слоеве в U1
-            double sumLayers = U1.Layers.Sum(layer => layer.R);
-            
-            double denominator = 0.10 + sumLayers + rse1;
-            return denominator > 0 ? 1.0 / denominator : null;
-        }
+        public double? CalculateU1() => U1Actual;
 
         /// <summary>
-        /// Изчисляване на U2 по формула: 1 / (Rsi2 + Σ(δj/λj) + 0.04)
+        /// Изчисляване на U2 (реален) по формула: 1 / (Rsi2 + Σ(δj/λj) + 0.04)
         /// </summary>
-        public double? CalculateU2()
-        {
-            double rsi2 = CalculateRse1Rsi2() ?? 0;
-            if (rsi2 <= 0) return null;
-
-            // Σ(δj/λj) за всички слоеве в U2
-            double sumLayers = U2.Layers.Sum(layer => layer.R);
-            
-            double denominator = rsi2 + sumLayers + 0.04;
-            return denominator > 0 ? 1.0 / denominator : null;
-        }
+        public double? CalculateU2() => U2Actual;
 
         /// <summary>
         /// Изчисляване на Uw по формула: 1 / (Σ(δj/λj) + 0.13 + 0.04)
