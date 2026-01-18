@@ -64,7 +64,7 @@ namespace EE.Doklad.Views
         {
             if (DataContext is RoofType roofType && roofType.ColdDetail != null)
             {
-                roofType.ColdDetail.CalculateUr();
+                roofType.ColdDetail.CalculateAll();
             }
         }
 

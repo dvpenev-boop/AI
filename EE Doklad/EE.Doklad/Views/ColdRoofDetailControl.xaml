@@ -82,6 +82,11 @@
             </StackPanel>
 
             <TextBlock Text="Таванска плоча (U1)" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <TextBlock Text="Rsi = 0.10" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="Gray" FontSize="11"/>
+                <TextBlock Text="Rse = Rse1 = " VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+                <TextBlock Text="{Binding ColdDetail.U1.Rse, StringFormat=0.0000}" VerticalAlignment="Center" Foreground="Gray" FontSize="11" FontWeight="Bold"/>
+            </StackPanel>
             <DataGrid ItemsSource="{Binding ColdDetail.U1.Layers}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
@@ -104,6 +109,11 @@
             </StackPanel>
 
             <TextBlock Text="Покривна плоча (U2)" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <TextBlock Text="Rsi = Rsi2 = " VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+                <TextBlock Text="{Binding ColdDetail.U2.Rsi, StringFormat=0.0000}" VerticalAlignment="Center" Foreground="Gray" FontSize="11" FontWeight="Bold" Margin="0,0,15,0"/>
+                <TextBlock Text="Rse = 0.04" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+            </StackPanel>
             <DataGrid ItemsSource="{Binding ColdDetail.U2.Layers}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
@@ -126,6 +136,10 @@
             </StackPanel>
 
             <TextBlock Text="Вертикални ограждения (Uw)" FontWeight="Bold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <TextBlock Text="Rsi = 0.13" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="Gray" FontSize="11"/>
+                <TextBlock Text="Rse = 0.04" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+            </StackPanel>
             <DataGrid ItemsSource="{Binding ColdDetail.Uw.Layers}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"

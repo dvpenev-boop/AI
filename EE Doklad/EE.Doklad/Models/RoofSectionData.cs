@@ -386,6 +386,22 @@ namespace EE.Doklad.Models
             U1.PropertyChanged += LayerTable_PropertyChanged;
             U2.PropertyChanged += LayerTable_PropertyChanged;
             Uw.PropertyChanged += LayerTable_PropertyChanged;
+            
+            // Настройка на началните стойности за U1, U2, Uw
+            U1.Rsi = 0.10;
+            U1.RsiEditable = false;
+            U1.Rse = 0.0; // Ще се изчисли динамично
+            U1.RseEditable = false;
+            
+            U2.Rsi = 0.0; // Ще се изчисли динамично
+            U2.RsiEditable = false;
+            U2.Rse = 0.04;
+            U2.RseEditable = false;
+            
+            Uw.Rsi = 0.13;
+            Uw.RsiEditable = false;
+            Uw.Rse = 0.04;
+            Uw.RseEditable = false;
         }
 
         /// <summary>
@@ -413,68 +429,93 @@ namespace EE.Doklad.Models
             }
         }
 
+        /// <summary>
+        /// Актуализира Rse1 и Rsi2 стойностите в таблиците U1 и U2
+        /// </summary>
+        private void UpdateResistanceValues()
+        {
+            double? rse1rsi2 = CalculateRse1Rsi2();
+            if (rse1rsi2.HasValue && rse1rsi2.Value > 0)
+            {
+                U1.Rse = rse1rsi2.Value;
+                U2.Rsi = rse1rsi2.Value;
+            }
+            else
+            {
+                U1.Rse = 0.0;
+                U2.Rsi = 0.0;
+            }
+            // Уведомяванията се правят от CalculateAll()
+        }
+
         private void LayerTable_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(RoofLayerTable.Uw))
             {
                 InvalidateCalculation();
             }
-            // При всяка промяна на слоевете, преизчисляваме ThetaU и изчислените стойности
-            OnPropertyChanged(nameof(ThetaU));
-            OnPropertyChanged(nameof(ThetaSe1));
-            OnPropertyChanged(nameof(ThetaSi2));
-            OnPropertyChanged(nameof(Rse1Rsi2));
-            OnPropertyChanged(nameof(U1Calculated));
-            OnPropertyChanged(nameof(U2Calculated));
-            OnPropertyChanged(nameof(UwCalculated));
+            // Само маркираме че има промяна, без автоматично преизчисление
         }
 
         partial void OnVpChanged(double value)
         {
             OnPropertyChanged(nameof(Deltavc));
             InvalidateCalculation();
-            OnPropertyChanged(nameof(ThetaU));
-            OnPropertyChanged(nameof(ThetaSe1));
-            OnPropertyChanged(nameof(ThetaSi2));
-            OnPropertyChanged(nameof(Rse1Rsi2));
-            OnPropertyChanged(nameof(U1Calculated));
-            OnPropertyChanged(nameof(U2Calculated));
-            OnPropertyChanged(nameof(UwCalculated));
         }
 
         partial void OnApChanged(double value)
         {
             OnPropertyChanged(nameof(Deltavc));
             InvalidateCalculation();
-            OnPropertyChanged(nameof(ThetaU));
-            OnPropertyChanged(nameof(ThetaSe1));
-            OnPropertyChanged(nameof(ThetaSi2));
-            OnPropertyChanged(nameof(Rse1Rsi2));
-            OnPropertyChanged(nameof(U1Calculated));
-            OnPropertyChanged(nameof(U2Calculated));
-            OnPropertyChanged(nameof(UwCalculated));
         }
 
 
-    partial void OnA1Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U1Calculated)); }
-    partial void OnA2Changed(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U2Calculated)); }
-    partial void OnAwChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(UwCalculated)); }
+    partial void OnA1Changed(double value) { InvalidateCalculation(); }
+    partial void OnA2Changed(double value) { InvalidateCalculation(); }
+    partial void OnAwChanged(double value) { InvalidateCalculation(); }
 
         partial void OnSpaceTypeChanged(ColdRoofSpaceType value)
         {
             // Автоматично задаване на n според избрания тип
             N = value == ColdRoofSpaceType.Sealed ? 0.1 : 0.3;
             InvalidateCalculation();
-            OnPropertyChanged(nameof(ThetaU));
-            OnPropertyChanged(nameof(ThetaSe1));
-            OnPropertyChanged(nameof(ThetaSi2));
         }
 
 
-    partial void OnNChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
-    partial void OnVChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); }
-    partial void OnTiChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U1Calculated)); }
-    partial void OnTeChanged(double value) { InvalidateCalculation(); OnPropertyChanged(nameof(ThetaU)); OnPropertyChanged(nameof(ThetaSe1)); OnPropertyChanged(nameof(ThetaSi2)); OnPropertyChanged(nameof(U2Calculated)); }
+    partial void OnNChanged(double value) { InvalidateCalculation(); }
+    partial void OnVChanged(double value) { InvalidateCalculation(); }
+    partial void OnTiChanged(double value) { InvalidateCalculation(); }
+    partial void OnTeChanged(double value) { InvalidateCalculation(); }
+
+        /// <summary>
+        /// Извършва всички изчисления и актуализира всички изчислени стойности.
+        /// Този метод се извиква при натискане на бутона "Изчисли".
+        /// </summary>
+        public void CalculateAll()
+        {
+            // Актуализирай съпротивленията
+            UpdateResistanceValues();
+
+            // Уведоми за промяна на всички изчислени свойства
+            OnPropertyChanged(nameof(ThetaU));
+            OnPropertyChanged(nameof(ThetaSe1));
+            OnPropertyChanged(nameof(ThetaSi2));
+            OnPropertyChanged(nameof(KinematicViscosity));
+            OnPropertyChanged(nameof(LambdaAir));
+            OnPropertyChanged(nameof(Prandtl));
+            OnPropertyChanged(nameof(Beta));
+            OnPropertyChanged(nameof(Grashof));
+            OnPropertyChanged(nameof(GrPr));
+            OnPropertyChanged(nameof(EpsilonK));
+            OnPropertyChanged(nameof(LambdaEk));
+            OnPropertyChanged(nameof(Rse1Rsi2));
+            OnPropertyChanged(nameof(U1Calculated));
+            OnPropertyChanged(nameof(U2Calculated));
+            OnPropertyChanged(nameof(UwCalculated));
+
+            // Изчисли Ur
+            CalculateUr();
+        }
 
         /// <summary>
         /// Изчисляване на Rse1 = Rsi2 по формула: δвс / (2 * λекв)
