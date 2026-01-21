@@ -1,0 +1,75 @@
+<UserControl x:Class="EE.Doklad.Views.FloorPanels.FloorUnheatedSpacePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:EE.Doklad.Models"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters">
+    <UserControl.Resources>
+        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+    </UserControl.Resources>
+    <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
+        <StackPanel>
+            <TextBlock Text="Под към неотопляемо помещение" FontWeight="Bold" FontSize="13" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Основни параметри" FontWeight="SemiBold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Площ A (m²):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Area, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Периметър P (m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Perimeter, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Височина над терен H (m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="200"/>
+                <TextBox Width="100" Text="{Binding HeightAboveGround, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <TextBlock Text="Температури" FontWeight="SemiBold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="θi (°C):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Ti, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" Margin="0,0,10,0"/>
+                <TextBlock Text="θe (°C):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="100" Text="{Binding Te, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}"/>
+            </StackPanel>
+
+            <TextBlock Text="Вентилация" FontWeight="SemiBold" Margin="0,6,0,4"/>
+            <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding VentilationMode, Mode=TwoWay}" Margin="0,0,0,6" Width="200" HorizontalAlignment="Left">
+                <ComboBoxItem Content="Без вентилация" Tag="{x:Static models:VentilationMode.None}"/>
+                <ComboBoxItem Content="Естествена" Tag="{x:Static models:VentilationMode.Natural}"/>
+                <ComboBoxItem Content="Механична" Tag="{x:Static models:VentilationMode.Mechanical}"/>
+            </ComboBox>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="n (1/h):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding N, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <TextBlock Text="Топлинни съпротивления" FontWeight="SemiBold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Rsi (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Rsi, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="100" Text="{Binding Rse, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <TextBlock Text="Слоеве" FontWeight="SemiBold" Margin="0,10,0,4"/>
+            <DataGrid ItemsSource="{Binding Layers}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
+                        Click="AddLayer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveLayer_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

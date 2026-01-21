@@ -13,8 +13,9 @@ namespace EE.Doklad.Models
         CoverPage,      // Челна страница (фиксирана на позиция №1)
         Certificates,   // Удостоверения (фиксирана на позиция №2)
         ObjectData,     // Данни за обекта (фиксирана на позиция №3)
-    ExternalWalls,   // Външни стени (секция №6)
-    Roof            // Покрив (нова секция)
+        ExternalWalls,  // Външни стени (секция №6)
+        Roof,           // Покрив (секция №7)
+        Floor           // Под (секция №8)
     }
 
     /// <summary>
@@ -67,6 +68,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Покрив" (само за Roof секции)
         /// </summary>
         public RoofSectionData? RoofSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Под" (само за Floor секции)
+        /// </summary>
+        public FloorSectionData? FloorSectionData { get; set; }
 
         public int Order { get; set; }
 

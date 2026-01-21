@@ -159,6 +159,20 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = roofSectionView;
         }
+        else if (section.Type == ModelSectionType.Floor ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Под")))
+        {
+            if (section.FloorSectionData == null)
+                section.FloorSectionData = new Models.FloorSectionData();
+
+            section.Type = ModelSectionType.Floor;
+
+            var floorSectionView = new FloorSectionView
+            {
+                DataContext = new ViewModels.FloorSectionViewModel(section.FloorSectionData)
+            };
+            ContentScrollViewer.Content = floorSectionView;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

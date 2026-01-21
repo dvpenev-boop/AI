@@ -1,0 +1,120 @@
+<UserControl x:Class="EE.Doklad.Views.FloorSectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="EE.Doklad.Views"
+             xmlns:floorPanels="clr-namespace:EE.Doklad.Views.FloorPanels"
+             xmlns:models="clr-namespace:EE.Doklad.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <!-- Description -->
+        <TextBlock Text="Описание на пода (вид, състояние, конструкция):" Margin="0,0,0,5"/>
+        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                 Height="60" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+
+        <!-- Floor list header -->
+        <TextBlock Text="Под по типове" FontWeight="Bold" Margin="0,0,0,10"/>
+        
+        <!-- Add floor button -->
+        <Button Content="+ Добави под" 
+                Background="#4CAF50" 
+                Foreground="White" 
+                Click="AddFloor_Click"
+                Padding="10,5" 
+                Margin="0,0,0,10"/>
+
+        <!-- Floor items table -->
+        <DataGrid ItemsSource="{Binding FloorItems}" 
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding SelectedFloorItem, Mode=TwoWay}"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="All"
+                  Margin="0,0,0,20">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="№" Binding="{Binding Number, Mode=OneWay}" Width="50" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Име" Binding="{Binding Name, Mode=TwoWay}" Width="*" IsReadOnly="False"/>
+                <DataGridTextColumn Header="Тип под" Binding="{Binding TypeLabel, Mode=OneWay}" Width="200" IsReadOnly="True"/>
+                <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding UDisplay, Mode=OneWay}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="A (m²)" Binding="{Binding ADisplay, Mode=OneWay}" Width="100" IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Премахни" 
+                                    Background="#f44336" 
+                                    Foreground="White"
+                                    Command="{Binding DataContext.RemoveFloorItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}"
+                                    Padding="5,2"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Floor details section - ALL floors shown one after another -->
+        <TextBlock Text="Детайли на подовете" FontWeight="Bold" Margin="0,20,0,10"/>
+        
+        <!-- ItemsControl to show ALL floor details -->
+        <ItemsControl ItemsSource="{Binding FloorItems}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="LightGray" BorderThickness="1" Margin="0,0,0,15" Padding="10">
+                        <StackPanel>
+                            <!-- Floor header -->
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                            
+                            <!-- Show appropriate detail panel based on FloorType -->
+                            <ContentControl Content="{Binding}">
+                                <ContentControl.Resources>
+                                    <DataTemplate DataType="{x:Type models:FloorItem}">
+                                        <ContentControl>
+                                            <ContentControl.Style>
+                                                <Style TargetType="ContentControl">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding FloorType}" Value="ExternalAir">
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <floorPanels:FloorExternalAirPanel DataContext="{Binding ExternalAirDetail}"/>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding FloorType}" Value="Ground">
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <floorPanels:FloorGroundPanel DataContext="{Binding GroundDetail}"/>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding FloorType}" Value="UnheatedSpace">
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <floorPanels:FloorUnheatedSpacePanel DataContext="{Binding UnheatedSpaceDetail}"/>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding FloorType}" Value="HeatedBasement">
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <floorPanels:FloorHeatedBasementPanel DataContext="{Binding HeatedBasementDetail}"/>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ContentControl.Style>
+                                        </ContentControl>
+                                    </DataTemplate>
+                                </ContentControl.Resources>
+                            </ContentControl>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hoy+JoIcf5g=",
+  "dgSpecHash": "5jsxg2d0lHs=",
   "success": true,
-  "projectFilePath": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
+  "projectFilePath": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\dimit\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\dimit\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",

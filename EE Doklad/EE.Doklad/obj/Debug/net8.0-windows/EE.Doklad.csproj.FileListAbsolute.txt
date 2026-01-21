@@ -107,3 +107,15 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\refint\EE.Doklad.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.pdb
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.genruntimeconfig.cache
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\ref\EE.Doklad.dll
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorSectionView.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorExternalAirPanel.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorGroundPanel.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorHeatedBasementPanel.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedSpacePanel.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorSectionView.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorTypeSelectionDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorExternalAirPanel.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorGroundPanel.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorHeatedBasementPanel.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedSpacePanel.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorTypeSelectionDialog.baml

@@ -640,6 +640,18 @@ namespace EE.Doklad.ViewModels
                     section.ExternalWallsSectionData = externalWallsData;
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("Покрив"))
+                {
+                    section.Type = SectionType.Roof;
+                    section.RoofSectionData = new RoofSectionData();
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("Под"))
+                {
+                    section.Type = SectionType.Floor;
+                    section.FloorSectionData = new FloorSectionData();
+                    section.StaticText = string.Empty;
+                }
                 report.Sections.Add(section);
             }
 
