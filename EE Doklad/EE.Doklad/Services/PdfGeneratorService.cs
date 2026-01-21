@@ -438,37 +438,148 @@ namespace EE.Doklad.Services
 
     private void ComposeSectionContent(ColumnDescriptor column, Section section)
         {
-
             if (section.Type == SectionType.CoverPage && section.CoverPageData != null)
             {
                 GenerateCoverPage(column, section.CoverPageData);
-                return;
             }
-
-            if (section.Type == SectionType.Certificates && section.CertificatesData != null)
+            else if (section.Type == SectionType.Certificates && section.CertificatesData != null)
             {
                 GenerateCertificates(column, section.CertificatesData);
-                return;
             }
-
-            if (section.Type == SectionType.ObjectData && section.ObjectDataSectionData != null)
+            else if (section.Type == SectionType.ObjectData && section.ObjectDataSectionData != null)
             {
                 GenerateObjectData(column, section.ObjectDataSectionData);
-                return;
             }
-
-            if (section.Type == SectionType.ExternalWalls && section.ExternalWallsSectionData is { } externalWallsData)
+            else if (section.Type == SectionType.ExternalWalls && section.ExternalWallsSectionData is { } externalWallsData)
             {
                 GenerateExternalWalls(column, externalWallsData);
+            }
+            else if (section.Type == SectionType.Roof && section.RoofSectionData is { } roofData)
+            {
+                GenerateRoofSection(column, roofData);
+            }
+            else if (section.Type == SectionType.Floor && section.FloorSectionData is { } floorData)
+            {
+                GenerateFloorSection(column, floorData);
+            }
+            else
+            {
+                // Fallback: render title and static text for all other section types
+                if (!string.IsNullOrWhiteSpace(section.Title))
+                {
+                    column.Item().Text(section.Title).Bold().FontSize(14);
+                    column.Item().PaddingBottom(5);
+                }
+                if (!string.IsNullOrWhiteSpace(section.StaticText))
+                {
+                    column.Item().Text(section.StaticText).Justify();
+                    column.Item().PaddingBottom(10);
+                }
+                // Render tables if present
+                if (section.Tables != null && section.Tables.Count > 0)
+                {
+                    foreach (var table in section.Tables)
+                    {
+                        // Simple fallback: just print table title if available
+                        if (!string.IsNullOrWhiteSpace(table.Title))
+                        {
+                            column.Item().Text(table.Title).SemiBold().FontSize(12);
+                        }
+                        // Optionally: render table data here if needed
+                    }
+                }
+            }
+        }
+        // --- Floor Section PDF ---
+        private void GenerateFloorSection(ColumnDescriptor column, EE.Doklad.Models.FloorSectionData data)
+        {
+            column.Item().Text("Под").Justify().Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description).Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            if (data.FloorItems == null || data.FloorItems.Count == 0)
+            {
+                column.Item().Text("Няма конфигурирани типове под.").FontColor(Colors.Grey.Darken1);
                 return;
             }
 
-            if (section.Type == SectionType.Roof && section.RoofSectionData is { } roofData)
+            // Summary table
+            column.Item().Table(tbl =>
             {
-                GenerateRoofSection(column, roofData);
-                return;
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.ConstantColumn(30); // №
+                    columns.RelativeColumn(2); // Тип под
+                    columns.RelativeColumn(1); // Режим
+                    columns.RelativeColumn(1); // U
+                    columns.RelativeColumn(1); // A
+                });
+                tbl.Header(header =>
+                {
+                    header.Cell().Text("№").SemiBold();
+                    header.Cell().Text("Тип под").SemiBold();
+                    header.Cell().Text("Режим").SemiBold();
+                    header.Cell().Text("U (W/m²K)").SemiBold();
+                    header.Cell().Text("A (m²)").SemiBold();
+                });
+                int idx = 1;
+                foreach (var item in data.FloorItems)
+                {
+                    tbl.Cell().Text(idx.ToString());
+                    tbl.Cell().Text(item.Name);
+                    tbl.Cell().Text(item.TypeLabel);
+                    tbl.Cell().Text(item.UDisplay);
+                    tbl.Cell().Text(item.ADisplay);
+                    idx++;
+                }
+            });
+
+            // Details for each floor type
+            int floorIdx = 1;
+            foreach (var item in data.FloorItems)
+            {
+                column.Item().PaddingTop(10).Text($"Под тип {floorIdx}").SemiBold().FontSize(12);
+                column.Item().Text("Слоеве").FontSize(11);
+                // Example: show layers if present (for all types)
+                var layers = item.ExternalAirDetail?.Layers
+                    ?? item.GroundDetail?.Layers
+                    ?? item.UnheatedSpaceDetail?.Layers
+                    ?? item.HeatedBasementDetail?.FloorLayers;
+                if (layers != null && layers.Count > 0)
+                {
+                    column.Item().Table(tbl =>
+                    {
+                        tbl.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(2); // Материал
+                            columns.RelativeColumn(1); // δ
+                            columns.RelativeColumn(1); // λ
+                            columns.RelativeColumn(1); // R
+                        });
+                        tbl.Header(header =>
+                        {
+                            header.Cell().Text("Материал").SemiBold();
+                            header.Cell().Text("δ (m)").SemiBold();
+                            header.Cell().Text("λ (W/mK)").SemiBold();
+                            header.Cell().Text("R=δ/λ").SemiBold();
+                        });
+                        foreach (var layer in layers)
+                        {
+                            tbl.Cell().Text(layer.Material ?? "");
+                            tbl.Cell().Text(layer.Thickness.ToString("0.000"));
+                            tbl.Cell().Text(layer.Lambda.ToString("0.000"));
+                            tbl.Cell().Text(layer.R.ToString("0.000"));
+                        }
+                    });
+                }
+                floorIdx++;
             }
-        }
+    }
         // --- Roof Section PDF ---
     private void GenerateRoofSection(ColumnDescriptor column, RoofSectionData data)
     {
