@@ -16,14 +16,14 @@
             <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Margin="10">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <TextBlock Text="Покрив" FontSize="22" FontWeight="Bold" />
+    <TextBlock Text="Покрив" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
         
         <!-- Описание -->
         <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,10">
@@ -34,9 +34,11 @@
         <!-- Обобщаваща таблица -->
         <GroupBox Header="Покрив по типове" Grid.Row="2">
             <DockPanel>
-                <!-- Бутон за добавяне -->
-                <Button Content="Добави покрив" Click="AddRoof_Click" 
-                        DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+        <!-- Бутон за добавяне -->
+        <Button Content="+ Добави покрив"
+            Click="AddRoof_Click"
+            DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="0,0,0,5"
+            Background="#4CAF50" Foreground="White" Padding="14,6" MinWidth="140" BorderThickness="0"/>
                 
                 <!-- Таблица с покриви -->
                 <DataGrid x:Name="SummaryGrid" 
@@ -58,6 +60,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Премахни" 
+                                            Background="#e53935" Foreground="White" Padding="8,2" BorderThickness="0"
                                             Command="{Binding DataContext.RemoveRoofTypeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                             CommandParameter="{Binding}"/>
                                 </DataTemplate>
