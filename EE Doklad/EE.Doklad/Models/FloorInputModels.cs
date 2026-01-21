@@ -32,6 +32,8 @@ namespace EE.Doklad.Models
     public partial class FloorGroundInput : ObservableObject
     {
         [ObservableProperty]
+        private double basementDepth = 0.0;
+        [ObservableProperty]
         private double area;
 
         [ObservableProperty]

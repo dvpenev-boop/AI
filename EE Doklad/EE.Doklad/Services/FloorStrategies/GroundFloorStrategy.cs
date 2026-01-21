@@ -58,27 +58,24 @@ namespace EE.Doklad.Services.FloorStrategies
                 df = dw_e + input.LambdaGround * (Rf + input.Rsi + 0.04); // 0.04 = Rse
             }
 
-            // (Г) U0 = Ufg;sog;0 (без периферна изолация)
+            // (добавка по методика)
+            double z = input.BasementDepth; // използвай публичното property, генерирано от ObservableProperty
+            double df_eff = df + 0.5 * z;
+
+            // (Г) U0 = Ufgb (без периферна изолация) по методиката
             double U0 = 0;
             string branch = "";
-            if (df < B)
+            if (df_eff < B)
             {
-                // формула (4)
-                U0 = 2 * input.LambdaGround / (Math.PI * B * (Rf + input.Rsi + 0.04)) * Math.Log(1 + B / df);
-                branch = "df < B (формула 4)";
+                // формула (13) от методиката
+                U0 = 2 * input.LambdaGround / (Math.PI * B + df_eff) * Math.Log((Math.PI * B) / df_eff + 1);
+                branch = "df+0.5z < B (методика, формула 13)";
             }
             else
             {
-                // формула (5)
-                U0 = 1 / (input.Rsi + Rf + 0.04 + dw_e / input.LambdaGround + df / (2 * input.LambdaGround));
-                branch = "df > B (формула 5)";
-                if (input.IsAltMethod)
-                {
-                    double Rg_eff = 0.457 * B / input.LambdaGround;
-                    double U_alt = 1 / (input.Rsi + Rf + 0.04 + dw_e / input.LambdaGround + Rg_eff);
-                    U0 = U_alt;
-                    branch += ", alt method";
-                }
+                // формула (14) от методиката
+                U0 = 1 / (0.457 * B / input.LambdaGround + df_eff);
+                branch = "df+0.5z >= B (методика, формула 14)";
             }
 
             double U = U0;
