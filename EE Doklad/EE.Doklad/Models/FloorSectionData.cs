@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using EE.Doklad.Models;
 
 namespace EE.Doklad.Models
 {
@@ -10,6 +11,19 @@ namespace EE.Doklad.Models
         private string description = string.Empty;
 
         public ObservableCollection<FloorItem> FloorItems { get; } = new ObservableCollection<FloorItem>();
+    }
+
+    // Detail class for Unheated Space floor type
+    public partial class FloorUnheatedSpaceDetail : ObservableObject
+    {
+        [ObservableProperty] private double ti = 20.0;
+        [ObservableProperty] private double height;
+        [ObservableProperty] private double perimeter;
+        [ObservableProperty] private VentilationMode ventilationMode = VentilationMode.None;
+        [ObservableProperty] private double airChangeRate;
+        [ObservableProperty] private double volumeFlowRate;
+        [ObservableProperty] private double windSpeed;
+        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
     }
 
     public partial class FloorItem : ObservableObject
@@ -76,81 +90,30 @@ namespace EE.Doklad.Models
     // Detail class for Ground floor type
     public partial class FloorGroundDetail : ObservableObject
     {
-        [ObservableProperty]
-        private double area;
-        [ObservableProperty]
-        private string error = string.Empty;
-        [ObservableProperty]
-        private double rsi = 0.17;
-        [ObservableProperty]
-        private double perimeter;
-
-        [ObservableProperty]
-        private double lambdaGround = 2.0; // Default value for soil
-
-        [ObservableProperty]
-        private GroundInsulationType insulationType = GroundInsulationType.None;
-
-        [ObservableProperty]
-        private double insulationWidth; // For edge insulation
-
-        [ObservableProperty]
-        private double insulationDepth; // For edge insulation
-
-        [ObservableProperty]
-        private double df; // Characteristic dimension
-
-        // Нови полета за разширена логика
-        [ObservableProperty]
-        private double insulationThickness; // dn
-
-        [ObservableProperty]
-        private double insulationResistance; // Rn
-
-        [ObservableProperty]
-        private double wallThickness; // dw,e
-
-        [ObservableProperty]
-        private bool isDfAuto = true;
-
-        [ObservableProperty]
-        private bool isAltMethod;
-
-        [ObservableProperty]
-        private string debugInfo = string.Empty;
-
-
-
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
-    }
-
-    // Detail class for Unheated Space floor type
-    public partial class FloorUnheatedSpaceDetail : ObservableObject
-    {
-        [ObservableProperty]
-        private double ti = 20.0;
-
-
-
-        [ObservableProperty]
-        private double height; // Height above ground
-
-        [ObservableProperty]
-        private double perimeter;
-
-        [ObservableProperty]
-        private VentilationMode ventilationMode = VentilationMode.None;
-
-        [ObservableProperty]
-        private double airChangeRate; // n (1/h)
-
-        [ObservableProperty]
-        private double volumeFlowRate; // V_dot (m³/h)
-
-        [ObservableProperty]
-        private double windSpeed; // at 10m height
-
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+    [ObservableProperty] private double area;
+    [ObservableProperty] private double perimeter;
+    [ObservableProperty] private double lambdaGround;
+    [ObservableProperty] private GroundInsulationType insulationType = GroundInsulationType.None;
+    [ObservableProperty] private double insulationWidth;
+    [ObservableProperty] private double insulationDepth;
+    [ObservableProperty] private double rsi;
+    [ObservableProperty] private double wallThickness;
+    [ObservableProperty] private double insulationThickness;
+    [ObservableProperty] private double insulationLambda;
+    [ObservableProperty] private string debugInfo = string.Empty;
+    [ObservableProperty] private string error = string.Empty;
+    [ObservableProperty] private double resultB;
+    [ObservableProperty] private double resultRf;
+    [ObservableProperty] private double resultDf;
+    [ObservableProperty] private double resultRn;
+    [ObservableProperty] private double resultRPrime;
+    [ObservableProperty] private double resultDPrime;
+    [ObservableProperty] private double resultArg1;
+    [ObservableProperty] private double resultArg2;
+    [ObservableProperty] private double resultPsiGed;
+    [ObservableProperty] private double resultU0;
+    [ObservableProperty] private double resultU;
+    public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
     }
 
     // Detail class for Heated Basement floor type

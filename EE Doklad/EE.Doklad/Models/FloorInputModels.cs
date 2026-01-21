@@ -32,8 +32,6 @@ namespace EE.Doklad.Models
     public partial class FloorGroundInput : ObservableObject
     {
         [ObservableProperty]
-        private double basementDepth = 0.0;
-        [ObservableProperty]
         private double area;
 
         [ObservableProperty]
@@ -51,8 +49,6 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double insulationDepth;
 
-        [ObservableProperty]
-        private double df;
 
         [ObservableProperty]
         private double rsi = 0.17;
@@ -67,13 +63,8 @@ namespace EE.Doklad.Models
     private double insulationThickness;
 
     [ObservableProperty]
-    private double insulationResistance;
+    private double insulationLambda = 0.04; // λ of peripheral insulation (W/mK)
 
-    [ObservableProperty]
-    private bool isDfAuto = true;
-
-    [ObservableProperty]
-    private bool isAltMethod;
     }
 
     /// <summary>

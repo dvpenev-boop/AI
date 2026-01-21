@@ -29,12 +29,11 @@ namespace EE.Doklad.Services.FloorStrategies
             if (input.Layers.Any(l => l.Thickness < 0)) error += "Има слой с δ < 0. ";
             if (input.Layers.Any(l => l.Lambda <= 0)) error += "Има слой с λ <= 0. ";
             if (input.WallThickness < 0) error += "dw,e < 0. ";
-            if (input.Df <= 0 && !input.IsDfAuto) error += "df <= 0. ";
             if ((input.InsulationType == GroundInsulationType.Edge || input.InsulationType == GroundInsulationType.UnderSlab))
             {
                 if (input.InsulationWidth <= 0) error += "D <= 0. ";
                 if (input.InsulationThickness <= 0) error += "dn <= 0. ";
-                if (input.InsulationResistance <= 0) error += "Rn <= 0. ";
+                if (input.InsulationLambda <= 0) error += "λ_ins <= 0. ";
             }
             if (!string.IsNullOrWhiteSpace(error))
             {
@@ -51,16 +50,11 @@ namespace EE.Doklad.Services.FloorStrategies
             // Rsi се подава отделно
 
             // (В) df
-            double df = input.Df;
             double dw_e = input.WallThickness;
-            if (input.IsDfAuto)
-            {
-                df = dw_e + input.LambdaGround * (Rf + input.Rsi + 0.04); // 0.04 = Rse
-            }
-
-            // (добавка по методика)
-            double z = input.BasementDepth; // използвай публичното property, генерирано от ObservableProperty
-            double df_eff = df + 0.5 * z;
+            // df винаги се изчислява автоматично по методиката
+            double df = dw_e + input.LambdaGround * (Rf + input.Rsi + 0.04); // 0.04 = Rse
+            // z = 0 за под към земя
+            double df_eff = df; // df + 0.5*z, но z=0
 
             // (Г) U0 = Ufgb (без периферна изолация) по методиката
             double U0 = 0;
@@ -69,13 +63,14 @@ namespace EE.Doklad.Services.FloorStrategies
             {
                 // формула (13) от методиката
                 U0 = 2 * input.LambdaGround / (Math.PI * B + df_eff) * Math.Log((Math.PI * B) / df_eff + 1);
-                branch = "df+0.5z < B (методика, формула 13)";
+                branch = "df < B (методика, формула 13, z=0)";
             }
             else
             {
                 // формула (14) от методиката
-                U0 = 1 / (0.457 * B / input.LambdaGround + df_eff);
-                branch = "df+0.5z >= B (методика, формула 14)";
+                // U = λg / (0.457 * B + df + 0.5*z). За z=0 => U = λg / (0.457*B + df)
+                U0 = input.LambdaGround / (0.457 * B + df_eff);
+                branch = "df >= B (методика, формула 14, z=0)";
             }
 
             double U = U0;
@@ -90,8 +85,9 @@ namespace EE.Doklad.Services.FloorStrategies
             else if (input.InsulationType == GroundInsulationType.Edge || input.InsulationType == GroundInsulationType.UnderSlab)
             {
                 // (Е) Хоризонтална/вертикална изолация
-                double Rn = input.InsulationResistance;
                 double dn = input.InsulationThickness;
+                double lambda_ins = input.InsulationLambda;
+                double Rn = lambda_ins > 0 ? dn / lambda_ins : 0.0;
                 double D = input.InsulationWidth;
                 double lambda_g = input.LambdaGround;
                 double R_ = Rn - dn / lambda_g;
@@ -111,6 +107,11 @@ namespace EE.Doklad.Services.FloorStrategies
                         Psi_g_ed = -(lambda_g / Math.PI) * (Math.Log(arg1) - Math.Log(arg2));
                         U = U0 + (2 * Psi_g_ed) / B;
                         insulationBranch += " (Edge/Horizontal)";
+                        result.Assumptions.Add($"Rn = {Rn:F3}");
+                        result.Assumptions.Add($"R' = {R_:F3}");
+                        result.Assumptions.Add($"d' = {d_:F3}");
+                        result.Assumptions.Add($"arg1 = {arg1:F3}");
+                        result.Assumptions.Add($"arg2 = {arg2:F3}");
                     }
                     else
                     {
@@ -128,6 +129,11 @@ namespace EE.Doklad.Services.FloorStrategies
                         Psi_g_ed = -(lambda_g / Math.PI) * (Math.Log(arg1) - Math.Log(arg2));
                         U = U0 + (2 * Psi_g_ed) / B;
                         insulationBranch += " (Vertical)";
+                        result.Assumptions.Add($"Rn = {Rn:F3}");
+                        result.Assumptions.Add($"R' = {R_:F3}");
+                        result.Assumptions.Add($"d' = {d_:F3}");
+                        result.Assumptions.Add($"arg1 = {arg1:F3}");
+                        result.Assumptions.Add($"arg2 = {arg2:F3}");
                     }
                     else
                     {
@@ -147,7 +153,7 @@ namespace EE.Doklad.Services.FloorStrategies
                 Area = input.Area,
                 Description = $"B = {B:F2} m, Rf = {Rf:F3}, dw,e = {dw_e:F3}, df = {df:F3}, U0 = {U0:F3}, Psi_g_ed = {Psi_g_ed:F3}, U = {U:F3}, {branch} {insulationBranch}"
             });
-            result.Assumptions.Add($"B = {B:F2} m");
+            result.Assumptions.Add($"B = {B:F2}");
             result.Assumptions.Add($"Rf = {Rf:F3}");
             result.Assumptions.Add($"dw,e = {dw_e:F3}");
             result.Assumptions.Add($"df = {df:F3}");

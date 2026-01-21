@@ -109,13 +109,10 @@ namespace EE.Doklad.ViewModels
                     InsulationType = detail.InsulationType,
                     InsulationWidth = detail.InsulationWidth,
                     InsulationDepth = detail.InsulationDepth,
-                    Df = detail.Df,
                     Rsi = detail.Rsi,
                     WallThickness = detail.WallThickness,
                     InsulationThickness = detail.InsulationThickness,
-                    InsulationResistance = detail.InsulationResistance,
-                    IsDfAuto = detail.IsDfAuto,
-                    IsAltMethod = detail.IsAltMethod
+                    InsulationLambda = detail.InsulationLambda
                 };
                 // Копирай слоевете
                 if (detail.Layers != null)
@@ -137,6 +134,19 @@ namespace EE.Doklad.ViewModels
                     item.NotifyDisplayPropertiesChanged();
                     detail.DebugInfo = string.Join("\n", result.Assumptions);
                     detail.Error = string.Empty;
+
+                    // Set result properties for UI
+                    detail.ResultRn = GetAssumptionValue(result.Assumptions, "Rn = ");
+                    detail.ResultRPrime = GetAssumptionValue(result.Assumptions, "R' = ");
+                    detail.ResultDPrime = GetAssumptionValue(result.Assumptions, "d' = ");
+                    detail.ResultArg1 = GetAssumptionValue(result.Assumptions, "arg1 = ");
+                    detail.ResultArg2 = GetAssumptionValue(result.Assumptions, "arg2 = ");
+                    detail.ResultPsiGed = GetAssumptionValue(result.Assumptions, "Psi_g_ed = ");
+                    detail.ResultU0 = GetAssumptionValue(result.Assumptions, "U0 = ");
+                    detail.ResultU = GetAssumptionValue(result.Assumptions, "U = ");
+                    detail.ResultB = GetAssumptionValue(result.Assumptions, "B = ");
+                    detail.ResultRf = GetAssumptionValue(result.Assumptions, "Rf = ");
+                    detail.ResultDf = GetAssumptionValue(result.Assumptions, "df = ");
                 }
                 else
                 {
@@ -146,6 +156,18 @@ namespace EE.Doklad.ViewModels
                 }
                 OnPropertyChanged(nameof(FloorItems));
             }
+
+        private double GetAssumptionValue(System.Collections.Generic.List<string> assumptions, string prefix)
+        {
+            var line = assumptions.FirstOrDefault(a => a.StartsWith(prefix));
+            if (line != null)
+            {
+                var valueStr = line.Substring(prefix.Length).Trim();
+                if (double.TryParse(valueStr.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var val))
+                    return val;
+            }
+            return double.NaN;
+        }
         // (Премахнато дублиране на RecalculateGround)
 
         public bool TryAddFloor(FloorType floorType, out string? error)
