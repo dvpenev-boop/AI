@@ -39,8 +39,8 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private FloorUnheatedSpaceDetail? unheatedSpaceDetail;
 
-        [ObservableProperty]
-        private FloorHeatedBasementDetail? heatedBasementDetail;
+    [ObservableProperty]
+    private FloorHeatedBasementDetail? heatedBasementDetail;
 
         public string TypeLabel => FloorType switch
         {
@@ -53,6 +53,12 @@ namespace EE.Doklad.Models
 
         public string UDisplay => UValue > 0 ? $"{UValue:F3}" : "—";
         public string ADisplay => Area > 0 ? $"{Area:F2}" : "—";
+
+        public void NotifyDisplayPropertiesChanged()
+        {
+            OnPropertyChanged(nameof(UDisplay));
+            OnPropertyChanged(nameof(ADisplay));
+        }
     }
 
     // Detail class for External Air floor type
@@ -71,6 +77,12 @@ namespace EE.Doklad.Models
     public partial class FloorGroundDetail : ObservableObject
     {
         [ObservableProperty]
+        private double area;
+        [ObservableProperty]
+        private string error = string.Empty;
+        [ObservableProperty]
+        private double rsi = 0.17;
+        [ObservableProperty]
         private double perimeter;
 
         [ObservableProperty]
@@ -88,6 +100,27 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double df; // Characteristic dimension
 
+        // Нови полета за разширена логика
+        [ObservableProperty]
+        private double insulationThickness; // dn
+
+        [ObservableProperty]
+        private double insulationResistance; // Rn
+
+        [ObservableProperty]
+        private double wallThickness; // dw,e
+
+        [ObservableProperty]
+        private bool isDfAuto = true;
+
+        [ObservableProperty]
+        private bool isAltMethod;
+
+        [ObservableProperty]
+        private string debugInfo = string.Empty;
+
+
+
         public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
     }
 
@@ -97,8 +130,7 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double ti = 20.0;
 
-        [ObservableProperty]
-        private double te = -15.0;
+
 
         [ObservableProperty]
         private double height; // Height above ground

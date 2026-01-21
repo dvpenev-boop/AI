@@ -56,6 +56,22 @@ namespace EE.Doklad.Models
         private double rsi = 0.17;
 
         public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+
+    // Нови полета за разширена логика (съответствие с FloorGroundDetail)
+    [ObservableProperty]
+    private double wallThickness;
+
+    [ObservableProperty]
+    private double insulationThickness;
+
+    [ObservableProperty]
+    private double insulationResistance;
+
+    [ObservableProperty]
+    private bool isDfAuto = true;
+
+    [ObservableProperty]
+    private bool isAltMethod;
     }
 
     /// <summary>

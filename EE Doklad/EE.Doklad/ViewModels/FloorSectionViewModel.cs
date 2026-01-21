@@ -62,10 +62,91 @@ namespace EE.Doklad.ViewModels
             _data.FloorItems.CollectionChanged += (s, e) =>
             {
                 Debug.WriteLine($"[FloorSectionViewModel] FloorItems.CollectionChanged: Action={e.Action}, NewItemsCount={e.NewItems?.Count ?? 0}");
+                if (e.NewItems != null)
+                {
+                    foreach (var item in e.NewItems)
+                    {
+                        if (item is FloorItem floorItem && floorItem.FloorType == Models.FloorType.Ground && floorItem.GroundDetail != null)
+                        {
+                            SubscribeGroundDetail(floorItem);
+                        }
+                    }
+                }
             };
-            
+
+            // Subscribe for already existing items
+            foreach (var item in _data.FloorItems)
+            {
+                if (item.FloorType == Models.FloorType.Ground && item.GroundDetail != null)
+                {
+                    SubscribeGroundDetail(item);
+                }
+            }
             Debug.WriteLine("[FloorSectionViewModel] Constructor completed");
+            // Subscribe for recalculation on GroundDetail changes
+            // (Премахнато дублиране)
+    // Премахната излишна скоба
         }
+            private void SubscribeGroundDetail(FloorItem item)
+            {
+                var detail = item.GroundDetail;
+                if (detail == null) return;
+                detail.PropertyChanged += (s, e) => RecalculateGround(item);
+                detail.Layers.CollectionChanged += (s, e) => RecalculateGround(item);
+                foreach (var layer in detail.Layers)
+                    layer.PropertyChanged += (s, e) => RecalculateGround(item);
+            }
+
+            private void RecalculateGround(FloorItem item)
+            {
+                if (item.GroundDetail == null) return;
+                var detail = item.GroundDetail;
+                var input = new Models.FloorGroundInput
+                {
+                    Area = detail.Area,
+                    Perimeter = detail.Perimeter,
+                    LambdaGround = detail.LambdaGround,
+                    InsulationType = detail.InsulationType,
+                    InsulationWidth = detail.InsulationWidth,
+                    InsulationDepth = detail.InsulationDepth,
+                    Df = detail.Df,
+                    Rsi = detail.Rsi,
+                    WallThickness = detail.WallThickness,
+                    InsulationThickness = detail.InsulationThickness,
+                    InsulationResistance = detail.InsulationResistance,
+                    IsDfAuto = detail.IsDfAuto,
+                    IsAltMethod = detail.IsAltMethod
+                };
+                // Копирай слоевете
+                if (detail.Layers != null)
+                {
+                    foreach (var l in detail.Layers)
+                    {
+                        var layer = new RoofLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
+                        input.Layers.Add(layer);
+                        layer.PropertyChanged += (s, e) => RecalculateGround(item);
+                    }
+                }
+
+                var calc = new Services.FloorCalculator();
+                var result = calc.Calculate(Models.FloorType.Ground, input);
+                if (result.IsValid)
+                {
+                    item.UValue = result.U;
+                    item.Area = input.Area;
+                    item.NotifyDisplayPropertiesChanged();
+                    detail.DebugInfo = string.Join("\n", result.Assumptions);
+                    detail.Error = string.Empty;
+                }
+                else
+                {
+                    item.UValue = 0;
+                    detail.DebugInfo = string.Empty;
+                    detail.Error = result.ErrorMessage;
+                }
+                OnPropertyChanged(nameof(FloorItems));
+            }
+        // (Премахнато дублиране на RecalculateGround)
 
         public bool TryAddFloor(FloorType floorType, out string? error)
         {

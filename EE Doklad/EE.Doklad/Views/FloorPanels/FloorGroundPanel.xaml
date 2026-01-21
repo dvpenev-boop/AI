@@ -5,6 +5,8 @@
              xmlns:converters="clr-namespace:EE.Doklad.Converters">
     <UserControl.Resources>
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+        <converters:EdgeInsulationVisibilityConverter x:Key="EdgeInsulationVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
     </UserControl.Resources>
     <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
         <StackPanel>
@@ -32,10 +34,43 @@
 
             <TextBlock Text="Тип изолация" FontWeight="SemiBold" Margin="0,6,0,4"/>
             <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding InsulationType, Mode=TwoWay}" Margin="0,0,0,6" Width="200" HorizontalAlignment="Left">
-                <ComboBoxItem Content="Без изолация" Tag="{x:Static models:GroundInsulationType.None}"/>
-                <ComboBoxItem Content="Краищна изолация" Tag="{x:Static models:GroundInsulationType.Edge}"/>
-                <ComboBoxItem Content="Под плочата" Tag="{x:Static models:GroundInsulationType.UnderSlab}"/>
+                <ComboBoxItem Content="Без периферна изолация" Tag="{x:Static models:GroundInsulationType.None}"/>
+                <ComboBoxItem Content="Хоризонтална периферна изолация" Tag="{x:Static models:GroundInsulationType.Edge}"/>
+                <ComboBoxItem Content="Вертикална периферна изолация" Tag="{x:Static models:GroundInsulationType.UnderSlab}"/>
             </ComboBox>
+
+            <!-- Параметри за периферна изолация -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6" Visibility="{Binding InsulationType, Converter={StaticResource EdgeInsulationVisibilityConverter}}">
+                <TextBlock Text="D (широчина/дълбочина, m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="200"/>
+                <TextBox Width="80" Text="{Binding InsulationWidth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+                <TextBlock Text="dn (дебелина, m):" VerticalAlignment="Center" Margin="10,0,5,0" Width="120"/>
+                <TextBox Width="80" Text="{Binding InsulationThickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+                <TextBlock Text="Rn (R на изолацията, m²K/W):" VerticalAlignment="Center" Margin="10,0,5,0" Width="150"/>
+                <TextBox Width="80" Text="{Binding InsulationResistance, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <!-- dw,e -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="dw,e (дебелина на външните стени на нивото на терена, m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="320"/>
+                <TextBox Width="80" Text="{Binding WallThickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <!-- df автоматично -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <CheckBox Content="df се изчислява автоматично" IsChecked="{Binding IsDfAuto, Mode=TwoWay}"/>
+                <TextBox Width="100" Margin="10,0,0,0" Text="{Binding Df, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" IsReadOnly="{Binding IsDfAuto}"/>
+            </StackPanel>
+
+            <!-- Alt метод -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <CheckBox Content="Alt method for good insulation" IsChecked="{Binding IsAltMethod, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <!-- Debug и грешки -->
+            <TextBlock Text="Грешка:" Foreground="Red" FontWeight="Bold" Visibility="{Binding Error, Converter={StaticResource StringToVisibilityConverter}}"/>
+            <TextBlock Text="{Binding Error}" Foreground="Red" TextWrapping="Wrap" Visibility="{Binding Error, Converter={StaticResource StringToVisibilityConverter}}"/>
+            <TextBlock Text="Debug info:" FontWeight="SemiBold" Margin="0,10,0,0"/>
+            <TextBox Text="{Binding DebugInfo}" IsReadOnly="True" TextWrapping="Wrap" Background="#F5F5F5"/>
 
             <TextBlock Text="Топлинно съпротивление" FontWeight="SemiBold" Margin="0,6,0,4"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
