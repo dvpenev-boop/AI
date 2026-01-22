@@ -52,7 +52,7 @@ namespace EE.Doklad.Services.FloorStrategies
             // (В) df
             double dw_e = input.WallThickness;
             // df винаги се изчислява автоматично по методиката
-            double df = dw_e + input.LambdaGround * (Rf + input.Rsi + 0.04); // 0.04 = Rse
+            double df = dw_e + input.LambdaGround * (Rf + 0.17 + 0.04); // 0.17 = Rsi (fixed), 0.04 = Rse
             // z = 0 за под към земя
             double df_eff = df; // df + 0.5*z, но z=0
 

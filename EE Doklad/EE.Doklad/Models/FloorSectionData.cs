@@ -96,7 +96,6 @@ namespace EE.Doklad.Models
     [ObservableProperty] private GroundInsulationType insulationType = GroundInsulationType.None;
     [ObservableProperty] private double insulationWidth;
     [ObservableProperty] private double insulationDepth;
-    [ObservableProperty] private double rsi;
     [ObservableProperty] private double wallThickness;
     [ObservableProperty] private double insulationThickness;
     [ObservableProperty] private double insulationLambda;

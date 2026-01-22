@@ -28,9 +28,35 @@
             </StackPanel>
 
             <TextBlock Text="Земна основа" FontWeight="SemiBold" Margin="0,6,0,4"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6" VerticalAlignment="Center">
                 <TextBlock Text="λg (W/mK):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
-                <TextBox Width="100" Text="{Binding LambdaGround, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}"/>
+                <TextBox Width="100" Text="{Binding LambdaGround, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" VerticalAlignment="Center"/>
+                <Border BorderBrush="#B0B0B0" BorderThickness="1" CornerRadius="4" Padding="8" Margin="20,0,0,0" Background="#FAFAFA" VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="Проектни стойности за земна основа (ISO 13370)" FontWeight="Bold" FontSize="12" Margin="0,0,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Тип почва" FontWeight="SemiBold" Grid.Row="0" Grid.Column="0"/>
+                            <TextBlock Text="λg [W/(m·K)]" FontWeight="SemiBold" Grid.Row="0" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBlock Text="Глина" Grid.Row="1" Grid.Column="0"/>
+                            <TextBlock Text="1.5" Grid.Row="1" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBlock Text="Пясък или чакъл" Grid.Row="2" Grid.Column="0"/>
+                            <TextBlock Text="2.0" Grid.Row="2" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBlock Text="Скална основа" Grid.Row="3" Grid.Column="0"/>
+                            <TextBlock Text="3.5" Grid.Row="3" Grid.Column="1" Margin="10,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
 
 
@@ -110,8 +136,6 @@
 
             <TextBlock Text="Топлинно съпротивление" FontWeight="SemiBold" Margin="0,6,0,4"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <TextBlock Text="Rsi (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
-                <TextBox Width="100" Text="{Binding Rsi, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
             </StackPanel>
 
             <TextBlock Text="Слоеве" FontWeight="SemiBold" Margin="0,10,0,4"/>

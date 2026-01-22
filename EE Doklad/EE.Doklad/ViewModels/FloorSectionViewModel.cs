@@ -109,7 +109,6 @@ namespace EE.Doklad.ViewModels
                     InsulationType = detail.InsulationType,
                     InsulationWidth = detail.InsulationWidth,
                     InsulationDepth = detail.InsulationDepth,
-                    Rsi = detail.Rsi,
                     WallThickness = detail.WallThickness,
                     InsulationThickness = detail.InsulationThickness,
                     InsulationLambda = detail.InsulationLambda
