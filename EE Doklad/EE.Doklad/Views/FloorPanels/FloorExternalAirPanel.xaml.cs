@@ -19,44 +19,9 @@ namespace EE.Doklad.Views.FloorPanels
         {
             var binding = ((TextBox)sender).GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
             binding?.UpdateSource();
-            System.Diagnostics.Debug.WriteLine($"[AreaTextBox_LostFocus] Area={ParentFloorItem?.Area}");
-            
-            // Trigger recalculation when Area is changed
-            if (ParentFloorItem != null && DataContext is FloorExternalAirDetail detail)
+            if (DataContext is FloorExternalAirDetail detail)
             {
-                try
-                {
-                    // Manually recalculate external air when area changes
-                    var input = new Models.FloorExternalAirInput
-                    {
-                        Area = ParentFloorItem.Area,
-                        Rsi = detail.Rsi,
-                        Rse = detail.Rse
-                    };
-                    if (detail.Layers != null)
-                    {
-                        foreach (var l in detail.Layers)
-                        {
-                            var layer = new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
-                            input.Layers.Add(layer);
-                        }
-                    }
-                    var calc = new Services.FloorCalculator();
-                    var result = calc.Calculate(Models.FloorType.ExternalAir, input);
-                    if (result.IsValid)
-                    {
-                        ParentFloorItem.UValue = result.U;
-                    }
-                    else
-                    {
-                        ParentFloorItem.UValue = 0;
-                    }
-                    ParentFloorItem.NotifyDisplayPropertiesChanged();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AreaTextBox_LostFocus] Exception: {ex}");
-                }
+                System.Diagnostics.Debug.WriteLine($"[AreaTextBox_LostFocus] Area={detail.Area}");
             }
         }
 
@@ -66,44 +31,9 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 var binding = ((TextBox)sender).GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
                 binding?.UpdateSource();
-                System.Diagnostics.Debug.WriteLine($"[AreaTextBox_KeyDown] Area={ParentFloorItem?.Area}");
-                
-                // Trigger recalculation when Area is changed
-                if (ParentFloorItem != null && DataContext is FloorExternalAirDetail detail)
+                if (DataContext is FloorExternalAirDetail detail)
                 {
-                    try
-                    {
-                        // Manually recalculate external air when area changes
-                        var input = new Models.FloorExternalAirInput
-                        {
-                            Area = ParentFloorItem.Area,
-                            Rsi = detail.Rsi,
-                            Rse = detail.Rse
-                        };
-                        if (detail.Layers != null)
-                        {
-                            foreach (var l in detail.Layers)
-                            {
-                                var layer = new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
-                                input.Layers.Add(layer);
-                            }
-                        }
-                        var calc = new Services.FloorCalculator();
-                        var result = calc.Calculate(Models.FloorType.ExternalAir, input);
-                        if (result.IsValid)
-                        {
-                            ParentFloorItem.UValue = result.U;
-                        }
-                        else
-                        {
-                            ParentFloorItem.UValue = 0;
-                        }
-                        ParentFloorItem.NotifyDisplayPropertiesChanged();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[AreaTextBox_KeyDown] Exception: {ex}");
-                    }
+                    System.Diagnostics.Debug.WriteLine($"[AreaTextBox_KeyDown] Area={detail.Area}");
                 }
             }
         }
@@ -177,42 +107,12 @@ namespace EE.Doklad.Views.FloorPanels
                 var tb = this.FindName("AreaTextBox") as System.Windows.Controls.TextBox;
                 var be = tb?.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
                 be?.UpdateSource();
-                System.Diagnostics.Debug.WriteLine($"[AddLayer_Click] Area={ParentFloorItem?.Area}");
 
                 if (DataContext is EE.Doklad.Models.FloorExternalAirDetail detail)
                 {
                     detail.Layers.Add(new FloorLayer());
                     System.Diagnostics.Debug.WriteLine($"[AddLayer_Click] Layer added. Total layers: {detail.Layers.Count}");
-                    
-                    // Recalculate U-value after adding layer
-                    if (ParentFloorItem != null)
-                    {
-                        var input = new Models.FloorExternalAirInput
-                        {
-                            Area = ParentFloorItem.Area,
-                            Rsi = detail.Rsi,
-                            Rse = detail.Rse
-                        };
-                        if (detail.Layers != null)
-                        {
-                            foreach (var l in detail.Layers)
-                            {
-                                var layer = new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
-                                input.Layers.Add(layer);
-                            }
-                        }
-                        var calc = new FloorCalculator();
-                        var result = calc.Calculate(Models.FloorType.ExternalAir, input);
-                        if (result.IsValid)
-                        {
-                            ParentFloorItem.UValue = result.U;
-                        }
-                        else
-                        {
-                            ParentFloorItem.UValue = 0;
-                        }
-                        ParentFloorItem.NotifyDisplayPropertiesChanged();
-                    }
+                    // ViewModel automatically recalculates via subscription
                 }
             }
             catch (Exception ex)
@@ -230,42 +130,12 @@ namespace EE.Doklad.Views.FloorPanels
                 var tb = this.FindName("AreaTextBox") as System.Windows.Controls.TextBox;
                 var be = tb?.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
                 be?.UpdateSource();
-                System.Diagnostics.Debug.WriteLine($"[RemoveLayer_Click] Area={ParentFloorItem?.Area}");
 
                 if (DataContext is EE.Doklad.Models.FloorExternalAirDetail detail && detail.Layers.Count > 0)
                 {
                     detail.Layers.RemoveAt(detail.Layers.Count - 1);
                     System.Diagnostics.Debug.WriteLine($"[RemoveLayer_Click] Layer removed. Total layers: {detail.Layers.Count}");
-                    
-                    // Recalculate U-value after removing layer
-                    if (ParentFloorItem != null)
-                    {
-                        var input = new Models.FloorExternalAirInput
-                        {
-                            Area = ParentFloorItem.Area,
-                            Rsi = detail.Rsi,
-                            Rse = detail.Rse
-                        };
-                        if (detail.Layers != null)
-                        {
-                            foreach (var l in detail.Layers)
-                            {
-                                var layer = new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
-                                input.Layers.Add(layer);
-                            }
-                        }
-                        var calc = new FloorCalculator();
-                        var result = calc.Calculate(Models.FloorType.ExternalAir, input);
-                        if (result.IsValid)
-                        {
-                            ParentFloorItem.UValue = result.U;
-                        }
-                        else
-                        {
-                            ParentFloorItem.UValue = 0;
-                        }
-                        ParentFloorItem.NotifyDisplayPropertiesChanged();
-                    }
+                    // ViewModel automatically recalculates via subscription
                 }
             }
             catch (Exception ex)
@@ -283,8 +153,10 @@ namespace EE.Doklad.Views.FloorPanels
                 var tb = this.FindName("AreaTextBox") as System.Windows.Controls.TextBox;
                 var be = tb?.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
                 be?.UpdateSource();
-                System.Diagnostics.Debug.WriteLine($"[LayersGrid_BeginningEdit] Area={ParentFloorItem?.Area}");
-                ParentFloorItem?.NotifyDisplayPropertiesChanged();
+                if (DataContext is FloorExternalAirDetail detail)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LayersGrid_BeginningEdit] Area={detail.Area}");
+                }
             }
             catch (Exception ex)
             {
@@ -297,36 +169,7 @@ namespace EE.Doklad.Views.FloorPanels
             try
             {
                 System.Diagnostics.Debug.WriteLine($"[LayersGrid_CellEditEnding] Cell edit ending for column: {e.Column.Header}");
-                
-                // Recalculate U-value after layer property changes
-                if (ParentFloorItem != null && DataContext is FloorExternalAirDetail detail)
-                {
-                    var input = new Models.FloorExternalAirInput
-                    {
-                        Area = ParentFloorItem.Area,
-                        Rsi = detail.Rsi,
-                        Rse = detail.Rse
-                    };
-                    if (detail.Layers != null)
-                    {
-                        foreach (var l in detail.Layers)
-                        {
-                            var layer = new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
-                            input.Layers.Add(layer);
-                        }
-                    }
-                    var calc = new FloorCalculator();
-                    var result = calc.Calculate(Models.FloorType.ExternalAir, input);
-                    if (result.IsValid)
-                    {
-                        ParentFloorItem.UValue = result.U;
-                    }
-                    else
-                    {
-                        ParentFloorItem.UValue = 0;
-                    }
-                    ParentFloorItem.NotifyDisplayPropertiesChanged();
-                }
+                // ViewModel automatically recalculates via layer property changed subscriptions
             }
             catch (Exception ex)
             {

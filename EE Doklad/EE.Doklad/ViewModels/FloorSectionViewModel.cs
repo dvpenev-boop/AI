@@ -121,10 +121,10 @@ namespace EE.Doklad.ViewModels
             {
                 if (item.ExternalAirDetail == null) return;
                 var detail = item.ExternalAirDetail;
-                System.Diagnostics.Debug.WriteLine($"[RecalculateExternalAir] Area={item.Area}, Layers={detail.Layers.Count}");
+                System.Diagnostics.Debug.WriteLine($"[RecalculateExternalAir] Area={detail.Area}, Layers={detail.Layers.Count}");
                 var input = new Models.FloorExternalAirInput
                 {
-                    Area = item.Area,
+                    Area = detail.Area,
                     Rsi = detail.Rsi,
                     Rse = detail.Rse
                 };
@@ -144,7 +144,7 @@ namespace EE.Doklad.ViewModels
                 if (result.IsValid)
                 {
                     item.UValue = result.U;
-                    item.Area = input.Area;
+                    item.Area = detail.Area;
                     item.NotifyDisplayPropertiesChanged();
                 }
                 else

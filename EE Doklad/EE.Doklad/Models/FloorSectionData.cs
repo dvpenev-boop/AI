@@ -85,6 +85,10 @@ namespace EE.Doklad.Models
     // Detail class for External Air floor type
     public partial class FloorExternalAirDetail : ObservableObject
     {
+        // Area property for auto-calculation
+        [ObservableProperty] 
+        private double area;
+
         // Константи за топлинни съпротивления
         public double Rsi => 0.17;
         public double Rse => 0.04;

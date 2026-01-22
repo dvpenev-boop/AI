@@ -8,10 +8,10 @@ namespace EE.Doklad.Models
         private string material = string.Empty;
 
         [ObservableProperty]
-        private double thickness = 0.1; // Default 10 cm
+        private double thickness;
 
         [ObservableProperty]
-        private double lambda = 0.04; // Default insulation thermal conductivity
+        private double lambda;
 
         public double R => Lambda > 0 ? Thickness / Lambda : 0;
 
