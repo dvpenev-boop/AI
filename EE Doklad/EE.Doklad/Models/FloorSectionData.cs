@@ -56,11 +56,14 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private FloorHeatedBasementDetail? heatedBasementDetail;
 
+        [ObservableProperty]
+        private FloorUnheatedBasementDetail? unheatedBasementDetail;
+
         public string TypeLabel => FloorType switch
         {
             FloorType.ExternalAir => "Под към външен въздух",
             FloorType.Ground => "Под към земя",
-            FloorType.UnheatedSpace => "Под към неотопляемо помещение",
+            FloorType.UnheatedBasement => "Под към неотопляем сутерен",
             FloorType.HeatedBasement => "Под над отопляем сутерен",
             _ => "Неизвестен"
         };
@@ -156,5 +159,53 @@ namespace EE.Doklad.Models
 
     public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
     public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
+    }
+
+    // Detail class for Unheated Basement floor type
+    public partial class FloorUnheatedBasementDetail : ObservableObject
+    {
+        // === Геометрия ===
+        [ObservableProperty] private double area;
+        [ObservableProperty] private double perimeter;
+        [ObservableProperty] private double depthBelowGround;
+        [ObservableProperty] private double heightAboveGround;
+        [ObservableProperty] private double volume;
+
+        // === Параметри за земята ===
+        [ObservableProperty] private double lambdaGround = 2.0;
+        [ObservableProperty] private double wallThicknessAtGrade;
+
+        // === Вентилация ===
+        [ObservableProperty] private double airChangeRate = 0.3;
+        [ObservableProperty] private double airDensity = 1.2;
+        [ObservableProperty] private double airSpecificHeat = 0.28;
+
+        // === Топлинни съпротивления ===
+        [ObservableProperty] private double rsiFloorToBasement = 0.17;
+        [ObservableProperty] private double rseFloorToBasement = 0.17;
+        [ObservableProperty] private double rsiBasementFloor = 0.17;
+        [ObservableProperty] private double rseBasementFloor = 0.00;
+        [ObservableProperty] private double rsiBasementWall = 0.13;
+        [ObservableProperty] private double rseBasementWall = 0.00;
+        [ObservableProperty] private double rsiWallAboveGrade = 0.13;
+        [ObservableProperty] private double rseWallAboveGrade = 0.04;
+
+        // === Диагностични изходи ===
+        [ObservableProperty] private double resultUfSus;
+        [ObservableProperty] private double resultUfGb;
+        [ObservableProperty] private double resultUwGb;
+        [ObservableProperty] private double resultUw;
+        [ObservableProperty] private double resultHveB;
+        [ObservableProperty] private double resultB;
+        [ObservableProperty] private double resultDf;
+        [ObservableProperty] private double resultDwb;
+        [ObservableProperty] private double resultS;
+        [ObservableProperty] private double resultUub;
+
+        // === Слоеве на конструкции ===
+        public ObservableCollection<FloorLayer> FloorToBasementLayers { get; } = new ObservableCollection<FloorLayer>();
+        public ObservableCollection<FloorLayer> BasementFloorLayers { get; } = new ObservableCollection<FloorLayer>();
+        public ObservableCollection<FloorLayer> BasementWallLayers { get; } = new ObservableCollection<FloorLayer>();
+        public ObservableCollection<FloorLayer> WallAboveGradeLayers { get; } = new ObservableCollection<FloorLayer>();
     }
 }

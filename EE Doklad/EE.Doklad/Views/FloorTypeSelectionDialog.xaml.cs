@@ -52,19 +52,19 @@ namespace EE.Doklad.Views
             }
         }
 
-        private void UnheatedSpace_Click(object sender, RoutedEventArgs e)
+        private void UnheatedBasement_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("[FloorTypeSelectionDialog] UnheatedSpace button clicked");
+            Debug.WriteLine("[FloorTypeSelectionDialog] UnheatedBasement button clicked");
             try
             {
-                SelectedFloorType = FloorType.UnheatedSpace;
+                SelectedFloorType = FloorType.UnheatedBasement;
                 Debug.WriteLine($"[FloorTypeSelectionDialog] SelectedFloorType set to: {SelectedFloorType}");
                 DialogResult = true;
                 Debug.WriteLine("[FloorTypeSelectionDialog] DialogResult set to true");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[FloorTypeSelectionDialog] ERROR in UnheatedSpace_Click: {ex.Message}");
+                Debug.WriteLine($"[FloorTypeSelectionDialog] ERROR in UnheatedBasement_Click: {ex.Message}");
                 Debug.WriteLine($"[FloorTypeSelectionDialog] Stack trace: {ex.StackTrace}");
                 MessageBox.Show($"Грешка: {ex.Message}", "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
             }

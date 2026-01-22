@@ -28,7 +28,12 @@ namespace EE.Doklad.Models
         /// <summary>
         /// Под над отопляем сутерен + стени на сутерена към земя
         /// </summary>
-        HeatedBasement
+        HeatedBasement,
+        
+        /// <summary>
+        /// Под към неотопляем сутерен (с изчисление на контакт със земята)
+        /// </summary>
+        UnheatedBasement
     }
 
     /// <summary>

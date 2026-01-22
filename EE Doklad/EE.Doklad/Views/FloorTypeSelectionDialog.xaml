@@ -18,7 +18,7 @@
         <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,10">
             <Button Content="Под към външен въздух" Height="35" Margin="0,0,0,8" Click="ExternalAir_Click"/>
             <Button Content="Под към земя" Height="35" Margin="0,0,0,8" Click="Ground_Click"/>
-            <Button Content="Под към неотопляемо помещение" Height="35" Margin="0,0,0,8" Click="UnheatedSpace_Click"/>
+            <Button Content="Под към неотопляем сутерен" Height="35" Margin="0,0,0,8" Click="UnheatedBasement_Click"/>
             <Button Content="Под над отопляем сутерен" Height="35" Click="HeatedBasement_Click"/>
         </StackPanel>
         

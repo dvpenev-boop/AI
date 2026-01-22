@@ -1,0 +1,164 @@
+<UserControl x:Class="EE.Doklad.Views.FloorPanels.FloorUnheatedBasementPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters">
+    <UserControl.Resources>
+        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+    </UserControl.Resources>
+    <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
+        <StackPanel>
+            <TextBlock Text="Под към неотопляем сутерен" FontWeight="Bold" FontSize="13" Margin="0,0,0,10"/>
+
+            <!-- Геометрия -->
+            <TextBlock Text="Геометрия" FontWeight="SemiBold" Margin="0,6,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Площ A (m²):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Area, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Периметър P (m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Perimeter, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Дълбочина z (m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding DepthBelowGround, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="Височина h (m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="100" Text="{Binding HeightAboveGround, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Обем V (m³):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding Volume, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <!-- Параметри за земята -->
+            <TextBlock Text="Параметри за земята" FontWeight="SemiBold" Margin="0,10,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="λg (W/m·K):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding LambdaGround, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="d_we (m):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="100" Text="{Binding WallThicknessAtGrade, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <!-- Вентилация -->
+            <TextBlock Text="Вентилация" FontWeight="SemiBold" Margin="0,10,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="n (1/h):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding AirChangeRate, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
+            <!-- Под между отопляемото и сутерена -->
+            <TextBlock Text="Под отопляемо → сутерен" FontWeight="SemiBold" Margin="0,15,0,4" Background="#E3F2FD" Padding="4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Rsi (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding RsiFloorToBasement, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="100" Text="{Binding RseFloorToBasement, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <DataGrid ItemsSource="{Binding FloorToBasementLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddFloorToBasementLayer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveFloorToBasementLayer_Click"/>
+            </StackPanel>
+
+            <!-- Подова плоча на сутерена -->
+            <TextBlock Text="Подова плоча на сутерена" FontWeight="SemiBold" Margin="0,10,0,4" Background="#FFF3E0" Padding="4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Rsi (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding RsiBasementFloor, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="100" Text="{Binding RseBasementFloor, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <DataGrid ItemsSource="{Binding BasementFloorLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddBasementFloorLayer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveBasementFloorLayer_Click"/>
+            </StackPanel>
+
+            <!-- Стени на сутерена към земя -->
+            <TextBlock Text="Стени на сутерена → земя" FontWeight="SemiBold" Margin="0,10,0,4" Background="#F3E5F5" Padding="4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Rsi (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding RsiBasementWall, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="100" Text="{Binding RseBasementWall, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <DataGrid ItemsSource="{Binding BasementWallLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddBasementWallLayer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveBasementWallLayer_Click"/>
+            </StackPanel>
+
+            <!-- Стени над терена -->
+            <TextBlock Text="Стени над терена → въздух" FontWeight="SemiBold" Margin="0,10,0,4" Background="#E8F5E9" Padding="4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Rsi (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="150"/>
+                <TextBox Width="100" Text="{Binding RsiWallAboveGrade, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="100" Text="{Binding RseWallAboveGrade, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <DataGrid ItemsSource="{Binding WallAboveGradeLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddWallAboveGradeLayer_Click"/>
+                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveWallAboveGradeLayer_Click"/>
+            </StackPanel>
+
+            <!-- Диагностични резултати -->
+            <TextBlock Text="Резултати (диагностични)" FontWeight="SemiBold" Margin="0,15,0,4" Background="#FFEBEE" Padding="4"/>
+            <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding ResultUfSus, StringFormat='Uf_sus: {0:F4} W/m²K'}" Margin="0,2"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ResultUfGb, StringFormat='Uf_gb: {0:F4} W/m²K'}" Margin="0,2"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding ResultUwGb, StringFormat='Uw_gb: {0:F4} W/m²K'}" Margin="0,2"/>
+                
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding ResultUw, StringFormat='Uw: {0:F4} W/m²K'}" Margin="0,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ResultHveB, StringFormat='Hve_b: {0:F2} W/K'}" Margin="0,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ResultB, StringFormat='B: {0:F3} m'}" Margin="0,2"/>
+                
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding ResultDf, StringFormat='df: {0:F3} m'}" Margin="0,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ResultDwb, StringFormat='d_wb: {0:F3} m'}" Margin="0,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding ResultS, StringFormat='S: {0:F2} W/K'}" Margin="0,2"/>
+                
+                <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding ResultUub, StringFormat='★ Uub: {0:F4} W/m²K'}" FontWeight="Bold" FontSize="14" Foreground="#D32F2F" Margin="0,8,0,2"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

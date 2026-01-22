@@ -13,6 +13,7 @@ namespace EE.Doklad.Services
         private readonly GroundFloorStrategy _groundStrategy = new();
         private readonly UnheatedSpaceFloorStrategy _unheatedSpaceStrategy = new();
         private readonly HeatedBasementFloorStrategy _heatedBasementStrategy = new();
+        private readonly UnheatedBasementFloorStrategy _unheatedBasementStrategy = new();
 
         public FloorCalculationResult Calculate(FloorType type, object input)
         {
@@ -29,6 +30,9 @@ namespace EE.Doklad.Services
                 
                 FloorType.HeatedBasement when input is FloorHeatedBasementInput heatedBasementInput =>
                     _heatedBasementStrategy.Calculate(heatedBasementInput),
+                
+                FloorType.UnheatedBasement when input is FloorUnheatedBasementInput unheatedBasementInput =>
+                    _unheatedBasementStrategy.Calculate(unheatedBasementInput),
                 
                 _ => new FloorCalculationResult
                 {

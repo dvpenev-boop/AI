@@ -294,14 +294,32 @@ namespace EE.Doklad.ViewModels
                         }
                         break;
 
-                    case FloorType.UnheatedSpace:
-                        Debug.WriteLine("[FloorSectionViewModel] Creating UnheatedSpace detail");
-                        floorItem.UnheatedSpaceDetail = new FloorUnheatedSpaceDetail();
-                        if (!floorItem.UnheatedSpaceDetail.Layers.Any())
+                    case FloorType.UnheatedBasement:
+                        Debug.WriteLine("[FloorSectionViewModel] Creating UnheatedBasement detail");
+                        floorItem.UnheatedBasementDetail = new FloorUnheatedBasementDetail();
+                        // Инициализация на слоевете - добавяме по 1 слой във всяка колекция
+                        if (!floorItem.UnheatedBasementDetail.FloorToBasementLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to UnheatedSpace");
-                            floorItem.UnheatedSpaceDetail.Layers.Add(new FloorLayer());
+                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to FloorToBasementLayers");
+                            floorItem.UnheatedBasementDetail.FloorToBasementLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
                         }
+                        if (!floorItem.UnheatedBasementDetail.BasementFloorLayers.Any())
+                        {
+                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to BasementFloorLayers");
+                            floorItem.UnheatedBasementDetail.BasementFloorLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
+                        }
+                        if (!floorItem.UnheatedBasementDetail.BasementWallLayers.Any())
+                        {
+                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to BasementWallLayers");
+                            floorItem.UnheatedBasementDetail.BasementWallLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
+                        }
+                        if (!floorItem.UnheatedBasementDetail.WallAboveGradeLayers.Any())
+                        {
+                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to WallAboveGradeLayers");
+                            floorItem.UnheatedBasementDetail.WallAboveGradeLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
+                        }
+                        SubscribeUnheatedBasementDetail(floorItem);
+                        RecalculateUnheatedBasement(floorItem);
                         break;
 
                     case FloorType.HeatedBasement:
@@ -384,6 +402,128 @@ namespace EE.Doklad.ViewModels
             }
 
             return FloorItems.LastOrDefault();
+        }
+
+        private void SubscribeUnheatedBasementDetail(FloorItem item)
+        {
+            var detail = item.UnheatedBasementDetail;
+            if (detail == null) return;
+
+            // Subscribe към промени на основните свойства
+            detail.PropertyChanged += (s, e) => RecalculateUnheatedBasement(item);
+
+            // Subscribe към промени във всяка колекция от слоеве
+            var collections = new[]
+            {
+                detail.FloorToBasementLayers,
+                detail.BasementFloorLayers,
+                detail.BasementWallLayers,
+                detail.WallAboveGradeLayers
+            };
+
+            foreach (var collection in collections)
+            {
+                collection.CollectionChanged += (s, e) =>
+                {
+                    if (e.NewItems != null)
+                    {
+                        foreach (FloorLayer layer in e.NewItems)
+                            layer.PropertyChanged += (s2, e2) => RecalculateUnheatedBasement(item);
+                    }
+                    RecalculateUnheatedBasement(item);
+                };
+
+                foreach (var layer in collection)
+                    layer.PropertyChanged += (s, e) => RecalculateUnheatedBasement(item);
+            }
+        }
+
+        private void RecalculateUnheatedBasement(FloorItem item)
+        {
+            try
+            {
+                if (item.UnheatedBasementDetail == null) return;
+                var detail = item.UnheatedBasementDetail;
+
+                System.Diagnostics.Debug.WriteLine($"[RecalculateUnheatedBasement] Area={detail.Area}, Perimeter={detail.Perimeter}");
+
+                var input = new Models.FloorUnheatedBasementInput
+                {
+                    Area = detail.Area,
+                    Perimeter = detail.Perimeter,
+                    DepthBelowGround = detail.DepthBelowGround,
+                    HeightAboveGround = detail.HeightAboveGround,
+                    Volume = detail.Volume,
+                    LambdaGround = detail.LambdaGround,
+                    WallThicknessAtGrade = detail.WallThicknessAtGrade,
+                    AirChangeRate = detail.AirChangeRate,
+                    AirDensity = detail.AirDensity,
+                    AirSpecificHeat = detail.AirSpecificHeat,
+                    RsiFloorToBasement = detail.RsiFloorToBasement,
+                    RseFloorToBasement = detail.RseFloorToBasement,
+                    RsiBasementFloor = detail.RsiBasementFloor,
+                    RseBasementFloor = detail.RseBasementFloor,
+                    RsiBasementWall = detail.RsiBasementWall,
+                    RseBasementWall = detail.RseBasementWall,
+                    RsiWallAboveGrade = detail.RsiWallAboveGrade,
+                    RseWallAboveGrade = detail.RseWallAboveGrade
+                };
+
+                // Копирай слоевете от всички 4 конструкции
+                CopyLayers(detail.FloorToBasementLayers, input.FloorToBasementLayers);
+                CopyLayers(detail.BasementFloorLayers, input.BasementFloorLayers);
+                CopyLayers(detail.BasementWallLayers, input.BasementWallLayers);
+                CopyLayers(detail.WallAboveGradeLayers, input.WallAboveGradeLayers);
+
+                var calc = new Services.FloorCalculator();
+                var result = calc.Calculate(Models.FloorType.UnheatedBasement, input);
+
+                if (result.IsValid)
+                {
+                    item.UValue = result.U;
+                    item.Area = detail.Area;
+
+                    // Попълни диагностичните резултати
+                    detail.ResultUub = result.U;
+                    foreach (var component in result.Components)
+                    {
+                        switch (component.Name)
+                        {
+                            case "Uf_sus": detail.ResultUfSus = component.Value; break;
+                            case "Uf_gb": detail.ResultUfGb = component.Value; break;
+                            case "Uw_gb": detail.ResultUwGb = component.Value; break;
+                            case "Uw": detail.ResultUw = component.Value; break;
+                            case "Hve_b": detail.ResultHveB = component.Value; break;
+                            case "B": detail.ResultB = component.Value; break;
+                            case "df": detail.ResultDf = component.Value; break;
+                            case "dwb": detail.ResultDwb = component.Value; break;
+                            case "S": detail.ResultS = component.Value; break;
+                        }
+                    }
+
+                    item.NotifyDisplayPropertiesChanged();
+                }
+                else
+                {
+                    item.UValue = 0;
+                    item.NotifyDisplayPropertiesChanged();
+                }
+
+                OnPropertyChanged(nameof(FloorItems));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RecalculateUnheatedBasement] Exception: {ex}");
+            }
+        }
+
+        private void CopyLayers(System.Collections.ObjectModel.ObservableCollection<FloorLayer> source, System.Collections.ObjectModel.ObservableCollection<FloorLayer> target)
+        {
+            target.Clear();
+            foreach (var l in source)
+            {
+                target.Add(new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda });
+            }
         }
 
         private void UpdateIndexes()

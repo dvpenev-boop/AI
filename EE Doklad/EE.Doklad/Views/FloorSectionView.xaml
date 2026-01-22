@@ -97,10 +97,10 @@
                                                                 </Setter.Value>
                                                             </Setter>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding FloorType}" Value="UnheatedSpace">
+                                                        <DataTrigger Binding="{Binding FloorType}" Value="UnheatedBasement">
                                                             <Setter Property="Content">
                                                                 <Setter.Value>
-                                                                    <floorPanels:FloorUnheatedSpacePanel DataContext="{Binding UnheatedSpaceDetail}"/>
+                                                                    <floorPanels:FloorUnheatedBasementPanel DataContext="{Binding UnheatedBasementDetail}"/>
                                                                 </Setter.Value>
                                                             </Setter>
                                                         </DataTrigger>

@@ -119,3 +119,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorGround
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorHeatedBasementPanel.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedSpacePanel.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorTypeSelectionDialog.baml
+e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedBasementPanel.g.cs
+e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedBasementPanel.baml
