@@ -84,8 +84,10 @@
                                                         <DataTrigger Binding="{Binding FloorType}" Value="ExternalAir">
                                                             <Setter Property="Content">
                                                                 <Setter.Value>
-                                                                    <floorPanels:FloorExternalAirPanel DataContext="{Binding ExternalAirDetail}"/>
-                                                                </Setter.Value>
+                                                                        <floorPanels:FloorExternalAirPanel
+                                                                            DataContext="{Binding ExternalAirDetail}"
+                                                                            ParentFloorItem="{Binding RelativeSource={RelativeSource AncestorType=ContentControl}, Path=Content}"/>
+                                                                    </Setter.Value>
                                                             </Setter>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding FloorType}" Value="Ground">

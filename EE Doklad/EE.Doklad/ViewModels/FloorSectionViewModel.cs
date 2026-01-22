@@ -66,9 +66,12 @@ namespace EE.Doklad.ViewModels
                 {
                     foreach (var item in e.NewItems)
                     {
-                        if (item is FloorItem floorItem && floorItem.FloorType == Models.FloorType.Ground && floorItem.GroundDetail != null)
+                        if (item is FloorItem floorItem)
                         {
-                            SubscribeGroundDetail(floorItem);
+                            if (floorItem.FloorType == Models.FloorType.Ground && floorItem.GroundDetail != null)
+                                SubscribeGroundDetail(floorItem);
+                            if (floorItem.FloorType == Models.FloorType.ExternalAir && floorItem.ExternalAirDetail != null)
+                                SubscribeExternalAirDetail(floorItem);
                         }
                     }
                 }
@@ -77,22 +80,99 @@ namespace EE.Doklad.ViewModels
             // Subscribe for already existing items
             foreach (var item in _data.FloorItems)
             {
-                if (item.FloorType == Models.FloorType.Ground && item.GroundDetail != null)
+                if (item is FloorItem floorItem)
                 {
-                    SubscribeGroundDetail(item);
+                    if (floorItem.FloorType == Models.FloorType.Ground && floorItem.GroundDetail != null)
+                        SubscribeGroundDetail(floorItem);
+                    if (floorItem.FloorType == Models.FloorType.ExternalAir && floorItem.ExternalAirDetail != null)
+                        SubscribeExternalAirDetail(floorItem);
                 }
             }
             Debug.WriteLine("[FloorSectionViewModel] Constructor completed");
-            // Subscribe for recalculation on GroundDetail changes
-            // (Премахнато дублиране)
-    // Премахната излишна скоба
+        }
+
+        // ---
+        // Добавено: ExternalAir subscribe и преизчисление
+        private void SubscribeExternalAirDetail(FloorItem item)
+        {
+            var detail = item.ExternalAirDetail;
+            if (detail == null) return;
+            detail.Layers.CollectionChanged += (s, e) => {
+                // Subscribe към PropertyChanged за нови слоеве
+                if (e.NewItems != null)
+                {
+                    foreach (FloorLayer layer in e.NewItems)
+                        layer.PropertyChanged += (s2, e2) => RecalculateExternalAir(item);
+                }
+                RecalculateExternalAir(item);
+            };
+            foreach (var layer in detail.Layers)
+                layer.PropertyChanged += (s, e) => RecalculateExternalAir(item);
+            // Subscribe към промяна на Area (ако има такова свойство)
+            detail.PropertyChanged += (s, e) => {
+                if (e.PropertyName == "Area")
+                    RecalculateExternalAir(item);
+            };
+        }
+
+        private void RecalculateExternalAir(FloorItem item)
+        {
+            try
+            {
+                if (item.ExternalAirDetail == null) return;
+                var detail = item.ExternalAirDetail;
+                System.Diagnostics.Debug.WriteLine($"[RecalculateExternalAir] Area={item.Area}, Layers={detail.Layers.Count}");
+                var input = new Models.FloorExternalAirInput
+                {
+                    Area = item.Area,
+                    Rsi = detail.Rsi,
+                    Rse = detail.Rse
+                };
+                // Копирай слоевете
+                if (detail.Layers != null)
+                {
+                    foreach (var l in detail.Layers)
+                    {
+                        var layer = new Models.FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
+                        input.Layers.Add(layer);
+                        layer.PropertyChanged += (s, e) => RecalculateExternalAir(item);
+                    }
+                }
+
+                var calc = new Services.FloorCalculator();
+                var result = calc.Calculate(Models.FloorType.ExternalAir, input);
+                if (result.IsValid)
+                {
+                    item.UValue = result.U;
+                    item.Area = input.Area;
+                    item.NotifyDisplayPropertiesChanged();
+                }
+                else
+                {
+                    item.UValue = 0;
+                    item.NotifyDisplayPropertiesChanged();
+                }
+                OnPropertyChanged(nameof(FloorItems));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RecalculateExternalAir] Exception: {ex}");
+            }
         }
             private void SubscribeGroundDetail(FloorItem item)
             {
                 var detail = item.GroundDetail;
                 if (detail == null) return;
                 detail.PropertyChanged += (s, e) => RecalculateGround(item);
-                detail.Layers.CollectionChanged += (s, e) => RecalculateGround(item);
+                detail.Layers.CollectionChanged += (s, e) => {
+                    // При добавяне/премахване на слой – subscribe към PropertyChanged и преизчисли
+                    if (e.NewItems != null)
+                    {
+                        foreach (FloorLayer layer in e.NewItems)
+                            layer.PropertyChanged += (s2, e2) => RecalculateGround(item);
+                    }
+                    RecalculateGround(item);
+                };
                 foreach (var layer in detail.Layers)
                     layer.PropertyChanged += (s, e) => RecalculateGround(item);
             }
@@ -118,7 +198,7 @@ namespace EE.Doklad.ViewModels
                 {
                     foreach (var l in detail.Layers)
                     {
-                        var layer = new RoofLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
+                        var layer = new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda };
                         input.Layers.Add(layer);
                         layer.PropertyChanged += (s, e) => RecalculateGround(item);
                     }
@@ -198,8 +278,10 @@ namespace EE.Doklad.ViewModels
                         if (!floorItem.ExternalAirDetail.Layers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default layer to ExternalAir");
-                            floorItem.ExternalAirDetail.Layers.Add(new RoofLayer());
+                            floorItem.ExternalAirDetail.Layers.Add(new FloorLayer());
                         }
+                        SubscribeExternalAirDetail(floorItem);
+                        RecalculateExternalAir(floorItem);
                         break;
 
                     case FloorType.Ground:
@@ -208,7 +290,7 @@ namespace EE.Doklad.ViewModels
                         if (!floorItem.GroundDetail.Layers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default layer to Ground");
-                            floorItem.GroundDetail.Layers.Add(new RoofLayer());
+                            floorItem.GroundDetail.Layers.Add(new FloorLayer());
                         }
                         break;
 
@@ -218,7 +300,7 @@ namespace EE.Doklad.ViewModels
                         if (!floorItem.UnheatedSpaceDetail.Layers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default layer to UnheatedSpace");
-                            floorItem.UnheatedSpaceDetail.Layers.Add(new RoofLayer());
+                            floorItem.UnheatedSpaceDetail.Layers.Add(new FloorLayer());
                         }
                         break;
 
@@ -228,12 +310,12 @@ namespace EE.Doklad.ViewModels
                         if (!floorItem.HeatedBasementDetail.FloorLayers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default floor layer to HeatedBasement");
-                            floorItem.HeatedBasementDetail.FloorLayers.Add(new RoofLayer());
+                            floorItem.HeatedBasementDetail.FloorLayers.Add(new FloorLayer());
                         }
                         if (!floorItem.HeatedBasementDetail.WallLayers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default wall layer to HeatedBasement");
-                            floorItem.HeatedBasementDetail.WallLayers.Add(new RoofLayer());
+                            floorItem.HeatedBasementDetail.WallLayers.Add(new FloorLayer());
                         }
                         break;
 

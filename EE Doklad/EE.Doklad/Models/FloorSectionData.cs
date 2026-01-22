@@ -23,7 +23,7 @@ namespace EE.Doklad.Models
         [ObservableProperty] private double airChangeRate;
         [ObservableProperty] private double volumeFlowRate;
         [ObservableProperty] private double windSpeed;
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
     }
 
     public partial class FloorItem : ObservableObject
@@ -68,8 +68,15 @@ namespace EE.Doklad.Models
         public string UDisplay => UValue > 0 ? $"{UValue:F3}" : "—";
         public string ADisplay => Area > 0 ? $"{Area:F2}" : "—";
 
+        // Partial method to notify display changes when Area changes
+        partial void OnAreaChanged(double value)
+        {
+            OnPropertyChanged(nameof(ADisplay));
+        }
+
         public void NotifyDisplayPropertiesChanged()
         {
+            // Only notify display properties, not Area itself to avoid triggering recursive recalculation
             OnPropertyChanged(nameof(UDisplay));
             OnPropertyChanged(nameof(ADisplay));
         }
@@ -78,13 +85,20 @@ namespace EE.Doklad.Models
     // Detail class for External Air floor type
     public partial class FloorExternalAirDetail : ObservableObject
     {
-        [ObservableProperty]
-        private double ti = 20.0;
+        // Константи за топлинни съпротивления
+        public double Rsi => 0.17;
+        public double Rse => 0.04;
 
-        [ObservableProperty]
-        private double te = -15.0;
+        // Многослойна конструкция
+    public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
 
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+        // За изображение (схема)
+        private AttachmentData? _schemeAttachment = new();
+        public AttachmentData? SchemeAttachment
+        {
+            get => _schemeAttachment;
+            set { _schemeAttachment = value; OnPropertyChanged(); }
+        }
     }
 
     // Detail class for Ground floor type
@@ -112,7 +126,7 @@ namespace EE.Doklad.Models
     [ObservableProperty] private double resultPsiGed;
     [ObservableProperty] private double resultU0;
     [ObservableProperty] private double resultU;
-    public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
     }
 
     // Detail class for Heated Basement floor type
@@ -136,7 +150,7 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double wallAreaToGround;
 
-        public ObservableCollection<RoofLayer> FloorLayers { get; } = new ObservableCollection<RoofLayer>();
-        public ObservableCollection<RoofLayer> WallLayers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
+    public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
     }
 }

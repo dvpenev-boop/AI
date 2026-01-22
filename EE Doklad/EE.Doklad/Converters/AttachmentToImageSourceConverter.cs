@@ -17,19 +17,30 @@ namespace EE.Doklad.Converters
                 return null;
             }
 
-            if (attachment.Bytes == null || attachment.Bytes.Length == 0)
+            // Support both property names used in the codebase: Data / Bytes and MimeType / ContentType
+            var bytes = attachment.Data;
+            var contentType = attachment.MimeType;
+
+            // Try reflection fallback for older naming
+            if ((bytes == null || bytes.Length == 0))
             {
-                return null;
+                var prop = attachment.GetType().GetProperty("Bytes");
+                if (prop != null)
+                    bytes = prop.GetValue(attachment) as byte[];
+            }
+            if (string.IsNullOrEmpty(contentType))
+            {
+                var prop2 = attachment.GetType().GetProperty("ContentType");
+                if (prop2 != null)
+                    contentType = prop2.GetValue(attachment) as string;
             }
 
-            if (attachment.ContentType == "application/pdf")
-            {
-                return null;
-            }
+            if (bytes == null || bytes.Length == 0) return null;
+            if (contentType == "application/pdf") return null;
 
             try
             {
-                using var ms = new MemoryStream(attachment.Bytes);
+                using var ms = new MemoryStream(bytes);
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
@@ -55,10 +66,25 @@ namespace EE.Doklad.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var inverse = parameter?.ToString() == "Inverse";
-            var visible = value is AttachmentData attachment
-                && attachment.Bytes != null
-                && attachment.Bytes.Length > 0
-                && attachment.ContentType != "application/pdf";
+            var visible = false;
+            if (value is AttachmentData attachment)
+            {
+                var bytes = attachment.Data;
+                var contentType = attachment.MimeType;
+                if ((bytes == null || bytes.Length == 0))
+                {
+                    var prop = attachment.GetType().GetProperty("Bytes");
+                    if (prop != null)
+                        bytes = prop.GetValue(attachment) as byte[];
+                }
+                if (string.IsNullOrEmpty(contentType))
+                {
+                    var prop2 = attachment.GetType().GetProperty("ContentType");
+                    if (prop2 != null)
+                        contentType = prop2.GetValue(attachment) as string;
+                }
+                visible = bytes != null && bytes.Length > 0 && contentType != "application/pdf";
+            }
 
             if (inverse)
             {

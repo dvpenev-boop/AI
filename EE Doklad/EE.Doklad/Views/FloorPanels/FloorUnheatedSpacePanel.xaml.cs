@@ -15,7 +15,7 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorUnheatedSpaceInput input)
             {
-                input.Layers.Add(new RoofLayer());
+                input.Layers.Add(new FloorLayer());
             }
         }
 

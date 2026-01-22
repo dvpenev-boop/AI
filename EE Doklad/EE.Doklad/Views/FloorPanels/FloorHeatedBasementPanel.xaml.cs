@@ -15,7 +15,7 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorHeatedBasementInput input)
             {
-                input.FloorLayers.Add(new RoofLayer());
+                input.FloorLayers.Add(new FloorLayer());
             }
         }
 
@@ -31,7 +31,7 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorHeatedBasementInput input)
             {
-                input.WallLayers.Add(new RoofLayer());
+                input.WallLayers.Add(new FloorLayer());
             }
         }
 

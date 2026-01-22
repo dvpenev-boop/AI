@@ -20,7 +20,8 @@ namespace EE.Doklad.Services.FloorStrategies
             try
             {
                 // Изчисление на R по ISO 6946
-                double rw = input.Layers.Sum(layer => layer.Thickness / layer.Lambda);
+                // Skip layers with zero lambda to avoid division by zero
+                double rw = input.Layers.Where(layer => layer.Lambda > 0).Sum(layer => layer.Thickness / layer.Lambda);
                 double rtotal = input.Rsi + rw + input.Rse;
                 
                 if (rtotal <= 0)

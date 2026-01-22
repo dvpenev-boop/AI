@@ -546,11 +546,17 @@ namespace EE.Doklad.Services
                 column.Item().PaddingTop(10).Text($"Под тип {floorIdx}").SemiBold().FontSize(12);
                 column.Item().Text("Слоеве").FontSize(11);
                 // Example: show layers if present (for all types)
-                var layers = item.ExternalAirDetail?.Layers
-                    ?? item.GroundDetail?.Layers
-                    ?? item.UnheatedSpaceDetail?.Layers
-                    ?? item.HeatedBasementDetail?.FloorLayers;
-                if (layers != null && layers.Count > 0)
+                var layers = (item.ExternalAirDetail != null && item.ExternalAirDetail.Layers != null && item.ExternalAirDetail.Layers.Count > 0)
+                    ? (System.Collections.IEnumerable)item.ExternalAirDetail.Layers
+                    : (item.GroundDetail != null && item.GroundDetail.Layers != null && item.GroundDetail.Layers.Count > 0)
+                        ? (System.Collections.IEnumerable)item.GroundDetail.Layers
+                        : (item.UnheatedSpaceDetail != null && item.UnheatedSpaceDetail.Layers != null && item.UnheatedSpaceDetail.Layers.Count > 0)
+                            ? (System.Collections.IEnumerable)item.UnheatedSpaceDetail.Layers
+                            : (item.HeatedBasementDetail != null && item.HeatedBasementDetail.FloorLayers != null && item.HeatedBasementDetail.FloorLayers.Count > 0)
+                                ? (System.Collections.IEnumerable)item.HeatedBasementDetail.FloorLayers
+                                : null;
+                var floorLayerList = layers as System.Collections.Generic.ICollection<EE.Doklad.Models.FloorLayer>;
+                if (floorLayerList != null && floorLayerList.Count > 0)
                 {
                     column.Item().Table(tbl =>
                     {
@@ -568,12 +574,12 @@ namespace EE.Doklad.Services
                             header.Cell().Text("λ (W/mK)").SemiBold();
                             header.Cell().Text("R=δ/λ").SemiBold();
                         });
-                        foreach (var layer in layers)
+                        foreach (var l in floorLayerList)
                         {
-                            tbl.Cell().Text(layer.Material ?? "");
-                            tbl.Cell().Text(layer.Thickness.ToString("0.000"));
-                            tbl.Cell().Text(layer.Lambda.ToString("0.000"));
-                            tbl.Cell().Text(layer.R.ToString("0.000"));
+                            tbl.Cell().Text(l.Material ?? "");
+                            tbl.Cell().Text(l.Thickness.ToString("0.000"));
+                            tbl.Cell().Text(l.Lambda.ToString("0.000"));
+                            tbl.Cell().Text(l.R.ToString("0.000"));
                         }
                     });
                 }

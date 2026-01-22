@@ -13,23 +13,23 @@ namespace EE.Doklad.Views.FloorPanels
 
         private void AddLayer_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is FloorGroundInput input)
+            if (DataContext is FloorGroundDetail detail)
             {
-                input.Layers.Add(new RoofLayer());
+                detail.Layers.Add(new FloorLayer());
             }
         }
 
         private void RemoveLayer_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is FloorGroundInput input && input.Layers.Count > 0)
+            if (DataContext is FloorGroundDetail detail && detail.Layers.Count > 0)
             {
-                input.Layers.RemoveAt(input.Layers.Count - 1);
+                detail.Layers.RemoveAt(detail.Layers.Count - 1);
             }
         }
 
         public FloorGroundInput GetInput()
         {
-            return DataContext as FloorGroundInput ?? new FloorGroundInput();
+            return DataContext as FloorGroundInput ?? new FloorGroundInput(); // Not used, kept for compatibility
         }
     }
 }

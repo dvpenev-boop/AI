@@ -23,7 +23,7 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double rse = 0.04;
 
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double rsi = 0.17;
 
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
 
     // Нови полета за разширена логика (съответствие с FloorGroundDetail)
     [ObservableProperty]
@@ -108,7 +108,7 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double n; // Air change rate (same as airChangeRate, but for backward compat)
 
-        public ObservableCollection<RoofLayer> Layers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double rsiWall = 0.13;
 
-        public ObservableCollection<RoofLayer> FloorLayers { get; } = new ObservableCollection<RoofLayer>();
-        public ObservableCollection<RoofLayer> WallLayers { get; } = new ObservableCollection<RoofLayer>();
+    public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
+    public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
     }
 }
