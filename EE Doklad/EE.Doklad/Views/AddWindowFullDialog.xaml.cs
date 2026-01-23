@@ -59,6 +59,9 @@ namespace EE.Doklad.Views
             CountTextBox.TextChanged += AnyInputChanged;
 
             // Geometry
+            // Initialize width/height (user inputs are in cm)
+            WidthTextBox.Text = _batch.Width > 0 ? (_batch.Width * 100.0).ToString("F0") : string.Empty;
+            HeightTextBox.Text = _batch.Height > 0 ? (_batch.Height * 100.0).ToString("F0") : string.Empty;
             WidthTextBox.TextChanged += AnyInputChanged;
             HeightTextBox.TextChanged += AnyInputChanged;
 

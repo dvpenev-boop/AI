@@ -33,6 +33,9 @@ namespace EE.Doklad.ViewModels
             RefreshSummary();
         }
 
+        // Expose batches for matrix view binding
+        public ObservableCollection<WindowBatch> WindowBatches => _data.WindowBatches;
+
         /// <summary>
         /// Презарежда обобщената таблица от партидите
         /// </summary>

@@ -129,3 +129,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowBatchDetailsDialo
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowsSectionView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowFullDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowFullDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MatrixSummaryView.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MatrixSummaryView.g.cs
