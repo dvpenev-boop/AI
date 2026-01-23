@@ -367,7 +367,7 @@ namespace EE.Doklad.ViewModels
 
                         Debug.WriteLine($"[FloorSectionViewModel] Adding Floor component to collection");
                         SelectedFloorItem = floorItem;
-                        FloorItems.Add(floorItem);
+                        FloorItems.Insert(0, floorItem);
 
                         // РЕД 2: Стена към земя (създаваме нов FloorItem с референция към същия detail)
                         var wallItem = new FloorItem
@@ -384,7 +384,8 @@ namespace EE.Doklad.ViewModels
                         };
 
                         Debug.WriteLine($"[FloorSectionViewModel] Adding Wall component to collection");
-                        FloorItems.Add(wallItem);
+                        // Insert wallItem just below the main floorItem for composite
+                        FloorItems.Insert(1, wallItem);
 
                         Debug.WriteLine($"[FloorSectionViewModel] Raising PropertyChanged for FloorItems");
                         OnPropertyChanged(nameof(FloorItems));
@@ -404,7 +405,7 @@ namespace EE.Doklad.ViewModels
                 SelectedFloorItem = floorItem;
                 
                 Debug.WriteLine($"[FloorSectionViewModel] Adding FloorItem to collection... Current count: {FloorItems.Count}");
-                FloorItems.Add(floorItem);
+                FloorItems.Insert(0, floorItem);
                 Debug.WriteLine($"[FloorSectionViewModel] FloorItem added successfully. New count: {FloorItems.Count}");
                 
                 Debug.WriteLine($"[FloorSectionViewModel] Raising PropertyChanged for FloorItems");
