@@ -11,7 +11,7 @@ namespace EE.Doklad.Services.FloorStrategies
     public class HeatedBasementFloorStrategy : IFloorStrategy<FloorHeatedBasementInput>
     {
         private const double Rsi = 0.17; // Вътрешна повърхностна съпротивление (m²K/W)
-        private const double Rse = 0.04; // Външна повърхностна съпротивление (m²K/W)
+        private const double Rse = 0.00; // Външна повърхностна съпротивление (m²K/W)
 
         public FloorCalculationResult Calculate(FloorHeatedBasementInput input)
         {
@@ -59,9 +59,9 @@ namespace EE.Doklad.Services.FloorStrategies
                 double U_f_g_b;
                 if (d_f + 0.5 * z < B)
                 {
-                    // Формула (45) от ISO 13370
+                    // Формула (13) от ISO 13370
                     double arg = (Math.PI * B) / (d_f + 0.5 * z) + 1;
-                    U_f_g_b = (2 * lambda_g) / (Math.PI * (B + d_f + 0.5 * z)) * Math.Log(arg);
+                    U_f_g_b = (2 * lambda_g) / (Math.PI * B + d_f + 0.5 * z) * Math.Log(arg);
                 }
                 else
                 {

@@ -9,7 +9,7 @@
         <StackPanel>
             <TextBlock Text="Под над отопляем сутерен (ISO 13370 - стационарна част)" FontWeight="Bold" FontSize="13" Margin="0,0,0,10"/>
             
-            <TextBlock Text="⚠️ Композитен елемент: Създава два реда в таблицата (Под към земя + Стена към земя)" 
+            <TextBlock Text="Създава два реда в таблицата (Под към земя + Стена към земя)" 
                        Foreground="DarkOrange" FontStyle="Italic" Margin="0,0,0,10"/>
 
             <!-- ГЕОМЕТРИЯ -->
