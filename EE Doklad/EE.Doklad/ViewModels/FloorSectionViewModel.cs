@@ -328,14 +328,53 @@ namespace EE.Doklad.ViewModels
                         if (!floorItem.HeatedBasementDetail.FloorLayers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default floor layer to HeatedBasement");
-                            floorItem.HeatedBasementDetail.FloorLayers.Add(new FloorLayer());
+                            floorItem.HeatedBasementDetail.FloorLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
                         }
                         if (!floorItem.HeatedBasementDetail.WallLayers.Any())
                         {
                             Debug.WriteLine("[FloorSectionViewModel] Adding default wall layer to HeatedBasement");
-                            floorItem.HeatedBasementDetail.WallLayers.Add(new FloorLayer());
+                            floorItem.HeatedBasementDetail.WallLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
                         }
-                        break;
+
+                        // КРИТИЧНО: Създаваме композитна група (2 реда)
+                        var groupId = Guid.NewGuid().ToString();
+                        
+                        // РЕД 1: Под към земя
+                        floorItem.GroupId = groupId;
+                        floorItem.IsComposite = true;
+                        floorItem.CompositeType = "Floor";
+                        floorItem.Name = "Под над отопляем сутерен";
+                        
+                        // Subscribe за промени и преизчисляване
+                        SubscribeHeatedBasementDetail(floorItem);
+                        RecalculateHeatedBasement(floorItem);
+
+                        Debug.WriteLine($"[FloorSectionViewModel] Adding Floor component to collection");
+                        SelectedFloorItem = floorItem;
+                        FloorItems.Add(floorItem);
+
+                        // РЕД 2: Стена към земя (създаваме нов FloorItem с референция към същия detail)
+                        var wallItem = new FloorItem
+                        {
+                            Number = FloorItems.Count + 1,
+                            Name = "Под над отопляем сутерен",
+                            FloorType = FloorType.HeatedBasement,
+                            GroupId = groupId,
+                            IsComposite = true,
+                            CompositeType = "Wall",
+                            HeatedBasementDetail = floorItem.HeatedBasementDetail,
+                            Area = 0, // Ще се изчисли от z * P
+                            UValue = 0
+                        };
+
+                        Debug.WriteLine($"[FloorSectionViewModel] Adding Wall component to collection");
+                        FloorItems.Add(wallItem);
+
+                        Debug.WriteLine($"[FloorSectionViewModel] Raising PropertyChanged for FloorItems");
+                        OnPropertyChanged(nameof(FloorItems));
+                        
+                        Debug.WriteLine("[FloorSectionViewModel] TryAddFloor completed successfully (HeatedBasement with 2 rows)");
+                        return true;
 
                     default:
                         Debug.WriteLine($"[FloorSectionViewModel] ERROR: Unknown floor type: {floorType}");
@@ -381,10 +420,35 @@ namespace EE.Doklad.ViewModels
                 return;
             }
 
-            var removedIndex = FloorItems.IndexOf(floorItem);
+            // КРИТИЧНО: Ако това е композитен под (Heated Basement), трием и двата реда
+            if (floorItem.IsComposite && !string.IsNullOrEmpty(floorItem.GroupId))
+            {
+                Debug.WriteLine($"[FloorSectionViewModel] Removing composite floor group: {floorItem.GroupId}");
+                
+                // Намираме всички редове от същата група
+                var groupItems = FloorItems.Where(item => item.GroupId == floorItem.GroupId).ToList();
+                
+                Debug.WriteLine($"[FloorSectionViewModel] Found {groupItems.Count} items in composite group");
+                
+                // Премахваме всички от групата
+                foreach (var item in groupItems)
+                {
+                    FloorItems.Remove(item);
+                }
+                
+                var removedIndex = 0; // За простота, ще вземем първия
+                UpdateIndexes();
+                SelectedFloorItem = GetNextSelection(removedIndex);
+                OnPropertyChanged(nameof(FloorItems));
+                Debug.WriteLine($"[FloorSectionViewModel] Composite group removed. Total items: {FloorItems.Count}");
+                return;
+            }
+
+            // За обикновени (некомпозитни) подове
+            var removedIndex2 = FloorItems.IndexOf(floorItem);
             FloorItems.Remove(floorItem);
             UpdateIndexes();
-            SelectedFloorItem = GetNextSelection(removedIndex);
+            SelectedFloorItem = GetNextSelection(removedIndex2);
             OnPropertyChanged(nameof(FloorItems));
             Debug.WriteLine($"[FloorSectionViewModel] FloorItem removed. Total items: {FloorItems.Count}");
         }
@@ -524,6 +588,140 @@ namespace EE.Doklad.ViewModels
             {
                 target.Add(new FloorLayer { Material = l.Material, Thickness = l.Thickness, Lambda = l.Lambda });
             }
+        }
+
+        private void SubscribeHeatedBasementDetail(FloorItem item)
+        {
+            var detail = item.HeatedBasementDetail;
+            if (detail == null) return;
+
+            // Subscribe към промени на основните свойства
+            detail.PropertyChanged += (s, e) => RecalculateHeatedBasement(item);
+
+            // Subscribe към промени в колекциите от слоеве
+            var collections = new[]
+            {
+                detail.FloorLayers,
+                detail.WallLayers
+            };
+
+            foreach (var collection in collections)
+            {
+                collection.CollectionChanged += (s, e) =>
+                {
+                    if (e.NewItems != null)
+                    {
+                        foreach (FloorLayer layer in e.NewItems)
+                            layer.PropertyChanged += (s2, e2) => RecalculateHeatedBasement(item);
+                    }
+                    RecalculateHeatedBasement(item);
+                };
+
+                foreach (var layer in collection)
+                    layer.PropertyChanged += (s, e) => RecalculateHeatedBasement(item);
+            }
+        }
+
+        private void RecalculateHeatedBasement(FloorItem item)
+        {
+            try
+            {
+                if (item.HeatedBasementDetail == null) return;
+                var detail = item.HeatedBasementDetail;
+
+                System.Diagnostics.Debug.WriteLine($"[RecalculateHeatedBasement] Area={detail.Area}, Perimeter={detail.Perimeter}, Depth={detail.Depth}");
+
+                var input = new Models.FloorHeatedBasementInput
+                {
+                    Area = detail.Area,
+                    Perimeter = detail.Perimeter,
+                    Depth = detail.Depth,
+                    WallThicknessAtGrade = detail.WallThicknessAtGrade,
+                    LambdaGround = detail.LambdaGround,
+                    PsiWallFloor = detail.PsiWallFloor,
+                    RsiFloor = detail.RsiFloor,
+                    RseFloor = detail.RseFloor,
+                    RsiWall = detail.RsiWall,
+                    RseWall = detail.RseWall
+                };
+
+                // Копирай слоевете
+                CopyLayers(detail.FloorLayers, input.FloorLayers);
+                CopyLayers(detail.WallLayers, input.WallLayers);
+
+                var calc = new Services.FloorCalculator();
+                var result = calc.Calculate(Models.FloorType.HeatedBasement, input);
+
+                if (result.IsValid)
+                {
+                    // Извличаме резултатите от components
+                    double U_f_g_b = GetComponentValue(result.Components, "Uf;g;b");
+                    double U_w_g_b = GetComponentValue(result.Components, "Uw;g;b");
+                    double H_g = GetComponentValue(result.Components, "Hg");
+                    double B = GetComponentValue(result.Components, "B");
+                    double d_f = GetComponentValue(result.Components, "df");
+                    double d_w_b = GetComponentValue(result.Components, "dwb");
+                    double A_walls = GetComponentValue(result.Components, "Awalls");
+
+                    // Съхраняваме диагностичните резултати
+                    detail.ResultUfgb = U_f_g_b;
+                    detail.ResultUwgb = U_w_g_b;
+                    detail.ResultHg = H_g;
+                    detail.ResultB = B;
+                    detail.ResultDf = d_f;
+                    detail.ResultDwb = d_w_b;
+                    detail.ResultAwalls = A_walls;
+
+                    // КРИТИЧНО: Обновяваме ДВАТА реда в таблицата
+                    if (!string.IsNullOrEmpty(item.GroupId))
+                    {
+                        var groupItems = FloorItems.Where(fi => fi.GroupId == item.GroupId).ToList();
+                        
+                        foreach (var groupItem in groupItems)
+                        {
+                            if (groupItem.CompositeType == "Floor")
+                            {
+                                // Ред 1: Под към земя
+                                groupItem.UValue = U_f_g_b;
+                                groupItem.Area = detail.Area;
+                                groupItem.NotifyDisplayPropertiesChanged();
+                            }
+                            else if (groupItem.CompositeType == "Wall")
+                            {
+                                // Ред 2: Стена към земя
+                                groupItem.UValue = U_w_g_b;
+                                groupItem.Area = A_walls; // z * P
+                                groupItem.NotifyDisplayPropertiesChanged();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // При грешка, нулираме U на всички редове от групата
+                    if (!string.IsNullOrEmpty(item.GroupId))
+                    {
+                        var groupItems = FloorItems.Where(fi => fi.GroupId == item.GroupId).ToList();
+                        foreach (var groupItem in groupItems)
+                        {
+                            groupItem.UValue = 0;
+                            groupItem.NotifyDisplayPropertiesChanged();
+                        }
+                    }
+                }
+
+                OnPropertyChanged(nameof(FloorItems));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RecalculateHeatedBasement] Exception: {ex}");
+            }
+        }
+
+        private double GetComponentValue(System.Collections.Generic.List<FloorCalcComponent> components, string name)
+        {
+            var component = components.FirstOrDefault(c => c.Name == name);
+            return component?.Value ?? 0.0;
         }
 
         private void UpdateIndexes()

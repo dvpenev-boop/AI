@@ -13,39 +13,34 @@ namespace EE.Doklad.Views.FloorPanels
 
         private void AddFloorLayer_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is FloorHeatedBasementInput input)
+            if (DataContext is FloorHeatedBasementDetail detail)
             {
-                input.FloorLayers.Add(new FloorLayer());
+                detail.FloorLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
             }
         }
 
         private void RemoveFloorLayer_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is FloorHeatedBasementInput input && input.FloorLayers.Count > 0)
+            if (DataContext is FloorHeatedBasementDetail detail && detail.FloorLayers.Count > 0)
             {
-                input.FloorLayers.RemoveAt(input.FloorLayers.Count - 1);
+                detail.FloorLayers.RemoveAt(detail.FloorLayers.Count - 1);
             }
         }
 
         private void AddWallLayer_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is FloorHeatedBasementInput input)
+            if (DataContext is FloorHeatedBasementDetail detail)
             {
-                input.WallLayers.Add(new FloorLayer());
+                detail.WallLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
             }
         }
 
         private void RemoveWallLayer_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is FloorHeatedBasementInput input && input.WallLayers.Count > 0)
+            if (DataContext is FloorHeatedBasementDetail detail && detail.WallLayers.Count > 0)
             {
-                input.WallLayers.RemoveAt(input.WallLayers.Count - 1);
+                detail.WallLayers.RemoveAt(detail.WallLayers.Count - 1);
             }
-        }
-
-        public FloorHeatedBasementInput GetInput()
-        {
-            return DataContext as FloorHeatedBasementInput ?? new FloorHeatedBasementInput();
         }
     }
 }

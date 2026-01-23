@@ -116,41 +116,79 @@ namespace EE.Doklad.Models
     /// </summary>
     public partial class FloorHeatedBasementInput : ObservableObject
     {
+        // === Геометрия ===
+        /// <summary>
+        /// Площ на подовата плоча на сутерена (m²)
+        /// </summary>
         [ObservableProperty]
-        private double floorArea;
+        private double area;
 
+        /// <summary>
+        /// Периметър на сутерена (m)
+        /// </summary>
         [ObservableProperty]
-        private double areaFloor; // Alias for floorArea
+        private double perimeter;
 
+        /// <summary>
+        /// Дълбочина на сутерена под терена z (m)
+        /// </summary>
         [ObservableProperty]
-        private double ti = 20.0;
+        private double depth;
 
+        /// <summary>
+        /// Пълна дебелина на стените на нивото на терена d_we (m)
+        /// </summary>
         [ObservableProperty]
-        private double tb = 15.0;
+        private double wallThicknessAtGrade;
 
+        // === Параметри за земята ===
+        /// <summary>
+        /// Топлопроводност на земята λg (W/m·K)
+        /// </summary>
         [ObservableProperty]
-        private double te = -15.0;
+        private double lambdaGround = 2.0;
 
+        /// <summary>
+        /// Линеен топлинен мост ψ_wf (W/mK), по подразбиране 0
+        /// </summary>
         [ObservableProperty]
-        private double basementDepth;
+        private double psiWallFloor = 0.0;
 
-        [ObservableProperty]
-        private double z; // Alias for basementDepth
-
-        [ObservableProperty]
-        private double wallAreaToGround;
-
+        // === Топлинни съпротивления ===
+        /// <summary>
+        /// Rsi за подова плоча на сутерена (m²K/W)
+        /// </summary>
         [ObservableProperty]
         private double rsiFloor = 0.17;
 
+        /// <summary>
+        /// Rse за подова плоча на сутерена (m²K/W)
+        /// </summary>
         [ObservableProperty]
         private double rseFloor = 0.04;
 
+        /// <summary>
+        /// Rsi за сутеренни стени към земя (m²K/W)
+        /// </summary>
         [ObservableProperty]
         private double rsiWall = 0.13;
 
-    public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
-    public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
+        /// <summary>
+        /// Rse за сутеренни стени към земя (m²K/W)
+        /// </summary>
+        [ObservableProperty]
+        private double rseWall = 0.00;
+
+        // === Слоеве на конструкции ===
+        /// <summary>
+        /// Слоеве на подовата плоча на сутерена към земя
+        /// </summary>
+        public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
+
+        /// <summary>
+        /// Слоеве на сутеренните стени към земя
+        /// </summary>
+        public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
     }
 
     /// <summary>

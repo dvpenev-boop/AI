@@ -59,11 +59,31 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private FloorUnheatedBasementDetail? unheatedBasementDetail;
 
+        /// <summary>
+        /// Уникален идентификатор на групата за композитни подове
+        /// </summary>
+        [ObservableProperty]
+        private string? groupId;
+
+        /// <summary>
+        /// Дали този под е част от композитна група (напр. отопляем сутерен = под + стена)
+        /// </summary>
+        [ObservableProperty]
+        private bool isComposite;
+
+        /// <summary>
+        /// Тип на компонента в композитната група: "Floor" или "Wall"
+        /// </summary>
+        [ObservableProperty]
+        private string? compositeType;
+
         public string TypeLabel => FloorType switch
         {
             FloorType.ExternalAir => "Под към външен въздух",
             FloorType.Ground => "Под към земя",
             FloorType.UnheatedBasement => "Под към неотопляем сутерен",
+            FloorType.HeatedBasement when CompositeType == "Floor" => "Под над отопляем сутерен – Под към земя",
+            FloorType.HeatedBasement when CompositeType == "Wall" => "Под над отопляем сутерен – Стена към земя",
             FloorType.HeatedBasement => "Под над отопляем сутерен",
             _ => "Неизвестен"
         };
@@ -77,11 +97,17 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(ADisplay));
         }
 
+        partial void OnCompositeTypeChanged(string? value)
+        {
+            OnPropertyChanged(nameof(TypeLabel));
+        }
+
         public void NotifyDisplayPropertiesChanged()
         {
             // Only notify display properties, not Area itself to avoid triggering recursive recalculation
             OnPropertyChanged(nameof(UDisplay));
             OnPropertyChanged(nameof(ADisplay));
+            OnPropertyChanged(nameof(TypeLabel));
         }
     }
 
@@ -139,26 +165,101 @@ namespace EE.Doklad.Models
     // Detail class for Heated Basement floor type
     public partial class FloorHeatedBasementDetail : ObservableObject
     {
+        // === Геометрия ===
+        /// <summary>
+        /// Площ на подовата плоча на сутерена (m²)
+        /// </summary>
         [ObservableProperty]
-        private double ti = 20.0; // Main heated space
+        private double area;
+
+        /// <summary>
+        /// Периметър на сутерена (m)
+        /// </summary>
+        [ObservableProperty]
+        private double perimeter;
+
+        /// <summary>
+        /// Дълбочина на сутерена под терена z (m)
+        /// </summary>
+        [ObservableProperty]
+        private double depth;
+
+        /// <summary>
+        /// Пълна дебелина на стените на нивото на терена d_we (m)
+        /// </summary>
+        [ObservableProperty]
+        private double wallThicknessAtGrade;
+
+        // === Параметри за земята ===
+        /// <summary>
+        /// Топлопроводност на земята λg (W/m·K)
+        /// </summary>
+        [ObservableProperty]
+        private double lambdaGround = 2.0;
+
+        /// <summary>
+        /// Линеен топлинен мост ψ_wf (W/mK), по подразбиране 0
+        /// </summary>
+        [ObservableProperty]
+        private double psiWallFloor = 0.0;
+
+        // === Топлинни съпротивления ===
+        /// <summary>
+        /// Rsi за подова плоча на сутерена (m²K/W)
+        /// </summary>
+        [ObservableProperty]
+        private double rsiFloor = 0.17;
+
+        /// <summary>
+        /// Rse за подова плоча на сутерена (m²K/W)
+        /// </summary>
+        [ObservableProperty]
+        private double rseFloor = 0.04;
+
+        /// <summary>
+        /// Rsi за сутеренни стени към земя (m²K/W)
+        /// </summary>
+        [ObservableProperty]
+        private double rsiWall = 0.13;
+
+        /// <summary>
+        /// Rse за сутеренни стени към земя (m²K/W)
+        /// </summary>
+        [ObservableProperty]
+        private double rseWall = 0.00;
+
+        // === Диагностични резултати ===
+        [ObservableProperty]
+        private double resultUfgb; // U на подова плоча към земя
 
         [ObservableProperty]
-        private double tb = 15.0; // Basement temperature
+        private double resultUwgb; // U на стени към земя
 
         [ObservableProperty]
-        private double te = -15.0; // External/ground temperature
+        private double resultHg; // Стационарен коефициент
 
         [ObservableProperty]
-        private double floorArea;
+        private double resultB; // Характеристичен размер
 
         [ObservableProperty]
-        private double basementDepth; // z
+        private double resultDf; // Еквивалентна дебелина на пода
 
         [ObservableProperty]
-        private double wallAreaToGround;
+        private double resultDwb; // Еквивалентна дебелина на стените
 
-    public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
-    public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
+        [ObservableProperty]
+        private double resultAwalls; // Площ на стените към земя
+
+        // === Слоеве на конструкции ===
+        /// <summary>
+        /// Слоеве на подовата плоча на сутерена към земя
+        /// </summary>
+        public ObservableCollection<FloorLayer> FloorLayers { get; } = new ObservableCollection<FloorLayer>();
+
+        /// <summary>
+        /// Слоеве на сутеренните стени към земя
+        /// </summary>
+        public ObservableCollection<FloorLayer> WallLayers { get; } = new ObservableCollection<FloorLayer>();
     }
 
     // Detail class for Unheated Basement floor type
