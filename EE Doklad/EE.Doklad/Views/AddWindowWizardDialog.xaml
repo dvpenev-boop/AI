@@ -108,12 +108,14 @@
                 <StackPanel x:Name="Step5Panel" Visibility="Collapsed">
                     <TextBlock Text="Стъпка 5: Слънцезащита" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
                     
-                    <RadioButton x:Name="ShadingNoneRadio" Content="Без слънцезащита" GroupName="Shading" 
-                                 IsChecked="True" Margin="0,0,0,5" Checked="ShadingRadio_Checked"/>
-                    <RadioButton x:Name="ShadingInternalRadio" Content="Вътрешна щора" GroupName="Shading" 
-                                 Margin="0,0,0,5" Checked="ShadingRadio_Checked"/>
-                    <RadioButton x:Name="ShadingExternalRadio" Content="Външна щора" GroupName="Shading" 
-                                 Margin="0,0,0,15" Checked="ShadingRadio_Checked"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <TextBlock Text="Режим:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox x:Name="ShadingModeComboBox" Width="180" Margin="0,0,0,0">
+                            <ComboBoxItem>Без щора</ComboBoxItem>
+                            <ComboBoxItem>Вътрешна щора</ComboBoxItem>
+                            <ComboBoxItem>Външна щора</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
                     
                     <TextBlock Text="Вид слънцезащита:" Margin="0,0,0,5"/>
                     <ComboBox x:Name="ShadingCategoryComboBox" Width="300" HorizontalAlignment="Left" 

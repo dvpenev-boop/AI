@@ -75,10 +75,10 @@ namespace EE.Doklad.Views
             FrameFractionTextBox.Text = (_batch.FrameFraction * 100).ToString("F1");
             FrameFractionTextBox.TextChanged += AnyInputChanged;
 
-            // Shading
-            ShadingNoneRadio.Checked += AnyInputChanged;
-            ShadingInternalRadio.Checked += AnyInputChanged;
-            ShadingExternalRadio.Checked += AnyInputChanged;
+            // Shading - use ComboBox for mode (0=None,1=Internal,2=External)
+            ShadingModeComboBox.SelectionChanged += (s, e) => AnyInputChanged(s, e);
+            // Default shading mode: none if no shading type saved, otherwise internal
+            ShadingModeComboBox.SelectedIndex = string.IsNullOrEmpty(_batch.ShadingTypeId) ? 0 : 1;
             ShadingCategoryComboBox.ItemsSource = _shadingByCategory.Keys.ToList();
             if (ShadingCategoryComboBox.Items.Count > 0)
             {
@@ -128,8 +128,9 @@ namespace EE.Doklad.Views
             var opticalType = OpticalTypeComboBox.SelectedItem is OpticalType ot ? ot : OpticalType.Clear;
             double g_base = opticalType == OpticalType.Clear ? 0.90 * gn : 0.75 * gn + 0.25 * gn;
             double shading = 1.0;
-            if (ShadingInternalRadio.IsChecked == true && ShadingOptionsDataGrid.SelectedItem is ShadingOption so1) shading = so1.FShadeInt;
-            if (ShadingExternalRadio.IsChecked == true && ShadingOptionsDataGrid.SelectedItem is ShadingOption so2) shading = so2.FShadeExt;
+            // Determine shading factor based on selected shading mode
+            if (ShadingModeComboBox.SelectedIndex == 1 && ShadingOptionsDataGrid.SelectedItem is ShadingOption so1) shading = so1.FShadeInt;
+            if (ShadingModeComboBox.SelectedIndex == 2 && ShadingOptionsDataGrid.SelectedItem is ShadingOption so2) shading = so2.FShadeExt;
             double g_eff = g_base * shading;
             int count = TryParseInt(CountTextBox.Text, out var c) ? c : 1;
             double ua = u * areaGross;
@@ -194,8 +195,8 @@ namespace EE.Doklad.Views
             TryParseDouble(FrameFractionTextBox.Text, out double ffr);
             _batch.FrameFraction = ffr / 100.0;
 
-            // 5. Слънцезащита
-            if (ShadingNoneRadio.IsChecked == true)
+            // 5. Слънцезащита (ComboBox mode)
+            if (ShadingModeComboBox.SelectedIndex == 0)
             {
                 _batch.ShadingTypeId = null;
                 _batch.ShadingReductionFactor = 1.0;
@@ -203,7 +204,7 @@ namespace EE.Doklad.Views
             else if (ShadingOptionsDataGrid.SelectedItem is ShadingOption option)
             {
                 _batch.ShadingTypeId = option.Id;
-                _batch.ShadingReductionFactor = ShadingInternalRadio.IsChecked == true
+                _batch.ShadingReductionFactor = ShadingModeComboBox.SelectedIndex == 1
                     ? option.FShadeInt
                     : option.FShadeExt;
             }

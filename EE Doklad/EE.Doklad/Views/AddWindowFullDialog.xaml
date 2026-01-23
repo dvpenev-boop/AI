@@ -106,9 +106,12 @@
             <GroupBox Header="5. Слънцезащита" Margin="0,6">
                 <StackPanel Margin="8">
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="ShadingNoneRadio" Content="Без щора" Margin="0,0,12,0"/>
-                        <RadioButton x:Name="ShadingInternalRadio" Content="Вътрешна щора" Margin="0,0,12,0"/>
-                        <RadioButton x:Name="ShadingExternalRadio" Content="Външна щора"/>
+                        <TextBlock Text="Режим на щора:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox x:Name="ShadingModeComboBox" Width="160" Margin="0,0,12,0">
+                            <ComboBoxItem>Без щора</ComboBoxItem>
+                            <ComboBoxItem>Вътрешна щора</ComboBoxItem>
+                            <ComboBoxItem>Външна щора</ComboBoxItem>
+                        </ComboBox>
                     </StackPanel>
                     <ComboBox x:Name="ShadingCategoryComboBox" Width="300" Margin="0,8,0,0"/>
                     <DataGrid x:Name="ShadingOptionsDataGrid" AutoGenerateColumns="False" Height="120" Margin="0,8,0,0">

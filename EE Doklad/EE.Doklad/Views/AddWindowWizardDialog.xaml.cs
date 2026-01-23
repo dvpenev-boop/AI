@@ -105,8 +105,8 @@ namespace EE.Doklad.Views
         {
             if (CalculatedAreaTextBlock == null || WidthTextBox == null || HeightTextBox == null) return;
 
-            if (double.TryParse(WidthTextBox.Text, out double wCm) &&
-                double.TryParse(HeightTextBox.Text, out double hCm) &&
+            if (TryParseDouble(WidthTextBox.Text, out double wCm) &&
+                TryParseDouble(HeightTextBox.Text, out double hCm) &&
                 wCm > 0 && hCm > 0)
             {
                 // Конвертиране от см в м²
@@ -159,7 +159,7 @@ namespace EE.Doklad.Views
             if (FrameAreaGlassTextBlock == null) return;
 
             double aGross = GetCurrentAreaGross();
-            if (double.TryParse(FrameFractionTextBox.Text, out double ffrPct) &&
+            if (TryParseDouble(FrameFractionTextBox.Text, out double ffrPct) &&
                 ffrPct >= 0 && ffrPct < 50 && aGross > 0)
             {
                 double ffr = ffrPct / 100.0;
@@ -174,8 +174,8 @@ namespace EE.Doklad.Views
 
         private double GetCurrentAreaGross()
         {
-            if (double.TryParse(WidthTextBox?.Text, out double wCm) &&
-                double.TryParse(HeightTextBox?.Text, out double hCm) &&
+            if (TryParseDouble(WidthTextBox?.Text, out double wCm) &&
+                TryParseDouble(HeightTextBox?.Text, out double hCm) &&
                 wCm > 0 && hCm > 0)
             {
                 // width/height are entered in cm in the wizard; return area in m²
@@ -192,10 +192,11 @@ namespace EE.Doklad.Views
 
         private void InitializeStep5()
         {
-            if (ShadingNoneRadio == null) return; // Safety check
-            
-            ShadingNoneRadio.IsChecked = string.IsNullOrEmpty(_batch.ShadingTypeId);
-            ShadingInternalRadio.IsChecked = !string.IsNullOrEmpty(_batch.ShadingTypeId);
+            if (ShadingModeComboBox == null) return; // Safety check
+
+            // Default: none if no saved shading type, otherwise internal
+            ShadingModeComboBox.SelectedIndex = string.IsNullOrEmpty(_batch.ShadingTypeId) ? 0 : 1;
+            ShadingModeComboBox.SelectionChanged += (s, e) => UpdateShadingUI();
 
             // Populate category combo
             ShadingCategoryComboBox.ItemsSource = _shadingByCategory.Keys;
@@ -207,10 +208,8 @@ namespace EE.Doklad.Views
             UpdateShadingUI();
         }
 
-        private void ShadingRadio_Checked(object sender, RoutedEventArgs e)
-        {
-            UpdateShadingUI();
-        }
+        // kept for compatibility (not used now)
+        private void ShadingRadio_Checked(object sender, RoutedEventArgs e) { }
 
         private void ShadingCategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -231,9 +230,9 @@ namespace EE.Doklad.Views
 
         private void UpdateShadingUI()
         {
-            if (ShadingNoneRadio == null || ShadingCategoryComboBox == null || ShadingOptionsDataGrid == null) return;
+            if (ShadingModeComboBox == null || ShadingCategoryComboBox == null || ShadingOptionsDataGrid == null) return;
 
-            bool hasShading = ShadingInternalRadio.IsChecked == true || ShadingExternalRadio.IsChecked == true;
+            bool hasShading = ShadingModeComboBox.SelectedIndex == 1 || ShadingModeComboBox.SelectedIndex == 2;
             ShadingCategoryComboBox.IsEnabled = hasShading;
             ShadingOptionsDataGrid.IsEnabled = hasShading;
 
@@ -242,19 +241,18 @@ namespace EE.Doklad.Views
 
         private void UpdateShadingPreview()
         {
-            if (ShadingPreviewTextBlock == null || ShadingNoneRadio == null) return;
+            if (ShadingPreviewTextBlock == null || ShadingModeComboBox == null) return;
 
-            if (ShadingNoneRadio.IsChecked == true)
+            if (ShadingModeComboBox.SelectedIndex == 0)
             {
                 ShadingPreviewTextBlock.Text = "Избран коефициент: 1.00 (без щора)";
                 return;
             }
 
-            if (ShadingOptionsDataGrid?.SelectedItem is ShadingOption option && 
-                (ShadingInternalRadio != null && ShadingExternalRadio != null))
+            if (ShadingOptionsDataGrid?.SelectedItem is ShadingOption option)
             {
-                double factor = ShadingInternalRadio.IsChecked == true ? option.FShadeInt : option.FShadeExt;
-                string location = ShadingInternalRadio.IsChecked == true ? "вътрешна" : "външна";
+                double factor = ShadingModeComboBox.SelectedIndex == 1 ? option.FShadeInt : option.FShadeExt;
+                string location = ShadingModeComboBox.SelectedIndex == 1 ? "вътрешна" : "външна";
                 ShadingPreviewTextBlock.Text = $"Избран коефициент: {factor:F2} ({location})";
             }
             else
@@ -449,7 +447,7 @@ namespace EE.Doklad.Views
                     _batch.FrameFraction = ffr / 100.0;
                     break;
                 case 5:
-                    if (ShadingNoneRadio.IsChecked == true)
+                    if (ShadingModeComboBox.SelectedIndex == 0)
                     {
                         _batch.ShadingTypeId = null;
                         _batch.ShadingReductionFactor = 1.0;
@@ -457,7 +455,7 @@ namespace EE.Doklad.Views
                     else if (ShadingOptionsDataGrid.SelectedItem is ShadingOption option)
                     {
                         _batch.ShadingTypeId = option.Id;
-                        _batch.ShadingReductionFactor = ShadingInternalRadio.IsChecked == true
+                        _batch.ShadingReductionFactor = ShadingModeComboBox.SelectedIndex == 1
                             ? option.FShadeInt
                             : option.FShadeExt;
                     }
@@ -508,8 +506,12 @@ namespace EE.Doklad.Views
             result = 0;
             if (string.IsNullOrWhiteSpace(text))
                 return false;
-            
-            return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
+            // Try current culture first (accepts comma in many locales), then invariant (dot)
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out result)) return true;
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out result)) return true;
+            // Fallback: replace comma with dot and try invariant
+            var alt = text.Replace(',', '.');
+            return double.TryParse(alt, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
         }
 
         #endregion
