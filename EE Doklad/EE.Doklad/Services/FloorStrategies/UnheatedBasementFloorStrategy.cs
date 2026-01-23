@@ -52,6 +52,15 @@ namespace EE.Doklad.Services.FloorStrategies
                 double rTotalWallAboveGrade = input.RsiWallAboveGrade + rLayersWallAboveGrade + input.RseWallAboveGrade;
                 double uw = rTotalWallAboveGrade > 0 ? 1.0 / rTotalWallAboveGrade : 0;
 
+                    // === Прозорци и врати в надтеренната част ===
+                    double a_ag = input.HeightAboveGround * input.Perimeter;
+                    double a_win = input.WindowArea;
+                    double a_door = input.DoorArea;
+                    double a_opaque = Math.Max(0, a_ag - a_win - a_door);
+                    double u_win = input.WindowUValue;
+                    double u_door = input.DoorUValue;
+                    // Сборен топлопренос през надтеренната част
+                    double aboveGradeTransfer = (uw * a_opaque) + (u_win * a_win) + (u_door * a_door);
                 // === 2. Контакт със земята ===
 
                 // 2.1 Еквивалентна дебелина на подовата плоча на сутерена
@@ -103,7 +112,7 @@ namespace EE.Doklad.Services.FloorStrategies
                 // 4.1 Сборен "изход" от сутерена
                 double s = (input.Area * ufGb) +
                            (z * input.Perimeter * uwGb) +
-                           (input.HeightAboveGround * input.Perimeter * uw) +
+                               aboveGradeTransfer +
                            hveB;
 
                 // 4.2 Краен резултат

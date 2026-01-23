@@ -41,7 +41,12 @@ namespace EE.Doklad.Tests
                 RsiBasementWall = 0.13,
                 RseBasementWall = 0.0,
                 RsiWallAboveGrade = 0.13,
-                RseWallAboveGrade = 0.04
+                RseWallAboveGrade = 0.04,
+                // Нови членове за прозорци и врати
+                WindowArea = 2.0, // 2 m² прозорци
+                DoorArea = 1.0,   // 1 m² врата
+                WindowUValue = 1.2, // U-стойност на прозорци
+                DoorUValue = 1.6    // U-стойност на врата
             };
 
             // Добавяне на слоеве за под между отопляемото и сутерена

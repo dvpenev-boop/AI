@@ -130,6 +130,21 @@
                 <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveWallAboveGradeLayer_Click"/>
             </StackPanel>
 
+            <!-- Прозорци и врати в надтеренната част -->
+            <TextBlock Text="Прозорци и врати (над терена)" FontWeight="SemiBold" Margin="0,10,0,4" Background="#E3F2FD" Padding="4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Площ на прозорци (m²):" VerticalAlignment="Center" Margin="0,0,5,0" Width="180"/>
+                <TextBox Width="80" Text="{Binding WindowArea, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="U-прозорци (W/m²K):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="80" Text="{Binding WindowUValue, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Площ на врати (m²):" VerticalAlignment="Center" Margin="0,0,5,0" Width="180"/>
+                <TextBox Width="80" Text="{Binding DoorArea, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" Margin="0,0,10,0"/>
+                <TextBlock Text="U-врати (W/m²K):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
+                <TextBox Width="80" Text="{Binding DoorUValue, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
+            </StackPanel>
+
             <!-- Диагностични резултати -->
             <TextBlock Text="Резултати (диагностични)" FontWeight="SemiBold" Margin="0,15,0,4" Background="#FFEBEE" Padding="4"/>
             <Grid Margin="0,0,0,5">

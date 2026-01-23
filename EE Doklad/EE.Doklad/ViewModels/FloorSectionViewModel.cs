@@ -546,7 +546,12 @@ namespace EE.Doklad.ViewModels
                     RsiBasementWall = detail.RsiBasementWall,
                     RseBasementWall = detail.RseBasementWall,
                     RsiWallAboveGrade = detail.RsiWallAboveGrade,
-                    RseWallAboveGrade = detail.RseWallAboveGrade
+                    RseWallAboveGrade = detail.RseWallAboveGrade,
+                    // Нови полета за прозорци и врати
+                    WindowArea = detail.WindowArea,
+                    DoorArea = detail.DoorArea,
+                    WindowUValue = detail.WindowUValue,
+                    DoorUValue = detail.DoorUValue
                 };
 
                 // Копирай слоевете от всички 4 конструкции

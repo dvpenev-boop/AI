@@ -308,5 +308,11 @@ namespace EE.Doklad.Models
         public ObservableCollection<FloorLayer> BasementFloorLayers { get; } = new ObservableCollection<FloorLayer>();
         public ObservableCollection<FloorLayer> BasementWallLayers { get; } = new ObservableCollection<FloorLayer>();
         public ObservableCollection<FloorLayer> WallAboveGradeLayers { get; } = new ObservableCollection<FloorLayer>();
+
+    // === Прозорци и врати в надтеренната част ===
+    [ObservableProperty] private double windowArea;
+    [ObservableProperty] private double doorArea;
+    [ObservableProperty] private double windowUValue = 1.3;
+    [ObservableProperty] private double doorUValue = 1.5;
     }
 }
