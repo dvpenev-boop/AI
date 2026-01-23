@@ -57,7 +57,7 @@ namespace EE.Doklad.Views
                 TypeName = _summaryRow.TypeName
             };
 
-            var dialog = new AddWindowWizardDialog(newBatch);
+            var dialog = new AddWindowFullDialog(newBatch);
             if (dialog.ShowDialog() == true)
             {
                 _batchesCollection.Add(dialog.Result);
@@ -71,7 +71,7 @@ namespace EE.Doklad.Views
         {
             if (sender is System.Windows.Controls.Button button && button.DataContext is WindowBatch batch)
             {
-                var dialog = new AddWindowWizardDialog(batch);
+                var dialog = new AddWindowFullDialog(batch);
                 if (dialog.ShowDialog() == true)
                 {
                     // Update batch in place

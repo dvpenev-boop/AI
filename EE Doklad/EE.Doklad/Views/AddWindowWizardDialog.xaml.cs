@@ -90,75 +90,34 @@ namespace EE.Doklad.Views
 
         private void InitializeStep2()
         {
-            if (GeometryWidthHeightRadio == null || WidthTextBox == null || HeightTextBox == null || 
-                GeometryAreaRadio == null || AreaGrossTextBox == null) return;
-            
+            if (WidthTextBox == null || HeightTextBox == null) return;
+
             if (_batch.Width > 0 && _batch.Height > 0)
             {
-                GeometryWidthHeightRadio.IsChecked = true;
-                WidthTextBox.Text = _batch.Width.ToString("F2");
-                HeightTextBox.Text = _batch.Height.ToString("F2");
-            }
-            else if (_batch.AreaGross > 0)
-            {
-                GeometryAreaRadio.IsChecked = true;
-                AreaGrossTextBox.Text = _batch.AreaGross.ToString("F2");
-            }
-            else
-            {
-                GeometryWidthHeightRadio.IsChecked = true;
+                WidthTextBox.Text = (_batch.Width * 100.0).ToString("F0");
+                HeightTextBox.Text = (_batch.Height * 100.0).ToString("F0");
             }
 
-            UpdateGeometryFields();
-        }
-
-        private void GeometryRadio_Checked(object sender, RoutedEventArgs e)
-        {
-            UpdateGeometryFields();
-        }
-
-        private void UpdateGeometryFields()
-        {
-            if (GeometryWidthHeightRadio == null || WidthTextBox == null || HeightTextBox == null || AreaGrossTextBox == null) return;
-
-            bool useWidthHeight = GeometryWidthHeightRadio.IsChecked == true;
-            WidthTextBox.IsEnabled = useWidthHeight;
-            HeightTextBox.IsEnabled = useWidthHeight;
-            AreaGrossTextBox.IsEnabled = !useWidthHeight;
-
-            UpdateCalculatedArea();
-        }
-
-        private void GeometryTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
             UpdateCalculatedArea();
         }
 
         private void UpdateCalculatedArea()
         {
-            if (CalculatedAreaTextBlock == null || GeometryWidthHeightRadio == null || 
-                WidthTextBox == null || HeightTextBox == null) return;
+            if (CalculatedAreaTextBlock == null || WidthTextBox == null || HeightTextBox == null) return;
 
-            if (GeometryWidthHeightRadio.IsChecked == true)
+            if (double.TryParse(WidthTextBox.Text, out double wCm) &&
+                double.TryParse(HeightTextBox.Text, out double hCm) &&
+                wCm > 0 && hCm > 0)
             {
-                if (double.TryParse(WidthTextBox.Text, out double wCm) &&
-                    double.TryParse(HeightTextBox.Text, out double hCm) &&
-                    wCm > 0 && hCm > 0)
-                {
-                    // Конвертиране от см в м²
-                    double wM = wCm / 100.0;
-                    double hM = hCm / 100.0;
-                    double area = wM * hM;
-                    CalculatedAreaTextBlock.Text = $"Площ: {area:F3} m² (от {wCm:F0}×{hCm:F0} см)";
-                }
-                else
-                {
-                    CalculatedAreaTextBlock.Text = "Площ: —";
-                }
+                // Конвертиране от см в м²
+                double wM = wCm / 100.0;
+                double hM = hCm / 100.0;
+                double area = wM * hM;
+                CalculatedAreaTextBlock.Text = $"Площ: {area:F3} m² (от {wCm:F0}×{hCm:F0} см)";
             }
             else
             {
-                CalculatedAreaTextBlock.Text = "";
+                CalculatedAreaTextBlock.Text = "Площ: —";
             }
         }
 
@@ -215,17 +174,14 @@ namespace EE.Doklad.Views
 
         private double GetCurrentAreaGross()
         {
-            if (GeometryWidthHeightRadio?.IsChecked == true)
+            if (double.TryParse(WidthTextBox?.Text, out double wCm) &&
+                double.TryParse(HeightTextBox?.Text, out double hCm) &&
+                wCm > 0 && hCm > 0)
             {
-                if (double.TryParse(WidthTextBox?.Text, out double w) &&
-                    double.TryParse(HeightTextBox?.Text, out double h))
-                {
-                    return w * h;
-                }
-            }
-            else if (double.TryParse(AreaGrossTextBox?.Text, out double a))
-            {
-                return a;
+                // width/height are entered in cm in the wizard; return area in m²
+                double wM = wCm / 100.0;
+                double hM = hCm / 100.0;
+                return wM * hM;
             }
             return 0;
         }
@@ -407,29 +363,17 @@ namespace EE.Doklad.Views
                     return true;
                     
                 case 2:
-                    if (GeometryWidthHeightRadio?.IsChecked == true)
+                    if (!TryParseDouble(WidthTextBox?.Text, out double w) || w <= 0)
                     {
-                        if (!TryParseDouble(WidthTextBox?.Text, out double w) || w <= 0)
-                        {
-                            MessageBox.Show("Ширина трябва да е положително число.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return false;
-                        }
-                        if (!TryParseDouble(HeightTextBox?.Text, out double h) || h <= 0)
-                        {
-                            MessageBox.Show("Височина трябва да е положително число.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return false;
-                        }
-                        return true;
+                        MessageBox.Show("Ширина трябва да е положително число.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return false;
                     }
-                    else
+                    if (!TryParseDouble(HeightTextBox?.Text, out double h) || h <= 0)
                     {
-                        if (!TryParseDouble(AreaGrossTextBox?.Text, out double a) || a <= 0)
-                        {
-                            MessageBox.Show("Площ трябва да е положително число.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return false;
-                        }
-                        return true;
+                        MessageBox.Show("Височина трябва да е положително число.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return false;
                     }
+                    return true;
                     
                 case 3:
                     if (!TryParseDouble(UValueTextBox?.Text, out double u) || u <= 0 || u > 10)
@@ -486,22 +430,12 @@ namespace EE.Doklad.Views
                     _batch.Count = int.Parse(CountTextBox.Text);
                     break;
                 case 2:
-                    if (GeometryWidthHeightRadio.IsChecked == true)
-                    {
-                        // Конвертиране от см в м
-                        TryParseDouble(WidthTextBox.Text, out double widthCm);
-                        TryParseDouble(HeightTextBox.Text, out double heightCm);
-                        _batch.Width = widthCm / 100.0;  // см → м
-                        _batch.Height = heightCm / 100.0; // см → м
+                        // Конвертиране от см в м (винаги ширина×височина)
+                        TryParseDouble(WidthTextBox.Text, out double widthCm2);
+                        TryParseDouble(HeightTextBox.Text, out double heightCm2);
+                        _batch.Width = widthCm2 / 100.0;  // см → м
+                        _batch.Height = heightCm2 / 100.0; // см → м
                         _batch.AreaGross = _batch.Width * _batch.Height;
-                    }
-                    else
-                    {
-                        TryParseDouble(AreaGrossTextBox.Text, out double area);
-                        _batch.AreaGross = area;
-                        _batch.Width = 0;
-                        _batch.Height = 0;
-                    }
                     break;
                 case 3:
                     TryParseDouble(UValueTextBox.Text, out double u);

@@ -49,7 +49,7 @@ namespace EE.Doklad.ViewModels
         [RelayCommand]
         private void AddWindow()
         {
-            var dialog = new Views.AddWindowWizardDialog();
+            var dialog = new Views.AddWindowFullDialog();
             if (dialog.ShowDialog() == true)
             {
                 _data.WindowBatches.Add(dialog.Result);

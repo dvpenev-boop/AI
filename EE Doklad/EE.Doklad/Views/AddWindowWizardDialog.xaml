@@ -47,27 +47,18 @@
                 <StackPanel x:Name="Step2Panel" Visibility="Collapsed">
                     <TextBlock Text="Стъпка 2: Геометрия" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
                     
-                    <RadioButton x:Name="GeometryWidthHeightRadio" Content="Въведи ширина × височина (в см)" 
-                                 GroupName="GeometryInput" IsChecked="True" Margin="0,0,0,10"
-                                 Checked="GeometryRadio_Checked"/>
+                    <!-- Пряко въвеждане на размери (само ширина×височина) -->
                     
                     <StackPanel Orientation="Horizontal" Margin="20,0,0,15">
                         <TextBlock Text="Ширина (см):" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBox x:Name="WidthTextBox" Width="100" TextChanged="GeometryTextBox_TextChanged"/>
+                        <TextBox x:Name="WidthTextBox" Width="100"/>
                         <TextBlock Text="Височина (см):" VerticalAlignment="Center" Margin="20,0,10,0"/>
-                        <TextBox x:Name="HeightTextBox" Width="100" TextChanged="GeometryTextBox_TextChanged"/>
+                        <TextBox x:Name="HeightTextBox" Width="100"/>
                     </StackPanel>
                     
                     <TextBlock x:Name="CalculatedAreaTextBlock" Text="Площ: —" Margin="20,0,0,15" Foreground="Blue" FontWeight="Bold"/>
                     
-                    <RadioButton x:Name="GeometryAreaRadio" Content="Въведи директно площ (в м²)" 
-                                 GroupName="GeometryInput" Margin="0,0,0,10"
-                                 Checked="GeometryRadio_Checked"/>
-                    
-                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                        <TextBlock Text="Площ (м²):" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBox x:Name="AreaGrossTextBox" Width="100"/>
-                    </StackPanel>
+                    <!-- Премахнато: ръчно въвеждане на площ - винаги използвайте ширина и височина -->
                 </StackPanel>
 
                 <!-- Step 3: Топлотехнически/оптични данни -->

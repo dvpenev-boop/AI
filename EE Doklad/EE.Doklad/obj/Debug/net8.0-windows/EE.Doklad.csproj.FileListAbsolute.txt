@@ -127,3 +127,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowWizardDialog.b
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowWizardDialog.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowBatchDetailsDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowsSectionView.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowFullDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowFullDialog.g.cs

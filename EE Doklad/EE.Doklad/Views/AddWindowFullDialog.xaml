@@ -1,0 +1,170 @@
+<Window x:Class="EE.Doklad.Views.AddWindowFullDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Добавяне на прозорец/врата (Пълен преглед)" Height="700" Width="950"
+        MinWidth="700" MinHeight="500"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" SizeToContent="Manual">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <StackPanel Margin="12" x:Name="MainPanel" Orientation="Vertical" >
+            <!-- Секция 1: Основни данни -->
+            <GroupBox Header="1. Основни данни" Margin="0,6">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Вид:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="KindComboBox" Width="200" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+
+                    <TextBlock Text="Фасада (ориентация):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="OrientationComboBox" Width="200" Grid.Row="1" Grid.Column="1" Margin="0,2"/>
+
+                    <TextBlock Text="Брой:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="CountTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2"/>
+                    <TextBlock x:Name="CountError" Foreground="Red" FontSize="12" Grid.Row="3" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+            <!-- Секция 2: Геометрия -->
+            <GroupBox Header="2. Геометрия" Margin="0,6">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+                        <TextBlock Text="Ширина (см):"/>
+                        <TextBlock Text="Височина (см):" Margin="0,8,0,0"/>
+                        <TextBlock Text="Площ (m²):" Margin="0,8,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="WidthTextBox" Width="100" Margin="0,0,12,0"/>
+                            <TextBox x:Name="HeightTextBox" Width="100"/>
+                        </StackPanel>
+                        <TextBlock x:Name="GeometryError" Foreground="Red" FontSize="12"/>
+                        <TextBlock x:Name="CalculatedAreaTextBlock" FontWeight="Bold" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+            <!-- Секция 3: Топлотехнически и оптични данни -->
+            <GroupBox Header="3. Топлотехнически и оптични данни" Margin="0,6">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="U [W/m²K]:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="UValueTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+                    <TextBlock x:Name="UError" Foreground="Red" FontSize="12" Grid.Row="1" Grid.Column="1"/>
+
+                    <TextBlock Text="g_n:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GNTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2"/>
+                    <TextBlock x:Name="GNError" Foreground="Red" FontSize="12" Grid.Row="3" Grid.Column="1"/>
+
+                    <TextBlock Text="Оптичен тип:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="OpticalTypeComboBox" Width="200" Grid.Row="4" Grid.Column="1" Margin="0,2"/>
+                    <TextBlock x:Name="OpticalTypeError" Foreground="Red" FontSize="12" Grid.Row="5" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+            <!-- Секция 4: Рамка -->
+            <GroupBox Header="4. Рамка" Margin="0,6">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="F_fr (%):" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="FrameFractionTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+                    <TextBlock x:Name="FrameFractionError" Foreground="Red" FontSize="12" Grid.Row="1" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+            <!-- Секция 5: Слънцезащита -->
+            <GroupBox Header="5. Слънцезащита" Margin="0,6">
+                <StackPanel Margin="8">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="ShadingNoneRadio" Content="Без щора" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="ShadingInternalRadio" Content="Вътрешна щора" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="ShadingExternalRadio" Content="Външна щора"/>
+                    </StackPanel>
+                    <ComboBox x:Name="ShadingCategoryComboBox" Width="300" Margin="0,8,0,0"/>
+                    <DataGrid x:Name="ShadingOptionsDataGrid" AutoGenerateColumns="False" Height="120" Margin="0,8,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
+                            <DataGridTextColumn Header="α" Binding="{Binding Alpha}" Width="60"/>
+                            <DataGridTextColumn Header="τ" Binding="{Binding Tau}" Width="60"/>
+                            <DataGridTextColumn Header="F_sh_int" Binding="{Binding FShadeInt}" Width="80"/>
+                            <DataGridTextColumn Header="F_sh_ext" Binding="{Binding FShadeExt}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock x:Name="ShadingPreviewTextBlock" FontWeight="Bold" Margin="0,8,0,0"/>
+                </StackPanel>
+            </GroupBox>
+            <!-- Секция 6: Препятствия -->
+                <GroupBox Header="6. Препятствия (засенчване)" Margin="0,6">
+                    <Grid Margin="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Профил на препятствията:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="ObstacleProfileComboBox" Width="300" Grid.Row="0" Grid.Column="1"/>
+                    </Grid>
+                </GroupBox>
+            <!-- Preview панел -->
+            <GroupBox Header="Преглед на изчисленията" Margin="0,0,0,15">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Площ (AreaGross):"/>
+                    <TextBlock x:Name="PreviewAreaGross" FontWeight="Bold"/>
+                    <TextBlock Text="Площ стъкло (AreaGlass):"/>
+                    <TextBlock x:Name="PreviewAreaGlass" FontWeight="Bold"/>
+                    <TextBlock Text="g_base:"/>
+                    <TextBlock x:Name="PreviewGBase" FontWeight="Bold"/>
+                    <TextBlock Text="Коефициент щора (ShadingReductionFactor):"/>
+                    <TextBlock x:Name="PreviewShadingReduction" FontWeight="Bold"/>
+                    <TextBlock Text="g_eff:"/>
+                    <TextBlock x:Name="PreviewGEff" FontWeight="Bold"/>
+                    <TextBlock Text="UA (U*AreaGross):"/>
+                    <TextBlock x:Name="PreviewUA" FontWeight="Bold"/>
+                    <TextBlock Text="Общо площ (TotalGrossArea):"/>
+                    <TextBlock x:Name="PreviewTotalGrossArea" FontWeight="Bold"/>
+                    <TextBlock Text="Общо площ стъкло (TotalGlassArea):"/>
+                    <TextBlock x:Name="PreviewTotalGlassArea" FontWeight="Bold"/>
+                    <TextBlock Text="UA общо (Count*U*AreaGross):"/>
+                    <TextBlock x:Name="PreviewTotalUA" FontWeight="Bold"/>
+                    <TextBlock Text="gA (Count*g_eff*AreaGlass):"/>
+                    <TextBlock x:Name="PreviewTotalGA" FontWeight="Bold"/>
+                </StackPanel>
+            </GroupBox>
+            <!-- Долни бутони -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                <Button x:Name="SaveButton" Content="Запиши" Width="120" Height="36" Background="#4CAF50" Foreground="White" FontWeight="Bold" Margin="0,0,10,0"/>
+                <Button x:Name="ResetButton" Content="Нулирай" Width="100" Height="36" Margin="0,0,10,0"/>
+                <Button x:Name="CancelButton" Content="Отказ" Width="100" Height="36"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
