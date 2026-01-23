@@ -75,9 +75,10 @@ namespace EE.Doklad.Services.FloorStrategies
 
                 if (df + 0.5 * z < b)
                 {
-                    double denominator = Math.PI * (b + df + 0.5 * z);
+                    // Коригирана формула по БДС EN ISO 13370: знаменателят е (πB + df + 0.5z)
+                    double denominator = (Math.PI * b) + df + 0.5 * z;
                     double lnArg = (Math.PI * b) / (df + 0.5 * z) + 1.0;
-                    ufGb = (2.0 * input.LambdaGround / denominator) * Math.Log(lnArg);
+                    ufGb = (2.0 * input.LambdaGround * Math.Log(lnArg)) / denominator;
                 }
                 else
                 {
@@ -105,7 +106,8 @@ namespace EE.Doklad.Services.FloorStrategies
                 }
 
                 // === 3. Вентилационна проводимост на сутерена ===
-                double hveB = input.AirSpecificHeat * input.AirDensity * input.AirChangeRate * input.Volume;
+                // По БДС EN ISO 13370: използва се константа 0.33 Wh/(m³·K) за cp * ρ
+                double hveB = 0.33 * input.AirChangeRate * input.Volume;
 
                 // === 4. Еквивалентен коефициент Uub ===
 
