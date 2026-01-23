@@ -37,11 +37,27 @@ namespace EE.Doklad.ViewModels
             set
             {
                 Debug.WriteLine($"[FloorSectionViewModel] SelectedFloorItem changing from {_selectedFloorItem?.Name} to {value?.Name}");
+                if (value != null)
+                {
+                    // If the selected row is a composite child (e.g. the "Wall" part of a HeatedBasement),
+                    // redirect selection to the composite owner (the "Floor" part) so the UI shows
+                    // exactly one detail container for the composite element.
+                    if (value.IsComposite && value.CompositeType == "Wall" && !string.IsNullOrEmpty(value.GroupId))
+                    {
+                        var owner = FloorItems.FirstOrDefault(fi => fi.GroupId == value.GroupId && fi.CompositeType == "Floor");
+                        if (owner != null)
+                        {
+                            Debug.WriteLine($"[FloorSectionViewModel] Selection redirected from child '{value.Name}' to owner '{owner.Name}'");
+                            value = owner;
+                        }
+                    }
+                }
+
                 if (_selectedFloorItem != value)
                 {
                     _selectedFloorItem = value;
                     OnPropertyChanged(nameof(SelectedFloorItem));
-                    Debug.WriteLine($"[FloorSectionViewModel] SelectedFloorItem changed successfully");
+                    Debug.WriteLine($"[FloorSectionViewModel] SelectedFloorItem changed successfully to {_selectedFloorItem?.Name}");
                 }
             }
         }
