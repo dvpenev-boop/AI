@@ -24,6 +24,14 @@ namespace EE.Doklad.Models
         [ObservableProperty] private double volumeFlowRate;
         [ObservableProperty] private double windSpeed;
     public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
+
+    // Image attachment for the grid
+    private AttachmentData? _unheatedSpaceSchemeAttachment = new();
+    public AttachmentData? UnheatedSpaceSchemeAttachment
+    {
+        get => _unheatedSpaceSchemeAttachment;
+        set { _unheatedSpaceSchemeAttachment = value; OnPropertyChanged(); }
+    }
     }
 
     public partial class FloorItem : ObservableObject
@@ -160,6 +168,14 @@ namespace EE.Doklad.Models
     [ObservableProperty] private double resultU0;
     [ObservableProperty] private double resultU;
     public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
+
+    // Image attachment for the grid
+    private AttachmentData? _groundSchemeAttachment = new();
+    public AttachmentData? GroundSchemeAttachment
+    {
+        get => _groundSchemeAttachment;
+        set { _groundSchemeAttachment = value; OnPropertyChanged(); }
+    }
     }
 
     // Detail class for Heated Basement floor type
@@ -241,6 +257,21 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double resultB; // Характеристичен размер
 
+            // Image attachments for each grid
+            private AttachmentData? _heatedBasementFloorSchemeAttachment = new();
+            public AttachmentData? HeatedBasementFloorSchemeAttachment
+            {
+                get => _heatedBasementFloorSchemeAttachment;
+                set { _heatedBasementFloorSchemeAttachment = value; OnPropertyChanged(); }
+            }
+
+            private AttachmentData? _heatedBasementWallSchemeAttachment = new();
+            public AttachmentData? HeatedBasementWallSchemeAttachment
+            {
+                get => _heatedBasementWallSchemeAttachment;
+                set { _heatedBasementWallSchemeAttachment = value; OnPropertyChanged(); }
+            }
+
         [ObservableProperty]
         private double resultDf; // Еквивалентна дебелина на пода
 
@@ -314,5 +345,34 @@ namespace EE.Doklad.Models
     [ObservableProperty] private double doorArea;
     [ObservableProperty] private double windowUValue = 1.3;
     [ObservableProperty] private double doorUValue = 1.5;
+
+        // Image attachments for each grid
+        private AttachmentData? _floorToBasementSchemeAttachment = new();
+        public AttachmentData? FloorToBasementSchemeAttachment
+        {
+            get => _floorToBasementSchemeAttachment;
+            set { _floorToBasementSchemeAttachment = value; OnPropertyChanged(); }
+        }
+
+        private AttachmentData? _basementFloorSchemeAttachment = new();
+        public AttachmentData? BasementFloorSchemeAttachment
+        {
+            get => _basementFloorSchemeAttachment;
+            set { _basementFloorSchemeAttachment = value; OnPropertyChanged(); }
+        }
+
+        private AttachmentData? _basementWallSchemeAttachment = new();
+        public AttachmentData? BasementWallSchemeAttachment
+        {
+            get => _basementWallSchemeAttachment;
+            set { _basementWallSchemeAttachment = value; OnPropertyChanged(); }
+        }
+
+        private AttachmentData? _wallAboveGradeSchemeAttachment = new();
+        public AttachmentData? WallAboveGradeSchemeAttachment
+        {
+            get => _wallAboveGradeSchemeAttachment;
+            set { _wallAboveGradeSchemeAttachment = value; OnPropertyChanged(); }
+        }
     }
 }

@@ -5,6 +5,8 @@
              xmlns:converters="clr-namespace:EE.Doklad.Converters">
     <UserControl.Resources>
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+        <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
+        <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
     </UserControl.Resources>
     <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
         <StackPanel>
@@ -51,24 +53,48 @@
                 <TextBox Width="100" Text="{Binding Rse, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
             </StackPanel>
 
-            <TextBlock Text="Слоеве" FontWeight="SemiBold" Margin="0,10,0,4"/>
-            <DataGrid ItemsSource="{Binding Layers}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      HeadersVisibility="Column"
-                      Margin="0,0,0,5">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
-                        Click="AddLayer_Click"/>
-                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
-                        Click="RemoveLayer_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Width="520">
+                    <TextBlock Text="Слоеве" FontWeight="SemiBold" Margin="0,10,0,4"/>
+                    <DataGrid ItemsSource="{Binding Layers}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              HeadersVisibility="Column"
+                              Margin="0,0,0,5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                Click="AddLayer_Click"/>
+                        <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                Click="RemoveLayer_Click"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border BorderBrush="#AAAAAA" BorderThickness="1" Margin="20,0,0,0" Padding="8" Width="220" Height="220">
+                    <StackPanel>
+                        <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="130" VerticalAlignment="Center">
+                            <Grid>
+                                <Image Stretch="Uniform"
+                                       Visibility="{Binding UnheatedSpaceSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                       Source="{Binding UnheatedSpaceSchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                <TextBlock Text="Няма изображение" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding UnheatedSpaceSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                            <Button Content="Качи" Padding="6,2" Margin="0,0,8,0" Background="#2196F3" Foreground="White" BorderThickness="0"
+                                    Click="UploadUnheatedSpaceScheme_Click"/>
+                            <Button Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                    Click="RemoveUnheatedSpaceScheme_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </StackPanel>
     </Border>

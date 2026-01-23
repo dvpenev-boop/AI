@@ -3,9 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:EE.Doklad.Converters">
     <UserControl.Resources>
-        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
-        <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
-        <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
+    <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+    <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
+    <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
     </UserControl.Resources>
     <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
         <StackPanel>

@@ -4,6 +4,8 @@
              xmlns:converters="clr-namespace:EE.Doklad.Converters">
     <UserControl.Resources>
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+        <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
+        <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
     </UserControl.Resources>
     <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
         <StackPanel>
@@ -54,14 +56,42 @@
                 <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
                 <TextBox Width="100" Text="{Binding RseFloorToBasement, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
             </StackPanel>
-            <DataGrid ItemsSource="{Binding FloorToBasementLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Width="520">
+                    <DataGrid ItemsSource="{Binding FloorToBasementLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddFloorToBasementLayer_Click"/>
+                        <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveFloorToBasementLayer_Click"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border BorderBrush="#AAAAAA" BorderThickness="1" Margin="20,0,0,0" Padding="8" Width="220" Height="220">
+                    <StackPanel>
+                        <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="130" VerticalAlignment="Center">
+                            <Grid>
+                                <Image Stretch="Uniform"
+                                       Visibility="{Binding FloorToBasementSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                       Source="{Binding FloorToBasementSchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                <TextBlock Text="Няма изображение" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding FloorToBasementSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                            <Button Content="Качи" Padding="6,2" Margin="0,0,8,0" Background="#2196F3" Foreground="White" BorderThickness="0"
+                                    Click="UploadFloorToBasementScheme_Click"/>
+                            <Button Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                    Click="RemoveFloorToBasementScheme_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddFloorToBasementLayer_Click"/>
                 <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveFloorToBasementLayer_Click"/>
@@ -75,17 +105,41 @@
                 <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
                 <TextBox Width="100" Text="{Binding RseBasementFloor, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
             </StackPanel>
-            <DataGrid ItemsSource="{Binding BasementFloorLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddBasementFloorLayer_Click"/>
-                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveBasementFloorLayer_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Width="520">
+                    <DataGrid ItemsSource="{Binding BasementFloorLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddBasementFloorLayer_Click"/>
+                        <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveBasementFloorLayer_Click"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border BorderBrush="#AAAAAA" BorderThickness="1" Margin="20,0,0,0" Padding="8" Width="220" Height="220">
+                    <StackPanel>
+                        <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="130" VerticalAlignment="Center">
+                            <Grid>
+                                <Image Stretch="Uniform"
+                                       Visibility="{Binding BasementFloorSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                       Source="{Binding BasementFloorSchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                <TextBlock Text="Няма изображение" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding BasementFloorSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                            <Button Content="Качи" Padding="6,2" Margin="0,0,8,0" Background="#2196F3" Foreground="White" BorderThickness="0"
+                                    Click="UploadBasementFloorScheme_Click"/>
+                            <Button Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                    Click="RemoveBasementFloorScheme_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
 
             <!-- Стени на сутерена към земя -->
@@ -96,17 +150,41 @@
                 <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
                 <TextBox Width="100" Text="{Binding RseBasementWall, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
             </StackPanel>
-            <DataGrid ItemsSource="{Binding BasementWallLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddBasementWallLayer_Click"/>
-                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveBasementWallLayer_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Width="520">
+                    <DataGrid ItemsSource="{Binding BasementWallLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddBasementWallLayer_Click"/>
+                        <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveBasementWallLayer_Click"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border BorderBrush="#AAAAAA" BorderThickness="1" Margin="20,0,0,0" Padding="8" Width="220" Height="220">
+                    <StackPanel>
+                        <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="130" VerticalAlignment="Center">
+                            <Grid>
+                                <Image Stretch="Uniform"
+                                       Visibility="{Binding BasementWallSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                       Source="{Binding BasementWallSchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                <TextBlock Text="Няма изображение" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding BasementWallSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                            <Button Content="Качи" Padding="6,2" Margin="0,0,8,0" Background="#2196F3" Foreground="White" BorderThickness="0"
+                                    Click="UploadBasementWallScheme_Click"/>
+                            <Button Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                    Click="RemoveBasementWallScheme_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
 
             <!-- Стени над терена -->
@@ -117,17 +195,41 @@
                 <TextBlock Text="Rse (m²K/W):" VerticalAlignment="Center" Margin="0,0,5,0" Width="120"/>
                 <TextBox Width="100" Text="{Binding RseWallAboveGrade, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}"/>
             </StackPanel>
-            <DataGrid ItemsSource="{Binding WallAboveGradeLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                    <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddWallAboveGradeLayer_Click"/>
-                <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveWallAboveGradeLayer_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Width="520">
+                    <DataGrid ItemsSource="{Binding WallAboveGradeLayers}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,0,0,5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Слой" Padding="6,2" Margin="0,0,10,0" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="AddWallAboveGradeLayer_Click"/>
+                        <Button Content="Премахни слой" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0" Click="RemoveWallAboveGradeLayer_Click"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border BorderBrush="#AAAAAA" BorderThickness="1" Margin="20,0,0,0" Padding="8" Width="220" Height="220">
+                    <StackPanel>
+                        <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="130" VerticalAlignment="Center">
+                            <Grid>
+                                <Image Stretch="Uniform"
+                                       Visibility="{Binding WallAboveGradeSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                       Source="{Binding WallAboveGradeSchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                <TextBlock Text="Няма изображение" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding WallAboveGradeSchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                            <Button Content="Качи" Padding="6,2" Margin="0,0,8,0" Background="#2196F3" Foreground="White" BorderThickness="0"
+                                    Click="UploadWallAboveGradeScheme_Click"/>
+                            <Button Content="Премахни" Padding="6,2" Background="#F44336" Foreground="White" BorderThickness="0"
+                                    Click="RemoveWallAboveGradeScheme_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
 
             <!-- Прозорци и врати в надтеренната част -->

@@ -74,5 +74,119 @@ namespace EE.Doklad.Views.FloorPanels
                 detail.WallAboveGradeLayers.RemoveAt(detail.WallAboveGradeLayers.Count - 1);
             }
         }
+
+        public static string? SelectImageFile()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Изображения|*.png;*.jpg;*.jpeg",
+                Title = "Изберете изображение"
+            };
+            return dialog.ShowDialog() == true ? dialog.FileName : null;
+        }
+
+        public static void LoadImage(EE.Doklad.Models.AttachmentData attachment, string filePath)
+        {
+            try
+            {
+                attachment.AttachmentFileName = System.IO.Path.GetFileName(filePath);
+                attachment.Data = System.IO.File.ReadAllBytes(filePath);
+                var ext = System.IO.Path.GetExtension(filePath).ToLowerInvariant();
+                attachment.MimeType = ext switch
+                {
+                    ".png" => "image/png",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    _ => "application/octet-stream"
+                };
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Грешка при зареждане: {ex.Message}", "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void UploadFloorToBasementScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                var filePath = SelectImageFile();
+                if (filePath == null)
+                    return;
+                var newAttachment = new EE.Doklad.Models.AttachmentData();
+                LoadImage(newAttachment, filePath);
+                detail.FloorToBasementSchemeAttachment = newAttachment;
+            }
+        }
+
+        private void RemoveFloorToBasementScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                detail.FloorToBasementSchemeAttachment = new EE.Doklad.Models.AttachmentData();
+            }
+        }
+
+        private void UploadBasementFloorScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                var filePath = SelectImageFile();
+                if (filePath == null)
+                    return;
+                var newAttachment = new EE.Doklad.Models.AttachmentData();
+                LoadImage(newAttachment, filePath);
+                detail.BasementFloorSchemeAttachment = newAttachment;
+            }
+        }
+
+        private void RemoveBasementFloorScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                detail.BasementFloorSchemeAttachment = new EE.Doklad.Models.AttachmentData();
+            }
+        }
+
+        private void UploadBasementWallScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                var filePath = SelectImageFile();
+                if (filePath == null)
+                    return;
+                var newAttachment = new EE.Doklad.Models.AttachmentData();
+                LoadImage(newAttachment, filePath);
+                detail.BasementWallSchemeAttachment = newAttachment;
+            }
+        }
+
+        private void RemoveBasementWallScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                detail.BasementWallSchemeAttachment = new EE.Doklad.Models.AttachmentData();
+            }
+        }
+
+        private void UploadWallAboveGradeScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                var filePath = SelectImageFile();
+                if (filePath == null)
+                    return;
+                var newAttachment = new EE.Doklad.Models.AttachmentData();
+                LoadImage(newAttachment, filePath);
+                detail.WallAboveGradeSchemeAttachment = newAttachment;
+            }
+        }
+
+        private void RemoveWallAboveGradeScheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FloorUnheatedBasementDetail detail)
+            {
+                detail.WallAboveGradeSchemeAttachment = new EE.Doklad.Models.AttachmentData();
+            }
+        }
     }
 }
