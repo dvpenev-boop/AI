@@ -1,0 +1,181 @@
+<Window x:Class="EE.Doklad.Views.AddWindowWizardDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Добавяне на прозорец/врата" Height="600" Width="900"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock x:Name="StepIndicatorTextBlock" Text="Стъпка 1 от 6" FontSize="14" Foreground="Gray"/>
+            <TextBlock Text="Wizard за добавяне на прозорец/врата" FontSize="18" FontWeight="Bold"/>
+        </StackPanel>
+
+        <!-- Content Area (Steps) -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <!-- Step 1: Основни данни -->
+                <StackPanel x:Name="Step1Panel" Visibility="Visible">
+                    <TextBlock Text="Стъпка 1: Основни данни" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Вид:" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="KindComboBox" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Фасада (ориентация):" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="OrientationComboBox" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Брой:" Margin="0,0,0,5"/>
+                    <TextBox x:Name="CountTextBox" Width="100" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                    
+                    <Border Background="#FFF9C4" Padding="10" CornerRadius="4" Margin="0,10,0,0">
+                        <TextBlock TextWrapping="Wrap">
+                            ℹ Брой: Въведете колко еднакви прозорци/врати искате да добавите. 
+                            Например, ако имате 5 прозореца с идентични характеристики, въведете 5.
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <!-- Step 2: Геометрия -->
+                <StackPanel x:Name="Step2Panel" Visibility="Collapsed">
+                    <TextBlock Text="Стъпка 2: Геометрия" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <RadioButton x:Name="GeometryWidthHeightRadio" Content="Въведи ширина × височина (в см)" 
+                                 GroupName="GeometryInput" IsChecked="True" Margin="0,0,0,10"
+                                 Checked="GeometryRadio_Checked"/>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="20,0,0,15">
+                        <TextBlock Text="Ширина (см):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox x:Name="WidthTextBox" Width="100" TextChanged="GeometryTextBox_TextChanged"/>
+                        <TextBlock Text="Височина (см):" VerticalAlignment="Center" Margin="20,0,10,0"/>
+                        <TextBox x:Name="HeightTextBox" Width="100" TextChanged="GeometryTextBox_TextChanged"/>
+                    </StackPanel>
+                    
+                    <TextBlock x:Name="CalculatedAreaTextBlock" Text="Площ: —" Margin="20,0,0,15" Foreground="Blue" FontWeight="Bold"/>
+                    
+                    <RadioButton x:Name="GeometryAreaRadio" Content="Въведи директно площ (в м²)" 
+                                 GroupName="GeometryInput" Margin="0,0,0,10"
+                                 Checked="GeometryRadio_Checked"/>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                        <TextBlock Text="Площ (м²):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox x:Name="AreaGrossTextBox" Width="100"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Step 3: Топлотехнически/оптични данни -->
+                <StackPanel x:Name="Step3Panel" Visibility="Collapsed">
+                    <TextBlock Text="Стъпка 3: Топлотехнически и оптични данни" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <RadioButton x:Name="CatalogRadio" Content="Избор от каталог" GroupName="DataInput" IsChecked="True" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="ManualRadio" Content="Ръчно въвеждане" GroupName="DataInput" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="U-стойност (W/m²K):" Margin="0,0,0,5"/>
+                    <TextBox x:Name="UValueTextBox" Width="150" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="g_n (перпендикуляр, 0-1):" Margin="0,0,0,5"/>
+                    <TextBox x:Name="GNTextBox" Width="150" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Оптичен тип:" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="OpticalTypeComboBox" Width="250" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                    
+                    <Border Background="#E3F2FD" Padding="10" CornerRadius="4">
+                        <TextBlock TextWrapping="Wrap">
+                            ℹ Clear (Прозрачно): 4 сезона / селективно прозрачно остъкляване<LineBreak/>
+                            ℹ Diffusing (Дифузно): матирано или със слънцезащитно приспособление
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <!-- Step 4: Рамка -->
+                <StackPanel x:Name="Step4Panel" Visibility="Collapsed">
+                    <TextBlock Text="Стъпка 4: Рамка" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="F_fr - Процент площ на рамката (%, типично 10-20%):" Margin="0,0,0,5"/>
+                    <TextBox x:Name="FrameFractionTextBox" Width="100" HorizontalAlignment="Left" 
+                             TextChanged="FrameFractionTextBox_TextChanged" Margin="0,0,0,10"/>
+                    
+                    <TextBlock x:Name="FrameAreaGlassTextBlock" Text="A_стъкло = —" FontSize="14" 
+                               Foreground="Blue" Margin="0,0,0,15"/>
+                    
+                    <Border Background="#FFF9C4" Padding="10" CornerRadius="4">
+                        <TextBlock TextWrapping="Wrap">
+                            ℹ F_fr: Рамката намалява ефективната площ на стъклото.<LineBreak/>
+                            Формула: A_стъкло = A_брутна × (1 - F_fr)
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <!-- Step 5: Слънцезащита -->
+                <StackPanel x:Name="Step5Panel" Visibility="Collapsed">
+                    <TextBlock Text="Стъпка 5: Слънцезащита" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <RadioButton x:Name="ShadingNoneRadio" Content="Без слънцезащита" GroupName="Shading" 
+                                 IsChecked="True" Margin="0,0,0,5" Checked="ShadingRadio_Checked"/>
+                    <RadioButton x:Name="ShadingInternalRadio" Content="Вътрешна щора" GroupName="Shading" 
+                                 Margin="0,0,0,5" Checked="ShadingRadio_Checked"/>
+                    <RadioButton x:Name="ShadingExternalRadio" Content="Външна щора" GroupName="Shading" 
+                                 Margin="0,0,0,15" Checked="ShadingRadio_Checked"/>
+                    
+                    <TextBlock Text="Вид слънцезащита:" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="ShadingCategoryComboBox" Width="300" HorizontalAlignment="Left" 
+                              Margin="0,0,0,10" SelectionChanged="ShadingCategoryComboBox_SelectionChanged"/>
+                    
+                    <TextBlock Text="Избор на коефициент (Таблица 4):" Margin="0,0,0,5"/>
+                    <DataGrid x:Name="ShadingOptionsDataGrid" Height="150" AutoGenerateColumns="False" 
+                              CanUserAddRows="False" SelectionMode="Single" Margin="0,0,0,10"
+                              SelectionChanged="ShadingOptionsDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Вид" Binding="{Binding CategoryName}" Width="*"/>
+                            <DataGridTextColumn Header="α" Binding="{Binding AbsorptionAlpha, StringFormat=F2}" Width="60"/>
+                            <DataGridTextColumn Header="τ" Binding="{Binding TransmittanceTau, StringFormat=F2}" Width="60"/>
+                            <DataGridTextColumn Header="F_вътр" Binding="{Binding FShadeInt, StringFormat=F2}" Width="70"/>
+                            <DataGridTextColumn Header="F_външ" Binding="{Binding FShadeExt, StringFormat=F2}" Width="70"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <TextBlock x:Name="ShadingPreviewTextBlock" Text="Избран коефициент: —" 
+                               FontSize="14" FontWeight="Bold" Foreground="Green" Margin="0,0,0,10"/>
+                    
+                    <Border Background="#E3F2FD" Padding="10" CornerRadius="4">
+                        <TextBlock TextWrapping="Wrap">
+                            ℹ Коефициентът е множител към g_base: g_eff = g_base × ShadingReductionFactor<LineBreak/>
+                            При отопление се приема ShadingReductionFactor = 1.00 (щорите са вдигнати).
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <!-- Step 6: Препятствия -->
+                <StackPanel x:Name="Step6Panel" Visibility="Collapsed">
+                    <TextBlock Text="Стъпка 6: Препятствия (засенчване)" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Профил на препятствие:" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="ObstacleProfileComboBox" Width="300" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                    
+                    <Border Background="#FFF9C4" Padding="10" CornerRadius="4">
+                        <TextBlock TextWrapping="Wrap">
+                            ℹ Препятствията (балкони, съседни сгради, дървета) влияят на слънчевите печалби.<LineBreak/>
+                            Профилите съдържат месечни коефициенти F_sh,obst[m] (0..1).<LineBreak/>
+                            За детайлна настройка изберете "Custom".
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Navigation Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="BackButton" Content="&lt; Назад" Width="100" Margin="0,0,10,0" Click="BackButton_Click"/>
+            <Button x:Name="NextButton" Content="Напред &gt;" Width="100" Margin="0,0,10,0" 
+                    Background="#4CAF50" Foreground="White" Click="NextButton_Click"/>
+            <Button x:Name="CancelButton" Content="Отказ" Width="100" Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,141 @@
+<UserControl x:Class="EE.Doklad.Views.WindowsSectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EE.Doklad.Views"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:OrientationConverter x:Key="OrientationConverter"/>
+    </UserControl.Resources>
+    
+    <StackPanel Margin="20">
+        <!-- Header -->
+        <TextBlock Text="9. Прозорци и врати" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+        
+        <!-- Description -->
+        <TextBlock Text="{Binding Description}" 
+                   TextWrapping="Wrap" 
+                   Foreground="Gray" 
+                   Margin="0,0,0,20"/>
+
+        <!-- Toolbar -->
+        <WrapPanel Margin="0,0,0,10" HorizontalAlignment="Left">
+            <Button Content="+ Добави прозорец/врата" 
+                    Background="#4CAF50"
+                    Foreground="White"
+                    Command="{Binding AddWindowCommand}"
+                    Padding="12,6"
+                    Margin="0,0,5,0"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    FontWeight="SemiBold"/>
+            
+            <Button Content="Редактирай избраното" 
+                    Background="#2196F3"
+                    Foreground="White"
+                    Command="{Binding EditSelectedCommand}"
+                    Padding="12,6"
+                    Margin="0,0,5,0"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+            
+            <Button Content="Изтрий" 
+                    Background="#F44336"
+                    Foreground="White"
+                    Command="{Binding DeleteSelectedCommand}"
+                    Padding="12,6"
+                    Margin="0,0,5,0"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+            
+            <Button Content="Импорт от Excel" 
+                    Background="LightGray"
+                    Foreground="DarkGray"
+                    IsEnabled="False"
+                    Padding="12,6"
+                    Margin="0,0,5,0"
+                    BorderThickness="0"
+                    ToolTip="Следваща версия"/>
+        </WrapPanel>
+
+        <!-- Summary Table -->
+        <TextBlock Text="Обобщена таблица:" FontWeight="Bold" Margin="0,10,0,5"/>
+        
+        <DataGrid ItemsSource="{Binding SummaryRows}" 
+                  SelectedItem="{Binding SelectedSummaryRow, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="All"
+                  IsReadOnly="True"
+                  Margin="0,0,0,20">
+            <DataGrid.Columns>
+                <!-- Тип (primary column) -->
+                <DataGridTextColumn Header="Тип" Binding="{Binding TypeName}" Width="*" MinWidth="180"/>
+                
+                <!-- Фасада -->
+                <DataGridTextColumn Header="Фасада" Width="80">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="Orientation" Converter="{StaticResource OrientationConverter}"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                
+                <!-- Брой -->
+                <DataGridTextColumn Header="Брой" Binding="{Binding TotalCount}" Width="60"/>
+                
+                <!-- A брутна -->
+                <DataGridTextColumn Header="A брутна [m²]" Width="100">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="ATotalGross" StringFormat="F2"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                
+                <!-- Ū -->
+                <DataGridTextColumn Header="Ū [W/m²K]" Width="90">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="UAvg" StringFormat="F3"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                
+                <!-- ḡ -->
+                <DataGridTextColumn Header="ḡ" Width="70">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="GAvg" StringFormat="F3"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                
+                <!-- Details button -->
+                <DataGridTemplateColumn Header="" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Детайли >" 
+                                    Background="#FF9800"
+                                    Foreground="White"
+                                    Command="{Binding DataContext.OpenDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    Padding="8,2"
+                                    BorderThickness="0"
+                                    Cursor="Hand"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Info panel -->
+        <Border Background="#E3F2FD" Padding="10" CornerRadius="4" Margin="0,10,0,0">
+            <StackPanel>
+                <TextBlock Text="ℹ Информація" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBlock TextWrapping="Wrap">
+                    • Партидите се групират автоматично по фасада и тип прозорец.<LineBreak/>
+                    • g се изчислява по формули 3.41/3.42 с отчитане на щори (Табл. 4).<LineBreak/>
+                    • За детайли на партидите натиснете "Details >" на избрана група.
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

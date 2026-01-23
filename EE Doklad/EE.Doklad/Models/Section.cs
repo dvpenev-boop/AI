@@ -15,7 +15,8 @@ namespace EE.Doklad.Models
         ObjectData,     // Данни за обекта (фиксирана на позиция №3)
         ExternalWalls,  // Външни стени (секция №6)
         Roof,           // Покрив (секция №7)
-        Floor           // Под (секция №8)
+        Floor,          // Под (секция №8)
+        Windows         // Прозорци и врати (секция №9)
     }
 
     /// <summary>
@@ -73,6 +74,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Под" (само за Floor секции)
         /// </summary>
         public FloorSectionData? FloorSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Прозорци и врати" (само за Windows секции)
+        /// </summary>
+        public WindowsSectionData? WindowsSectionData { get; set; }
 
         public int Order { get; set; }
 

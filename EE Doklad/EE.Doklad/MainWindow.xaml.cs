@@ -173,6 +173,20 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = floorSectionView;
         }
+        else if (section.Type == ModelSectionType.Windows ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Прозорци")))
+        {
+            if (section.WindowsSectionData == null)
+                section.WindowsSectionData = new Models.WindowsSectionData();
+
+            section.Type = ModelSectionType.Windows;
+
+            var windowsSectionView = new WindowsSectionView
+            {
+                DataContext = new ViewModels.WindowsSectionViewModel(section.WindowsSectionData)
+            };
+            ContentScrollViewer.Content = windowsSectionView;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

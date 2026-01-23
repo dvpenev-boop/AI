@@ -121,3 +121,9 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheat
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorTypeSelectionDialog.baml
 e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedBasementPanel.g.cs
 e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorUnheatedBasementPanel.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowBatchDetailsDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowsSectionView.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowWizardDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AddWindowWizardDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowBatchDetailsDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WindowsSectionView.baml
