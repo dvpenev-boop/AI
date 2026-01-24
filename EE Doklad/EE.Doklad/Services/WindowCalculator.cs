@@ -118,6 +118,22 @@ namespace EE.Doklad.Services
         }
 
         /// <summary>
+        /// Връща g_alt (g_gl,alt;wi) за даден вид остъкляване (Таблица 3 - използвани стойности)
+        /// </summary>
+        public static double GetGlazingGAlt(GlazingType glazing)
+        {
+            return glazing switch
+            {
+                GlazingType.Single => 0.85,
+                GlazingType.Double => 0.75,
+                GlazingType.DoubleSelective => 0.67,
+                GlazingType.Triple => 0.70,
+                GlazingType.TripleSelective => 0.50,
+                _ => 0.75
+            };
+        }
+
+        /// <summary>
         /// Изчислява площта на стъклото: A_gl = A_gross * (1 - F_fr)
         /// </summary>
         public static double CalculateAreaGlass(double areaGross, double frameFraction)

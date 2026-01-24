@@ -23,13 +23,13 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Вид:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="KindComboBox" Width="200" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+                    <ComboBox x:Name="KindComboBox" Width="200" Grid.Row="0" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
 
                     <TextBlock Text="Фасада (ориентация):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="OrientationComboBox" Width="200" Grid.Row="1" Grid.Column="1" Margin="0,2"/>
+                    <ComboBox x:Name="OrientationComboBox" Width="200" Grid.Row="1" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
 
                     <TextBlock Text="Брой:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="CountTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2"/>
+                    <TextBox x:Name="CountTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="CountError" Foreground="Red" FontSize="12" Grid.Row="3" Grid.Column="1"/>
                 </Grid>
             </GroupBox>
@@ -50,8 +50,8 @@
                     </StackPanel>
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="WidthTextBox" Width="100" Margin="0,0,12,0"/>
-                            <TextBox x:Name="HeightTextBox" Width="100"/>
+                            <TextBox x:Name="WidthTextBox" Width="100" Margin="0,0,12,0" HorizontalAlignment="Left"/>
+                            <TextBox x:Name="HeightTextBox" Width="100" HorizontalAlignment="Left"/>
                         </StackPanel>
                         <TextBlock x:Name="GeometryError" Foreground="Red" FontSize="12"/>
                         <TextBlock x:Name="CalculatedAreaTextBlock" FontWeight="Bold" Margin="0,6,0,0"/>
@@ -68,22 +68,34 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="180"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="U [W/m²K]:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="UValueTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+                    <TextBox x:Name="UValueTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="UError" Foreground="Red" FontSize="12" Grid.Row="1" Grid.Column="1"/>
 
-                    <TextBlock Text="g_n:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="GNTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2"/>
+                    <TextBlock Text="g_n (изчислен):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GNTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2" IsReadOnly="True" Background="#FFF0F0F0" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="GNError" Foreground="Red" FontSize="12" Grid.Row="3" Grid.Column="1"/>
 
-                    <TextBlock Text="Оптичен тип:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="OpticalTypeComboBox" Width="200" Grid.Row="4" Grid.Column="1" Margin="0,2"/>
-                    <TextBlock x:Name="OpticalTypeError" Foreground="Red" FontSize="12" Grid.Row="5" Grid.Column="1"/>
+                    <TextBlock Text="Вид остъкляване:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="GlazingTypeComboBox" Width="220" Grid.Row="4" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="g_gl,alt;wi (табл.3):" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="GlazingGAltTextBlock" Grid.Row="5" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="g_gl,dif,wi (дифузна):" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GlazingGDiffTextBox" Width="100" Grid.Row="6" Grid.Column="1" Margin="0,2" ToolTip="Въведете стойност от сертификат (ISO 15099)." HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="Оптичен тип:" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="OpticalTypeComboBox" Width="200" Grid.Row="7" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="OpticalTypeError" Foreground="Red" FontSize="12" Grid.Row="8" Grid.Column="1"/>
                 </Grid>
             </GroupBox>
             <!-- Секция 4: Рамка -->
@@ -98,7 +110,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="F_fr (%):" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="FrameFractionTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+                    <TextBox x:Name="FrameFractionTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="FrameFractionError" Foreground="Red" FontSize="12" Grid.Row="1" Grid.Column="1"/>
                 </Grid>
             </GroupBox>
@@ -107,13 +119,13 @@
                 <StackPanel Margin="8">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Режим на щора:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <ComboBox x:Name="ShadingModeComboBox" Width="160" Margin="0,0,12,0">
+                        <ComboBox x:Name="ShadingModeComboBox" Width="160" Margin="0,0,12,0" HorizontalAlignment="Left">
                             <ComboBoxItem>Без щора</ComboBoxItem>
                             <ComboBoxItem>Вътрешна щора</ComboBoxItem>
                             <ComboBoxItem>Външна щора</ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
-                    <ComboBox x:Name="ShadingCategoryComboBox" Width="300" Margin="0,8,0,0"/>
+                    <ComboBox x:Name="ShadingCategoryComboBox" Width="300" Margin="0,8,0,0" HorizontalAlignment="Left" HorizontalContentAlignment="Left"/>
                     <DataGrid x:Name="ShadingOptionsDataGrid" AutoGenerateColumns="False" Height="120" Margin="0,8,0,0">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>

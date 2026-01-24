@@ -53,6 +53,13 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private OpticalType opticalType = OpticalType.Clear;
 
+        
+
+        [ObservableProperty]
+        private GlazingType glazingType = GlazingType.Double;
+
+        [ObservableProperty]
+        private double glazingGDif; // g_gl,dif,wi - дифузна пропускливост (по сертификат ISO 15099)
         [ObservableProperty]
         private double frameFraction = 0.15; // F_fr (0..0.5)
 
@@ -208,6 +215,25 @@ namespace EE.Doklad.Models
         Clear,
         [Description("Дифузно (Diffusing)")]
         Diffusing
+    }
+
+    /// <summary>
+    /// Вид остъкляване (Таблица 3)
+    /// </summary>
+    public enum GlazingType
+    {
+        [Description("Единично стъкло")]
+        Single,
+        [Description("Двоен стъклопакет")]
+        Double,
+        [Description("Двоен селективен нискоемис.")]
+        DoubleSelective,
+        [Description("Троен стъклопакет")]
+        Triple,
+        [Description("Троен селективен")]
+        TripleSelective,
+        [Description("Друг / неуточнен")]
+        Other
     }
 
     /// <summary>

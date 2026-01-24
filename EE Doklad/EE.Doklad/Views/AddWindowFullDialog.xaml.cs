@@ -68,11 +68,29 @@ namespace EE.Doklad.Views
             // U/g/OpticalType
             UValueTextBox.Text = _batch.UValue > 0 ? _batch.UValue.ToString("F2") : "1.40";
             UValueTextBox.TextChanged += AnyInputChanged;
-            GNTextBox.Text = _batch.GN > 0 ? _batch.GN.ToString("F3") : "0.750";
-            GNTextBox.TextChanged += AnyInputChanged;
+            // GN is computed from glazing tables (read-only)
+            GNTextBox.Text = _batch.GN > 0 ? _batch.GN.ToString("F3") : string.Empty;
             OpticalTypeComboBox.ItemsSource = Enum.GetValues(typeof(OpticalType));
             OpticalTypeComboBox.SelectedItem = _batch.OpticalType;
             OpticalTypeComboBox.SelectionChanged += AnyInputChanged;
+
+            // Glazing type (Table 3) and g_diff input
+            GlazingTypeComboBox.ItemsSource = Enum.GetValues(typeof(GlazingType)).Cast<GlazingType>().Select(g => new { Value = g, Label = GetEnumDescription(g) }).ToList();
+            GlazingTypeComboBox.DisplayMemberPath = "Label";
+            GlazingTypeComboBox.SelectedValuePath = "Value";
+            GlazingTypeComboBox.SelectedValue = _batch.GlazingType;
+            GlazingTypeComboBox.SelectionChanged += (s, e) =>
+            {
+                if (GlazingTypeComboBox.SelectedValue is GlazingType gt)
+                {
+                    GlazingGAltTextBlock.Text = WindowCalculator.GetGlazingGAlt(gt).ToString("F3");
+                }
+                AnyInputChanged(s, e);
+            };
+
+            GlazingGAltTextBlock.Text = WindowCalculator.GetGlazingGAlt(_batch.GlazingType).ToString("F3");
+            GlazingGDiffTextBox.Text = _batch.GlazingGDif > 0 ? _batch.GlazingGDif.ToString("F3") : string.Empty;
+            GlazingGDiffTextBox.TextChanged += AnyInputChanged;
 
             // FrameFraction
             FrameFractionTextBox.Text = (_batch.FrameFraction * 100).ToString("F1");
@@ -127,14 +145,31 @@ namespace EE.Doklad.Views
             double ffr = TryParseDouble(FrameFractionTextBox.Text, out var f) ? f / 100.0 : 0;
             double areaGlass = areaGross * (1 - ffr);
             double u = TryParseDouble(UValueTextBox.Text, out var uval) ? uval : 0;
-            double gn = TryParseDouble(GNTextBox.Text, out var gnval) ? gnval : 0;
-            var opticalType = OpticalTypeComboBox.SelectedItem is OpticalType ot ? ot : OpticalType.Clear;
-            double g_base = opticalType == OpticalType.Clear ? 0.90 * gn : 0.75 * gn + 0.25 * gn;
-            double shading = 1.0;
-            // Determine shading factor based on selected shading mode
-            if (ShadingModeComboBox.SelectedIndex == 1 && ShadingOptionsDataGrid.SelectedItem is ShadingOption so1) shading = so1.FShadeInt;
-            if (ShadingModeComboBox.SelectedIndex == 2 && ShadingOptionsDataGrid.SelectedItem is ShadingOption so2) shading = so2.FShadeExt;
-            double g_eff = g_base * shading;
+
+            // Glazing and g calculations (Variant B)
+            var selectedGlazing = GlazingTypeComboBox.SelectedValue is GlazingType gtv ? gtv : _batch.GlazingType;
+            double gAlt = WindowCalculator.GetGlazingGAlt(selectedGlazing);
+            double gDif = TryParseDouble(GlazingGDiffTextBox.Text, out var gdifVal) && gdifVal > 0 ? gdifVal : (_batch.GlazingGDif > 0 ? _batch.GlazingGDif : gAlt);
+
+            const double a_gl = 0.75; // table 3 default for vertical
+            const double Fw = 0.90; // correction factor from table 3
+
+            double g_no_shade_base = a_gl * gAlt + (1 - a_gl) * gDif; // formula 3.42 base
+            double g_n_computed = Fw * g_no_shade_base; // apply correction 3.41
+
+            // shading (use τ from selected shading option if any)
+            double tau = 1.0;
+            if (ShadingModeComboBox.SelectedIndex > 0 && ShadingOptionsDataGrid.SelectedItem is ShadingOption sop)
+            {
+                tau = sop.TransmittanceTau > 0 ? sop.TransmittanceTau : 1.0;
+            }
+
+            double g_with_shade_base = a_gl * (gAlt * tau) + (1 - a_gl) * (gDif * tau);
+            double g_eff = Fw * g_with_shade_base;
+            double shadingFactor = g_no_shade_base > 1e-9 ? (g_with_shade_base / g_no_shade_base) : 1.0;
+
+            // set computed GN (read-only textbox)
+            GNTextBox.Text = g_n_computed.ToString("F3");
             int count = TryParseInt(CountTextBox.Text, out var c) ? c : 1;
             double ua = u * areaGross;
             double totalGross = count * areaGross;
@@ -144,8 +179,8 @@ namespace EE.Doklad.Views
             // Set preview fields
             PreviewAreaGross.Text = areaGross.ToString("F3");
             PreviewAreaGlass.Text = areaGlass.ToString("F3");
-            PreviewGBase.Text = g_base.ToString("F3");
-            PreviewShadingReduction.Text = shading.ToString("F3");
+            PreviewGBase.Text = g_no_shade_base.ToString("F3");
+            PreviewShadingReduction.Text = shadingFactor.ToString("F3");
             PreviewGEff.Text = g_eff.ToString("F3");
             PreviewUA.Text = ua.ToString("F3");
             PreviewTotalGrossArea.Text = totalGross.ToString("F3");
@@ -189,9 +224,20 @@ namespace EE.Doklad.Views
 
             // 3. Топлотехнически и оптични данни
             TryParseDouble(UValueTextBox.Text, out double u);
-            TryParseDouble(GNTextBox.Text, out double g);
+            // GN is computed from glazing tables (do not read user input)
             _batch.UValue = u;
-            _batch.GN = g;
+            // save glazing selections
+            _batch.GlazingType = GlazingTypeComboBox.SelectedValue is GlazingType gtv ? gtv : _batch.GlazingType;
+            _batch.GlazingGDif = TryParseDouble(GlazingGDiffTextBox.Text, out var gd) ? gd : _batch.GlazingGDif;
+
+            // compute GN and shading factor again for save
+            double gAlt_save = WindowCalculator.GetGlazingGAlt(_batch.GlazingType);
+            double gDif_save = _batch.GlazingGDif > 0 ? _batch.GlazingGDif : gAlt_save;
+            const double a_gl = 0.75;
+            const double Fw = 0.90;
+            double g_no_shade_base_save = a_gl * gAlt_save + (1 - a_gl) * gDif_save;
+            double g_n_save = Fw * g_no_shade_base_save;
+            _batch.GN = g_n_save;
             _batch.OpticalType = OpticalTypeComboBox.SelectedItem is OpticalType ot ? ot : OpticalType.Clear;
 
             // 4. Рамка
@@ -199,6 +245,7 @@ namespace EE.Doklad.Views
             _batch.FrameFraction = ffr / 100.0;
 
             // 5. Слънцезащита (ComboBox mode)
+            // Compute shading reduction factor based on τ
             if (ShadingModeComboBox.SelectedIndex == 0)
             {
                 _batch.ShadingTypeId = null;
@@ -207,9 +254,10 @@ namespace EE.Doklad.Views
             else if (ShadingOptionsDataGrid.SelectedItem is ShadingOption option)
             {
                 _batch.ShadingTypeId = option.Id;
-                _batch.ShadingReductionFactor = ShadingModeComboBox.SelectedIndex == 1
-                    ? option.FShadeInt
-                    : option.FShadeExt;
+                double tau_save = option.TransmittanceTau > 0 ? option.TransmittanceTau : 1.0;
+                double g_with_shade_base_save = a_gl * (gAlt_save * tau_save) + (1 - a_gl) * (gDif_save * tau_save);
+                double shadingFactor_save = g_no_shade_base_save > 1e-9 ? (g_with_shade_base_save / g_no_shade_base_save) : 1.0;
+                _batch.ShadingReductionFactor = shadingFactor_save;
             }
 
             // 6. Препятствия
