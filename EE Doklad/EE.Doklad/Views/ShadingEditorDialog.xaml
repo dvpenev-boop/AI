@@ -1,0 +1,181 @@
+<Window x:Class="EE.Doklad.Views.ShadingEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Засенчване – изчисление по методиката" Height="700" Width="950"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Info -->
+        <Border Grid.Row="0" Background="#E3F2FD" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+            <StackPanel>
+                <TextBlock Text="Изчисление на коефициент F_sh,dir по БДС EN ISO 52016-1" 
+                           FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBlock x:Name="WindowInfoTextBlock" Text="Прозорец: W=—, H=—, Фасада=—" 
+                           FontSize="13" Foreground="#1565C0"/>
+                <TextBlock Text="F_sh,dir се изчислява по месеци (Януари–Декември)" 
+                           FontSize="12" Foreground="Gray" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Режим (Прост/Custom) -->
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Text="Режим на въвеждане:" FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="SimpleModeRadio" Content="Прост режим" 
+                                     GroupName="EditMode" IsChecked="True" Margin="0,0,20,0"
+                                     Checked="EditModeRadio_Checked"/>
+                        <RadioButton x:Name="CustomModeRadio" Content="Custom режим (напреднал)" 
+                                     GroupName="EditMode"
+                                     Checked="EditModeRadio_Checked"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Прост режим -->
+                <Border x:Name="SimpleModeBorder" BorderBrush="#BDBDBD" BorderThickness="1" 
+                        Padding="15" CornerRadius="5" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Прост режим: основни елементи за засенчване" 
+                                   FontSize="13" FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <!-- Overhang (Навес) -->
+                        <CheckBox x:Name="OverhangCheckBox" Content="Навес (хоризонтален елемент над прозореца)" 
+                                  Margin="0,0,0,10" Checked="SimpleModeCheckBox_Changed" Unchecked="SimpleModeCheckBox_Changed"/>
+                        <StackPanel x:Name="OverhangPanel" Visibility="Collapsed" Margin="20,0,0,15">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <TextBlock Text="D (дълбочина, m):" Width="140" VerticalAlignment="Center"/>
+                                <TextBox x:Name="OverhangDepthTextBox" Width="100" 
+                                         TextChanged="SimpleMode_ValueChanged"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="L (верт. разстояние, m):" Width="140" VerticalAlignment="Center"/>
+                                <TextBox x:Name="OverhangDistanceTextBox" Width="100" 
+                                         TextChanged="SimpleMode_ValueChanged"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Left Fin (Ляво ребро) -->
+                        <CheckBox x:Name="LeftFinCheckBox" Content="Ляво странично ребро" 
+                                  Margin="0,0,0,10" Checked="SimpleModeCheckBox_Changed" Unchecked="SimpleModeCheckBox_Changed"/>
+                        <StackPanel x:Name="LeftFinPanel" Visibility="Collapsed" Margin="20,0,0,15">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <TextBlock Text="D (дълбочина, m):" Width="140" VerticalAlignment="Center"/>
+                                <TextBox x:Name="LeftFinDepthTextBox" Width="100" 
+                                         TextChanged="SimpleMode_ValueChanged"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="L (хориз. разстояние, m):" Width="140" VerticalAlignment="Center"/>
+                                <TextBox x:Name="LeftFinDistanceTextBox" Width="100" 
+                                         TextChanged="SimpleMode_ValueChanged"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Right Fin (Дясно ребро) -->
+                        <CheckBox x:Name="RightFinCheckBox" Content="Дясно странично ребро" 
+                                  Margin="0,0,0,10" Checked="SimpleModeCheckBox_Changed" Unchecked="SimpleModeCheckBox_Changed"/>
+                        <StackPanel x:Name="RightFinPanel" Visibility="Collapsed" Margin="20,0,0,15">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <TextBlock Text="D (дълбочина, m):" Width="140" VerticalAlignment="Center"/>
+                                <TextBox x:Name="RightFinDepthTextBox" Width="100" 
+                                         TextChanged="SimpleMode_ValueChanged"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="L (хориз. разстояние, m):" Width="140" VerticalAlignment="Center"/>
+                                <TextBox x:Name="RightFinDistanceTextBox" Width="100" 
+                                         TextChanged="SimpleMode_ValueChanged"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Preset: Setback -->
+                        <Button x:Name="SetbackPresetButton" Content="🔧 Preset: Отстъп (комбинация от всички)" 
+                                HorizontalAlignment="Left" Padding="10,5" Margin="0,10,0,0"
+                                Click="SetbackPresetButton_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Custom режим -->
+                <Border x:Name="CustomModeBorder" BorderBrush="#BDBDBD" BorderThickness="1" 
+                        Padding="15" CornerRadius="5" Visibility="Collapsed" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Custom режим: списък обекти за засенчване" 
+                                   FontSize="13" FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <DataGrid x:Name="CustomShadingsDataGrid" Height="200" AutoGenerateColumns="False" 
+                                  CanUserAddRows="False" SelectionMode="Single" Margin="0,0,0,10">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Тип" Binding="{Binding Type}" Width="120" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="D (m)" Binding="{Binding Depth, StringFormat=F2}" Width="80" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="L (m)" Binding="{Binding Distance, StringFormat=F2}" Width="80" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Име" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="AddShadingButton" Content="+ Добави" Width="100" Margin="0,0,10,0" 
+                                    Click="AddShadingButton_Click"/>
+                            <Button x:Name="EditShadingButton" Content="Редактирай" Width="100" Margin="0,0,10,0" 
+                                    Click="EditShadingButton_Click"/>
+                            <Button x:Name="DeleteShadingButton" Content="Изтрий" Width="100" 
+                                    Click="DeleteShadingButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Резултати -->
+                <Border Background="#F5F5F5" Padding="15" CornerRadius="5" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Резултати: месечни коефициенти F_sh,dir" 
+                                   FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <!-- Сумарни показатели -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock x:Name="MinFshTextBlock" Text="Min: —" FontWeight="Bold" Foreground="#D32F2F" Margin="0,0,20,0"/>
+                            <TextBlock x:Name="AvgFshTextBlock" Text="Avg: —" FontWeight="Bold" Foreground="#1976D2" Margin="0,0,20,0"/>
+                            <TextBlock x:Name="MaxFshTextBlock" Text="Max: —" FontWeight="Bold" Foreground="#388E3C"/>
+                        </StackPanel>
+
+                        <!-- Таблица с месечни резултати -->
+                        <DataGrid x:Name="ResultsDataGrid" Height="220" AutoGenerateColumns="False" 
+                                  CanUserAddRows="False" IsReadOnly="True" SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Месец" Binding="{Binding MonthName}" Width="100"/>
+                                <DataGridTextColumn Header="h_ovh (m)" Binding="{Binding HOverhang, StringFormat=F3}" Width="80"/>
+                                <DataGridTextColumn Header="w_finL (m)" Binding="{Binding WFinLeft, StringFormat=F3}" Width="85"/>
+                                <DataGridTextColumn Header="w_finR (m)" Binding="{Binding WFinRight, StringFormat=F3}" Width="85"/>
+                                <DataGridTextColumn Header="h_sun (m)" Binding="{Binding HSun, StringFormat=F3}" Width="80"/>
+                                <DataGridTextColumn Header="w_sun (m)" Binding="{Binding WSun, StringFormat=F3}" Width="80"/>
+                                <DataGridTextColumn Header="F_sh,dir" Binding="{Binding FshDir, StringFormat=F3}" Width="80"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Информация -->
+                <Border Background="#FFF9C4" Padding="10" CornerRadius="4">
+                    <TextBlock TextWrapping="Wrap">
+                        ℹ D: Дълбочината на навеса/ребрата (колко надвисва).<LineBreak/>
+                        ℹ L: Разстояние от ръба на прозореца до елемента.<LineBreak/>
+                        ℹ При промяна резултатите се обновяват автоматично.
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Долни бутони -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button x:Name="ApplyButton" Content="Приложи" Width="100" Margin="0,0,10,0" 
+                    Background="#4CAF50" Foreground="White" Click="ApplyButton_Click"/>
+            <Button x:Name="CancelButton" Content="Отказ" Width="100" Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -38,18 +37,11 @@ namespace EE.Doklad.Views
             _isEditMode = existingBatch != null;
             _batch = existingBatch ?? new WindowBatch();
 
-            LoadShadingOptions();
             LoadObstacleProfiles();
 
             InitializeStep1();
             UpdateStepVisibility();
             UpdateNavigationButtons();
-        }
-
-        private void LoadShadingOptions()
-        {
-            _allShadingOptions = WindowCalculator.GetShadingOptions();
-            _shadingByCategory = WindowCalculator.GetShadingOptionsByCategory();
         }
 
         private void LoadObstacleProfiles()
@@ -264,16 +256,124 @@ namespace EE.Doklad.Views
 
         #endregion
 
-        #region Step 6: Препятствия
+        #region Step 6: Засенчване
 
         private void InitializeStep6()
         {
-            // Initialize obstacle profiles
-            if (ObstacleProfileComboBox.ItemsSource == null)
+            LoadStep6_Shading();
+        }
+
+        private void LoadStep6_Shading()
+        {
+            if (_batch == null) return;
+
+            // Проверяваме дали има засенчване
+            if (_batch.HasShading)
             {
-                ObstacleProfileComboBox.ItemsSource = _obstacleProfiles;
-                ObstacleProfileComboBox.DisplayMemberPath = "Name";
-                ObstacleProfileComboBox.SelectedIndex = 0;
+                WithShadingRadio.IsChecked = true;
+            }
+            else
+            {
+                NoShadingRadio.IsChecked = true;
+            }
+
+            UpdateShadingSummaryUI();
+        }
+
+        private void NoShadingRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_batch == null) return;
+            
+            // Изчистваме засенчването
+            _batch.ShadingConfig = null;
+            _batch.FshDirMonthly = new double[12] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+            
+            UpdateShadingSummaryUI();
+        }
+
+        private void WithShadingRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_batch == null) return;
+            
+            // Отваряме диалога за засенчване
+            OpenShadingEditor();
+        }
+
+        private void EditShadingButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenShadingEditor();
+        }
+
+        private void ClearShadingButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_batch == null) return;
+            
+            // Премахваме засенчването
+            _batch.ShadingConfig = null;
+            _batch.FshDirMonthly = new double[12] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+            
+            // Връщаме радио бутона към "Без засенчване"
+            NoShadingRadio.IsChecked = true;
+            
+            UpdateShadingSummaryUI();
+        }
+
+        private void OpenShadingEditor()
+        {
+            if (_batch == null) return;
+
+            // Вземи текущите размери
+            if (_batch.Width <= 0 || _batch.Height <= 0)
+            {
+                MessageBox.Show("Моля, първо въведете валидна ширина и височина в Стъпка 2.", "Грешка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                NoShadingRadio.IsChecked = true;
+                return;
+            }
+
+            var dialog = new ShadingEditorDialog(_batch.Width, _batch.Height, _batch.Orientation, _batch.ShadingConfig)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Запази конфигурацията от диалога
+                _batch.ShadingConfig = dialog.Result;
+                _batch.FshDirMonthly = dialog.Result.FshDirMonthly;
+                UpdateShadingSummaryUI();
+            }
+            else
+            {
+                // При Cancel, ако няма конфигурация, връщаме към "Без засенчване"
+                if (_batch.ShadingConfig == null || _batch.ShadingConfig.Shadings.Count == 0)
+                {
+                    NoShadingRadio.IsChecked = true;
+                }
+            }
+        }
+
+        private void UpdateShadingSummaryUI()
+        {
+            if (_batch == null) return;
+
+            bool hasShading = _batch.HasShading;
+
+            // Показваме/скриваме summary панела
+            if (ShadingSummaryPanel != null)
+            {
+                ShadingSummaryPanel.Visibility = hasShading ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            if (hasShading && _batch.FshDirMonthly != null)
+            {
+                double min = _batch.FshDirMonthly.Min();
+                double avg = _batch.FshDirMonthly.Average();
+
+                if (FshMinText != null)
+                    FshMinText.Text = min.ToString("F3");
+
+                if (FshAvgText != null)
+                    FshAvgText.Text = avg.ToString("F3");
             }
         }
 
@@ -462,11 +562,7 @@ namespace EE.Doklad.Views
                     }
                     break;
                 case 6:
-                    if (ObstacleProfileComboBox.SelectedItem is ObstacleProfile profile)
-                    {
-                        _batch.ObstacleProfileId = profile.Id;
-                        _batch.MonthlyObstacleFactors = (double[])profile.MonthlyFactors.Clone();
-                    }
+                    // Засенчването се записва директно в OpenShadingDialog, няма нужда от допълнителен код тук
                     break;
             }
 

@@ -145,20 +145,81 @@
                     </Border>
                 </StackPanel>
 
-                <!-- Step 6: Препятствия -->
+                <!-- Step 6: Засенчване -->
                 <StackPanel x:Name="Step6Panel" Visibility="Collapsed">
-                    <TextBlock Text="Стъпка 6: Препятствия (засенчване)" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <TextBlock Text="Стъпка 6: Засенчване" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
                     
-                    <TextBlock Text="Профил на препятствие:" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="ObstacleProfileComboBox" Width="300" HorizontalAlignment="Left" Margin="0,0,0,15"/>
-                    
-                    <Border Background="#FFF9C4" Padding="10" CornerRadius="4">
-                        <TextBlock TextWrapping="Wrap">
-                            ℹ Препятствията (балкони, съседни сгради, дървета) влияят на слънчевите печалби.<LineBreak/>
-                            Профилите съдържат месечни коефициенти F_sh,obst[m] (0..1).<LineBreak/>
-                            За детайлна настройка изберете "Custom".
-                        </TextBlock>
+                    <!-- Бутонен избор -->
+                    <TextBlock Text="Режим на засенчване:" FontSize="13" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <RadioButton x:Name="NoShadingRadio" Content="Без засенчване" 
+                                     GroupName="ShadingMode" IsChecked="True" Margin="0,0,20,0"
+                                     Checked="NoShadingRadio_Checked"/>
+                        <RadioButton x:Name="WithShadingRadio" Content="Засенчване..." 
+                                     GroupName="ShadingMode"
+                                     Checked="WithShadingRadio_Checked"/>
+                    </StackPanel>
+
+                    <!-- Info блок -->
+                    <Border Background="#E3F2FD" BorderBrush="#2196F3" BorderThickness="1" 
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock TextWrapping="Wrap" Foreground="#1976D2" Text="ℹ️ Засенчването влияе само на соларните печалби чрез коефициенти Fsh,dir (по месеци)."/>
+                            <TextBlock Text="Не променя U-стойността или g₀." 
+                                       TextWrapping="Wrap" Foreground="#1976D2" Margin="0,4,0,0"/>
+                        </StackPanel>
                     </Border>
+
+                    <!-- Summary блок (показва се само ако има активно засенчване) -->
+                    <Border x:Name="ShadingSummaryPanel" 
+                                Background="#F5F5F5" 
+                                BorderBrush="#BDBDBD" 
+                                BorderThickness="1" 
+                                CornerRadius="4" 
+                                Padding="12"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock FontWeight="SemiBold" Margin="0,0,0,8">
+                                    <Run Text="✓ Активно засенчване"/>
+                                </TextBlock>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,4">
+                                        <Run Text="Fsh,dir (min):"/>
+                                    </TextBlock>
+                                    <TextBlock x:Name="FshMinText" Grid.Row="0" Grid.Column="1" 
+                                               Text="—" FontWeight="SemiBold" Margin="0,0,0,4"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,4">
+                                        <Run Text="Fsh,dir (avg):"/>
+                                    </TextBlock>
+                                    <TextBlock x:Name="FshAvgText" Grid.Row="1" Grid.Column="1" 
+                                               Text="—" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                                        <Button Content="Редактирай засенчване..." 
+                                                Click="EditShadingButton_Click"
+                                                Padding="8,4"
+                                                Margin="0,0,8,0"/>
+                                        <Button Content="Изчисти" 
+                                                Click="ClearShadingButton_Click"
+                                                Padding="8,4"
+                                                Background="#FFEBEE"
+                                                BorderBrush="#E57373"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                 </StackPanel>
             </Grid>
         </ScrollViewer>

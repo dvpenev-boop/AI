@@ -70,10 +70,28 @@ namespace EE.Doklad.Models
         private double shadingReductionFactor = 1.0; // множител за g_eff
 
         [ObservableProperty]
-        private string? obstacleProfileId; // nullable
+        private string? obstacleProfileId; // nullable (deprecated - вижте ShadingConfig)
 
         [ObservableProperty]
-        private double[]? monthlyObstacleFactors; // 12 месечни коефициента F_sh,obst[m]
+        private double[]? monthlyObstacleFactors; // 12 месечни коефициента F_sh,obst[m] (deprecated)
+
+        /// <summary>
+        /// Конфигурация на засенчването (null = без засенчване)
+        /// </summary>
+        [ObservableProperty]
+        private ShadingConfig? shadingConfig;
+
+        /// <summary>
+        /// Месечни коефициенти на намаление на прякото засенчване F_sh,dir[m] (Jan..Dec)
+        /// Ако няма засенчване, всички са 1.0
+        /// </summary>
+        [ObservableProperty]
+        private double[] fshDirMonthly = new double[12] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+        /// <summary>
+        /// Дали има активно засенчване
+        /// </summary>
+        public bool HasShading => ShadingConfig != null && ShadingConfig.Shadings.Count > 0;
 
         /// <summary>
         /// Име на типа прозорец (за групиране и визуализация)
