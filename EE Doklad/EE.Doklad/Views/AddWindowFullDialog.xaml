@@ -138,17 +138,30 @@
                     <TextBlock x:Name="ShadingPreviewTextBlock" FontWeight="Bold" Margin="0,8,0,0"/>
                 </StackPanel>
             </GroupBox>
-            <!-- Секция 6: Препятствия -->
-                <GroupBox Header="6. Препятствия (засенчване)" Margin="0,6">
-                    <Grid Margin="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="180"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Профил на препятствията:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="ObstacleProfileComboBox" Width="300" Grid.Row="0" Grid.Column="1"/>
-                    </Grid>
-                </GroupBox>
+            <!-- Секция 6: Препятствия (засенчване) - опростен UI, отваря модален редактор -->
+            <GroupBox Header="6. Препятствия (засенчване)" Margin="0,6">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Vertical">
+                        <TextBlock Text="Засенчване:" VerticalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <RadioButton x:Name="NoShadingRadio" Content="Без засенчване" GroupName="ShadingMode" IsChecked="True" Margin="0,0,8,0"/>
+                            <RadioButton x:Name="WithShadingRadio" Content="Засенчване…" GroupName="ShadingMode"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock Text="Кратко резюме:" FontWeight="Bold"/>
+                        <TextBlock x:Name="ShadingSummaryTextBlock" Text="Няма засенчване" Margin="0,6,0,8"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="EditShadingButton" Content="Редактирай засенчване…" Width="180" Margin="0,0,8,0"/>
+                            <Button x:Name="ClearShadingButton" Content="Изчисти" Width="80"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
             <!-- Preview панел -->
             <GroupBox Header="Преглед на изчисленията" Margin="0,0,0,15">
                 <StackPanel Margin="10">

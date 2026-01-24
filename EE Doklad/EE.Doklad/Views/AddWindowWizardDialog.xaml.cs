@@ -321,16 +321,26 @@ namespace EE.Doklad.Views
         private void OpenShadingEditor()
         {
             if (_batch == null) return;
+            // Вземи текущите размери: предпочитай стойностите от текстовите полета (в см), иначе използвай _batch (в m)
+            double wk = _batch.Width;
+            double hk = _batch.Height;
+            if (TryParseDouble(WidthTextBox?.Text, out double wCm) && wCm > 0)
+            {
+                wk = wCm / 100.0;
+            }
+            if (TryParseDouble(HeightTextBox?.Text, out double hCm) && hCm > 0)
+            {
+                hk = hCm / 100.0;
+            }
 
-            // Вземи текущите размери
-            if (_batch.Width <= 0 || _batch.Height <= 0)
+            if (wk <= 0 || hk <= 0)
             {
                 MessageBox.Show("Моля, първо въведете валидна ширина и височина в Стъпка 2.", "Грешка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 NoShadingRadio.IsChecked = true;
                 return;
             }
 
-            var dialog = new ShadingEditorDialog(_batch.Width, _batch.Height, _batch.Orientation, _batch.ShadingConfig)
+            var dialog = new ShadingEditorDialog(wk, hk, _batch.Orientation, _batch.ShadingConfig)
             {
                 Owner = this
             };

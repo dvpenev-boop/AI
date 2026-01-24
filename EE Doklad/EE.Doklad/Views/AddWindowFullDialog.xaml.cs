@@ -15,6 +15,8 @@ namespace EE.Doklad.Views
         private List<ShadingOption> _allShadingOptions = new();
         private Dictionary<string, List<ShadingOption>> _shadingByCategory = new();
         private List<ObstacleProfile> _obstacleProfiles = new();
+        // shading
+        private ShadingConfig? _shadingConfigLocal;
         public WindowBatch Result => _batch;
 
         public AddWindowFullDialog(WindowBatch? existingBatch = null)
@@ -112,10 +114,22 @@ namespace EE.Doklad.Views
             ShadingOptionsDataGrid.SelectionChanged += AnyInputChanged;
 
             // Obstacle
-            ObstacleProfileComboBox.ItemsSource = _obstacleProfiles;
-            ObstacleProfileComboBox.DisplayMemberPath = "Name";
-            ObstacleProfileComboBox.SelectedIndex = 0;
-            ObstacleProfileComboBox.SelectionChanged += AnyInputChanged;
+            // Replace old obstacle dropdown with simplified shading controls
+            // Wiring for edit/clear buttons and initial summary
+            EditShadingButton.Click += EditShadingButton_Click;
+            ClearShadingButton.Click += (s, e) => { ClearShading(); UpdatePreview(); };
+            // initialize from existing batch shading config (if present)
+            if (_batch.ShadingConfig != null)
+            {
+                _shadingConfigLocal = _batch.ShadingConfig;
+                WithShadingRadio.IsChecked = true;
+            }
+            else
+            {
+                _shadingConfigLocal = null;
+                NoShadingRadio.IsChecked = true;
+            }
+            UpdateShadingSummaryUI();
 
             // Buttons
             SaveButton.Click += SaveButton_Click;
@@ -127,6 +141,82 @@ namespace EE.Doklad.Views
         {
             UpdatePreview();
             ValidateAll();
+        }
+
+        private void EditShadingButton_Click(object? sender, RoutedEventArgs e)
+        {
+            // Open the modal shading editor using current window geometry and orientation.
+            // Prefer values from the Width/Height text boxes (user input in cm), fallback to _batch values (m).
+            double wk = _batch.Width;
+            double hk = _batch.Height;
+            if (TryParseDouble(WidthTextBox?.Text, out double wCm) && wCm > 0)
+            {
+                wk = wCm / 100.0;
+            }
+            if (TryParseDouble(HeightTextBox?.Text, out double hCm) && hCm > 0)
+            {
+                hk = hCm / 100.0;
+            }
+
+            if (wk <= 0 || hk <= 0)
+            {
+                MessageBox.Show("Моля, първо въведете валидна ширина и височина.", "Грешка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new ShadingEditorDialog(wk, hk, _batch.Orientation, _shadingConfigLocal);
+            dialog.Owner = this;
+            if (dialog.ShowDialog() == true)
+            {
+                _shadingConfigLocal = dialog.Result;
+                // Update batch previewed shading immediately
+                _batch.ShadingConfig = _shadingConfigLocal;
+                if (_shadingConfigLocal?.FshDirMonthly != null && _shadingConfigLocal.FshDirMonthly.Length == 12)
+                    _batch.FshDirMonthly = (double[])_shadingConfigLocal.FshDirMonthly.Clone();
+                else
+                    _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+
+                // Set UI to show shading
+                // (radio buttons and summary updated)
+                if (WithShadingRadio != null) WithShadingRadio.IsChecked = true;
+                UpdateShadingSummaryUI();
+                UpdatePreview();
+            }
+        }
+
+        private void ClearShading()
+        {
+            _shadingConfigLocal = null;
+            _batch.ShadingConfig = null;
+            _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+            NoShadingRadio.IsChecked = true;
+            UpdateShadingSummaryUI();
+        }
+
+        private void UpdateShadingSummaryUI()
+        {
+            if (ShadingSummaryTextBlock == null)
+                return;
+
+            if (_shadingConfigLocal == null)
+            {
+                ShadingSummaryTextBlock.Text = "Няма засенчване";
+                return;
+            }
+
+            // Show basic summary: number of objects and min/avg/max of monthly F_sh,dir if available
+            var arr = _shadingConfigLocal.FshDirMonthly ?? Enumerable.Repeat(1.0, 12).ToArray();
+            if (arr.Length == 12)
+            {
+                double min = arr.Min();
+                double avg = arr.Average();
+                double max = arr.Max();
+                ShadingSummaryTextBlock.Text = $"Обекти: {_shadingConfigLocal.Shadings.Count}, F_sh,dir (min/avg/max) = {min:F3}/{avg:F3}/{max:F3}";
+            }
+            else
+            {
+                ShadingSummaryTextBlock.Text = $"Обекти: {_shadingConfigLocal.Shadings.Count}";
+            }
         }
 
         private void ShadingCategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -260,11 +350,21 @@ namespace EE.Doklad.Views
                 _batch.ShadingReductionFactor = shadingFactor_save;
             }
 
-            // 6. Препятствия
-            if (ObstacleProfileComboBox.SelectedItem is ObstacleProfile profile)
+            // 6. Препятствия (засенчване) - използваме ShadingConfig и месечни F_sh,dir
+            if (_shadingConfigLocal != null)
             {
-                _batch.ObstacleProfileId = profile.Id;
-                _batch.MonthlyObstacleFactors = (double[])profile.MonthlyFactors.Clone();
+                _batch.ShadingConfig = _shadingConfigLocal;
+                // copy monthly F_sh,dir into batch (ensure length 12)
+                if (_shadingConfigLocal.FshDirMonthly != null && _shadingConfigLocal.FshDirMonthly.Length == 12)
+                    _batch.FshDirMonthly = (double[])_shadingConfigLocal.FshDirMonthly.Clone();
+                else
+                    _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+            }
+            else
+            {
+                // No shading: default 1.0 for all months
+                _batch.ShadingConfig = null;
+                _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
             }
 
             // Генериране на TypeName (SaveAllData)
