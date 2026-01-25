@@ -30,6 +30,17 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
     }
 
+    private void OpenClimateData_Click(object sender, RoutedEventArgs e)
+    {
+        // Show read-only methodology data viewer.
+        ContentScrollViewer.Content = new ClimateDataView();
+    }
+
+    private void OpenMaterials_Click(object sender, RoutedEventArgs e)
+    {
+        ContentScrollViewer.Content = new MaterialsCatalogView();
+    }
+
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         // Актуализираме UI при първоначално зареждане

@@ -1,0 +1,478 @@
+[
+  {
+    "id": "seed-bg-table1-1.1",
+    "code": "1.1.",
+    "name_bg": "Мрамор, гранит, базалт",
+    "variants": [
+      { "id": "seed-bg-table1-1.1-v1", "rho_kg_m3": 2800, "c_j_kgk": 920, "lambda_w_mk": 3.49, "mu": 67 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-1.2",
+    "code": "1.2.",
+    "name_bg": "Пясъчник, кварц",
+    "variants": [
+      { "id": "seed-bg-table1-1.2-v1", "rho_kg_m3": 2400, "c_j_kgk": 920, "lambda_w_mk": 2.04, "mu": 21 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-1.3",
+    "code": "1.3.",
+    "name_bg": "Варовик",
+    "variants": [
+      { "id": "seed-bg-table1-1.3-v1", "rho_kg_m3": 2000, "c_j_kgk": 840, "lambda_w_mk": 1.16, "mu": 12 },
+      { "id": "seed-bg-table1-1.3-v2", "rho_kg_m3": 1700, "c_j_kgk": 840, "lambda_w_mk": 0.93, "mu": 10 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.1",
+    "code": "2.1.",
+    "name_bg": "Стоманобетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.1-v1", "rho_kg_m3": 2500, "c_j_kgk": 960, "lambda_w_mk": 1.63, "mu": 90 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.2",
+    "code": "2.2.",
+    "name_bg": "Обикновен бетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.2-v1", "rho_kg_m3": 2400, "c_j_kgk": 960, "lambda_w_mk": 1.45, "mu": 60 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.3",
+    "code": "2.3.",
+    "name_bg": "Бетон с трошени тухли",
+    "variants": [
+      { "id": "seed-bg-table1-2.3-v1", "rho_kg_m3": 2000, "c_j_kgk": 920, "lambda_w_mk": 1.02, "mu": 10 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.4",
+    "code": "2.4.",
+    "name_bg": "Керамзитоперлитобетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.4-v1", "rho_kg_m3": 1100, "c_j_kgk": 1000, "lambda_w_mk": 0.38, "mu": 6 },
+      { "id": "seed-bg-table1-2.4-v2", "rho_kg_m3": 1000, "c_j_kgk": 1000, "lambda_w_mk": 0.34, "mu": 5 },
+      { "id": "seed-bg-table1-2.4-v3", "rho_kg_m3": 900, "c_j_kgk": 1000, "lambda_w_mk": 0.32, "mu": 4 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.5",
+    "code": "2.5.",
+    "name_bg": "Керамзитобетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.5-v1", "rho_kg_m3": 1500, "c_j_kgk": 1000, "lambda_w_mk": 0.58, "mu": 8 },
+      { "id": "seed-bg-table1-2.5-v2", "rho_kg_m3": 1400, "c_j_kgk": 1000, "lambda_w_mk": 0.52, "mu": 8 },
+      { "id": "seed-bg-table1-2.5-v3", "rho_kg_m3": 1300, "c_j_kgk": 1000, "lambda_w_mk": 0.47, "mu": 7 },
+      { "id": "seed-bg-table1-2.5-v4", "rho_kg_m3": 1200, "c_j_kgk": 1000, "lambda_w_mk": 0.42, "mu": 7 },
+      { "id": "seed-bg-table1-2.5-v5", "rho_kg_m3": 1100, "c_j_kgk": 1000, "lambda_w_mk": 0.37, "mu": 6 },
+      { "id": "seed-bg-table1-2.5-v6", "rho_kg_m3": 1000, "c_j_kgk": 1000, "lambda_w_mk": 0.33, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.6",
+    "code": "2.6.",
+    "name_bg": "Аглопоритбетон, сгуробетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.6-v1", "rho_kg_m3": 1500, "c_j_kgk": 980, "lambda_w_mk": 0.62, "mu": 8 },
+      { "id": "seed-bg-table1-2.6-v2", "rho_kg_m3": 1400, "c_j_kgk": 980, "lambda_w_mk": 0.55, "mu": 8 },
+      { "id": "seed-bg-table1-2.6-v3", "rho_kg_m3": 1300, "c_j_kgk": 980, "lambda_w_mk": 0.51, "mu": 7 },
+      { "id": "seed-bg-table1-2.6-v4", "rho_kg_m3": 1200, "c_j_kgk": 980, "lambda_w_mk": 0.44, "mu": 7 },
+      { "id": "seed-bg-table1-2.6-v5", "rho_kg_m3": 1100, "c_j_kgk": 980, "lambda_w_mk": 0.4, "mu": 6 },
+      { "id": "seed-bg-table1-2.6-v6", "rho_kg_m3": 1000, "c_j_kgk": 980, "lambda_w_mk": 0.36, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.7",
+    "code": "2.7.",
+    "name_bg": "Перлитобетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.7-v1", "rho_kg_m3": 800, "c_j_kgk": 1050, "lambda_w_mk": 0.26, "mu": 2 },
+      { "id": "seed-bg-table1-2.7-v2", "rho_kg_m3": 600, "c_j_kgk": 1050, "lambda_w_mk": 0.17, "mu": 2 },
+      { "id": "seed-bg-table1-2.7-v3", "rho_kg_m3": 450, "c_j_kgk": 1050, "lambda_w_mk": 0.14, "mu": 2 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.8",
+    "code": "2.8.",
+    "name_bg": "Пенобетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.8-v1", "rho_kg_m3": 800, "c_j_kgk": 1050, "lambda_w_mk": 0.26, "mu": 5 },
+      { "id": "seed-bg-table1-2.8-v2", "rho_kg_m3": 600, "c_j_kgk": 1050, "lambda_w_mk": 0.17, "mu": 3 },
+      { "id": "seed-bg-table1-2.8-v3", "rho_kg_m3": 400, "c_j_kgk": 1050, "lambda_w_mk": 0.14, "mu": 3 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.9",
+    "code": "2.9.",
+    "name_bg": "Газобетон (автоклавен)",
+    "variants": [
+      { "id": "seed-bg-table1-2.9-v1", "rho_kg_m3": 800, "c_j_kgk": 1050, "lambda_w_mk": 0.26, "mu": 5 },
+      { "id": "seed-bg-table1-2.9-v2", "rho_kg_m3": 700, "c_j_kgk": 1050, "lambda_w_mk": 0.21, "mu": 4 },
+      { "id": "seed-bg-table1-2.9-v3", "rho_kg_m3": 600, "c_j_kgk": 1050, "lambda_w_mk": 0.19, "mu": 3 },
+      { "id": "seed-bg-table1-2.9-v4", "rho_kg_m3": 500, "c_j_kgk": 1050, "lambda_w_mk": 0.16, "mu": 2 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-2.10",
+    "code": "2.10.",
+    "name_bg": "Дървобетон",
+    "variants": [
+      { "id": "seed-bg-table1-2.10-v1", "rho_kg_m3": 700, "c_j_kgk": 1450, "lambda_w_mk": 0.23, "mu": 4 },
+      { "id": "seed-bg-table1-2.10-v2", "rho_kg_m3": 1150, "c_j_kgk": 960, "lambda_w_mk": 0.35, "mu": null },
+      { "id": "seed-bg-table1-2.10-v3", "rho_kg_m3": 1000, "c_j_kgk": 840, "lambda_w_mk": 0.33, "mu": null },
+      { "id": "seed-bg-table1-2.10-v4", "rho_kg_m3": 850, "c_j_kgk": 840, "lambda_w_mk": 0.31, "mu": null }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.1",
+    "code": "3.1.",
+    "name_bg": "Циментово-пясъчен разтвор",
+    "variants": [
+      { "id": "seed-bg-table1-3.1-v1", "rho_kg_m3": 1800, "c_j_kgk": 1050, "lambda_w_mk": 0.93, "mu": 8 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.2",
+    "code": "3.2.",
+    "name_bg": "Варо-циментопясъчен разтвор",
+    "variants": [
+      { "id": "seed-bg-table1-3.2-v1", "rho_kg_m3": 1700, "c_j_kgk": 1050, "lambda_w_mk": 0.87, "mu": 7 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.3",
+    "code": "3.3.",
+    "name_bg": "Варо-пясъчен разтвор",
+    "variants": [
+      { "id": "seed-bg-table1-3.3-v1", "rho_kg_m3": 1600, "c_j_kgk": 1050, "lambda_w_mk": 0.81, "mu": 6 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.4",
+    "code": "3.4.",
+    "name_bg": "Разтвор със сгуриен пясък",
+    "variants": [
+      { "id": "seed-bg-table1-3.4-v1", "rho_kg_m3": 1400, "c_j_kgk": 1050, "lambda_w_mk": 0.58, "mu": 6 },
+      { "id": "seed-bg-table1-3.4-v2", "rho_kg_m3": 1200, "c_j_kgk": 1050, "lambda_w_mk": 0.47, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.5",
+    "code": "3.5.",
+    "name_bg": "Варо-перлитов разтвор",
+    "variants": [
+      { "id": "seed-bg-table1-3.5-v1", "rho_kg_m3": 550, "c_j_kgk": 1050, "lambda_w_mk": 0.16, "mu": 2 },
+      { "id": "seed-bg-table1-3.5-v2", "rho_kg_m3": 350, "c_j_kgk": 1050, "lambda_w_mk": 0.12, "mu": 2 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.6",
+    "code": "3.6.",
+    "name_bg": "Варо-пясъчна мазилка (външна)",
+    "variants": [
+      { "id": "seed-bg-table1-3.6-v1", "rho_kg_m3": 1800, "c_j_kgk": 1050, "lambda_w_mk": 0.87, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.7",
+    "code": "3.7.",
+    "name_bg": "Варо-пясъчна мазилка",
+    "variants": [
+      { "id": "seed-bg-table1-3.7-v1", "rho_kg_m3": 1600, "c_j_kgk": 1050, "lambda_w_mk": 0.7, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-3.8",
+    "code": "3.8.",
+    "name_bg": "Топлоизолационни външни",
+    "variants": [
+      { "id": "seed-bg-table1-3.8-v1", "rho_kg_m3": 400, "c_j_kgk": 920, "lambda_w_mk": 0.12, "mu": 6 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.1",
+    "code": "4.1.",
+    "name_bg": "Битум",
+    "variants": [
+      { "id": "seed-bg-table1-4.1-v1", "rho_kg_m3": 1100, "c_j_kgk": 1050, "lambda_w_mk": 0.17, "mu": 1200 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.2",
+    "code": "4.2.",
+    "name_bg": "Асфалт 20 mm",
+    "variants": [
+      { "id": "seed-bg-table1-4.2-v1", "rho_kg_m3": 2100, "c_j_kgk": 1050, "lambda_w_mk": 0.7, "mu": 2500 },
+      { "id": "seed-bg-table1-4.2-v2", "rho_kg_m3": 1900, "c_j_kgk": 1050, "lambda_w_mk": 0.7, "mu": 2000 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.3",
+    "code": "4.3.",
+    "name_bg": "Мушама битумна",
+    "variants": [
+      { "id": "seed-bg-table1-4.3-v1", "rho_kg_m3": 600, "c_j_kgk": 1050, "lambda_w_mk": 0.17, "mu": 100 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.4",
+    "code": "4.4.",
+    "name_bg": "Мушама битумна",
+    "variants": [
+      { "id": "seed-bg-table1-4.4-v1", "rho_kg_m3": 900, "c_j_kgk": 1460, "lambda_w_mk": 0.19, "mu": 100000 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.5",
+    "code": "4.5.",
+    "name_bg": "Битумизиран картон",
+    "variants": [
+      { "id": "seed-bg-table1-4.5-v1", "rho_kg_m3": 1100, "c_j_kgk": 1460, "lambda_w_mk": 0.19, "mu": 2000 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.6",
+    "code": "4.6.",
+    "name_bg": "Асфалтобетон",
+    "variants": [
+      { "id": "seed-bg-table1-4.6-v1", "rho_kg_m3": 2100, "c_j_kgk": 1050, "lambda_w_mk": 1.05, "mu": 92.59 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.7",
+    "code": "4.7.",
+    "name_bg": "Битумоперлит 1",
+    "variants": [
+      { "id": "seed-bg-table1-4.7-v1", "rho_kg_m3": 500, "c_j_kgk": 1050, "lambda_w_mk": 0.14, "mu": 0 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-4.8",
+    "code": "4.8.",
+    "name_bg": "Битумоперлит 2",
+    "variants": [
+      { "id": "seed-bg-table1-4.8-v1", "rho_kg_m3": 300, "c_j_kgk": 1050, "lambda_w_mk": 0.09, "mu": 0 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-5.1",
+    "code": "5.1.",
+    "name_bg": "Зидарии от обикновени плътни",
+    "variants": [
+      { "id": "seed-bg-table1-5.1-v1", "rho_kg_m3": 1800, "c_j_kgk": 1050, "lambda_w_mk": 0.79, "mu": 7 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-5.2",
+    "code": "5.2.",
+    "name_bg": "Зидарии от варо-пясъчни",
+    "variants": [
+      { "id": "seed-bg-table1-5.2-v1", "rho_kg_m3": 1900, "c_j_kgk": 1050, "lambda_w_mk": 0.87, "mu": 7 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-5.3",
+    "code": "5.3.",
+    "name_bg": "Зидария от кухи и решетъчни",
+    "variants": [
+      { "id": "seed-bg-table1-5.3-v1", "rho_kg_m3": 1400, "c_j_kgk": 1050, "lambda_w_mk": 0.52, "mu": null }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-5.4",
+    "code": "5.4.",
+    "name_bg": "Зидария от диатомитови тухли",
+    "variants": [
+      { "id": "seed-bg-table1-5.4-v1", "rho_kg_m3": 900, "c_j_kgk": 1050, "lambda_w_mk": 0.29, "mu": 4 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-5.5",
+    "code": "5.5.",
+    "name_bg": "Зидария от камъни с правилна",
+    "variants": [
+      { "id": "seed-bg-table1-5.5-v1", "rho_kg_m3": 2680, "c_j_kgk": 1050, "lambda_w_mk": 3.2, "mu": 3 },
+      { "id": "seed-bg-table1-5.5-v2", "rho_kg_m3": 1260, "c_j_kgk": 920, "lambda_w_mk": 0.51, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-5.6",
+    "code": "5.6.",
+    "name_bg": "Зидария от камъни с неправилна",
+    "variants": [
+      { "id": "seed-bg-table1-5.6-v1", "rho_kg_m3": 2420, "c_j_kgk": 1050, "lambda_w_mk": 2.57, "mu": 3 },
+      { "id": "seed-bg-table1-5.6-v2", "rho_kg_m3": 1380, "c_j_kgk": 920, "lambda_w_mk": 0.6, "mu": 5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.1",
+    "code": "6.1.",
+    "name_bg": "Естествен пясък",
+    "variants": [
+      { "id": "seed-bg-table1-6.1-v1", "rho_kg_m3": 1600, "c_j_kgk": 840, "lambda_w_mk": 1.6, "mu": 4 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.2",
+    "code": "6.2.",
+    "name_bg": "Перлит",
+    "variants": [
+      { "id": "seed-bg-table1-6.2-v1", "rho_kg_m3": 150, "c_j_kgk": 840, "lambda_w_mk": 0.06, "mu": null }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.3",
+    "code": "6.3.",
+    "name_bg": "Керамзит",
+    "variants": [
+      { "id": "seed-bg-table1-6.3-v1", "rho_kg_m3": 500, "c_j_kgk": 840, "lambda_w_mk": 0.16, "mu": 1 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.4",
+    "code": "6.4.",
+    "name_bg": "Аглопорит",
+    "variants": [
+      { "id": "seed-bg-table1-6.4-v1", "rho_kg_m3": 500, "c_j_kgk": 840, "lambda_w_mk": 0.19, "mu": 1 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.5",
+    "code": "6.5.",
+    "name_bg": "Сгурия",
+    "variants": [
+      { "id": "seed-bg-table1-6.5-v1", "rho_kg_m3": 1000, "c_j_kgk": 840, "lambda_w_mk": 0.29, "mu": 1 },
+      { "id": "seed-bg-table1-6.5-v2", "rho_kg_m3": 800, "c_j_kgk": 840, "lambda_w_mk": 0.24, "mu": 1 },
+      { "id": "seed-bg-table1-6.5-v3", "rho_kg_m3": 600, "c_j_kgk": 840, "lambda_w_mk": 0.2, "mu": 1 },
+      { "id": "seed-bg-table1-6.5-v4", "rho_kg_m3": 500, "c_j_kgk": 840, "lambda_w_mk": 0.17, "mu": 1 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.6",
+    "code": "6.6.",
+    "name_bg": "Металургична (доменна) шлака",
+    "variants": [
+      { "id": "seed-bg-table1-6.6-v1", "rho_kg_m3": 900, "c_j_kgk": 840, "lambda_w_mk": 0.26, "mu": 2 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-6.7",
+    "code": "6.7.",
+    "name_bg": "Пепел от ТЕЦ",
+    "variants": [
+      { "id": "seed-bg-table1-6.7-v1", "rho_kg_m3": 700, "c_j_kgk": 840, "lambda_w_mk": 0.17, "mu": 1 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-7.1",
+    "code": "7.1.",
+    "name_bg": "Скала",
+    "variants": [
+      { "id": "seed-bg-table1-7.1-v1", "rho_kg_m3": 2700, "c_j_kgk": 920, "lambda_w_mk": 3.5, "mu": 0 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-7.2",
+    "code": "7.2.",
+    "name_bg": "Пясък",
+    "variants": [
+      { "id": "seed-bg-table1-7.2-v1", "rho_kg_m3": 1800, "c_j_kgk": 840, "lambda_w_mk": 2.0, "mu": 0 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-7.3",
+    "code": "7.3.",
+    "name_bg": "Глина",
+    "variants": [
+      { "id": "seed-bg-table1-7.3-v1", "rho_kg_m3": 1400, "c_j_kgk": 840, "lambda_w_mk": 1.5, "mu": 0 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.1",
+    "code": "8.1.",
+    "name_bg": "Стомана, листова",
+    "variants": [
+      { "id": "seed-bg-table1-8.1-v1", "rho_kg_m3": 7800, "c_j_kgk": 460, "lambda_w_mk": 53.5, "mu": 600000 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.2",
+    "code": "8.2.",
+    "name_bg": "Алуминиево фолио",
+    "variants": [
+      { "id": "seed-bg-table1-8.2-v1", "rho_kg_m3": 2700, "c_j_kgk": 940, "lambda_w_mk": 203.0, "mu": 60000 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.3",
+    "code": "8.3.",
+    "name_bg": "Медно фолио",
+    "variants": [
+      { "id": "seed-bg-table1-8.3-v1", "rho_kg_m3": 9000, "c_j_kgk": 380, "lambda_w_mk": 380.0, "mu": 700000 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.4",
+    "code": "8.4.",
+    "name_bg": "Оловни листове",
+    "variants": [
+      { "id": "seed-bg-table1-8.4-v1", "rho_kg_m3": 11500, "c_j_kgk": 130, "lambda_w_mk": 35.0, "mu": null }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.5",
+    "code": "8.5.",
+    "name_bg": "Цинкови листове",
+    "variants": [
+      { "id": "seed-bg-table1-8.5-v1", "rho_kg_m3": 7100, "c_j_kgk": 390, "lambda_w_mk": 110.0, "mu": null }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.6",
+    "code": "8.6.",
+    "name_bg": "Плътни гипсови плочи",
+    "variants": [
+      { "id": "seed-bg-table1-8.6-v1", "rho_kg_m3": 1400, "c_j_kgk": 840, "lambda_w_mk": 0.7, "mu": 12 },
+      { "id": "seed-bg-table1-8.6-v2", "rho_kg_m3": 1200, "c_j_kgk": 840, "lambda_w_mk": 0.58, "mu": 8.5 },
+      { "id": "seed-bg-table1-8.6-v3", "rho_kg_m3": 1000, "c_j_kgk": 840, "lambda_w_mk": 0.47, "mu": 6 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.7",
+    "code": "8.7.",
+    "name_bg": "Гипсовлакнести плочи",
+    "variants": [
+      { "id": "seed-bg-table1-8.7-v1", "rho_kg_m3": 800, "c_j_kgk": 840, "lambda_w_mk": 0.35, "mu": 1.5 },
+      { "id": "seed-bg-table1-8.7-v2", "rho_kg_m3": 600, "c_j_kgk": 840, "lambda_w_mk": 0.29, "mu": 1.5 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.8",
+    "code": "8.8.",
+    "name_bg": "Гипскартон",
+    "variants": [
+      { "id": "seed-bg-table1-8.8-v1", "rho_kg_m3": 900, "c_j_kgk": 840, "lambda_w_mk": 0.21, "mu": 12 },
+      { "id": "seed-bg-table1-8.8-v2", "rho_kg_m3": 900, "c_j_kgk": 840, "lambda_w_mk": 0.23, "mu": 8 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.9",
+    "code": "8.9.",
+    "name_bg": "Гипсоперлитови плочи",
+    "variants": [
+      { "id": "seed-bg-table1-8.9-v1", "rho_kg_m3": 700, "c_j_kgk": 840, "lambda_w_mk": 0.2, "mu": 5 },
+      { "id": "seed-bg-table1-8.9-v2", "rho_kg_m3": 500, "c_j_kgk": 840, "lambda_w_mk": 0.15, "mu": 3 }
+    ]
+  },
+  {
+    "id": "seed-bg-table1-8.10",
+    "code": "8.10.",
+    "name_bg": "Азбестоциментни плочи",
+    "variants": [
+      { "id": "seed-bg-table1-8.10-v1", "rho_kg_m3": 1900, "c_j_kgk": 840, "lambda_w_mk": 0.35, "mu": 10 }
+    ]
+  }
+]

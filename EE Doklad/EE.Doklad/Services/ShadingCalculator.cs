@@ -43,31 +43,197 @@ namespace EE.Doklad.Services
 
         #endregion
 
-        #region Корелационни коефициенти
+        #region Sampling-based helpers (solar geometry + shadow sampling)
 
-        /// <summary>
-        /// Коефициенти за навеси (Overhang) - период лято (Jun-Sep), северно полукълбо
-        /// </summary>
-        private static readonly Dictionary<OrientationBucket, OverhangCoefficients> OverhangCoeffs = new()
-        {
-            { OrientationBucket.South,     new OverhangCoefficients(-3.023, 0.045, 1.285, -0.006) },
-            { OrientationBucket.SouthEast, new OverhangCoefficients(-1.255, 0.015, 0.905, -0.008) },
-            { OrientationBucket.East,      new OverhangCoefficients(-0.684, 0.005, 0.610, -0.004) },
-            { OrientationBucket.NorthEast, new OverhangCoefficients(-0.654, 0.006, 0.616, -0.006) },
-            { OrientationBucket.North,     new OverhangCoefficients(-0.726, 0.007, 0.616, -0.007) }
-        };
+        // Convert degrees to radians
+        private static double Deg2Rad(double d) => d * Math.PI / 180.0;
+        private static double Rad2Deg(double r) => r * 180.0 / Math.PI;
 
-        /// <summary>
-        /// Коефициенти за ребра (Fins) - период лято (Jun-Sep), северно полукълбо
-        /// </summary>
-        private static readonly Dictionary<OrientationBucket, FinCoefficients> FinCoeffs = new()
+        // Compute sun altitude (alpha) and azimuth (A) for given latitude (deg), declination (deg) and hour angle omega (rad)
+        // Azimuth returned as degrees from North clockwise (0=N,90=E,180=S)
+        private static (double altitudeRad, double azimuthDeg) SunPosition(double latitudeDeg, double declinationDeg, double omegaRad)
         {
-            { OrientationBucket.South,     new FinCoefficients(-1.175, 0.012, 0.860, -0.008) },
-            { OrientationBucket.SouthEast, new FinCoefficients(-0.799, 0.009, 0.684, -0.006) },
-            { OrientationBucket.East,      new FinCoefficients(0.118, -0.014, 0.005, 0.010) },
-            { OrientationBucket.NorthEast, new FinCoefficients(0.155, -0.041, -0.680, 0.009) },
-            { OrientationBucket.North,     new FinCoefficients(0.275, -0.133, 0.641, 0.039) }
-        };
+            double phi = Deg2Rad(latitudeDeg);
+            double delta = Deg2Rad(declinationDeg);
+            // altitude: sin alpha = sin phi sin delta + cos phi cos delta cos omega
+            double sinAlpha = Math.Sin(phi) * Math.Sin(delta) + Math.Cos(phi) * Math.Cos(delta) * Math.Cos(omegaRad);
+            double alpha = Math.Asin(Math.Clamp(sinAlpha, -1.0, 1.0));
+
+            // azimuth: compute using sinA and cosA then atan2
+            // sin A = cos delta * sin omega / cos alpha
+            // cos A = (sin delta * cos phi - cos delta * sin phi * cos omega) / cos alpha
+            double cosAlpha = Math.Cos(alpha);
+            double sinA = 0.0;
+            double cosA = 1.0;
+            if (Math.Abs(cosAlpha) > 1e-9)
+            {
+                sinA = (Math.Cos(delta) * Math.Sin(omegaRad)) / cosAlpha;
+                cosA = (Math.Sin(delta) * Math.Cos(phi) - Math.Cos(delta) * Math.Sin(phi) * Math.Cos(omegaRad)) / cosAlpha;
+            }
+
+            double A = Math.Atan2(sinA, cosA); // radians, measured from South? depends on formula
+            // Convert to degrees and normalize to 0..360 measured from North clockwise
+            // The formula here gives azimuth from South; adjust: az_from_north = (A_rad in radians) -> deg
+            double azDeg = Rad2Deg(A);
+            // atan2 result can be negative; convert
+            // We need azimuth from North clockwise; convert by adding 180 (if from South) and normalize
+            azDeg = (azDeg + 180.0) % 360.0;
+            if (azDeg < 0) azDeg += 360.0;
+
+            return (alpha, azDeg);
+        }
+
+        // Compute sunrise/sunset hour angle (rad) for given latitude and declination
+        private static double SunriseHourAngle(double latitudeDeg, double declinationDeg)
+        {
+            double phi = Deg2Rad(latitudeDeg);
+            double delta = Deg2Rad(declinationDeg);
+            // cos omega0 = -tan phi * tan delta
+            double cosw = -Math.Tan(phi) * Math.Tan(delta);
+            if (cosw <= -1.0) return Math.PI; // polar day
+            if (cosw >= 1.0) return 0.0; // polar night
+            return Math.Acos(Math.Clamp(cosw, -1.0, 1.0));
+        }
+
+        // Compute per-month sample array of F_sh values by sampling sun positions during daytime
+        private static double[] ComputeMonthlySamplesFsh(double wk, double hk, Orientation orientation, List<ShadingObject> shadings, double latitude, double declinationDeg)
+        {
+            var samples = ComputeMonthlyDetailedSamples(wk, hk, orientation, shadings, latitude, declinationDeg);
+            if (samples.Count == 0) return Array.Empty<double>();
+            return samples.Select(s => s.FshDir).ToArray();
+        }
+
+        // Per-sample structure
+        private class SampleResult
+        {
+            public double HOverhang;
+            public double WFinLeft;
+            public double WFinRight;
+            public double HObstacle;
+            public double HSun;
+            public double WSun;
+            public double FshDir;
+        }
+
+        // Compute per-sample detailed shading results for a month by sampling hour angles
+        private static List<SampleResult> ComputeMonthlyDetailedSamples(double wk, double hk, Orientation orientation, List<ShadingObject> shadings, double latitude, double declinationDeg)
+        {
+            var results = new List<SampleResult>();
+
+            // sunrise/sunset hour angle
+            double omega0 = SunriseHourAngle(latitude, declinationDeg);
+            if (omega0 <= 0) return results; // no sun
+
+            // sample N points across day (including sunrise/sunset). Use 25 samples (hourly-ish)
+            int N = 25;
+            for (int i = 0; i < N; i++)
+            {
+                double frac = (double)i / (N - 1);
+                double omega = -omega0 + frac * (2.0 * omega0); // radians
+
+                var (alphaRad, azimuthDeg) = SunPosition(latitude, declinationDeg, omega);
+                if (alphaRad <= 0) continue; // sun below horizon
+
+                // facade azimuth (deg from North clockwise)
+                double facadeAz = OrientationToAzimuth(orientation);
+                // azimuth difference (abs minimal angle)
+                double diff = Math.Abs(NormalizeAngleDeg(azimuthDeg - facadeAz));
+                if (diff > 180) diff = 360 - diff;
+
+                // compute overhang shadow height (max across overhangs)
+                double maxHov = 0.0;
+                foreach (var ov in shadings.Where(s => s.Type == ShadingType.Overhang))
+                {
+                    double D = ov.Depth;
+                    double L = ov.Distance;
+                    if (D <= 0) continue;
+                    double hov = D * (1.0 / Math.Tan(alphaRad)); // D * cot(alpha)
+                    double hOnWindow = Math.Max(0.0, hov - L);
+                    maxHov = Math.Max(maxHov, Math.Min(hOnWindow, hk));
+                }
+
+                // lateral fins (left/right) — project horizontal effect depending on azimuth diff
+                double maxWfinL = 0.0;
+                foreach (var fin in shadings.Where(s => s.Type == ShadingType.LeftFin))
+                {
+                    double D = fin.Depth;
+                    double L = fin.Distance; // not used currently
+                    if (D <= 0) continue;
+                    double wfin = D * (1.0 / Math.Tan(alphaRad)) * Math.Abs(Math.Sin(Deg2Rad(diff)));
+                    maxWfinL = Math.Max(maxWfinL, Math.Min(wfin, wk));
+                }
+
+                double maxWfinR = 0.0;
+                foreach (var fin in shadings.Where(s => s.Type == ShadingType.RightFin))
+                {
+                    double D = fin.Depth;
+                    if (D <= 0) continue;
+                    double wfin = D * (1.0 / Math.Tan(alphaRad)) * Math.Abs(Math.Sin(Deg2Rad(diff)));
+                    maxWfinR = Math.Max(maxWfinR, Math.Min(wfin, wk));
+                }
+
+                // obstacles
+                double maxHobst = 0.0;
+                foreach (var ob in shadings.Where(s => s.Type == ShadingType.Obstacle))
+                {
+                    double H = ob.Depth; // interpret as obstacle top height above window top (m)
+                    double dist = ob.Distance; // horizontal distance from facade to obstacle (m)
+                    if (H <= 0 || dist <= 0) continue;
+                    // obstacle elevation angle
+                    double thetaObs = Math.Atan2(H, dist);
+                    // if obstacle elevation angle > sun altitude, there will be shadow
+                    if (thetaObs > alphaRad)
+                    {
+                        // simple proportional shadow: fraction of window height blocked ~ (thetaObs - alpha)/thetaObs
+                        double fracObs = Math.Clamp((thetaObs - alphaRad) / thetaObs, 0.0, 1.0);
+                        double hObs = fracObs * hk;
+                        maxHobst = Math.Max(maxHobst, Math.Min(hObs, hk));
+                    }
+                }
+
+                double hSun = Math.Max(0.0, hk - (maxHobst + maxHov));
+                double wSun = Math.Max(0.0, wk - (maxWfinL + maxWfinR));
+                double fsh = (hSun * wSun) / (hk * wk);
+
+                results.Add(new SampleResult
+                {
+                    HOverhang = maxHov,
+                    WFinLeft = maxWfinL,
+                    WFinRight = maxWfinR,
+                    HObstacle = maxHobst,
+                    HSun = hSun,
+                    WSun = wSun,
+                    FshDir = Math.Clamp(fsh, 0.0, 1.0)
+                });
+            }
+
+            return results;
+        }
+
+        // Map Orientation enum to facade azimuth (deg from North clockwise)
+        private static double OrientationToAzimuth(Orientation o)
+        {
+            return o switch
+            {
+                Orientation.North => 0.0,
+                Orientation.NorthEast => 45.0,
+                Orientation.East => 90.0,
+                Orientation.SouthEast => 135.0,
+                Orientation.South => 180.0,
+                Orientation.SouthWest => 225.0,
+                Orientation.West => 270.0,
+                Orientation.NorthWest => 315.0,
+                _ => 180.0
+            };
+        }
+
+        private static double NormalizeAngleDeg(double a)
+        {
+            double v = a % 360.0;
+            if (v < -180.0) v += 360.0;
+            if (v > 180.0) v -= 360.0;
+            return v;
+        }
 
         #endregion
 
@@ -91,44 +257,26 @@ namespace EE.Doklad.Services
             double latitude = 42.7,
             bool northHemisphere = true)
         {
+            // If geometry invalid -> no shading effect
             if (wk <= 0 || hk <= 0)
                 return Enumerable.Repeat(1.0, 12).ToArray();
 
             var shadingsList = shadings?.ToList() ?? new List<ShadingObject>();
+            // If no shading objects provided, return 1.0 for all months
             if (shadingsList.Count == 0)
                 return Enumerable.Repeat(1.0, 12).ToArray();
 
             var result = new double[12];
-            var orientBucket = MapOrientationToBucket(orientation);
-
+            // We'll compute monthly F_sh,dir by sampling the sun across the daytime
             for (int m = 0; m < 12; m++)
             {
-                double deltaM = SolarDeclinationByMonth[m];
-
-                // 1. Изчисли засенчване от навеси (overhangs)
-                double hOverhang = CalculateOverhangShadowHeight(
-                    shadingsList.Where(s => s.Type == ShadingType.Overhang),
-                    hk, orientBucket, latitude, deltaM);
-
-                // 2. Изчисли засенчване от странични ребра
-                double wFinRight = CalculateFinShadowWidth(
-                    shadingsList.Where(s => s.Type == ShadingType.RightFin),
-                    wk, orientBucket, latitude, deltaM);
-
-                double wFinLeft = CalculateFinShadowWidth(
-                    shadingsList.Where(s => s.Type == ShadingType.LeftFin),
-                    wk, orientBucket, latitude, deltaM);
-
-                // 3. Засенчване от препятствия (за бъдещо разширение)
-                double hObstacle = 0.0; // TODO: Implement obstacle logic
-
-                // 4. Изчисли осветени размери
-                double hSun = Math.Max(0, hk - (hObstacle + hOverhang));
-                double wSun = Math.Max(0, wk - (wFinRight + wFinLeft));
-
-                // 5. Коефициент на намаление
-                double fshDir = (hSun * wSun) / (hk * wk);
-                result[m] = Math.Clamp(fshDir, 0.0, 1.0);
+                double deltaDeg = SolarDeclinationByMonth[m];
+                double[] monthlySamples = ComputeMonthlySamplesFsh(wk, hk, orientation, shadingsList, latitude, deltaDeg);
+                // average across samples (samples array may be empty if sun never up -> treat as no shading)
+                if (monthlySamples.Length == 0)
+                    result[m] = 1.0;
+                else
+                    result[m] = Math.Clamp(monthlySamples.Average(), 0.0, 1.0);
             }
 
             return result;
@@ -145,194 +293,54 @@ namespace EE.Doklad.Services
             double latitude = 42.7,
             bool northHemisphere = true)
         {
+            var results = new List<MonthlyShadingResult>();
             if (wk <= 0 || hk <= 0)
-                return Enumerable.Range(0, 12).Select(m => new MonthlyShadingResult
+            {
+                for (int m = 0; m < 12; m++)
                 {
-                    Month = m + 1,
-                    MonthName = MonthNames[m],
-                    FshDir = 1.0
-                }).ToList();
+                    results.Add(new MonthlyShadingResult { Month = m + 1, MonthName = MonthNames[m], FshDir = 1.0 });
+                }
+                return results;
+            }
 
             var shadingsList = shadings?.ToList() ?? new List<ShadingObject>();
-            var results = new List<MonthlyShadingResult>();
-            var orientBucket = MapOrientationToBucket(orientation);
-
             for (int m = 0; m < 12; m++)
             {
-                double deltaM = SolarDeclinationByMonth[m];
+                double deltaDeg = SolarDeclinationByMonth[m];
+                // Compute per-sample values and then aggregate (mean)
+                var samples = ComputeMonthlyDetailedSamples(wk, hk, orientation, shadingsList, latitude, deltaDeg);
 
-                double hOverhang = CalculateOverhangShadowHeight(
-                    shadingsList.Where(s => s.Type == ShadingType.Overhang),
-                    hk, orientBucket, latitude, deltaM);
+                if (samples.Count == 0)
+                {
+                    results.Add(new MonthlyShadingResult { Month = m + 1, MonthName = MonthNames[m], FshDir = 1.0 });
+                    continue;
+                }
 
-                double wFinRight = CalculateFinShadowWidth(
-                    shadingsList.Where(s => s.Type == ShadingType.RightFin),
-                    wk, orientBucket, latitude, deltaM);
-
-                double wFinLeft = CalculateFinShadowWidth(
-                    shadingsList.Where(s => s.Type == ShadingType.LeftFin),
-                    wk, orientBucket, latitude, deltaM);
-
-                double hObstacle = 0.0;
-
-                double hSun = Math.Max(0, hk - (hObstacle + hOverhang));
-                double wSun = Math.Max(0, wk - (wFinRight + wFinLeft));
-                double fshDir = (hSun * wSun) / (hk * wk);
+                // average over samples
+                double avgHOver = samples.Average(s => s.HOverhang);
+                double avgWFinL = samples.Average(s => s.WFinLeft);
+                double avgWFinR = samples.Average(s => s.WFinRight);
+                double avgHObs = samples.Average(s => s.HObstacle);
+                double avgHSun = samples.Average(s => s.HSun);
+                double avgWSun = samples.Average(s => s.WSun);
+                double avgFsh = samples.Average(s => s.FshDir);
 
                 results.Add(new MonthlyShadingResult
                 {
                     Month = m + 1,
                     MonthName = MonthNames[m],
-                    HOverhang = hOverhang,
-                    WFinLeft = wFinLeft,
-                    WFinRight = wFinRight,
-                    HObstacle = hObstacle,
-                    HSun = hSun,
-                    WSun = wSun,
-                    FshDir = Math.Clamp(fshDir, 0.0, 1.0)
+                    HOverhang = avgHOver,
+                    WFinLeft = avgWFinL,
+                    WFinRight = avgWFinR,
+                    HObstacle = avgHObs,
+                    HSun = avgHSun,
+                    WSun = avgWSun,
+                    FshDir = Math.Clamp(avgFsh, 0.0, 1.0)
                 });
             }
 
             return results;
         }
-
-        #endregion
-
-        #region Вътрешни методи за изчисления
-
-        /// <summary>
-        /// Изчислява височина на засенчване от навеси за един месец
-        /// </summary>
-        private static double CalculateOverhangShadowHeight(
-            IEnumerable<ShadingObject> overhangs,
-            double hk,
-            OrientationBucket orientBucket,
-            double latitude,
-            double deltaM)
-        {
-            var overhangsList = overhangs.ToList();
-            if (overhangsList.Count == 0)
-                return 0.0;
-
-            var coeffs = OverhangCoeffs[orientBucket];
-            double maxShadow = 0.0;
-
-            foreach (var ovh in overhangsList)
-            {
-                double d = ovh.Depth;
-                double l = ovh.Distance;
-
-                if (d <= 0 || hk <= 0)
-                    continue;
-
-                double p1 = d / hk;
-                double p2 = l / hk;
-
-                // Корелационна формула (1) от методиката
-                // h_ovh = (1 - Hk) * { 1 + [(A1 + B1*c_south*(φ_w - δ_m)) * P1 + 
-                //                          (A2 + B2*c_south*(φ_w - δ_m)) * P2] }
-                // За простота: c_south = -1 (южно полукълбо коригира знака)
-                // TODO: Имплементирай пълната формула при нужда
-                
-                // Временна приближена формула:
-                double latDiff = latitude - deltaM;
-                double term1 = (coeffs.A1 + coeffs.B1 * (-1.0) * latDiff) * p1;
-                double term2 = (coeffs.A2 + coeffs.B2 * (-1.0) * latDiff) * p2;
-                double hOvhNorm = 1.0 + term1 + term2;
-                double hOvh = (1 - hk) * hOvhNorm; // Това е опростена версия
-                
-                // По-реалистична връзка (нормализирана):
-                // h_ovh ≈ H_k * (коефициент базиран на геометрия)
-                // За най-простата версия:
-                hOvh = hk * Math.Max(0, Math.Min(1.0, 0.3 * (d / hk) + 0.1 * (l / hk)));
-
-                maxShadow = Math.Max(maxShadow, hOvh);
-            }
-
-            return Math.Min(maxShadow, hk);
-        }
-
-        /// <summary>
-        /// Изчислява ширина на засенчване от ребра за един месец
-        /// </summary>
-        private static double CalculateFinShadowWidth(
-            IEnumerable<ShadingObject> fins,
-            double wk,
-            OrientationBucket orientBucket,
-            double latitude,
-            double deltaM)
-        {
-            var finsList = fins.ToList();
-            if (finsList.Count == 0)
-                return 0.0;
-
-            var coeffs = FinCoeffs[orientBucket];
-            double maxShadow = 0.0;
-
-            foreach (var fin in finsList)
-            {
-                double d = fin.Depth;
-                double l = fin.Distance;
-
-                if (d <= 0 || wk <= 0)
-                    continue;
-
-                double p1 = d / wk;
-                double p2 = l / wk;
-
-                // Корелационна формула (3) от методиката (аналогична на overhangs)
-                // Временна приближена формула:
-                double latDiff = latitude - deltaM;
-                double term1 = (coeffs.A1 + coeffs.B1 * (-1.0) * latDiff) * p1;
-                double term2 = (coeffs.A2 + coeffs.B2 * (-1.0) * latDiff) * p2;
-                
-                // Опростена връзка:
-                double wFin = wk * Math.Max(0, Math.Min(1.0, 0.3 * (d / wk) + 0.1 * (l / wk)));
-
-                maxShadow = Math.Max(maxShadow, wFin);
-            }
-
-            return Math.Min(maxShadow, wk);
-        }
-
-        #endregion
-
-        #region Помощни методи
-
-        /// <summary>
-        /// Мапва ориентация към bucket (закръгляване към 45°)
-        /// </summary>
-        private static OrientationBucket MapOrientationToBucket(Orientation orientation)
-        {
-            return orientation switch
-            {
-                Orientation.South => OrientationBucket.South,
-                Orientation.SouthEast => OrientationBucket.SouthEast,
-                Orientation.SouthWest => OrientationBucket.SouthEast, // ЮЗ е близо до ЮИ
-                Orientation.East => OrientationBucket.East,
-                Orientation.West => OrientationBucket.East, // Запад е симетрично на изток
-                Orientation.NorthEast => OrientationBucket.NorthEast,
-                Orientation.NorthWest => OrientationBucket.NorthEast,
-                Orientation.North => OrientationBucket.North,
-                _ => OrientationBucket.South
-            };
-        }
-
-        #endregion
-
-        #region Вътрешни структури
-
-        private enum OrientationBucket
-        {
-            South,
-            SouthEast, // Включва ЮИ и ЮЗ
-            East,      // Включва И и З
-            NorthEast, // Включва СИ и СЗ
-            North
-        }
-
-        private record OverhangCoefficients(double A1, double B1, double A2, double B2);
-        private record FinCoefficients(double A1, double B1, double A2, double B2);
 
         #endregion
     }

@@ -17,6 +17,9 @@ namespace EE.Doklad.ViewModels
         private readonly PdfGeneratorService _pdfService;
 
         [ObservableProperty]
+        private int _currentClimateZone = 1;
+
+        [ObservableProperty]
         private Report _currentReport;
 
         [ObservableProperty]
@@ -32,6 +35,18 @@ namespace EE.Doklad.ViewModels
 
             // Закачаме обработчик за промяна на климатичната зона
             AttachClimateZoneHandler();
+
+            // Initial sync
+            TrySyncCurrentClimateZone();
+        }
+
+        private void TrySyncCurrentClimateZone()
+        {
+            var objectSection = CurrentReport?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData);
+            if (objectSection?.ObjectDataSectionData != null)
+            {
+                CurrentClimateZone = objectSection.ObjectDataSectionData.ClimateZone;
+            }
         }
 
         private void AttachClimateZoneHandler()
@@ -57,6 +72,8 @@ namespace EE.Doklad.ViewModels
                 {
                     climateZone = objectSection.ObjectDataSectionData.ClimateZone;
                 }
+
+                CurrentClimateZone = climateZone;
                 // Обновяваме Te за всички студени покриви във всички RoofSectionData секции
                 foreach (var roofSection in CurrentReport.Sections)
                 {

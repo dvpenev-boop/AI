@@ -1,0 +1,97 @@
+<UserControl x:Class="EE.Doklad.Views.ClimateDataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="Данни (Методика)" FontSize="18" FontWeight="Bold" />
+            <TextBlock Text="Климатични зони (read-only)" FontSize="12" Foreground="DimGray" Margin="0,2,0,0"/>
+            <TextBlock Text="{Binding MetaLine}" FontSize="11" Foreground="DimGray" Margin="0,2,0,0"/>
+            <TextBlock Text="{Binding ImportedBy}" FontSize="11" Foreground="DimGray" TextWrapping="Wrap" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" BorderBrush="#DDD" BorderThickness="1" Padding="10">
+                <StackPanel>
+                    <TextBlock Text="Климатични зони" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <ListBox ItemsSource="{Binding Zones}"
+                             SelectedItem="{Binding SelectedZone}"
+                             DisplayMemberPath="Name"/>
+                </StackPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Stretch"/>
+
+            <Border Grid.Column="2" BorderBrush="#DDD" BorderThickness="1" Padding="10">
+                <StackPanel>
+                    <TextBlock Text="{Binding SelectedZone.Name}" FontSize="16" FontWeight="Bold" />
+                    <TextBlock Margin="0,2,0,0" Foreground="DimGray" TextWrapping="Wrap"
+                               Text="{Binding SelectedZoneMeta}" />
+                    <TextBlock Margin="0,4,0,12" Foreground="DimGray" TextWrapping="Wrap">
+                        <Run Text="Отоплителен сезон: "/>
+                        <Run Text="{Binding SelectedZone.HeatingSeason.Start}"/>
+                        <Run Text=" – "/>
+                        <Run Text="{Binding SelectedZone.HeatingSeason.End}"/>
+                    </TextBlock>
+
+                    <TextBlock Text="Месечни данни" FontWeight="SemiBold" Margin="0,0,0,6"/>
+
+                    <DataGrid ItemsSource="{Binding MonthlyRows}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeRows="False"
+                              CanUserSortColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Месец" Binding="{Binding Month}" Width="*" />
+                            <DataGridTextColumn Header="Te [°C]" Binding="{Binding Te, StringFormat=F2}" Width="*" />
+                            <DataGridTextColumn Header="Север [W/m²]" Binding="{Binding SolarN, StringFormat=F1}" Width="*" />
+                            <DataGridTextColumn Header="Изток [W/m²]" Binding="{Binding SolarE, StringFormat=F1}" Width="*" />
+                            <DataGridTextColumn Header="Запад [W/m²]" Binding="{Binding SolarW, StringFormat=F1}" Width="*" />
+                            <DataGridTextColumn Header="Юг [W/m²]" Binding="{Binding SolarS, StringFormat=F1}" Width="*" />
+                            <DataGridTextColumn Header="Хор. [W/m²]" Binding="{Binding SolarH, StringFormat=F1}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Margin="0,10,0,6" Text="Относителна влажност (май–септември)" FontWeight="SemiBold" />
+                    <DataGrid ItemsSource="{Binding HumidityRows}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeRows="False"
+                              CanUserSortColumns="False"
+                              Height="140">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Месец" Binding="{Binding Month}" Width="*" />
+                            <DataGridTextColumn Header="RH [%]" Binding="{Binding RhPercent, StringFormat=F1}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Margin="0,10,0,0" Foreground="DimGray" TextWrapping="Wrap"
+                               Text="Забележка: UI е само за преглед. Данните се редактират само от инженер чрез промяна на seed файла в сорс кода и нов билд."/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
