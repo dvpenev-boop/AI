@@ -4,12 +4,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:EE.Doklad.ViewModels"
+             xmlns:conv="clr-namespace:EE.Doklad.Converters"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
 
     <UserControl.DataContext>
         <vm:MaterialsCatalogViewModel/>
     </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <conv:NumericNullableConverter x:Key="NumericNullableConverter" />
+    </UserControl.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -21,30 +26,50 @@
             <StackPanel DockPanel.Dock="Left">
                 <TextBlock Text="Строителни материали" FontSize="18" FontWeight="Bold" />
                 <TextBlock Text="Нормативните материали са само за преглед. Потребителските могат да се добавят/изтриват." FontSize="12" Foreground="DimGray"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Content="Импортиране" x:Name="ImportButton" Margin="0,0,6,0" Padding="8,4" />
+                    <Button Content="Експортиране" x:Name="ExportButton" Margin="0,0,6,0" Padding="8,4" />
+                    <Button Content="+ Добави (потребителски)" Command="{Binding AddUserMaterialCommand}" Margin="0,0,6,0" Padding="8,4"/>
+                    <Button Content="🗑 Изтрий" Command="{Binding DeleteSelectedCommand}" Padding="8,4"/>
+                </StackPanel>
             </StackPanel>
 
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="+ Добави (потребителски)" Command="{Binding AddUserMaterialCommand}" Margin="0,0,6,0" Padding="8,4"/>
-                <Button Content="🗑 Изтрий" Command="{Binding DeleteSelectedCommand}" Padding="8,4"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <CheckBox Content="Нормативни" IsChecked="{Binding ShowSeed}" Margin="0,0,6,0"/>
+                    <CheckBox Content="Типови" IsChecked="{Binding ShowTypical}" Margin="0,0,6,0"/>
+                    <CheckBox Content="Потребителски" IsChecked="{Binding ShowUser}"/>
+                </StackPanel>
             </StackPanel>
         </DockPanel>
 
-        <Border Grid.Row="1" BorderBrush="#DDD" BorderThickness="1" Padding="10">
+            <Border Grid.Row="1" BorderBrush="#DDD" BorderThickness="1" Padding="10">
             <DataGrid ItemsSource="{Binding Materials}"
                       SelectedItem="{Binding Selected}"
                       AutoGenerateColumns="False"
-                      IsReadOnly="True"
+                      IsReadOnly="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
                       CanUserReorderColumns="False"
-                      CanUserResizeRows="False">
+                      CanUserResizeRows="False"
+                      RowEditEnding="DataGrid_RowEditEnding">
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="IsEnabled" Value="True" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSeed}" Value="True">
+                                <Setter Property="IsEnabled" Value="False" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="Seed" Binding="{Binding IsSeed}" Width="60"/>
-                    <DataGridTextColumn Header="Код" Binding="{Binding Code}" Width="80"/>
-                    <DataGridTextColumn Header="Наименование" Binding="{Binding NameBg}" Width="*"/>
-                    <DataGridTextColumn Header="ρ [kg/m³]" Binding="{Binding RhoKgM3}" Width="90"/>
-                    <DataGridTextColumn Header="c [J/kgK]" Binding="{Binding CJKgK}" Width="90"/>
-                    <DataGridTextColumn Header="λ [W/mK]" Binding="{Binding LambdaWMK}" Width="90"/>
+                    <DataGridTextColumn Header="Наименование" Binding="{Binding NameBg, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                    <DataGridTextColumn Header="ρ [kg/m³]" Binding="{Binding RhoKgM3, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericNullableConverter}}" Width="90"/>
+                    <DataGridTextColumn Header="c [J/kgK]" Binding="{Binding CJKgK, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericNullableConverter}}" Width="90"/>
+                    <DataGridTextColumn Header="λ [W/mK]" Binding="{Binding LambdaWMK, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericNullableConverter}}" Width="90"/>
                     <DataGridTextColumn Header="μ" Binding="{Binding Mu}" Width="70"/>
                     <DataGridTextColumn Header="# вар." Binding="{Binding VariantCount}" Width="70"/>
                 </DataGrid.Columns>

@@ -24,6 +24,15 @@ namespace EE.Doklad.ViewModels
 
         public ObservableCollection<BuildingMaterialRow> Materials { get; } = new();
 
+    [ObservableProperty]
+    private bool _showSeed = true;
+
+    [ObservableProperty]
+    private bool _showTypical = false;
+
+    [ObservableProperty]
+    private bool _showUser = true;
+
         [ObservableProperty]
         private BuildingMaterialRow? _selected;
 
@@ -31,8 +40,23 @@ namespace EE.Doklad.ViewModels
         private void Refresh()
         {
             Materials.Clear();
-            foreach (var row in Service.GetCombinedRows())
+            foreach (var row in Service.GetCombinedRows(ShowSeed, ShowTypical, ShowUser))
                 Materials.Add(row);
+        }
+
+        partial void OnShowSeedChanged(bool value)
+        {
+            RefreshCommand.Execute(null);
+        }
+
+        partial void OnShowTypicalChanged(bool value)
+        {
+            RefreshCommand.Execute(null);
+        }
+
+        partial void OnShowUserChanged(bool value)
+        {
+            RefreshCommand.Execute(null);
         }
 
         [RelayCommand(CanExecute = nameof(CanEditOrDeleteSelected))]

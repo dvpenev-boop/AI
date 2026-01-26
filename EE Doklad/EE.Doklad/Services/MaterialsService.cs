@@ -20,14 +20,44 @@ namespace EE.Doklad.Services
 
         public IReadOnlyList<BuildingMaterialRow> GetCombinedRows()
         {
-            var seed = _repo.LoadSeed();
-            var user = _repo.LoadUser();
+            // default: seed + user
+            return GetCombinedRows(includeSeed: true, includeTypical: false, includeUser: true);
+        }
 
-            var seedRows = seed.Select(ToRow).ToList();
-            var userRows = user.Select(ToRow).ToList();
+        public IReadOnlyList<BuildingMaterialRow> GetCombinedRows(bool includeSeed, bool includeTypical, bool includeUser)
+        {
+            var rows = new List<BuildingMaterialRow>();
 
-            // Seed first, then user.
-            return seedRows.Concat(userRows)
+            if (includeSeed)
+            {
+                var seed = _repo.LoadSeed();
+                rows.AddRange(seed.Select(ToRow));
+            }
+
+            if (includeTypical)
+            {
+                var typical = _repo.LoadTypical();
+                rows.AddRange(typical.Select(s =>
+                {
+                    var r = ToRow(s);
+                    // treat typical as readonly (same as seed)
+                    r.IsSeed = true;
+                    return r;
+                }));
+            }
+
+            if (includeUser)
+            {
+                var user = _repo.LoadUser();
+                var userRows = user
+                    .Where(u => !string.IsNullOrWhiteSpace(u.NameBg))
+                    .Select(ToRow)
+                    .ToList();
+                rows.AddRange(userRows);
+            }
+
+            // Seed/typical first, then user.
+            return rows
                 .OrderBy(r => r.IsSeed ? 0 : 1)
                 .ThenBy(r => r.Code ?? string.Empty)
                 .ThenBy(r => r.NameBg)

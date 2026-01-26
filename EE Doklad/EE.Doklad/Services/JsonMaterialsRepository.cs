@@ -21,6 +21,31 @@ namespace EE.Doklad.Services
             _userFilePath = userFilePath ?? GetDefaultUserFilePath();
         }
 
+        // Try to load an optional embedded "typical" materials file. If not present, return empty list.
+        public IReadOnlyList<BuildingMaterialSeed> LoadTypical()
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            const string typicalName = "EE.Doklad.Data.materials.typical.json";
+            using var stream = asm.GetManifestResourceStream(typicalName);
+            if (stream == null)
+            {
+                return Array.Empty<BuildingMaterialSeed>();
+            }
+
+            using var reader = new StreamReader(stream);
+            var json = reader.ReadToEnd();
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            };
+
+            var items = JsonConvert.DeserializeObject<List<BuildingMaterialSeed>>(json, settings);
+            return items ?? new List<BuildingMaterialSeed>();
+        }
+
         public IReadOnlyList<BuildingMaterialSeed> LoadSeed()
         {
             var asm = Assembly.GetExecutingAssembly();

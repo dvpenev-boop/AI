@@ -137,3 +137,7 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ClimateDataView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ClimateDataView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MaterialsCatalogView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MaterialsCatalogView.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MaterialsEditWindow.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MaterialsEditWindow.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ImportOptionsWindow.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ImportOptionsWindow.g.cs
