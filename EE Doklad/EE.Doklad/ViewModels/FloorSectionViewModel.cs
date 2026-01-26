@@ -13,27 +13,11 @@ namespace EE.Doklad.ViewModels
     public class FloorSectionViewModel : INotifyPropertyChanged
     {
         private readonly FloorSectionData _data;
-        private readonly MaterialsService _materialsService;
-        private string _materialSearchText = string.Empty;
+    private readonly MaterialsService _materialsService;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
-        public ICollectionView? MaterialOptionsView { get; private set; }
-
-        public string MaterialSearchText
-        {
-            get => _materialSearchText;
-            set
-            {
-                if (_materialSearchText != value)
-                {
-                    _materialSearchText = value;
-                    OnPropertyChanged(nameof(MaterialSearchText));
-                    MaterialOptionsView?.Refresh();
-                }
-            }
-        }
 
         public System.Collections.ObjectModel.ObservableCollection<FloorItem> FloorItems => _data.FloorItems;
 
@@ -141,20 +125,6 @@ namespace EE.Doklad.ViewModels
             {
                 MaterialOptions.Add(option);
             }
-
-            MaterialOptionsView = CollectionViewSource.GetDefaultView(MaterialOptions);
-            MaterialOptionsView.Filter = FilterMaterial;
-        }
-
-        private bool FilterMaterial(object obj)
-        {
-            if (obj is not MaterialOption option)
-                return false;
-
-            if (string.IsNullOrWhiteSpace(MaterialSearchText))
-                return true;
-
-            return option.NameBg.Contains(MaterialSearchText, StringComparison.OrdinalIgnoreCase);
         }
 
         // ---

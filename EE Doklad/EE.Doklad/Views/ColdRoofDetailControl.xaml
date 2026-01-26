@@ -100,21 +100,14 @@
                     <DataGridTemplateColumn Header="Материал" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:RoofSectionView}, Path=DataContext.MaterialOptionsView}"
+                                <ComboBox ItemsSource="{Binding MaterialOptions}"
                                           SelectedValuePath="Id"
                                           DisplayMemberPath="Display"
                                           SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged}"
-                                          Text="{Binding Material, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                           IsEditable="True"
+                                          IsTextSearchEnabled="True"
                                           StaysOpenOnEdit="True"
-                                          TextSearch.TextPath="NameBg">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <EventSetter Event="PreviewKeyUp" Handler="MaterialComboBox_PreviewKeyUp"/>
-                                            <EventSetter Event="LostFocus" Handler="MaterialComboBox_LostFocus"/>
-                                        </Style>
-                                    </ComboBox.Style>
-                                </ComboBox>
+                                          TextSearch.TextPath="Display"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -150,21 +143,14 @@
                     <DataGridTemplateColumn Header="Материал" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:RoofSectionView}, Path=DataContext.MaterialOptionsView}"
+                                <ComboBox ItemsSource="{Binding MaterialOptions}"
                                           SelectedValuePath="Id"
                                           DisplayMemberPath="Display"
                                           SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged}"
-                                          Text="{Binding Material, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                           IsEditable="True"
+                                          IsTextSearchEnabled="True"
                                           StaysOpenOnEdit="True"
-                                          TextSearch.TextPath="NameBg">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <EventSetter Event="PreviewKeyUp" Handler="MaterialComboBox_PreviewKeyUp"/>
-                                            <EventSetter Event="LostFocus" Handler="MaterialComboBox_LostFocus"/>
-                                        </Style>
-                                    </ComboBox.Style>
-                                </ComboBox>
+                                          TextSearch.TextPath="Display"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -196,21 +182,14 @@
                     <DataGridTemplateColumn Header="Материал" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:RoofSectionView}, Path=DataContext.MaterialOptionsView}"
+                                <ComboBox ItemsSource="{Binding MaterialOptions}"
                                           SelectedValuePath="Id"
                                           DisplayMemberPath="Display"
                                           SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged}"
-                                          Text="{Binding Material, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                           IsEditable="True"
+                                          IsTextSearchEnabled="True"
                                           StaysOpenOnEdit="True"
-                                          TextSearch.TextPath="NameBg">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <EventSetter Event="PreviewKeyUp" Handler="MaterialComboBox_PreviewKeyUp"/>
-                                            <EventSetter Event="LostFocus" Handler="MaterialComboBox_LostFocus"/>
-                                        </Style>
-                                    </ComboBox.Style>
-                                </ComboBox>
+                                          TextSearch.TextPath="Display"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

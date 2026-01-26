@@ -82,21 +82,14 @@
                             <DataGridTemplateColumn Header="Материал" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:FloorSectionView}, Path=DataContext.MaterialOptionsView}"
+                                        <ComboBox ItemsSource="{Binding MaterialOptions}"
                                                   SelectedValuePath="Id"
                                                   DisplayMemberPath="Display"
                                                   SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged}"
-                                                  Text="{Binding Material, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                   IsEditable="True"
+                                                  IsTextSearchEnabled="True"
                                                   StaysOpenOnEdit="True"
-                                                  TextSearch.TextPath="NameBg">
-                                            <ComboBox.Style>
-                                                <Style TargetType="ComboBox">
-                                                    <EventSetter Event="PreviewKeyUp" Handler="MaterialComboBox_PreviewKeyUp"/>
-                                                    <EventSetter Event="LostFocus" Handler="MaterialComboBox_LostFocus"/>
-                                                </Style>
-                                            </ComboBox.Style>
-                                        </ComboBox>
+                                                  TextSearch.TextPath="Display"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -155,12 +148,12 @@
                             <DataGridTemplateColumn Header="Материал" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox ItemsSource="{Binding Path=DataContext.MaterialOptionsView, RelativeSource={RelativeSource AncestorType={x:Type views:FloorSectionView}}}"
+                                        <ComboBox ItemsSource="{Binding MaterialOptions}"
                                                   SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                   SelectedValuePath="Id"
                                                   DisplayMemberPath="Display"
                                                   IsEditable="True"
-                                                  Text="{Binding Material, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                  IsTextSearchEnabled="True">
                                             <ComboBox.ItemsPanel>
                                                 <ItemsPanelTemplate>
                                                     <VirtualizingStackPanel />
@@ -169,12 +162,6 @@
                                             <ComboBox.InputBindings>
                                                 <KeyBinding Key="Enter" Command="{x:Static DataGrid.CommitEditCommand}" />
                                             </ComboBox.InputBindings>
-                                            <ComboBox.Style>
-                                                <Style TargetType="ComboBox">
-                                                    <EventSetter Event="PreviewKeyUp" Handler="MaterialComboBox_PreviewKeyUp"/>
-                                                    <EventSetter Event="LostFocus" Handler="MaterialComboBox_LostFocus"/>
-                                                </Style>
-                                            </ComboBox.Style>
                                         </ComboBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

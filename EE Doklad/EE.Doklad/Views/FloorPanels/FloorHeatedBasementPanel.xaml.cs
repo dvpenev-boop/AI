@@ -130,32 +130,7 @@ namespace EE.Doklad.Views.FloorPanels
             }
         }
 
-        private void MaterialComboBox_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-            if (sender is ComboBox comboBox && !string.IsNullOrEmpty(comboBox.Text))
-            {
-                var viewModel = FindFloorSectionViewModel();
-                if (viewModel != null)
-                {
-                    viewModel.MaterialSearchText = comboBox.Text;
-                    if (viewModel.MaterialOptionsView != null)
-                    {
-                        viewModel.MaterialOptionsView.Refresh();
-                        comboBox.IsDropDownOpen = true;
-                    }
-                }
-            }
-        }
-
-        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            // Clear filter when ComboBox loses focus to restore all items
-            var vm = FindFloorSectionViewModel();
-            if (vm != null)
-            {
-                vm.MaterialSearchText = string.Empty;
-            }
-        }
+        // Removed shared search/filter handlers. Rely on per-layer MaterialOptions + WPF TextSearch.
 
         private FloorSectionViewModel? FindFloorSectionViewModel()
         {

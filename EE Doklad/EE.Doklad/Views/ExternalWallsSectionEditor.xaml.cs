@@ -13,30 +13,12 @@ using Microsoft.Win32;
 
 namespace EE.Doklad.Views
 {
-    public partial class ExternalWallsSectionEditor : UserControl, INotifyPropertyChanged
+    public partial class ExternalWallsSectionEditor : UserControl
     {
         private const int MaxWallTypes = 8;
         private readonly MaterialsService _materialsService;
-        private string _materialSearchText = string.Empty;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
-        public ICollectionView? MaterialOptionsView { get; private set; }
-
-        public string MaterialSearchText
-        {
-            get => _materialSearchText;
-            set
-            {
-                if (_materialSearchText != value)
-                {
-                    _materialSearchText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaterialSearchText)));
-                    MaterialOptionsView?.Refresh();
-                }
-            }
-        }
 
         public ExternalWallsSectionEditor()
         {
@@ -56,21 +38,6 @@ namespace EE.Doklad.Views
             {
                 MaterialOptions.Add(option);
             }
-
-            MaterialOptionsView = CollectionViewSource.GetDefaultView(MaterialOptions);
-            MaterialOptionsView.Filter = FilterMaterial;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaterialOptionsView)));
-        }
-
-        private bool FilterMaterial(object obj)
-        {
-            if (obj is not MaterialOption option)
-                return false;
-
-            if (string.IsNullOrWhiteSpace(MaterialSearchText))
-                return true;
-
-            return option.NameBg.Contains(MaterialSearchText, StringComparison.OrdinalIgnoreCase);
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -216,19 +183,7 @@ namespace EE.Doklad.Views
             SouthColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void MaterialComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (sender is ComboBox comboBox && comboBox.IsEditable)
-            {
-                MaterialSearchText = comboBox.Text;
-            }
-        }
-
-        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            // Clear filter when ComboBox loses focus to restore all items
-            MaterialSearchText = string.Empty;
-        }
+        // Removed global search/filter handlers to avoid refreshing a shared ICollectionView.
 
         private static void UpdateIndexes(ExternalWallsSectionData data)
         {

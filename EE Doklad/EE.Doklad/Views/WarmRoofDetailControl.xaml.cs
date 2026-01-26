@@ -35,27 +35,7 @@ namespace EE.Doklad.Views
             }
         }
 
-        private void MaterialComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (sender is ComboBox comboBox && comboBox.IsEditable)
-            {
-                var vm = FindRoofSectionViewModel();
-                if (vm != null)
-                {
-                    vm.MaterialSearchText = comboBox.Text;
-                }
-            }
-        }
-
-        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            // Clear filter when ComboBox loses focus to restore all items
-            var vm = FindRoofSectionViewModel();
-            if (vm != null)
-            {
-                vm.MaterialSearchText = string.Empty;
-            }
-        }
+        // Using WPF built-in TextSearch; removed code that updated a shared MaterialSearchText/filter.
 
         private RoofSectionViewModel? FindRoofSectionViewModel()
         {
