@@ -112,34 +112,52 @@ namespace EE.Doklad.Views
                 }
                 else
                 {
-                    // Build lookup by name (case-insensitive)
-                    var map = existing.ToDictionary(x => (x.NameBg ?? string.Empty).Trim().ToLowerInvariant());
+                    // Build lookup by name (case-insensitive). Use grouping to avoid exceptions when
+                    // there are multiple existing user records with the same name.
+                    var map = existing.GroupBy(x => (x.NameBg ?? string.Empty).Trim().ToLowerInvariant())
+                                      .ToDictionary(g => g.Key, g => g.ToList());
 
                     foreach (var im in imported)
                     {
                         var nameKey = (im.NameBg ?? string.Empty).Trim().ToLowerInvariant();
-                        if (map.TryGetValue(nameKey, out var exist))
+                        if (map.TryGetValue(nameKey, out var existList) && existList.Count > 0)
                         {
+                            // Determine if any existing entry is technically identical to the imported one.
+                            bool hasIdentical = existList.Any(e => VariantsEqual(e.Variants, im.Variants));
+
                             if (strategy == EE.Doklad.Services.ImportMergeStrategy.MergeSkipDuplicates)
                             {
-                                skipped++;
-                                continue;
+                                // Skip only when an identical technical record already exists. If the name
+                                // is the same but technical values differ, treat as a new record and add it.
+                                if (hasIdentical)
+                                {
+                                    skipped++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    im.Id = string.Empty;
+                                    if (im.Variants != null)
+                                        foreach (var v in im.Variants) v.Id = string.Empty;
+                                    vm.Service.AddUserMaterial(im);
+                                    added++;
+                                    continue;
+                                }
                             }
                             else if (strategy == EE.Doklad.Services.ImportMergeStrategy.MergeOverwriteDuplicates)
                             {
-                                // overwrite: set id to existing and update
+                                // Overwrite the first existing entry with the same name.
+                                var exist = existList.First();
                                 im.Id = exist.Id;
                                 if (im.Variants != null)
-                                {
-                                    foreach (var v in im.Variants) v.Id = string.Empty; // let Update fill variant ids if missing
-                                }
+                                    foreach (var v in im.Variants) v.Id = string.Empty;
                                 vm.Service.UpdateUserMaterial(im);
                                 overwritten++;
                                 continue;
                             }
                         }
 
-                        // not existing -> add
+                        // No existing with same name -> add as new
                         im.Id = string.Empty;
                         if (im.Variants != null)
                             foreach (var v in im.Variants) v.Id = string.Empty;
@@ -156,6 +174,35 @@ namespace EE.Doklad.Views
             {
                 System.Windows.MessageBox.Show("Грешка при импортиране: " + ex.Message, "Грешка", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
+        }
+
+        private static bool VariantsEqual(System.Collections.Generic.List<EE.Doklad.Models.BuildingMaterialVariantUser>? a, System.Collections.Generic.List<EE.Doklad.Models.BuildingMaterialVariantUser>? b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null && b == null) return true;
+            if (a == null || b == null) return false;
+            if (a.Count != b.Count) return false;
+
+            const double eps = 1e-6;
+            for (int i = 0; i < a.Count; i++)
+            {
+                var va = a[i];
+                var vb = b[i];
+
+                if (!NullableDoubleEqual(va.RhoKgM3, vb.RhoKgM3, eps)) return false;
+                if (!NullableDoubleEqual(va.CJKgK, vb.CJKgK, eps)) return false;
+                if (!NullableDoubleEqual(va.LambdaWMK, vb.LambdaWMK, eps)) return false;
+                if (!NullableDoubleEqual(va.Mu, vb.Mu, eps)) return false;
+            }
+
+            return true;
+        }
+
+        private static bool NullableDoubleEqual(double? x, double? y, double eps)
+        {
+            if (x == null && y == null) return true;
+            if (x == null || y == null) return false;
+            return System.Math.Abs(x.Value - y.Value) <= eps;
         }
 
         private void EditButton_Click(object? sender, System.Windows.RoutedEventArgs e)
