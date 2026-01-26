@@ -1,6 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
 using EE.Doklad.Models;
+using EE.Doklad.ViewModels;
 
 namespace EE.Doklad.Views.FloorPanels
 {
@@ -15,7 +18,13 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorHeatedBasementDetail detail)
             {
-                detail.FloorLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
+                var viewModel = FindFloorSectionViewModel();
+                var newLayer = new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 };
+                if (viewModel != null)
+                {
+                    newLayer.MaterialOptions = viewModel.MaterialOptions;
+                }
+                detail.FloorLayers.Add(newLayer);
             }
         }
 
@@ -31,7 +40,13 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorHeatedBasementDetail detail)
             {
-                detail.WallLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
+                var viewModel = FindFloorSectionViewModel();
+                var newLayer = new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 };
+                if (viewModel != null)
+                {
+                    newLayer.MaterialOptions = viewModel.MaterialOptions;
+                }
+                detail.WallLayers.Add(newLayer);
             }
         }
 
@@ -113,6 +128,51 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 detail.HeatedBasementWallSchemeAttachment = new EE.Doklad.Models.AttachmentData();
             }
+        }
+
+        private void MaterialComboBox_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (sender is ComboBox comboBox && !string.IsNullOrEmpty(comboBox.Text))
+            {
+                var viewModel = FindFloorSectionViewModel();
+                if (viewModel != null)
+                {
+                    viewModel.MaterialSearchText = comboBox.Text;
+                    if (viewModel.MaterialOptionsView != null)
+                    {
+                        viewModel.MaterialOptionsView.Refresh();
+                        comboBox.IsDropDownOpen = true;
+                    }
+                }
+            }
+        }
+
+        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear filter when ComboBox loses focus to restore all items
+            var vm = FindFloorSectionViewModel();
+            if (vm != null)
+            {
+                vm.MaterialSearchText = string.Empty;
+            }
+        }
+
+        private FloorSectionViewModel? FindFloorSectionViewModel()
+        {
+            var parent = FindParentView(this);
+            return parent?.DataContext as FloorSectionViewModel;
+        }
+
+        private FloorSectionView? FindParentView(DependencyObject child)
+        {
+            var parent = System.Windows.Media.VisualTreeHelper.GetParent(child);
+            while (parent != null)
+            {
+                if (parent is FloorSectionView view)
+                    return view;
+                parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+            }
+            return null;
         }
     }
 }

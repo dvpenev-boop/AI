@@ -1,6 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using EE.Doklad.Models;
+using EE.Doklad.ViewModels;
 
 namespace EE.Doklad.Views.FloorPanels
 {
@@ -15,7 +18,10 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorUnheatedBasementDetail detail)
             {
-                detail.FloorToBasementLayers.Add(new FloorLayer { Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 });
+                var vm = FindFloorSectionViewModel();
+                var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                detail.FloorToBasementLayers.Add(layer);
             }
         }
 
@@ -31,7 +37,10 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorUnheatedBasementDetail detail)
             {
-                detail.BasementFloorLayers.Add(new FloorLayer { Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 });
+                var vm = FindFloorSectionViewModel();
+                var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                detail.BasementFloorLayers.Add(layer);
             }
         }
 
@@ -47,7 +56,10 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorUnheatedBasementDetail detail)
             {
-                detail.BasementWallLayers.Add(new FloorLayer { Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 });
+                var vm = FindFloorSectionViewModel();
+                var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                detail.BasementWallLayers.Add(layer);
             }
         }
 
@@ -63,7 +75,10 @@ namespace EE.Doklad.Views.FloorPanels
         {
             if (DataContext is FloorUnheatedBasementDetail detail)
             {
-                detail.WallAboveGradeLayers.Add(new FloorLayer { Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 });
+                var vm = FindFloorSectionViewModel();
+                var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                detail.WallAboveGradeLayers.Add(layer);
             }
         }
 
@@ -75,6 +90,48 @@ namespace EE.Doklad.Views.FloorPanels
             }
         }
 
+        private void MaterialComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.IsEditable)
+            {
+                var vm = FindFloorSectionViewModel();
+                if (vm != null)
+                {
+                    vm.MaterialSearchText = comboBox.Text;
+                }
+            }
+        }
+
+        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear filter when ComboBox loses focus to restore all items
+            var vm = FindFloorSectionViewModel();
+            if (vm != null)
+            {
+                vm.MaterialSearchText = string.Empty;
+            }
+        }
+
+        private FloorSectionViewModel? FindFloorSectionViewModel()
+        {
+            var parent = FindParentView();
+            return parent?.DataContext as FloorSectionViewModel;
+        }
+
+        private FloorSectionView? FindParentView()
+        {
+            DependencyObject current = this;
+            while (current != null)
+            {
+                if (current is FloorSectionView view)
+                {
+                    return view;
+                }
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
+
         public static string? SelectImageFile()
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
@@ -83,6 +140,11 @@ namespace EE.Doklad.Views.FloorPanels
                 Title = "Изберете изображение"
             };
             return dialog.ShowDialog() == true ? dialog.FileName : null;
+        }
+
+        public FloorUnheatedBasementInput GetInput()
+        {
+            return DataContext as FloorUnheatedBasementInput ?? new FloorUnheatedBasementInput();
         }
 
         public static void LoadImage(EE.Doklad.Models.AttachmentData attachment, string filePath)

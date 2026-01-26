@@ -1,17 +1,39 @@
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Windows.Data;
 using System.Windows.Input;
 using EE.Doklad.Models;
-using System.Diagnostics;
+using EE.Doklad.Services;
 
 namespace EE.Doklad.ViewModels
 {
     public class FloorSectionViewModel : INotifyPropertyChanged
     {
         private readonly FloorSectionData _data;
+        private readonly MaterialsService _materialsService;
+        private string _materialSearchText = string.Empty;
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
+        public ICollectionView? MaterialOptionsView { get; private set; }
+
+        public string MaterialSearchText
+        {
+            get => _materialSearchText;
+            set
+            {
+                if (_materialSearchText != value)
+                {
+                    _materialSearchText = value;
+                    OnPropertyChanged(nameof(MaterialSearchText));
+                    MaterialOptionsView?.Refresh();
+                }
+            }
+        }
 
         public System.Collections.ObjectModel.ObservableCollection<FloorItem> FloorItems => _data.FloorItems;
 
@@ -72,6 +94,10 @@ namespace EE.Doklad.ViewModels
         {
             Debug.WriteLine("[FloorSectionViewModel] Constructor called with data");
             _data = data;
+            _materialsService = new MaterialsService(new JsonMaterialsRepository());
+            
+            LoadMaterialOptions();
+            
             RemoveFloorItemCommand = new RelayCommand(param => RemoveFloorItem(param as FloorItem));
             
             // Subscribe to collection changes
@@ -105,6 +131,30 @@ namespace EE.Doklad.ViewModels
                 }
             }
             Debug.WriteLine("[FloorSectionViewModel] Constructor completed");
+        }
+
+        private void LoadMaterialOptions()
+        {
+            MaterialOptions.Clear();
+            var options = _materialsService.GetMaterialOptionsFlattened();
+            foreach (var option in options)
+            {
+                MaterialOptions.Add(option);
+            }
+
+            MaterialOptionsView = CollectionViewSource.GetDefaultView(MaterialOptions);
+            MaterialOptionsView.Filter = FilterMaterial;
+        }
+
+        private bool FilterMaterial(object obj)
+        {
+            if (obj is not MaterialOption option)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(MaterialSearchText))
+                return true;
+
+            return option.NameBg.Contains(MaterialSearchText, StringComparison.OrdinalIgnoreCase);
         }
 
         // ---

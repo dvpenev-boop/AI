@@ -1,26 +1,98 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using EE.Doklad.Models;
+using EE.Doklad.Services;
 using Microsoft.Win32;
 
 namespace EE.Doklad.Views
 {
-    public partial class ExternalWallsSectionEditor : UserControl
+    public partial class ExternalWallsSectionEditor : UserControl, INotifyPropertyChanged
     {
         private const int MaxWallTypes = 8;
+        private readonly MaterialsService _materialsService;
+        private string _materialSearchText = string.Empty;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
+        public ICollectionView? MaterialOptionsView { get; private set; }
+
+        public string MaterialSearchText
+        {
+            get => _materialSearchText;
+            set
+            {
+                if (_materialSearchText != value)
+                {
+                    _materialSearchText = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaterialSearchText)));
+                    MaterialOptionsView?.Refresh();
+                }
+            }
+        }
 
         public ExternalWallsSectionEditor()
         {
             InitializeComponent();
             DataContextChanged += OnDataContextChanged;
+
+            // Initialize materials service
+            _materialsService = new MaterialsService(new JsonMaterialsRepository());
+            LoadMaterialOptions();
+        }
+
+        private void LoadMaterialOptions()
+        {
+            MaterialOptions.Clear();
+            var options = _materialsService.GetMaterialOptionsFlattened();
+            foreach (var option in options)
+            {
+                MaterialOptions.Add(option);
+            }
+
+            MaterialOptionsView = CollectionViewSource.GetDefaultView(MaterialOptions);
+            MaterialOptionsView.Filter = FilterMaterial;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaterialOptionsView)));
+        }
+
+        private bool FilterMaterial(object obj)
+        {
+            if (obj is not MaterialOption option)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(MaterialSearchText))
+                return true;
+
+            return option.NameBg.Contains(MaterialSearchText, StringComparison.OrdinalIgnoreCase);
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UpdateFacadeColumnsVisibility();
+            InjectMaterialOptionsIntoLayers();
+        }
+
+        private void InjectMaterialOptionsIntoLayers()
+        {
+            if (DataContext is not ExternalWallsSectionData data)
+                return;
+
+            var optionsList = MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+
+            foreach (var wallType in data.WallTypes)
+            {
+                foreach (var layer in wallType.Layers)
+                {
+                    layer.MaterialOptions = optionsList;
+                }
+            }
         }
 
         private void AddWallType_Click(object sender, RoutedEventArgs e)
@@ -42,7 +114,11 @@ namespace EE.Doklad.Views
                 Index = data.WallTypes.Count + 1,
                 Name = $"Тип стена {data.WallTypes.Count + 1}"
             };
-            wallType.Layers.Add(new ExternalWallLayer());
+            var layer = new ExternalWallLayer
+            {
+                MaterialOptions = MaterialOptions.ToList()
+            };
+            wallType.Layers.Add(layer);
             data.WallTypes.Add(wallType);
             UpdateIndexes(data);
         }
@@ -72,7 +148,11 @@ namespace EE.Doklad.Views
         {
             if (sender is Button button && button.Tag is ExternalWallType wallType)
             {
-                wallType.Layers.Add(new ExternalWallLayer());
+                var layer = new ExternalWallLayer
+                {
+                    MaterialOptions = MaterialOptions.ToList()
+                };
+                wallType.Layers.Add(layer);
             }
         }
 
@@ -134,6 +214,20 @@ namespace EE.Doklad.Views
             NorthColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
             WestColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
             SouthColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void MaterialComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.IsEditable)
+            {
+                MaterialSearchText = comboBox.Text;
+            }
+        }
+
+        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear filter when ComboBox loses focus to restore all items
+            MaterialSearchText = string.Empty;
         }
 
         private static void UpdateIndexes(ExternalWallsSectionData data)

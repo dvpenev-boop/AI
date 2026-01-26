@@ -726,6 +726,9 @@ namespace EE.Doklad.Models
         private string _material = string.Empty;
 
         [ObservableProperty]
+        private string? _selectedMaterialId;
+
+        [ObservableProperty]
         private double _thickness;
 
         [ObservableProperty]
@@ -733,8 +736,25 @@ namespace EE.Doklad.Models
 
         public double R => Lambda > 0 ? Thickness / Lambda : 0;
 
+        partial void OnSelectedMaterialIdChanged(string? value)
+        {
+            // Auto-fill Lambda when material is selected
+            if (!string.IsNullOrEmpty(value) && MaterialOptions != null)
+            {
+                var option = MaterialOptions.FirstOrDefault(o => o.Id == value);
+                if (option != null)
+                {
+                    Lambda = option.LambdaWmk;
+                    Material = option.NameBg;
+                }
+            }
+        }
+
         partial void OnThicknessChanged(double value) => OnPropertyChanged(nameof(R));
 
         partial void OnLambdaChanged(double value) => OnPropertyChanged(nameof(R));
+
+        // Reference to material options (set from ViewModel)
+        public IReadOnlyList<MaterialOption>? MaterialOptions { get; set; }
     }
 }

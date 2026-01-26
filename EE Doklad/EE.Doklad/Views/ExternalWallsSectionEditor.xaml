@@ -99,9 +99,29 @@
                                                   HeadersVisibility="Column"
                                                   Margin="0,0,0,5">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Материал" Binding="{Binding Material, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                                <DataGridTemplateColumn Header="Материал" Width="*">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=MaterialOptionsView}"
+                                                                      SelectedValuePath="Id"
+                                                                      DisplayMemberPath="Display"
+                                                                      SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                      Text="{Binding Material, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                      IsEditable="True"
+                                                                      StaysOpenOnEdit="True"
+                                                                      TextSearch.TextPath="NameBg">
+                                                                <ComboBox.Style>
+                                                                    <Style TargetType="ComboBox">
+                                                                        <EventSetter Event="PreviewKeyUp" Handler="MaterialComboBox_PreviewKeyUp"/>
+                                                                        <EventSetter Event="LostFocus" Handler="MaterialComboBox_LostFocus"/>
+                                                                    </Style>
+                                                                </ComboBox.Style>
+                                                            </ComboBox>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
                                                 <DataGridTextColumn Header="δ (m)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
-                                                <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90"/>
+                                                <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="R" Binding="{Binding R, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
                                             </DataGrid.Columns>
                                         </DataGrid>

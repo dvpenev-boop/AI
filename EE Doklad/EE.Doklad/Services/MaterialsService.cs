@@ -103,6 +103,59 @@ namespace EE.Doklad.Services
             _repo.SaveUser(list);
         }
 
+        /// <summary>
+        /// Returns all materials (seed + user) flattened by variants.
+        /// Each variant becomes a separate MaterialOption.
+        /// </summary>
+        public IReadOnlyList<MaterialOption> GetMaterialOptionsFlattened()
+        {
+            var options = new List<MaterialOption>();
+
+            // Process seed materials
+            var seed = _repo.LoadSeed();
+            foreach (var mat in seed)
+            {
+                if (mat.Variants != null)
+                {
+                    foreach (var variant in mat.Variants)
+                    {
+                        if (variant.LambdaWMK.HasValue)
+                        {
+                            options.Add(new MaterialOption
+                            {
+                                Id = $"{mat.Id}|{variant.Id}",
+                                NameBg = mat.NameBg,
+                                LambdaWmk = variant.LambdaWMK.Value
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Process user materials
+            var user = _repo.LoadUser();
+            foreach (var mat in user)
+            {
+                if (!string.IsNullOrWhiteSpace(mat.NameBg) && mat.Variants != null)
+                {
+                    foreach (var variant in mat.Variants)
+                    {
+                        if (variant.LambdaWMK.HasValue)
+                        {
+                            options.Add(new MaterialOption
+                            {
+                                Id = $"{mat.Id}|{variant.Id}",
+                                NameBg = mat.NameBg,
+                                LambdaWmk = variant.LambdaWMK.Value
+                            });
+                        }
+                    }
+                }
+            }
+
+            return options;
+        }
+
         private static BuildingMaterialRow ToRow(BuildingMaterialSeed s)
         {
             var v0 = s.Variants?.FirstOrDefault();

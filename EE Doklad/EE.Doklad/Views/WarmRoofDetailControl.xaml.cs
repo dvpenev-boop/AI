@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using EE.Doklad.Models;
+using EE.Doklad.ViewModels;
 using Microsoft.Win32;
 
 namespace EE.Doklad.Views
@@ -18,7 +20,10 @@ namespace EE.Doklad.Views
         {
             if (DataContext is RoofType roofType && roofType.WarmDetail != null)
             {
-                roofType.WarmDetail.Layers.Add(new RoofLayer());
+                var vm = FindRoofSectionViewModel();
+                var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+                var layer = new RoofLayer { MaterialOptions = materialOptions };
+                roofType.WarmDetail.Layers.Add(layer);
             }
         }
 
@@ -28,6 +33,34 @@ namespace EE.Doklad.Views
             {
                 roofType.WarmDetail.Layers.RemoveAt(roofType.WarmDetail.Layers.Count - 1);
             }
+        }
+
+        private void MaterialComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.IsEditable)
+            {
+                var vm = FindRoofSectionViewModel();
+                if (vm != null)
+                {
+                    vm.MaterialSearchText = comboBox.Text;
+                }
+            }
+        }
+
+        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear filter when ComboBox loses focus to restore all items
+            var vm = FindRoofSectionViewModel();
+            if (vm != null)
+            {
+                vm.MaterialSearchText = string.Empty;
+            }
+        }
+
+        private RoofSectionViewModel? FindRoofSectionViewModel()
+        {
+            var parent = FindParentView();
+            return parent?.DataContext as RoofSectionViewModel;
         }
 
         private void UploadScheme_Click(object sender, RoutedEventArgs e)

@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
 using EE.Doklad.Models;
 using EE.Doklad.Services;
+using EE.Doklad.ViewModels;
+using Microsoft.Win32;
 
 namespace EE.Doklad.Views.FloorPanels
 {
@@ -110,7 +113,10 @@ namespace EE.Doklad.Views.FloorPanels
 
                 if (DataContext is EE.Doklad.Models.FloorExternalAirDetail detail)
                 {
-                    detail.Layers.Add(new FloorLayer());
+                    var vm = FindFloorSectionViewModel();
+                    var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+                    var layer = new FloorLayer { MaterialOptions = materialOptions };
+                    detail.Layers.Add(layer);
                     System.Diagnostics.Debug.WriteLine($"[AddLayer_Click] Layer added. Total layers: {detail.Layers.Count}");
                     // ViewModel automatically recalculates via subscription
                 }
@@ -175,6 +181,48 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 System.Diagnostics.Debug.WriteLine($"[LayersGrid_CellEditEnding] Exception: {ex}");
             }
+        }
+
+        private void MaterialComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.IsEditable)
+            {
+                var vm = FindFloorSectionViewModel();
+                if (vm != null)
+                {
+                    vm.MaterialSearchText = comboBox.Text;
+                }
+            }
+        }
+
+        private void MaterialComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear filter when ComboBox loses focus to restore all items
+            var vm = FindFloorSectionViewModel();
+            if (vm != null)
+            {
+                vm.MaterialSearchText = string.Empty;
+            }
+        }
+
+        private FloorSectionViewModel? FindFloorSectionViewModel()
+        {
+            var parent = FindParentView();
+            return parent?.DataContext as FloorSectionViewModel;
+        }
+
+        private FloorSectionView? FindParentView()
+        {
+            DependencyObject current = this;
+            while (current != null)
+            {
+                if (current is FloorSectionView view)
+                {
+                    return view;
+                }
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return null;
         }
 
         public FloorExternalAirInput GetInput()

@@ -81,4 +81,31 @@ namespace EE.Doklad.Models
 
         public int VariantCount { get; set; }
     }
+
+    /// <summary>
+    /// Flattened material option for layer dropdowns.
+    /// Each variant becomes a separate option.
+    /// </summary>
+    public sealed class MaterialOption
+    {
+        /// <summary>
+        /// Composite ID: materialId|variantId
+        /// </summary>
+        public string Id { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Material name in Bulgarian (without code prefix)
+        /// </summary>
+        public string NameBg { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Lambda value (W/mK) for this variant
+        /// </summary>
+        public double LambdaWmk { get; set; }
+
+        /// <summary>
+        /// Display string for dropdown
+        /// </summary>
+        public string Display => $"{NameBg} (λ={LambdaWmk:0.###} W/mK)";
+    }
 }

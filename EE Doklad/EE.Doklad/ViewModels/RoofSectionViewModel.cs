@@ -1,16 +1,39 @@
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Data;
 using System.Windows.Input;
 using EE.Doklad.Models;
-
-
-
+using EE.Doklad.Services;
 
 namespace EE.Doklad.ViewModels
 {
     public class RoofSectionViewModel : INotifyPropertyChanged
     {
+        private readonly RoofSectionData _data;
+        private readonly MaterialsService _materialsService;
+        private string _materialSearchText = string.Empty;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
+        public ICollectionView? MaterialOptionsView { get; private set; }
+
+        public string MaterialSearchText
+        {
+            get => _materialSearchText;
+            set
+            {
+                if (_materialSearchText != value)
+                {
+                    _materialSearchText = value;
+                    OnPropertyChanged(nameof(MaterialSearchText));
+                    MaterialOptionsView?.Refresh();
+                }
+            }
+        }
+
         // Връща температура θe според климатична зона (по-ниската от диапазона)
     public static double GetTeForClimateZone(int climateZone)
         {
@@ -29,9 +52,6 @@ namespace EE.Doklad.ViewModels
                 _ => 4.0 // по подразбиране
             };
         }
-        private readonly RoofSectionData _data;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public System.Collections.ObjectModel.ObservableCollection<RoofType> RoofTypes => _data.RoofTypes;
         
@@ -79,6 +99,9 @@ namespace EE.Doklad.ViewModels
         public RoofSectionViewModel(RoofSectionData data)
         {
             _data = data;
+            _materialsService = new MaterialsService(new JsonMaterialsRepository());
+            
+            LoadMaterialOptions();
             
             RemoveRoofTypeCommand = new RelayCommand(param => RemoveRoofType(param as RoofType));
             
@@ -87,6 +110,30 @@ namespace EE.Doklad.ViewModels
             
             // След това закачаме събитието за бъдещи промени
             _data.RoofTypes.CollectionChanged += RoofTypes_CollectionChanged;
+        }
+
+        private void LoadMaterialOptions()
+        {
+            MaterialOptions.Clear();
+            var options = _materialsService.GetMaterialOptionsFlattened();
+            foreach (var option in options)
+            {
+                MaterialOptions.Add(option);
+            }
+
+            MaterialOptionsView = CollectionViewSource.GetDefaultView(MaterialOptions);
+            MaterialOptionsView.Filter = FilterMaterial;
+        }
+
+        private bool FilterMaterial(object obj)
+        {
+            if (obj is not MaterialOption option)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(MaterialSearchText))
+                return true;
+
+            return option.NameBg.Contains(MaterialSearchText, StringComparison.OrdinalIgnoreCase);
         }
 
         private void RoofTypes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -143,12 +190,22 @@ namespace EE.Doklad.ViewModels
             if (mode == RoofMode.Cold)
             {
                 roofType.ColdDetail = new ColdRoofDetail();
+                var matOptions = MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
                 if (!roofType.ColdDetail.U1.Layers.Any())
-                    roofType.ColdDetail.U1.Layers.Add(new RoofLayer());
+                {
+                    var layer = new RoofLayer { MaterialOptions = matOptions };
+                    roofType.ColdDetail.U1.Layers.Add(layer);
+                }
                 if (!roofType.ColdDetail.U2.Layers.Any())
-                    roofType.ColdDetail.U2.Layers.Add(new RoofLayer());
+                {
+                    var layer = new RoofLayer { MaterialOptions = matOptions };
+                    roofType.ColdDetail.U2.Layers.Add(layer);
+                }
                 if (!roofType.ColdDetail.Uw.Layers.Any())
-                    roofType.ColdDetail.Uw.Layers.Add(new RoofLayer());
+                {
+                    var layer = new RoofLayer { MaterialOptions = matOptions };
+                    roofType.ColdDetail.Uw.Layers.Add(layer);
+                }
 
                 // Автоматично попълване на θe за студен покрив
                 var mainVM = System.Windows.Application.Current?.MainWindow?.DataContext as MainViewModel;
@@ -167,9 +224,11 @@ namespace EE.Doklad.ViewModels
             else if (mode == RoofMode.Warm)
             {
                 roofType.WarmDetail = new WarmRoofDetail();
+                var matOptions = MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
                 if (!roofType.WarmDetail.Layers.Any())
                 {
-                    roofType.WarmDetail.Layers.Add(new RoofLayer());
+                    var layer = new RoofLayer { MaterialOptions = matOptions };
+                    roofType.WarmDetail.Layers.Add(layer);
                 }
             }
 
