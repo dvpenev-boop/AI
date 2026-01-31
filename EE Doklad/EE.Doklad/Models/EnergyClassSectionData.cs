@@ -27,6 +27,18 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private string _colorHex = "#CCCCCC";
 
+        /// <summary>
+        /// Дали този ред е избраният клас (за маркер)
+        /// </summary>
+        [ObservableProperty]
+        private bool _isSelectedClass;
+
+        /// <summary>
+        /// Текст на маркера (празен ако не е избран)
+        /// </summary>
+        [ObservableProperty]
+        private string _markerText = string.Empty;
+
         public string MinValueDisplay => MinValue?.ToString("F0") ?? "—";
         public string MaxValueDisplay => MaxValue?.ToString("F0") ?? "—";
     }
@@ -206,7 +218,8 @@ namespace EE.Doklad.Models
         }
 
         /// <summary>
-        /// Генерира 7 реда (A..G) с прагове
+        /// Генерира 7 реда (A..G) с прагове.
+        /// Също задава IsSelectedClass и MarkerText за текущия клас.
         /// </summary>
         private List<EnergyClassThresholdRow> BuildThresholdRows(EnergyClassThresholds thresholds)
         {
@@ -221,7 +234,11 @@ namespace EE.Doklad.Models
                 ["G"] = "#ED1C24"  // Клас G - RGB: 239, 28, 36
             };
 
-            return new List<EnergyClassThresholdRow>
+            // Изчисли текущия клас и маркера
+            var computedClass = CalculatedClass;
+            var markerValue = MarkerValueRounded;
+
+            var rows = new List<EnergyClassThresholdRow>
             {
                 new EnergyClassThresholdRow
                 {
@@ -280,6 +297,16 @@ namespace EE.Doklad.Models
                     ColorHex = colorMap["G"]
                 }
             };
+
+            // Задай IsSelectedClass и MarkerText за правилния ред
+            foreach (var row in rows)
+            {
+                bool isSelected = (computedClass.HasValue && row.Class == computedClass.Value.ToString());
+                row.IsSelectedClass = isSelected;
+                row.MarkerText = (isSelected && markerValue.HasValue) ? markerValue.Value.ToString() : string.Empty;
+            }
+
+            return rows;
         }
 
         /// <summary>
@@ -365,6 +392,7 @@ namespace EE.Doklad.Models
 
         partial void OnEnergyPerformanceChanged(double? value)
         {
+            RefreshThresholds();
             OnPropertyChanged(nameof(CalculatedClass));
             OnPropertyChanged(nameof(ClassDescription));
             OnPropertyChanged(nameof(ClassDisplay));
