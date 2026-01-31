@@ -323,6 +323,46 @@ namespace EE.Doklad.Services
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
+        /// <summary>
+        /// Проверява дали секцията трябва да бъде рендирана в PDF
+        /// </summary>
+        private bool ShouldRenderSection(Report report, Section section)
+        {
+            // Проверка дали секцията е включена
+            if (!report.IsSectionEnabled(section.Type))
+                return false;
+
+            // Проверка за данни според типа секция
+            return section.Type switch
+            {
+                SectionType.CoverPage => section.CoverPageData != null,
+                SectionType.Certificates => section.CertificatesData != null &&
+                    (section.CertificatesData.CertificateAttachment?.HasAttachment == true ||
+                     section.CertificatesData.InsuranceAttachment?.HasAttachment == true),
+                SectionType.ObjectData => section.ObjectDataSectionData != null,
+                SectionType.ExternalWalls => section.ExternalWallsSectionData != null && 
+                    section.ExternalWallsSectionData.WallTypes?.Count > 0,
+                SectionType.Roof => section.RoofSectionData != null && 
+                    section.RoofSectionData.RoofTypes?.Count > 0,
+                SectionType.Floor => section.FloorSectionData != null && 
+                    section.FloorSectionData.FloorItems?.Count > 0,
+                SectionType.Lighting => section.LightingSectionData != null && 
+                    section.LightingSectionData.LineItems?.Count > 0,
+                SectionType.AppliancesAffecting => section.AppliancesAffectingSectionData != null && 
+                    section.AppliancesAffectingSectionData.LineItems?.Count > 0,
+                SectionType.AppliancesNotAffecting => section.AppliancesNotAffectingSectionData != null && 
+                    section.AppliancesNotAffectingSectionData.LineItems?.Count > 0,
+                SectionType.Results => section.ResultsSectionData != null && 
+                    section.ResultsSectionData.Rows?.Count > 0,
+                SectionType.EnergyClass => section.EnergyClassSectionData != null && 
+                    section.EnergyClassSectionData.BuildingType.HasValue,
+                SectionType.Conclusion => section.ConclusionSectionData != null,
+                
+                // Fallback: render other types if they have title
+                _ => !string.IsNullOrWhiteSpace(section.Title)
+            };
+        }
+
         public void GeneratePdf(Report report, string outputPath)
         {
             try
@@ -330,8 +370,12 @@ namespace EE.Doklad.Services
                 var sections = report.Sections.OrderBy(s => s.Order).ToList();
                 int tocIndex = sections.FindIndex(s => s.Title?.Trim() == "Съдържание" || s.Title?.ToLower().Contains("съдържание") == true);
 
+                // Filter sections that should be rendered
+                var sectionsToRender = sections.Where((s, idx) => idx == tocIndex || ShouldRenderSection(report, s)).ToList();
+
                 // 1. Render TOC placeholder to get its page count
-                var tocItemsPlaceholder = sections
+                var tocItemsPlaceholder = sectionsToRender
+                    .Where(s => sections.IndexOf(s) != tocIndex) // Exclude TOC itself from TOC
                     .Select(section => new TocItem(section.Title ?? string.Empty, 0))
                     .ToList();
 
@@ -339,10 +383,20 @@ namespace EE.Doklad.Services
                     ? GetTocPageCount(report, tocItemsPlaceholder)
                     : 0;
 
+                // 2. Calculate page numbers for each section (only for sections to render)
                 var pageNumbers = new int[sections.Count];
                 int currentPage = 1;
                 for (int i = 0; i < sections.Count; i++)
                 {
+                    var section = sections[i];
+                    
+                    // Skip sections that shouldn't be rendered
+                    if (i != tocIndex && !ShouldRenderSection(report, section))
+                    {
+                        pageNumbers[i] = -1; // Mark as skipped
+                        continue;
+                    }
+
                     pageNumbers[i] = currentPage;
                     if (i == tocIndex)
                     {
@@ -350,11 +404,13 @@ namespace EE.Doklad.Services
                         continue;
                     }
 
-                    currentPage += GetSectionPageCount(report, sections[i]);
+                    currentPage += GetSectionPageCount(report, section);
                 }
 
+                // Build TOC with only rendered sections
                 var tocItems = sections
-                    .Select((section, idx) => new TocItem(section.Title ?? string.Empty, pageNumbers[idx]))
+                    .Where((section, idx) => idx != tocIndex && pageNumbers[idx] >= 0) // Exclude TOC and skipped sections
+                    .Select((section, idx) => new TocItem(section.Title ?? string.Empty, pageNumbers[sections.IndexOf(section)]))
                     .ToList();
 
                 // 3. Render final document with real TOC
@@ -367,13 +423,22 @@ namespace EE.Doklad.Services
                             for (int i = 0; i < sections.Count; i++)
                             {
                                 var section = sections[i];
+                                
+                                // Skip TOC handling first
                                 if (i == tocIndex)
                                 {
                                     ComposeToc(column, tocItems);
                                     column.Item().PageBreak();
                                     continue;
                                 }
+
+                                // Skip sections that shouldn't be rendered
+                                if (!ShouldRenderSection(report, section))
+                                    continue;
+
                                 ComposeSectionContent(column, section);
+                                
+                                // Add page break if not last section
                                 if (i < sections.Count - 1)
                                 {
                                     column.Item().PageBreak();
@@ -461,6 +526,30 @@ namespace EE.Doklad.Services
             else if (section.Type == SectionType.Floor && section.FloorSectionData is { } floorData)
             {
                 GenerateFloorSection(column, floorData);
+            }
+            else if (section.Type == SectionType.Lighting && section.LightingSectionData is { } lightingData)
+            {
+                GenerateLightingSection(column, lightingData);
+            }
+            else if (section.Type == SectionType.AppliancesAffecting && section.AppliancesAffectingSectionData is { } appliancesAffectingData)
+            {
+                GenerateAppliancesSection(column, appliancesAffectingData);
+            }
+            else if (section.Type == SectionType.AppliancesNotAffecting && section.AppliancesNotAffectingSectionData is { } appliancesNotAffectingData)
+            {
+                GenerateAppliancesSection(column, appliancesNotAffectingData);
+            }
+            else if (section.Type == SectionType.Results && section.ResultsSectionData is { } resultsData)
+            {
+                GenerateResultsSection(column, resultsData);
+            }
+            else if (section.Type == SectionType.EnergyClass && section.EnergyClassSectionData is { } energyClassData)
+            {
+                GenerateEnergyClassSection(column, energyClassData);
+            }
+            else if (section.Type == SectionType.Conclusion && section.ConclusionSectionData is { } conclusionData)
+            {
+                GenerateConclusionSection(column, conclusionData);
             }
             else
             {
@@ -1350,6 +1439,407 @@ namespace EE.Doklad.Services
             });
 
             column.Item().PaddingBottom(15);
+        }
+
+        // --- Section 15: Lighting ---
+        private void GenerateLightingSection(ColumnDescriptor column, LightingSectionData data)
+        {
+            column.Item().Text(data.Title ?? "Осветление")
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description)
+                    .Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            if (data.LineItems == null || data.LineItems.Count == 0)
+            {
+                column.Item().Text("Няма добавени данни за осветление.")
+                    .FontSize(10).Italic();
+                return;
+            }
+
+            // Main lighting table
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.ConstantColumn(30); // №
+                    columns.RelativeColumn(2); // Наименование
+                    columns.RelativeColumn(1); // Брой
+                    columns.RelativeColumn(1); // Мощност единична [W]
+                    columns.RelativeColumn(1); // Мощност обща [kW]
+                    columns.RelativeColumn(1); // Режим [h/day]
+                    columns.RelativeColumn(1); // Дни [/week]
+                    columns.RelativeColumn(1); // Годишна енергия [kWh/y]
+                });
+
+                // Header
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("№").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Наименование").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Брой").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("P₁ [W]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("P [kW]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("h/day").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("days/week").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("E [kWh/y]").Bold();
+
+                // Data rows
+                foreach (var item in data.LineItems)
+                {
+                    tbl.Cell().Border(1).Padding(5).Text(item.Index.ToString());
+                    tbl.Cell().Border(1).Padding(5).Text(item.SelectedLightingComponentName ?? "—");
+                    tbl.Cell().Border(1).Padding(5).Text(item.Quantity.ToString());
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.PowerW, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.PowerTotal_kW, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.HoursPerDay, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.DaysPerWeek, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.AnnualEnergy_kWh, GenericNumberFormat));
+                }
+            });
+
+            column.Item().PaddingTop(10);
+
+            // Summary table
+            column.Item().Text("Обобщени показатели").SemiBold().FontSize(12);
+            column.Item().PaddingBottom(5);
+
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2);
+                    columns.RelativeColumn(1);
+                });
+
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Параметър").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Стойност").Bold();
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща мощност [kW]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalPower_kW, GenericNumberFormat));
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща годишна енергия [kWh/y]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalAnnualEnergy_kWh, GenericNumberFormat));
+
+                tbl.Cell().Border(1).Padding(5).Text("Едновременна мощност [W/m²]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.SimultaneousPower_W_per_m2, GenericNumberFormat));
+
+                tbl.Cell().Border(1).Padding(5).Text("Едновременна мощност [W]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.SimultaneousPower_W, GenericNumberFormat));
+            });
+        }
+
+        // --- Section 16/17: Appliances (Affecting / Not Affecting) ---
+        private void GenerateAppliancesSection(ColumnDescriptor column, AppliancesSectionData data)
+        {
+            column.Item().Text(data.Title ?? "Други разходи")
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description)
+                    .Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            if (data.LineItems == null || data.LineItems.Count == 0)
+            {
+                column.Item().Text("Няма добавени данни за уреди.")
+                    .FontSize(10).Italic();
+                return;
+            }
+
+            // Main appliances table
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.ConstantColumn(30); // №
+                    columns.RelativeColumn(2); // Наименование
+                    columns.RelativeColumn(1); // Брой
+                    columns.RelativeColumn(1); // Мощност единична [W]
+                    columns.RelativeColumn(1); // Мощност обща [kW]
+                    columns.RelativeColumn(1); // Режим [h/day]
+                    columns.RelativeColumn(1); // Дни [/week]
+                    columns.RelativeColumn(1); // Годишна енергия [kWh/y]
+                });
+
+                // Header
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("№").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Наименование").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Брой").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("P₁ [W]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("P [kW]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("h/day").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("days/week").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("E [kWh/y]").Bold();
+
+                // Data rows
+                foreach (var item in data.LineItems)
+                {
+                    tbl.Cell().Border(1).Padding(5).Text(item.Index.ToString());
+                    tbl.Cell().Border(1).Padding(5).Text(item.SelectedApplianceName ?? "—");
+                    tbl.Cell().Border(1).Padding(5).Text(item.Quantity.ToString());
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.PowerW, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.PowerTotal_kW, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.HoursPerDay, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.DaysPerWeek, GenericNumberFormat));
+                    tbl.Cell().Border(1).Padding(5).Text(FormatNumber(item.AnnualEnergy_kWh, GenericNumberFormat));
+                }
+            });
+
+            column.Item().PaddingTop(10);
+
+            // Summary table
+            column.Item().Text("Обобщени показатели").SemiBold().FontSize(12);
+            column.Item().PaddingBottom(5);
+
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2);
+                    columns.RelativeColumn(1);
+                });
+
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Параметър").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Стойност").Bold();
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща мощност [kW]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalPower_kW, GenericNumberFormat));
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща годишна енергия [kWh/y]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalAnnualEnergy_kWh, GenericNumberFormat));
+
+                tbl.Cell().Border(1).Padding(5).Text("Едновременна мощност [W/m²]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.SimultaneousPower_W_per_m2, GenericNumberFormat));
+
+                tbl.Cell().Border(1).Padding(5).Text("Едновременна мощност [W]");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.SimultaneousPower_W, GenericNumberFormat));
+            });
+        }
+
+        // --- Section 18: Results ---
+        private void GenerateResultsSection(ColumnDescriptor column, ResultsSectionData data)
+        {
+            column.Item().Text(data.Title ?? "Резултати сграда")
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description)
+                    .Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            if (data.Rows == null || data.Rows.Count == 0)
+            {
+                column.Item().Text("Няма добавени данни за резултати.")
+                    .FontSize(10).Italic();
+                return;
+            }
+
+            // Results table
+            column.Item().Text("Потребена енергия по системи").SemiBold().FontSize(12);
+            column.Item().PaddingBottom(5);
+
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2); // Система
+                    columns.RelativeColumn(1); // E [kWh/y]
+                    columns.RelativeColumn(1); // EP [kWh/m²]
+                    columns.RelativeColumn(1); // PEnr [kWh]
+                    columns.RelativeColumn(1); // PEr [kWh]
+                    columns.RelativeColumn(1); // PEtot [kWh]
+                    columns.RelativeColumn(1); // CO2e [tCO2]
+                });
+
+                // Header
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Система").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("E [kWh/y]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("EP [kWh/m²]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("PEnr [kWh]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("PEr [kWh]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("PEtot [kWh]").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("CO2e [tCO2]").Bold();
+
+                // Data rows
+                foreach (var row in data.Rows)
+                {
+                    var isTotal = row.RowName == "Общо";
+                    var bgColor = isTotal ? Colors.Grey.Lighten4 : Colors.White;
+                    var isBold = isTotal || row.IsCalculated;
+
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.RowName ?? "—").FontSize(isBold ? 11 : 10);
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.ConsumedEnergy ?? "—").FontSize(isBold ? 11 : 10);
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.SpecificConsumption ?? "—").FontSize(isBold ? 11 : 10);
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(FormatNumber(row.FpNrenKWh, GenericNumberFormat)).FontSize(isBold ? 11 : 10);
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(FormatNumber(row.FpRenKWh, GenericNumberFormat)).FontSize(isBold ? 11 : 10);
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(FormatNumber(row.FpTotKWh, GenericNumberFormat)).FontSize(isBold ? 11 : 10);
+                    tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(FormatNumber(row.EmCO2Tonnes, GenericNumberFormat)).FontSize(isBold ? 11 : 10);
+                }
+            });
+
+            column.Item().PaddingTop(10);
+
+            // Summary parameters
+            column.Item().Text("Обобщени показатели").SemiBold().FontSize(12);
+            column.Item().PaddingBottom(5);
+
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2);
+                    columns.RelativeColumn(1);
+                    columns.RelativeColumn(1);
+                });
+
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Параметър").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Стойност").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Единица").Bold();
+
+                tbl.Cell().Border(1).Padding(5).Text("Отопляема площ");
+                tbl.Cell().Border(1).Padding(5).Text(data.HeatedArea.HasValue ? FormatNumber(data.HeatedArea.Value, GenericNumberFormat) : "—");
+                tbl.Cell().Border(1).Padding(5).Text("m²");
+
+                tbl.Cell().Border(1).Padding(5).Text("Годишна специфична енергия (EP)");
+                tbl.Cell().Border(1).Padding(5).Text(data.TotalSpecificConsumption.HasValue ? FormatNumber(data.TotalSpecificConsumption.Value, GenericNumberFormat) : "—");
+                tbl.Cell().Border(1).Padding(5).Text("kWh/m²");
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща първична енергия (fp,tot)");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalFpTotKWh, GenericNumberFormat));
+                tbl.Cell().Border(1).Padding(5).Text("kWh");
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща първична невъзобновяема (fp,nren)");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalFpNrenKWh, GenericNumberFormat));
+                tbl.Cell().Border(1).Padding(5).Text("kWh");
+
+                tbl.Cell().Border(1).Padding(5).Text("Обща първична възобновяема (fp,ren)");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalFpRenKWh, GenericNumberFormat));
+                tbl.Cell().Border(1).Padding(5).Text("kWh");
+
+                tbl.Cell().Border(1).Padding(5).Text("Общи емисии CO2");
+                tbl.Cell().Border(1).Padding(5).Text(FormatNumber(data.TotalEmCO2Tonnes, GenericNumberFormat));
+                tbl.Cell().Border(1).Padding(5).Text("tCO2");
+            });
+        }
+
+        // --- Section 19: Energy Class ---
+        private void GenerateEnergyClassSection(ColumnDescriptor column, EnergyClassSectionData data)
+        {
+            column.Item().Text(data.Title ?? "Клас на енергопотребление")
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(5);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description)
+                    .Justify();
+                column.Item().PaddingBottom(10);
+            }
+
+            // Display building type and EP
+            column.Item().Table(tbl =>
+            {
+                tbl.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2);
+                    columns.RelativeColumn(1);
+                });
+
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Параметър").Bold();
+                tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Стойност").Bold();
+
+                tbl.Cell().Border(1).Padding(5).Text("Тип сграда");
+                tbl.Cell().Border(1).Padding(5).Text(data.BuildingType?.ToString() ?? "—");
+
+                tbl.Cell().Border(1).Padding(5).Text("Годишна специфична енергия (EP) [kWh/m²]");
+                tbl.Cell().Border(1).Padding(5).Text(data.EnergyPerformance.HasValue ? FormatNumber(data.EnergyPerformance.Value, GenericNumberFormat) : "—");
+
+                tbl.Cell().Border(1).Padding(5).Text("Изчислен клас");
+                tbl.Cell().Border(1).Padding(5).Text(data.CalculatedClass?.ToString() ?? "—").Bold().FontSize(14);
+            });
+
+            column.Item().PaddingTop(10);
+
+            // Thresholds table
+            if (data.ThresholdRows != null && data.ThresholdRows.Count > 0)
+            {
+                column.Item().Text("Прагове за класове").SemiBold().FontSize(12);
+                column.Item().PaddingBottom(5);
+
+                column.Item().Table(tbl =>
+                {
+                    tbl.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(1); // Клас
+                        columns.RelativeColumn(1); // Min
+                        columns.RelativeColumn(1); // Max
+                        columns.RelativeColumn(2); // Правило
+                        columns.RelativeColumn(1); // Маркер
+                    });
+
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Клас").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Min").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Max").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("Правило").Bold();
+                    tbl.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(5).Text("").Bold();
+
+                    foreach (var row in data.ThresholdRows)
+                    {
+                        var bgColor = row.IsSelectedClass ? Colors.Yellow.Lighten3 : Colors.White;
+
+                        tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.Class).Bold();
+                        tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.MinValueDisplay);
+                        tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.MaxValueDisplay);
+                        tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.RuleText ?? "—");
+                        tbl.Cell().Border(1).Background(bgColor).Padding(5).Text(row.MarkerText ?? "").Bold().FontSize(16);
+                    }
+                });
+            }
+
+            column.Item().PaddingTop(10);
+            column.Item().Text($"Класификация: {data.ClassDescription}")
+                .FontSize(11).SemiBold();
+        }
+
+        // --- Section 20: Conclusion ---
+        private void GenerateConclusionSection(ColumnDescriptor column, ConclusionSectionData data)
+        {
+            column.Item().Text(data.Title ?? "Заключение")
+                .Justify()
+                .Bold().FontSize(14);
+            column.Item().PaddingBottom(10);
+
+            if (!string.IsNullOrWhiteSpace(data.Description))
+            {
+                column.Item().Text(data.Description)
+                    .Justify().FontSize(10);
+                column.Item().PaddingBottom(10);
+            }
+
+            if (!string.IsNullOrWhiteSpace(data.ConclusionText))
+            {
+                column.Item().Text(data.ConclusionText)
+                    .Justify().FontSize(11);
+            }
+            else
+            {
+                column.Item().Text("Няма въведено заключение.")
+                    .FontSize(10).Italic();
+            }
         }
 
         private string GetPhaseText(ProjectPhase phase)

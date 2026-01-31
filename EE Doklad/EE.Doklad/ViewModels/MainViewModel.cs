@@ -688,6 +688,36 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("15. Осветление"))
+                {
+                    section.Type = SectionType.Lighting;
+                    section.LightingSectionData = new LightingSectionData
+                    {
+                        Title = "Осветление",
+                        Description = "Попълнете данните за осветление."
+                    };
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("16. Други разходи влияещи"))
+                {
+                    section.Type = SectionType.AppliancesAffecting;
+                    section.AppliancesAffectingSectionData = new AppliancesSectionData
+                    {
+                        Title = "Други разходи влияещи",
+                        Description = "Попълнете данните за уреди, които влияят на енергопотреблението."
+                    };
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("17. Други разходи не влияещи"))
+                {
+                    section.Type = SectionType.AppliancesNotAffecting;
+                    section.AppliancesNotAffectingSectionData = new AppliancesSectionData
+                    {
+                        Title = "Други разходи не влияещи",
+                        Description = "Попълнете данните за уреди, които не влияят на енергопотреблението."
+                    };
+                    section.StaticText = string.Empty;
+                }
                 else if (laterTitles[i].Contains("18. Резултати сграда"))
                 {
                     section.Type = SectionType.Results;

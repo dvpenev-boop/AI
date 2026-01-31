@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace EE.Doklad.Models
@@ -14,6 +16,24 @@ namespace EE.Doklad.Models
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime ModifiedDate { get; set; } = DateTime.Now;
         public ObservableCollection<Section> Sections { get; set; } = new();
+
+        /// <summary>
+        /// Включени секции за експорт в PDF (по SectionType).
+        /// Ако е null или празен - всички секции са включени.
+        /// </summary>
+        public HashSet<string>? EnabledSections { get; set; }
+
+        /// <summary>
+        /// Проверява дали дадена секция е включена за експорт.
+        /// По подразбиране всички секции са включени.
+        /// </summary>
+        public bool IsSectionEnabled(SectionType sectionType)
+        {
+            if (EnabledSections == null || EnabledSections.Count == 0)
+                return true; // Всички секции са включени по подразбиране
+
+            return EnabledSections.Contains(sectionType.ToString());
+        }
 
         [JsonIgnore]
         public bool IsDirty { get; set; }
