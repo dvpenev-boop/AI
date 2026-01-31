@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -197,6 +198,24 @@ public partial class MainWindow : Window
                 DataContext = new ViewModels.WindowsSectionViewModel(section.WindowsSectionData)
             };
             ContentScrollViewer.Content = windowsSectionView;
+        }
+        else if (section.Type == ModelSectionType.Heating ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Отопление")))
+        {
+            if (section.HeatingSectionData == null)
+                section.HeatingSectionData = new Models.HeatingSectionData();
+
+            section.Type = ModelSectionType.Heating;
+
+            // Намираме секция 5 (ObjectData) за да извлечем броя обитатели
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            var heatingSectionView = new HeatingSectionView
+            {
+                DataContext = new ViewModels.HeatingSectionViewModel(section.HeatingSectionData, objectData)
+            };
+            ContentScrollViewer.Content = heatingSectionView;
         }
         else
         {

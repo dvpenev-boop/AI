@@ -669,6 +669,16 @@ namespace EE.Doklad.ViewModels
                     section.FloorSectionData = new FloorSectionData();
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("Отопление"))
+                {
+                    section.Type = SectionType.Heating;
+                    section.HeatingSectionData = new HeatingSectionData
+                    {
+                        Title = "Отопление",
+                        Description = "Попълнете данните за отопление."
+                    };
+                    section.StaticText = string.Empty;
+                }
                 report.Sections.Add(section);
             }
 

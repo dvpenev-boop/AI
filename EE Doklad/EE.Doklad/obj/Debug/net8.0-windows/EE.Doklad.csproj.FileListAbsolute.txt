@@ -141,3 +141,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MaterialsEditWindow.g.c
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MaterialsEditWindow.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ImportOptionsWindow.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ImportOptionsWindow.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\HeatingSectionView.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\HeatingSectionView.baml

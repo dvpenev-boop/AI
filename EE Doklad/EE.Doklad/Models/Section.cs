@@ -16,7 +16,8 @@ namespace EE.Doklad.Models
         ExternalWalls,  // Външни стени (секция №6)
         Roof,           // Покрив (секция №7)
         Floor,          // Под (секция №8)
-        Windows         // Прозорци и врати (секция №9)
+        Windows,        // Прозорци и врати (секция №9)
+        Heating         // Отопление (секция №10)
     }
 
     /// <summary>
@@ -79,6 +80,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Прозорци и врати" (само за Windows секции)
         /// </summary>
         public WindowsSectionData? WindowsSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Отопление" (само за Heating секции)
+        /// </summary>
+        public HeatingSectionData? HeatingSectionData { get; set; }
 
         public int Order { get; set; }
 
