@@ -100,9 +100,9 @@
                                         Binding="{Binding DaysPerWeek, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" 
                                         Width="85"/>
                     
-                    <!-- Работен режим [days/y] - readonly -->
+                    <!-- Работен режим [days/y] - readonly, показва цяло число но изчислява с десетични -->
                     <DataGridTextColumn Header="Работен&#x0a;режим&#x0a;[days/y]" 
-                                        Binding="{Binding WorkingDaysPerYear, StringFormat=0.00}" 
+                                        Binding="{Binding WorkingDaysPerYear, StringFormat=0}" 
                                         IsReadOnly="True" 
                                         Width="85"/>
                     

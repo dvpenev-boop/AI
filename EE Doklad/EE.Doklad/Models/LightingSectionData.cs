@@ -282,16 +282,25 @@ namespace EE.Doklad.Models
         private double _daysPerWeek = 5.0;
 
         /// <summary>
-        /// Работен режим [days/y] = ((365 - HolidaysPerYear) / 7.0) * DaysPerWeek
+        /// Работен режим [days/y] = (365 / 7.0) * DaysPerWeek - HolidaysPerYear
+        /// Предполага че HolidaysPerYear съдържа САМО официални празници (без уикенди)
+        /// Уикендите се изчисляват автоматично чрез DaysPerWeek (5 дни = понеделник-петък)
         /// </summary>
         public double WorkingDaysPerYear
         {
             get
             {
-                if (DaysPerWeek < 0) return 0.0;
-                var effectiveDays = 365 - _holidaysPerYear;
-                if (effectiveDays < 0) effectiveDays = 0;
-                return (effectiveDays / 7.0) * DaysPerWeek;
+                if (DaysPerWeek < 0 || DaysPerWeek > 7) return 0.0;
+                
+                // Работни дни в годината (автоматично изключва уикендите)
+                double workingDaysWithoutHolidays = (365.0 / 7.0) * DaysPerWeek;
+                // За DaysPerWeek=5: (365/7) × 5 = 52.14 × 5 = 260.71 дни
+                
+                // Изваждаме официалните празници
+                double result = workingDaysWithoutHolidays - _holidaysPerYear;
+                // За HolidaysPerYear=21: 260.71 - 21 = 239.71 дни
+                
+                return result >= 0 ? result : 0.0;
             }
         }
 
