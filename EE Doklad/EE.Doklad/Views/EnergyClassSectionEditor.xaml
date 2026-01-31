@@ -3,15 +3,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:EE.Doklad.Views.Controls"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="900">
+    
+    <UserControl.Resources>
+        <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisInverse"/>
+        <converters:HexToBrushConverter x:Key="HexToBrush"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+    
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
             <!-- Заглавие -->
-            <TextBlock Text="{Binding Title, FallbackValue='Клас на енергопотребление'}"
-                       FontSize="18" 
+            <TextBlock Text="{Binding Title, FallbackValue='19. Клас на енергопотребление'}"
+                       FontSize="20" 
                        FontWeight="Bold" 
-                       Margin="0,0,0,15"/>
+                       Margin="0,0,0,20"/>
 
             <!-- Описание -->
             <TextBlock Text="Описание:"
@@ -25,112 +34,269 @@
                      TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto"
                      FontSize="11"
-                     Margin="0,0,0,30"
+                     Margin="0,0,0,20"
                      BorderBrush="#E0E0E0"
                      BorderThickness="1"/>
 
             <!-- Информационен блок -->
             <Border Background="#E3F2FD" BorderBrush="#2196F3" BorderThickness="2" 
-                    Padding="20" Margin="0,0,0,20" CornerRadius="8">
+                    Padding="20" Margin="0,0,0,25" CornerRadius="8">
                 <StackPanel>
                     <TextBlock Text="ℹ Автоматично определяне на клас" 
                               FontWeight="Bold" FontSize="14" Margin="0,0,0,15"
                               Foreground="#1976D2"/>
                     
                     <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10">
-                        Класът на енергопотребление се определя автоматично на база избрания <Bold>Тип сграда</Bold> 
-                        от секция "Данни за обекта" и стойността на <Bold>EP (годишна специфична енергия)</Bold>.
+                        <Run Text="Класът на енергопотребление се определя "/>
+                        <Run Text="автоматично" FontWeight="Bold"/>
+                        <Run Text=" на база:"/>
+                    </TextBlock>
+                    
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Margin="15,0,0,5">
+                        <Run Text="• Тип сграда от секция 5 "/>
+                        <Run Text="'Данни за обекта'" FontStyle="Italic"/>
+                    </TextBlock>
+                    
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Margin="15,0,0,10">
+                        <Run Text="• EP (годишна специфична енергия) от секция 18 "/>
+                        <Run Text="'Резултати сграда'" FontStyle="Italic"/>
+                        <Run Text=" → ред "/>
+                        <Run Text="'ОБЩО'" FontWeight="Bold"/>
+                        <Run Text=" → колона "/>
+                        <Run Text="'kWh/m²'" FontWeight="Bold"/>
                     </TextBlock>
 
-                    <TextBlock TextWrapping="Wrap" FontSize="12">
-                        Въведете стойността на EP по-долу, за да видите изчисления клас.
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#555">
+                        Не е необходимо ръчно въвеждане. Данните се обновяват автоматично.
                     </TextBlock>
                 </StackPanel>
             </Border>
 
-            <!-- Входни данни -->
-            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20" Padding="0">
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- БЛОК A: ВХОДНИ ДАННИ (Read-Only) -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,25" Padding="0">
                 <StackPanel>
                     <!-- Header -->
                     <Border Background="#2196F3" Padding="15">
-                        <TextBlock Text="Входни данни" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="A. Входни данни" FontSize="15" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <!-- Тип сграда (read-only, идва от ObjectData) -->
-                    <Border BorderBrush="#CCC" BorderThickness="0,0,0,1">
-                        <Grid Background="White">
+                    <!-- Тип сграда (read-only от секция 5) -->
+                    <Border BorderBrush="#CCC" BorderThickness="0,0,0,1" Background="White">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
                             
                             <TextBlock Grid.Column="0" Text="Тип сграда:" 
-                                      Padding="15,12" FontWeight="SemiBold" FontSize="12" 
-                                      Background="#F0F0F0" VerticalAlignment="Center"/>
+                                      Padding="15,12" FontWeight="SemiBold" FontSize="13" 
+                                      Background="#F5F5F5" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" 
                                       Text="{Binding BuildingTypeDisplay, FallbackValue='Не е избран'}" 
-                                      Padding="15,12" FontSize="12" VerticalAlignment="Center"
-                                      Background="#F5F5F5"/>
+                                      Padding="15,12" FontSize="13" VerticalAlignment="Center"
+                                      Background="White"
+                                      Foreground="#333"/>
                         </Grid>
                     </Border>
 
-                    <!-- EP - Годишна специфична енергия (редактируем) -->
-                    <Border BorderBrush="#CCC" BorderThickness="0,0,0,0">
-                        <Grid Background="White">
+                    <!-- EP - Годишна специфична енергия (read-only от секция 18) -->
+                    <Border BorderBrush="#CCC" BorderThickness="0,0,0,0" Background="White">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="EP - Годишна специфична енергия [kWh/m²]:" 
-                                      Padding="15,12" FontWeight="SemiBold" FontSize="12" 
-                                      Background="#F0F0F0" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" 
-                                    Text="{Binding EnergyPerformance, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" 
-                                    Padding="15,12" FontSize="12" VerticalAlignment="Center"
-                                    BorderThickness="0"/>
+                            <TextBlock Grid.Column="0" 
+                                      Padding="15,12" FontWeight="SemiBold" FontSize="13" 
+                                      Background="#F5F5F5" VerticalAlignment="Center">
+                                <Run Text="EP – Годишна специфична енергия"/>
+                                <LineBreak/>
+                                <Run Text="[kWh/m²]:" FontSize="12" Foreground="#666"/>
+                            </TextBlock>
+                            <TextBlock Grid.Column="1" 
+                                      Text="{Binding EnergyPerformanceDisplay, FallbackValue='—'}" 
+                                      Padding="15,12" FontSize="13" VerticalAlignment="Center"
+                                      Background="White"
+                                      Foreground="#333"
+                                      FontWeight="SemiBold"/>
                         </Grid>
                     </Border>
                 </StackPanel>
             </Border>
 
-            <!-- Резултат: Изчислен клас -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- БЛОК B: РЕЗУЛТАТ: ЕНЕРГИЕН КЛАС -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
             <Border BorderBrush="#4CAF50" BorderThickness="3" Background="#F1F8F4" 
-                    Padding="25" Margin="0,0,0,20" CornerRadius="8">
+                    Padding="25" Margin="0,0,0,25" CornerRadius="8">
                 <StackPanel>
-                    <TextBlock Text="Резултат: Енергиен клас" 
-                              FontSize="14" FontWeight="Bold" Margin="0,0,0,15"
+                    <TextBlock Text="B. Резултат: Енергиен клас" 
+                              FontSize="16" FontWeight="Bold" Margin="0,0,0,20"
                               Foreground="#2E7D32"/>
 
-                    <!-- Клас (голяма буква) -->
-                    <Border Background="White" BorderBrush="#4CAF50" BorderThickness="2"
-                            HorizontalAlignment="Center" Padding="40,20" Margin="0,0,0,15"
-                            CornerRadius="8">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="КЛАС" FontSize="14" FontWeight="SemiBold" 
-                                      HorizontalAlignment="Center" Foreground="#555"/>
-                            <TextBlock Text="{Binding ClassDisplay, FallbackValue='—'}" 
-                                      FontSize="72" FontWeight="Bold" 
-                                      HorizontalAlignment="Center" Foreground="#2E7D32"/>
+                    <!-- Липса на данни -->
+                    <Border Visibility="{Binding IsDataAvailable, Converter={StaticResource BoolToVisInverse}}"
+                            Background="#FFF3E0" BorderBrush="#FF9800" BorderThickness="2"
+                            Padding="20" Margin="0,0,0,20" CornerRadius="6">
+                        <StackPanel>
+                            <TextBlock Text="⚠ Липсват данни" FontWeight="Bold" FontSize="14" 
+                                      Foreground="#E65100" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding DataUnavailableMessage}" 
+                                      TextWrapping="Wrap" FontSize="12" Foreground="#555"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Описание на класа -->
-                    <TextBlock Text="{Binding ClassDescription, FallbackValue='Моля, попълнете данните'}" 
-                              FontSize="13" TextAlignment="Center" FontWeight="SemiBold"
-                              Foreground="#1B5E20" TextWrapping="Wrap"/>
+                    <!-- Данни налични -->
+                    <Grid Visibility="{Binding IsDataAvailable, Converter={StaticResource BoolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1.5*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Лява страна: Клас карта -->
+                        <Border Grid.Column="0" 
+                                Background="{Binding ClassColor, Converter={StaticResource HexToBrush}}" 
+                                BorderBrush="#333" BorderThickness="3"
+                                Padding="30" Margin="0,0,15,0" CornerRadius="8"
+                                VerticalAlignment="Top">
+                            <StackPanel>
+                                <TextBlock Text="ЕНЕРГИЕН КЛАС" FontSize="12" FontWeight="SemiBold" 
+                                          HorizontalAlignment="Center" Foreground="White" Margin="0,0,0,10"/>
+                                <TextBlock Text="{Binding ClassDisplay, FallbackValue='—'}" 
+                                          FontSize="80" FontWeight="Bold" 
+                                          HorizontalAlignment="Center" Foreground="White"
+                                          Margin="0,0,0,10"/>
+                                <TextBlock Text="{Binding ClassDescription, FallbackValue='—'}" 
+                                          FontSize="11" TextAlignment="Center" FontWeight="SemiBold"
+                                          Foreground="White" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Дясна страна: Визуална скала -->
+                        <Border Grid.Column="1" Background="White" BorderBrush="#999" BorderThickness="2"
+                                Padding="15" CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="Визуална скала A–G" FontSize="13" FontWeight="Bold" 
+                                          Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                                
+                                <controls:EnergyClassScale 
+                                    BandHeight="50"
+                                    MarkerValue="{Binding MarkerValueRounded, Mode=OneWay}"
+                                    NormalizedMarkerPosition="{Binding GetNormalizedMarkerPosition, Mode=OneWay}"
+                                    CurrentClass="{Binding ClassDisplay, Mode=OneWay}"
+                                    Width="300"
+                                    Height="350"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Top"
+                                    Margin="5"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </StackPanel>
             </Border>
 
-            <!-- Помощна таблица с прагове -->
-            <Border Background="#FFF9E6" BorderBrush="#FFB300" BorderThickness="1" 
-                    Padding="15" Margin="0,10,0,0" CornerRadius="4"
-                    x:Name="ThresholdsInfoBorder">
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- БЛОК C: ТАБЛИЦА С ПРАГОВЕ -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20" Padding="0"
+                    Visibility="{Binding IsDataAvailable, Converter={StaticResource BoolToVis}}">
                 <StackPanel>
-                    <TextBlock Text="📊 Прагове за избрания тип сграда:" 
+                    <!-- Header -->
+                    <Border Background="#FF9800" Padding="15">
+                        <TextBlock Text="C. Прагове за избрания тип сграда" 
+                                  FontSize="15" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+
+                    <!-- Таблица -->
+                    <DataGrid ItemsSource="{Binding ThresholdRows}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="All"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="False"
+                              BorderThickness="0"
+                              RowBackground="White"
+                              AlternatingRowBackground="#F9F9F9">
+                        
+                        <DataGrid.Columns>
+                            <!-- Клас -->
+                            <DataGridTemplateColumn Header="Клас" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,8" Background="{Binding ColorHex}" 
+                                                Margin="2">
+                                            <TextBlock Text="{Binding Class}" 
+                                                      FontWeight="Bold" FontSize="16"
+                                                      Foreground="White"
+                                                      HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- От (Min) -->
+                            <DataGridTextColumn Header="От [kWh/m²]" 
+                                                Binding="{Binding MinValueDisplay}" 
+                                                Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="10,8"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- До (Max) -->
+                            <DataGridTextColumn Header="До [kWh/m²]" 
+                                                Binding="{Binding MaxValueDisplay}" 
+                                                Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="10,8"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Правило (RuleText) -->
+                            <DataGridTextColumn Header="Условие" 
+                                                Binding="{Binding RuleText}" 
+                                                Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="10,8"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Информация за източниците на данните -->
+            <Border Background="#ECEFF1" BorderBrush="#90A4AE" BorderThickness="1" 
+                    Padding="15" Margin="0,10,0,0" CornerRadius="4">
+                <StackPanel>
+                    <TextBlock Text="📋 Източници на данни:" 
                               FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
-                    <TextBlock Text="{Binding ThresholdsInfo, FallbackValue=''}" 
-                              TextWrapping="Wrap" FontSize="11" FontFamily="Consolas"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,3">
+                        <Run Text="• Тип сграда: Секция 5 " FontWeight="SemiBold"/>
+                        <Run Text="'Данни за обекта' → Тип сграда" FontStyle="Italic"/>
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" FontSize="11">
+                        <Run Text="• EP стойност: Секция 18 " FontWeight="SemiBold"/>
+                        <Run Text="'Резултати сграда' → Ред 'ОБЩО' → Колона 'kWh/m²'" FontStyle="Italic"/>
+                    </TextBlock>
                 </StackPanel>
             </Border>
         </StackPanel>

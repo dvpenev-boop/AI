@@ -81,6 +81,13 @@ public partial class MainWindow : Window
 
     private void UpdateSectionContent()
     {
+        // Cleanup previous ViewModel if it was EnergyClassViewModel
+        if (ContentScrollViewer.Content is FrameworkElement oldContent && 
+            oldContent.Tag is ViewModels.EnergyClassViewModel oldViewModel)
+        {
+            oldViewModel.Cleanup();
+        }
+
         if (DataContext is not MainViewModel viewModel || viewModel.SelectedSection == null)
         {
             ContentScrollViewer.Content = null;
@@ -379,17 +386,21 @@ public partial class MainWindow : Window
 
             section.Type = ModelSectionType.EnergyClass;
 
-            // Синхронизираме типа сграда от ObjectData
-            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
-            if (objectDataSection?.ObjectDataSectionData != null)
+            // Създаваме и инициализираме ViewModel за автоматична синхронизация
+            var energyClassViewModel = new ViewModels.EnergyClassViewModel();
+            if (viewModel.CurrentReport != null)
             {
-                section.EnergyClassSectionData.BuildingType = objectDataSection.ObjectDataSectionData.BuildingTypeCode;
+                energyClassViewModel.Initialize(viewModel.CurrentReport, section.EnergyClassSectionData);
             }
 
             var energyClassEditor = new EnergyClassSectionEditor
             {
                 DataContext = section.EnergyClassSectionData
             };
+            
+            // Запазваме референция към ViewModel за cleanup при смяна на секция
+            energyClassEditor.Tag = energyClassViewModel;
+            
             ContentScrollViewer.Content = energyClassEditor;
         }
         else

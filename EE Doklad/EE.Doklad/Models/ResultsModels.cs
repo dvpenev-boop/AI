@@ -323,6 +323,28 @@ namespace EE.Doklad.Models
         /// </summary>
         public double TotalEmCO2Tonnes => Rows.Sum(r => r.EmCO2Tonnes);
 
+        /// <summary>
+        /// EP - Годишна специфична енергия от ред "ОБЩО" [kWh/m²]
+        /// Използва се в секция 19 "Клас на енергопотребление"
+        /// </summary>
+        public double? TotalSpecificConsumption
+        {
+            get
+            {
+                var totalRow = Rows.FirstOrDefault(r => r.RowName == "Общо");
+                if (totalRow == null)
+                    return null;
+
+                if (string.IsNullOrWhiteSpace(totalRow.SpecificConsumption) || totalRow.SpecificConsumption == "—")
+                    return null;
+
+                if (double.TryParse(totalRow.SpecificConsumption, out double value))
+                    return value;
+
+                return null;
+            }
+        }
+
         public ResultsSectionData()
         {
             InitializeFixedRows();
@@ -463,6 +485,12 @@ namespace EE.Doklad.Models
             {
                 row.SpecificConsumption = "—";
             }
+
+            // Notify TotalSpecificConsumption when "Общо" row changes
+            if (row.RowName == "Общо")
+            {
+                OnPropertyChanged(nameof(TotalSpecificConsumption));
+            }
         }
 
         /// <summary>
@@ -487,6 +515,7 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(TotalFpRenKWh));
             OnPropertyChanged(nameof(TotalFpTotKWh));
             OnPropertyChanged(nameof(TotalEmCO2Tonnes));
+            OnPropertyChanged(nameof(TotalSpecificConsumption));
         }
     }
 }
