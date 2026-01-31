@@ -221,15 +221,15 @@
                             
                             <TextBlock Grid.Column="0" Background="White"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0"/>
                             </Border>
                             <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0"/>
                             </Border>
                             <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0"/>
                             </Border>
                         </Grid>
@@ -269,16 +269,275 @@
                             </Grid.ColumnDefinitions>
                             
                             <TextBlock Grid.Column="0" Background="White"/>
+                                <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                                <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                                <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ТАБЛИЦА 3: Площи и Обеми -->
+            <!-- МЕСЕЧНА ТАБЛИЦА: Дни почивни по месеци -->
+            <TextBlock Text="Дни почивни по месеци:" FontSize="14" FontWeight="Bold" Margin="0,30,0,10"/>
+
+            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
+                <Grid>
+                    <!-- Define columns: label + 12 months + sum -->
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Header row -->
+                    <Border Grid.ColumnSpan="14" BorderBrush="#888" BorderThickness="0,0,0,1" Background="#D0D0D0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="80"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Месец" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <TextBlock Grid.Column="1" Text="Януари" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="Февруари" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="3" Text="Март" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="4" Text="Април" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="5" Text="Май" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="6" Text="Юни" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="7" Text="Юли" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="8" Text="Август" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="9" Text="Септември" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="10" Text="Октомври" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="11" Text="Ноември" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="12" Text="Декември" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock Grid.Column="13" Text="Сума" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Input row -->
+                    <Border Grid.Row="1" Grid.ColumnSpan="14" BorderBrush="#888" BorderThickness="0,0,0,0" Background="White">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="80"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Дни почивни" Padding="12,10" FontWeight="SemiBold" Background="#F0F0F0" VerticalAlignment="Center"/>
+
+                            <TextBox Grid.Column="1" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJanuary, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="2" Padding="6" TextAlignment="Center" Text="{Binding DaysOffFebruary, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="3" Padding="6" TextAlignment="Center" Text="{Binding DaysOffMarch, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="4" Padding="6" TextAlignment="Center" Text="{Binding DaysOffApril, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="5" Padding="6" TextAlignment="Center" Text="{Binding DaysOffMay, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="6" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJune, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="7" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJuly, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="8" Padding="6" TextAlignment="Center" Text="{Binding DaysOffAugust, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="9" Padding="6" TextAlignment="Center" Text="{Binding DaysOffSeptember, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="10" Padding="6" TextAlignment="Center" Text="{Binding DaysOffOctober, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="11" Padding="6" TextAlignment="Center" Text="{Binding DaysOffNovember, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            <TextBox Grid.Column="12" Padding="6" TextAlignment="Center" Text="{Binding DaysOffDecember, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+
+                            <TextBlock Grid.Column="13" Text="{Binding MonthlyDaysOffSum}" Padding="6" TextAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <TextBlock Text="Площи и Обеми:"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Margin="0,30,0,10"/>
+
+            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
+                <StackPanel>
+                    <!-- Header row -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="#D0D0D0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Параметър" Padding="12,8" FontWeight="Bold" FontSize="13"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                <TextBlock Text="Отопление" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Охлаждане" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 1: Застроена площ -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Застроена площ [m²]" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding BuiltUpArea, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0" Background="#F5F5F5">
+                                <TextBlock Text="–" Padding="12,10" VerticalAlignment="Center" FontSize="12" 
+                                           TextAlignment="Center" Foreground="#999"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 2: РЗП -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="РЗП [m²]" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding TotalFloorArea, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0" Background="#F5F5F5">
+                                <TextBlock Text="–" Padding="12,10" VerticalAlignment="Center" FontSize="12" 
+                                           TextAlignment="Center" Foreground="#999"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 3: Отопляема / Охлаждаема площ -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Отопляема / Охлаждаема площ [m²]" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding HeatedArea, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0"/>
                             </Border>
                             <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                <TextBox Text="{Binding CooledArea, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0"/>
                             </Border>
-                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="24" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 4: Нетен обем -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Нетен отопляем / охлаждаем обем [m³]" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding NetHeatedVolume, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding NetCooledVolume, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 5: Брутен обем -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Брутен отопляем / охлаждаем обем [m³]" Padding="12,10" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding GrossHeatedVolume, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding GrossCooledVolume, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0"/>
                             </Border>
                         </Grid>

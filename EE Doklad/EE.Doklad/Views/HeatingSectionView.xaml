@@ -312,6 +312,34 @@
                                     Style="{StaticResource ReadOnlyTextBoxStyle}"/>
                         </Grid>
                     </Border>
+
+                    <!-- Топлина от обитатели W/m² (read-only) -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Топлина от обитатели [W/m²]" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Grid.Column="1" Text="{Binding TotalOccupantHeatPerAreaDisplay, Mode=OneWay}"
+                                    Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Латентна топлина от обитатели W/m² (read-only) -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Латентна топлина от обитатели [W/m²]" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Grid.Column="1" Text="{Binding TotalLatentHeatPerAreaDisplay, Mode=OneWay}"
+                                    Style="{StaticResource ReadOnlyTextBoxStyle}"/>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </Border>
 
@@ -327,6 +355,8 @@
                         <Run Text="• Температура в помещението е равна на проектната температура."/>
                         <LineBreak/>
                         <Run Text="• Десетичните стойности могат да се въвеждат с ',' или '.' като разделител."/>
+                        <LineBreak/>
+                        <Run Text="• Стойностите в W/m² се изчисляват на база отопляемата площ от секция 5."/>
                     </TextBlock>
                 </StackPanel>
             </Border>

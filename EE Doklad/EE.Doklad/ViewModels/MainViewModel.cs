@@ -600,9 +600,18 @@ namespace EE.Doklad.ViewModels
                     BuildingType = "Жилищна сграда",
                     Ownership = "Частна собственост",
                     YearOfConstruction = "–",
-                    NumberOfOccupants = "–",
-                    OccupancySchedule = "24 ч./ден за всички дни",
-                    HeatingSchedule = "24 ч./ден за всички дни"
+                    NumberOfOccupants = null,
+                    // Leave schedules and area/volume fields empty by default per user request
+                    OccupancySchedule = null,
+                    HeatingSchedule = null,
+                    BuiltUpArea = null,
+                    TotalFloorArea = null,
+                    HeatedArea = null,
+                    NetHeatedVolume = null,
+                    GrossHeatedVolume = null,
+                    CooledArea = null,
+                    NetCooledVolume = null,
+                    GrossCooledVolume = null
                 }
             };
             report.Sections.Add(objectData);

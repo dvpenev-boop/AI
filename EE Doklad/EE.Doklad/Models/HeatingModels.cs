@@ -83,7 +83,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.Cinema,
-                DisplayName = "Кино, театър, училище",
+                DisplayName = "почивка",
                 Location = "Кино, театър, училище",
                 MetabolicRate = 100,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -99,7 +99,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.Office,
-                DisplayName = "Работа на компютър",
+                DisplayName = "седнал, много лека работа",
                 Location = "Работа на компютър",
                 MetabolicRate = 120,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -115,7 +115,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.HotelReceptionKasier,
-                DisplayName = "Офисна работа, столова, магазини",
+                DisplayName = "офисна работа",
                 Location = "Хотел, рецепция, касиер",
                 MetabolicRate = 130,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -131,7 +131,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.StandingLightWork,
-                DisplayName = "Стоящ, правомагазин, ходещ, баня",
+                DisplayName = "стоящ, прав, ходещ, баня",
                 Location = "Лабораторна работа",
                 MetabolicRate = 130,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -147,7 +147,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.WalkingSeated,
-                DisplayName = "Ходещ, седнал",
+                DisplayName = "ходещ, седнал",
                 Location = "Ходещ, седнал",
                 MetabolicRate = 150,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -163,7 +163,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.ModerateWork,
-                DisplayName = "Средна работа",
+                DisplayName = "средна работа",
                 Location = "Слуга, фризьор",
                 MetabolicRate = 160,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -179,7 +179,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.LightWorkSeated,
-                DisplayName = "Лека работа седнал",
+                DisplayName = "лека работа седнал",
                 Location = "Механична продукция",
                 MetabolicRate = 220,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -195,7 +195,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.Dancing,
-                DisplayName = "Танцуване, лека партийна работа",
+                DisplayName = "танцуване, леко",
                 Location = "Парти",
                 MetabolicRate = 250,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -211,7 +211,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.FastWalking,
-                DisplayName = "Бързо ходене",
+                DisplayName = "бързо ходене",
                 Location = "Планинско ходене",
                 MetabolicRate = 300,
                 TemperatureColumns = new List<TemperatureColumn>
@@ -227,7 +227,7 @@ namespace EE.Doklad.Models
             new ActivityRow
             {
                 ActivityLevel = ActivityLevel.HeavyWork,
-                DisplayName = "Тежка работа",
+                DisplayName = "тежка работа",
                 Location = "Атлети, спортуване",
                 MetabolicRate = 430,
                 TemperatureColumns = new List<TemperatureColumn>

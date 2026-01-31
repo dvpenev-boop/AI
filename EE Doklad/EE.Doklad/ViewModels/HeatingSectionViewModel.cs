@@ -263,6 +263,42 @@ namespace EE.Doklad.ViewModels
 
         public string TotalLatentHeatDisplay => $"{TotalLatentHeat:F2} W";
 
+        // ========== W/m² ИЗЧИСЛЕНИЯ ==========
+
+        /// <summary>
+        /// Отопляема площ от Секция 5
+        /// </summary>
+        public double HeatedArea
+        {
+            get
+            {
+                if (_objectData?.HeatedArea != null &&
+                    double.TryParse(_objectData.HeatedArea.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double area))
+                {
+                    return area > 0 ? area : 0;
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Топлина от обитатели [W/m²]
+        /// </summary>
+        public double TotalOccupantHeatPerArea => HeatedArea > 0 ? TotalOccupantHeat / HeatedArea : 0;
+
+        public string TotalOccupantHeatPerAreaDisplay => HeatedArea > 0 
+            ? $"{TotalOccupantHeatPerArea:F2} W/m²" 
+            : "– (няма площ)";
+
+        /// <summary>
+        /// Латентна топлина от обитатели [W/m²]
+        /// </summary>
+        public double TotalLatentHeatPerArea => HeatedArea > 0 ? TotalLatentHeat / HeatedArea : 0;
+
+        public string TotalLatentHeatPerAreaDisplay => HeatedArea > 0 
+            ? $"{TotalLatentHeatPerArea:F2} W/m²" 
+            : "– (няма площ)";
+
         // ========== VALIDATION ERRORS ==========
 
         private string? _infiltrationError;
@@ -353,6 +389,14 @@ namespace EE.Doklad.ViewModels
             {
                 OnPropertyChanged(nameof(NumberOfOccupants));
                 RecalculateOccupantHeat();
+            }
+            else if (e.PropertyName == nameof(ObjectDataSectionData.HeatedArea))
+            {
+                OnPropertyChanged(nameof(HeatedArea));
+                OnPropertyChanged(nameof(TotalOccupantHeatPerArea));
+                OnPropertyChanged(nameof(TotalOccupantHeatPerAreaDisplay));
+                OnPropertyChanged(nameof(TotalLatentHeatPerArea));
+                OnPropertyChanged(nameof(TotalLatentHeatPerAreaDisplay));
             }
         }
 
@@ -475,6 +519,13 @@ namespace EE.Doklad.ViewModels
             // Изчисли total heat
             TotalOccupantHeat = sensible * occupantCount;
             TotalLatentHeat = latent * occupantCount;
+
+            // Актуализирай W/m² полета
+            OnPropertyChanged(nameof(HeatedArea));
+            OnPropertyChanged(nameof(TotalOccupantHeatPerArea));
+            OnPropertyChanged(nameof(TotalOccupantHeatPerAreaDisplay));
+            OnPropertyChanged(nameof(TotalLatentHeatPerArea));
+            OnPropertyChanged(nameof(TotalLatentHeatPerAreaDisplay));
         }
 
         protected void OnPropertyChanged(string propertyName)
