@@ -336,6 +336,62 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = appliancesNotAffectingEditor;
         }
+        else if (section.Type == ModelSectionType.Results ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Резултати сграда")))
+        {
+            if (section.ResultsSectionData == null)
+            {
+                section.ResultsSectionData = new Models.ResultsSectionData
+                {
+                    Title = "Резултати сграда"
+                };
+            }
+
+            section.Type = ModelSectionType.Results;
+
+            // Синхронизираме отопляема площ от ObjectData
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            if (objectDataSection?.ObjectDataSectionData != null)
+            {
+                if (double.TryParse(objectDataSection.ObjectDataSectionData.HeatedArea, out double heatedArea))
+                {
+                    section.ResultsSectionData.HeatedArea = heatedArea;
+                }
+            }
+
+            var resultsViewModel = new ViewModels.ResultsSectionViewModel(section.ResultsSectionData);
+            var resultsEditor = new ResultsSectionEditor
+            {
+                DataContext = resultsViewModel
+            };
+            ContentScrollViewer.Content = resultsEditor;
+        }
+        else if (section.Type == ModelSectionType.EnergyClass ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Клас на енергопотребление")))
+        {
+            if (section.EnergyClassSectionData == null)
+            {
+                section.EnergyClassSectionData = new Models.EnergyClassSectionData
+                {
+                    Title = "Клас на енергопотребление"
+                };
+            }
+
+            section.Type = ModelSectionType.EnergyClass;
+
+            // Синхронизираме типа сграда от ObjectData
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            if (objectDataSection?.ObjectDataSectionData != null)
+            {
+                section.EnergyClassSectionData.BuildingType = objectDataSection.ObjectDataSectionData.BuildingTypeCode;
+            }
+
+            var energyClassEditor = new EnergyClassSectionEditor
+            {
+                DataContext = section.EnergyClassSectionData
+            };
+            ContentScrollViewer.Content = energyClassEditor;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

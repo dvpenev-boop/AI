@@ -84,9 +84,26 @@
                             
                             <TextBlock Grid.Column="0" Text="Тип сграда" Padding="12,10" VerticalAlignment="Center" 
                                        FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
-                            <TextBox Grid.Column="1" Text="{Binding BuildingType, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                     BorderThickness="0"/>
+                            <ComboBox Grid.Column="1" 
+                                      SelectedValue="{Binding BuildingTypeCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Code"
+                                      DisplayMemberPath="DisplayName"
+                                      Padding="12,10" 
+                                      VerticalAlignment="Center" 
+                                      Background="White" 
+                                      FontSize="12" 
+                                      BorderThickness="0">
+                                <ComboBox.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13" 
+                                                          Foreground="#0066CC" Margin="0,5,0,2"/>
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                    </GroupStyle>
+                                </ComboBox.GroupStyle>
+                            </ComboBox>
                         </Grid>
                     </Border>
 

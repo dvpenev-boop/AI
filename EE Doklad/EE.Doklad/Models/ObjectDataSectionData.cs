@@ -23,6 +23,12 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private string? _buildingType;
 
+        /// <summary>
+        /// Тип сграда (код) - нов подход с enum
+        /// </summary>
+        [ObservableProperty]
+        private BuildingTypeCode? _buildingTypeCode;
+
         [ObservableProperty]
         private string? _ownership;
 
@@ -265,6 +271,58 @@ namespace EE.Doklad.Models
         partial void OnClimateZoneChanged(int value)
         {
             OnPropertyChanged(nameof(HeatingSeasonInfo));
+        }
+
+        // Синхронизация между BuildingType (старо поле) и BuildingTypeCode (ново поле)
+        partial void OnBuildingTypeCodeChanged(BuildingTypeCode? value)
+        {
+            // Когато се промени кодът, обновяваме и старото текстово поле
+            if (value.HasValue)
+            {
+                var info = BuildingTypeInfo.GetByCode(value.Value);
+                if (info != null)
+                {
+                    _buildingType = info.DisplayName;
+                    OnPropertyChanged(nameof(BuildingType));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Изчислява и връща display name на типа сграда
+        /// </summary>
+        public string? BuildingTypeDisplayName
+        {
+            get
+            {
+                if (BuildingTypeCode.HasValue)
+                {
+                    var info = BuildingTypeInfo.GetByCode(BuildingTypeCode.Value);
+                    return info?.DisplayName;
+                }
+                return BuildingType; // fallback към стария текст
+            }
+        }
+
+        /// <summary>
+        /// Опит за миграция от стар BuildingType към BuildingTypeCode
+        /// Извиква се при десериализация на стари файлове
+        /// </summary>
+        public void MigrateBuildingType()
+        {
+            // Ако вече имаме код, не правим нищо
+            if (BuildingTypeCode.HasValue)
+                return;
+
+            // Опит за mapване от стария текст
+            if (!string.IsNullOrWhiteSpace(BuildingType))
+            {
+                var mapped = BuildingTypeInfo.TryMapFromString(BuildingType);
+                if (mapped.HasValue)
+                {
+                    BuildingTypeCode = mapped.Value;
+                }
+            }
         }
 
         public string HeatingSeasonInfo => ClimateZone switch

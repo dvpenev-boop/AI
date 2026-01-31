@@ -688,6 +688,27 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("18. Резултати сграда"))
+                {
+                    section.Type = SectionType.Results;
+                    section.ResultsSectionData = new ResultsSectionData
+                    {
+                        Title = "Резултати сграда",
+                        Description = "Таблица с изчисления на потребена енергия по енергоносители."
+                    };
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("19. Клас на енергопотребление"))
+                {
+                    section.Type = SectionType.EnergyClass;
+                    section.EnergyClassSectionData = new EnergyClassSectionData
+                    {
+                        Title = "Клас на енергопотребление",
+                        Description = "Автоматично определяне на енергиен клас според типа сграда и EP.",
+                        EnergyPerformance = null // Потребителят ще попълни
+                    };
+                    section.StaticText = string.Empty;
+                }
                 report.Sections.Add(section);
             }
 
