@@ -18,6 +18,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\climate_zones.json" />
     <EmbeddedResource Include="Data\materials.seed.json" />
+    <EmbeddedResource Include="Data\lighting.seed.json" />
+    <EmbeddedResource Include="Data\appliances.seed.json" />
   </ItemGroup>
 
 

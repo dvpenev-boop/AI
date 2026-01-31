@@ -42,6 +42,16 @@ public partial class MainWindow : Window
         ContentScrollViewer.Content = new MaterialsCatalogView();
     }
 
+    private void OpenLighting_Click(object sender, RoutedEventArgs e)
+    {
+        ContentScrollViewer.Content = new LightingCatalogView();
+    }
+
+    private void OpenAppliances_Click(object sender, RoutedEventArgs e)
+    {
+        ContentScrollViewer.Content = new AppliancesCatalogView();
+    }
+
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         // Актуализираме UI при първоначално зареждане

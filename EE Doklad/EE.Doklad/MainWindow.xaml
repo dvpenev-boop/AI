@@ -36,6 +36,10 @@
                 <MenuItem Header="Експорт в _PDF..." Command="{Binding ExportToPdfCommand}"/>
             </MenuItem>
             <MenuItem Header="Строителни _материали" Click="OpenMaterials_Click"/>
+            <MenuItem Header="Електрически _компоненти">
+                <MenuItem Header="_Осветление" Click="OpenLighting_Click"/>
+                <MenuItem Header="_Уреди" Click="OpenAppliances_Click"/>
+            </MenuItem>
             <MenuItem Header="_Данни">
                 <MenuItem Header="Климатични зони (методика)" Click="OpenClimateData_Click"/>
             </MenuItem>

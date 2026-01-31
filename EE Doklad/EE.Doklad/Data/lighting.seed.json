@@ -1,0 +1,299 @@
+[
+  {
+    "name": "ЛНЖ стандартна 25W",
+    "powerW": 25
+  },
+  {
+    "name": "ЛНЖ стандартна 40W",
+    "powerW": 40
+  },
+  {
+    "name": "ЛНЖ стандартна 60W",
+    "powerW": 60
+  },
+  {
+    "name": "ЛНЖ стандартна 75W",
+    "powerW": 75
+  },
+  {
+    "name": "ЛНЖ стандартна 100W",
+    "powerW": 100
+  },
+  {
+    "name": "ЛНЖ халогенна 28W",
+    "powerW": 28
+  },
+  {
+    "name": "ЛНЖ халогенна 42W",
+    "powerW": 42
+  },
+  {
+    "name": "ЛНЖ халогенна 70W",
+    "powerW": 70
+  },
+  {
+    "name": "Халогенна луна MR16 20W",
+    "powerW": 20
+  },
+  {
+    "name": "Халогенна луна MR16 35W",
+    "powerW": 35
+  },
+  {
+    "name": "Халогенна луна MR16 50W",
+    "powerW": 50
+  },
+  {
+    "name": "Халогенна луна GU10 35W",
+    "powerW": 35
+  },
+  {
+    "name": "Халогенна луна GU10 50W",
+    "powerW": 50
+  },
+  {
+    "name": "ЛНХ 1x18",
+    "powerW": 18
+  },
+  {
+    "name": "ЛНХ 2x18",
+    "powerW": 36
+  },
+  {
+    "name": "ЛНХ 1x36",
+    "powerW": 36
+  },
+  {
+    "name": "ЛНХ 2x36",
+    "powerW": 72
+  },
+  {
+    "name": "ЛНХ 3x36",
+    "powerW": 108
+  },
+  {
+    "name": "ЛНХ 4x36",
+    "powerW": 144
+  },
+  {
+    "name": "ЛОТ T12 1x40",
+    "powerW": 40
+  },
+  {
+    "name": "ЛОТ T12 2x40",
+    "powerW": 80
+  },
+  {
+    "name": "ЛОТ T12 4x40",
+    "powerW": 160
+  },
+  {
+    "name": "ЛОТ T8 1x18",
+    "powerW": 18
+  },
+  {
+    "name": "ЛОТ T8 2x18",
+    "powerW": 36
+  },
+  {
+    "name": "ЛОТ T8 1x36",
+    "powerW": 36
+  },
+  {
+    "name": "ЛОТ T8 2x36",
+    "powerW": 72
+  },
+  {
+    "name": "ЛОТ T8 3x36",
+    "powerW": 108
+  },
+  {
+    "name": "ЛОТ T8 1x58",
+    "powerW": 58
+  },
+  {
+    "name": "ЛОТ T8 2x58",
+    "powerW": 116
+  },
+  {
+    "name": "ЛОТ T5 1x14",
+    "powerW": 14
+  },
+  {
+    "name": "ЛОТ T5 2x14",
+    "powerW": 28
+  },
+  {
+    "name": "ЛОТ T5 1x28",
+    "powerW": 28
+  },
+  {
+    "name": "ЛОТ T5 2x28",
+    "powerW": 56
+  },
+  {
+    "name": "ЛОТ T5 1x54",
+    "powerW": 54
+  },
+  {
+    "name": "ЛОТ T5 2x54",
+    "powerW": 108
+  },
+  {
+    "name": "ЕСЛ 9W",
+    "powerW": 9
+  },
+  {
+    "name": "ЕСЛ 11W",
+    "powerW": 11
+  },
+  {
+    "name": "ЕСЛ 15W",
+    "powerW": 15
+  },
+  {
+    "name": "ЕСЛ 20W",
+    "powerW": 20
+  },
+  {
+    "name": "ЕСЛ 26W",
+    "powerW": 26
+  },
+  {
+    "name": "LED крушка 5W",
+    "powerW": 5
+  },
+  {
+    "name": "LED крушка 7W",
+    "powerW": 7
+  },
+  {
+    "name": "LED крушка 8W",
+    "powerW": 8
+  },
+  {
+    "name": "LED крушка 10W",
+    "powerW": 10
+  },
+  {
+    "name": "LED крушка 12W",
+    "powerW": 12
+  },
+  {
+    "name": "LED крушка 15W",
+    "powerW": 15
+  },
+  {
+    "name": "LED пура T8 60 cm – 9W",
+    "powerW": 9
+  },
+  {
+    "name": "LED пура T8 120 cm – 18W",
+    "powerW": 18
+  },
+  {
+    "name": "LED пура T8 150 cm – 24W",
+    "powerW": 24
+  },
+  {
+    "name": "LED панел 600x600 – 30W",
+    "powerW": 30
+  },
+  {
+    "name": "LED панел 600x600 – 36W",
+    "powerW": 36
+  },
+  {
+    "name": "LED панел 300x1200 – 40W",
+    "powerW": 40
+  },
+  {
+    "name": "LED панел 300x1200 – 45W",
+    "powerW": 45
+  },
+  {
+    "name": "LED луна 5W",
+    "powerW": 5
+  },
+  {
+    "name": "LED луна 7W",
+    "powerW": 7
+  },
+  {
+    "name": "LED луна 9W",
+    "powerW": 9
+  },
+  {
+    "name": "LED луна 12W",
+    "powerW": 12
+  },
+  {
+    "name": "LED луна 15W",
+    "powerW": 15
+  },
+  {
+    "name": "LED луна 18W",
+    "powerW": 18
+  },
+  {
+    "name": "LED луна 24W",
+    "powerW": 24
+  },
+  {
+    "name": "LED COB луна 20W",
+    "powerW": 20
+  },
+  {
+    "name": "LED COB луна 30W",
+    "powerW": 30
+  },
+  {
+    "name": "LED луна IP44 9W",
+    "powerW": 9
+  },
+  {
+    "name": "LED луна IP44 12W",
+    "powerW": 12
+  },
+  {
+    "name": "LED луна IP65 12W",
+    "powerW": 12
+  },
+  {
+    "name": "LED луна IP65 18W",
+    "powerW": 18
+  },
+  {
+    "name": "LED прожектор 30W",
+    "powerW": 30
+  },
+  {
+    "name": "LED прожектор 50W",
+    "powerW": 50
+  },
+  {
+    "name": "LED прожектор 100W",
+    "powerW": 100
+  },
+  {
+    "name": "LED прожектор 150W",
+    "powerW": 150
+  },
+  {
+    "name": "LED прожектор 200W",
+    "powerW": 200
+  },
+  {
+    "name": "LED камбана (High-bay) 100W",
+    "powerW": 100
+  },
+  {
+    "name": "LED камбана (High-bay) 150W",
+    "powerW": 150
+  },
+  {
+    "name": "LED камбана (High-bay) 200W",
+    "powerW": 200
+  }
+  
+]
