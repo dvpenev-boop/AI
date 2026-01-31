@@ -22,7 +22,8 @@ namespace EE.Doklad.Models
         AppliancesAffecting,        // Други разходи влияещи (секция №16)
         AppliancesNotAffecting,     // Други разходи невлияещи (секция №17)
         Results,                    // Резултати (секция за изчисления)
-        EnergyClass                 // Клас на енергопотребление
+        EnergyClass,                // Клас на енергопотребление (секция №19)
+        Conclusion                  // Заключение (секция №20)
     }
 
     /// <summary>
@@ -115,6 +116,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Клас на енергопотребление" (само за EnergyClass секции)
         /// </summary>
         public EnergyClassSectionData? EnergyClassSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Заключение" (само за Conclusion секции)
+        /// </summary>
+        public ConclusionSectionData? ConclusionSectionData { get; set; }
 
         public int Order { get; set; }
 

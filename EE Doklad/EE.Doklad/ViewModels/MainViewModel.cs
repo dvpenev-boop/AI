@@ -709,6 +709,16 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("20. Заключение"))
+                {
+                    section.Type = SectionType.Conclusion;
+                    section.ConclusionSectionData = new ConclusionSectionData
+                    {
+                        Title = "Заключение",
+                        Description = "Заключителна част на доклада с предварително попълнен текст, който може да се редактира."
+                    };
+                    section.StaticText = string.Empty;
+                }
                 report.Sections.Add(section);
             }
 

@@ -403,6 +403,23 @@ public partial class MainWindow : Window
             
             ContentScrollViewer.Content = energyClassEditor;
         }
+        else if (section.Type == ModelSectionType.Conclusion ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Заключение")))
+        {
+            if (section.ConclusionSectionData == null)
+            {
+                section.ConclusionSectionData = new Models.ConclusionSectionData
+                {
+                    Title = "Заключение"
+                };
+            }
+
+            section.Type = ModelSectionType.Conclusion;
+
+            var conclusionViewModel = new ViewModels.ConclusionSectionViewModel(section.ConclusionSectionData);
+            var conclusionEditor = new Views.ConclusionSectionEditor(conclusionViewModel);
+            ContentScrollViewer.Content = conclusionEditor;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

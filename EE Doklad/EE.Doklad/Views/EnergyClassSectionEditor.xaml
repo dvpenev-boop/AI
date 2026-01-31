@@ -74,223 +74,226 @@
             </Border>
 
             <!-- ═══════════════════════════════════════════════════════════════ -->
-            <!-- БЛОК A: ВХОДНИ ДАННИ (Read-Only) -->
+            <!-- БЛОК A: ВХОДНИ ДАННИ (Read-Only) - съвпадна с B и C -->
             <!-- ═══════════════════════════════════════════════════════════════ -->
-            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,25" Padding="0">
+            <Border BorderBrush="#2196F3" BorderThickness="2" Margin="0,0,0,15" Padding="0"
+                    Width="675" HorizontalAlignment="Left">
                 <StackPanel>
                     <!-- Header -->
-                    <Border Background="#2196F3" Padding="15">
-                        <TextBlock Text="A. Входни данни" FontSize="15" FontWeight="Bold" Foreground="White"/>
+                    <Border Background="#2196F3" Padding="12">
+                        <TextBlock Text="A. Входни данни" FontSize="13" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <!-- Тип сграда (read-only от секция 5) -->
-                    <Border BorderBrush="#CCC" BorderThickness="0,0,0,1" Background="White">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Text="Тип сграда:" 
-                                      Padding="15,12" FontWeight="SemiBold" FontSize="13" 
-                                      Background="#F5F5F5" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" 
-                                      Text="{Binding BuildingTypeDisplay, FallbackValue='Не е избран'}" 
-                                      Padding="15,12" FontSize="13" VerticalAlignment="Center"
-                                      Background="White"
-                                      Foreground="#333"/>
-                        </Grid>
-                    </Border>
+                    <!-- Таблица с данни -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- EP - Годишна специфична енергия (read-only от секция 18) -->
-                    <Border BorderBrush="#CCC" BorderThickness="0,0,0,0" Background="White">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" 
-                                      Padding="15,12" FontWeight="SemiBold" FontSize="13" 
-                                      Background="#F5F5F5" VerticalAlignment="Center">
-                                <Run Text="EP – Годишна специфична енергия"/>
-                                <LineBreak/>
-                                <Run Text="[kWh/m²]:" FontSize="12" Foreground="#666"/>
-                            </TextBlock>
-                            <TextBlock Grid.Column="1" 
-                                      Text="{Binding EnergyPerformanceDisplay, FallbackValue='—'}" 
-                                      Padding="15,12" FontSize="13" VerticalAlignment="Center"
-                                      Background="White"
-                                      Foreground="#333"
-                                      FontWeight="SemiBold"/>
-                        </Grid>
-                    </Border>
+                        <!-- Ред 1: Тип сграда -->
+                        <Border Grid.Row="0" Grid.Column="0" Background="#E3F2FD" 
+                                BorderBrush="#CCC" BorderThickness="0,0,1,1" Padding="12">
+                            <TextBlock Text="Тип сграда:" FontWeight="Bold" FontSize="11" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Row="0" Grid.Column="1" Background="White" 
+                                BorderBrush="#CCC" BorderThickness="0,0,0,1" Padding="12">
+                            <TextBlock Text="{Binding BuildingTypeDisplay, FallbackValue='Не е избран'}" 
+                                      FontSize="11" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </Border>
+
+                        <!-- Ред 2: EP -->
+                        <Border Grid.Row="1" Grid.Column="0" Background="#E3F2FD" 
+                                BorderBrush="#CCC" BorderThickness="0,0,1,0" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="EP – Годишна специфична енергия" 
+                                          FontWeight="Bold" FontSize="11"/>
+                                <TextBlock Text="[kWh/m²]:" FontSize="9" Foreground="#666" 
+                                          Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" Background="White" 
+                                BorderBrush="#CCC" BorderThickness="0" Padding="12">
+                            <TextBlock Text="{Binding EnergyPerformanceDisplay, FallbackValue='—'}" 
+                                      FontSize="11" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </Border>
+                    </Grid>
                 </StackPanel>
             </Border>
 
             <!-- ═══════════════════════════════════════════════════════════════ -->
-            <!-- БЛОК B: РЕЗУЛТАТ: ЕНЕРГИЕН КЛАС (само карта, без голяма скала) -->
+            <!-- БЛОКОВЕ B + C: РЕЗУЛТАТ И ТАБЛИЦА-СКАЛА (обединени на един ред) -->
             <!-- ═══════════════════════════════════════════════════════════════ -->
-            <Border BorderBrush="#4CAF50" BorderThickness="3" Background="#F1F8F4" 
-                    Padding="25" Margin="0,0,0,25" CornerRadius="8"
-                    Visibility="{Binding IsDataAvailable, Converter={StaticResource BoolToVis}}">
-                <StackPanel>
-                    <TextBlock Text="B. Резултат: Енергиен клас" 
-                              FontSize="16" FontWeight="Bold" Margin="0,0,0,20"
-                              Foreground="#2E7D32"/>
+            <Grid Visibility="{Binding IsDataAvailable, Converter={StaticResource BoolToVis}}"
+                  Margin="0,0,0,20" Width="675" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- Карта с клас (центрирана) -->
-                    <Border Background="{Binding ClassColor, Converter={StaticResource HexToBrush}}" 
-                            BorderBrush="#333" BorderThickness="3"
-                            Padding="40" CornerRadius="8"
-                            HorizontalAlignment="Center"
-                            Width="400">
-                        <StackPanel>
-                            <TextBlock Text="ЕНЕРГИЕН КЛАС" FontSize="14" FontWeight="SemiBold" 
-                                      HorizontalAlignment="Center" Foreground="White" Margin="0,0,0,15"/>
-                            <TextBlock Text="{Binding ClassDisplay, FallbackValue='—'}" 
-                                      FontSize="90" FontWeight="Bold" 
-                                      HorizontalAlignment="Center" Foreground="White"
-                                      Margin="0,0,0,15"/>
-                            <TextBlock Text="{Binding ClassDescription, FallbackValue='—'}" 
-                                      FontSize="12" TextAlignment="Center" FontWeight="SemiBold"
-                                      Foreground="White" TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Border>
+                <!-- ЛЯВО: Блок B - Резултатна карта (компактна) -->
+                <Border Grid.Column="0" BorderBrush="#4CAF50" BorderThickness="2" 
+                        Background="#F1F8F4" Padding="12" CornerRadius="6" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="B. Резултат" 
+                                  FontSize="12" FontWeight="Bold" Margin="0,0,0,10"
+                                  Foreground="#2E7D32"/>
 
-            <!-- ═══════════════════════════════════════════════════════════════ -->
-            <!-- БЛОК C: ТАБЛИЦА-СКАЛА С ПРАГОВЕ (като Word/Excel) -->
-            <!-- ═══════════════════════════════════════════════════════════════ -->
-            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20" Padding="0"
-                    Visibility="{Binding IsDataAvailable, Converter={StaticResource BoolToVis}}">
-                <StackPanel>
-                    <!-- Header -->
-                    <Border Background="#FF9800" Padding="12">
-                        <TextBlock Text="C. Прагове за избрания тип сграда" 
-                                  FontSize="14" FontWeight="Bold" Foreground="White"/>
-                    </Border>
+                        <!-- Карта с клас (компактна) -->
+                        <Border Background="{Binding ClassColor, Converter={StaticResource HexToBrush}}" 
+                                BorderBrush="#333" BorderThickness="2"
+                                Padding="20,15" CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="ЕНЕРГИЕН КЛАС" FontSize="12" FontWeight="Bold" 
+                                          HorizontalAlignment="Center" Foreground="Black" Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding ClassDisplay, FallbackValue='—'}" 
+                                          FontSize="48" FontWeight="Bold" 
+                                          HorizontalAlignment="Center" Foreground="Black"
+                                          Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding ClassDescription, FallbackValue='—'}" 
+                                          FontSize="11" TextAlignment="Center" FontWeight="Bold"
+                                          Foreground="Black" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
 
-                    <!-- Компактна таблица-скала -->
-                    <DataGrid ItemsSource="{Binding ThresholdRows}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="All"
-                              CanUserReorderColumns="False"
-                              CanUserResizeColumns="True"
-                              CanUserSortColumns="False"
-                              BorderThickness="0"
-                              RowBackground="White"
-                              AlternatingRowBackground="#F9F9F9"
-                              RowHeight="35"
-                              FontWeight="Bold">
-                        
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="FontSize" Value="12"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                        
-                        <DataGrid.Columns>
-                            <!-- От (Min) -->
-                            <DataGridTextColumn Header="EPmin [kWh/m²]" 
-                                                Binding="{Binding MinValueDisplay}" 
-                                                Width="100">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Padding" Value="8,5"/>
-                                        <Setter Property="FontSize" Value="11"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                <!-- ДЯСНО: Блок C - Компактна таблица-скала -->
+                <Border Grid.Column="1" BorderBrush="#FF9800" BorderThickness="2" 
+                        Padding="0" CornerRadius="6">
+                    <StackPanel>
+                        <!-- Header -->
+                        <Border Background="#FF9800" Padding="8" CornerRadius="6,6,0,0">
+                            <TextBlock Text="C. Прагове за избрания тип сграда" 
+                                      FontSize="12" FontWeight="Bold" Foreground="White"/>
+                        </Border>
 
-                            <!-- Условие -->
-                            <DataGridTextColumn Header="Условие" 
-                                                Binding="{Binding RuleText}" 
-                                                Width="130">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Padding" Value="8,5"/>
-                                        <Setter Property="FontSize" Value="11"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="FontFamily" Value="Consolas"/>
-                                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                        <!-- Компактна таблица-скала -->
+                        <DataGrid ItemsSource="{Binding ThresholdRows}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="All"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeColumns="False"
+                                  CanUserSortColumns="False"
+                                  BorderThickness="0"
+                                  RowBackground="White"
+                                  AlternatingRowBackground="#F9F9F9"
+                                  RowHeight="30"
+                                  FontWeight="Bold">
+                            
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="FontSize" Value="9"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    <Setter Property="Padding" Value="3,5"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            
+                            <DataGrid.Columns>
+                                <!-- От (Min) -->
+                                <DataGridTextColumn Header="EPmin" 
+                                                    Binding="{Binding MinValueDisplay}" 
+                                                    Width="55">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Padding" Value="3,3"/>
+                                            <Setter Property="FontSize" Value="9"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                            <!-- До (Max) -->
-                            <DataGridTextColumn Header="EPmax [kWh/m²]" 
-                                                Binding="{Binding MaxValueDisplay}" 
-                                                Width="100">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Padding" Value="8,5"/>
-                                        <Setter Property="FontSize" Value="11"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                <!-- Условие -->
+                                <DataGridTextColumn Header="Условие" 
+                                                    Binding="{Binding RuleText}" 
+                                                    Width="95">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Padding" Value="3,3"/>
+                                            <Setter Property="FontSize" Value="9"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="FontFamily" Value="Consolas"/>
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                            <!-- Скала (цветна лента с клас) -->
-                            <DataGridTemplateColumn Header="Скала" Width="180">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding ColorHex, Converter={StaticResource HexToBrush}}" 
-                                                BorderBrush="White" BorderThickness="1"
-                                                Margin="2" Padding="10,5">
-                                            <TextBlock Text="{Binding Class}" 
-                                                      FontWeight="Bold" FontSize="16"
-                                                      Foreground="Black"
-                                                      HorizontalAlignment="Left"
-                                                      VerticalAlignment="Center"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
+                                <!-- До (Max) -->
+                                <DataGridTextColumn Header="EPmax" 
+                                                    Binding="{Binding MaxValueDisplay}" 
+                                                    Width="55">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Padding" Value="3,3"/>
+                                            <Setter Property="FontSize" Value="9"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                            <!-- EP маркер (показва се само на правилния ред) -->
-                            <DataGridTemplateColumn Header="EP kWh/m²" Width="120">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <!-- Маркер (показва се само ако има текст) -->
-                                            <Border Background="#1976D2" BorderBrush="#0D47A1" BorderThickness="2"
-                                                    Padding="10,5" Margin="2" CornerRadius="4">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsSelectedClass}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock Text="{Binding MarkerText}" 
-                                                          FontWeight="Bold" FontSize="14"
-                                                          Foreground="White"
-                                                          HorizontalAlignment="Center"
+                                <!-- Скала (цветна лента с клас) -->
+                                <DataGridTemplateColumn Header="Скала" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{Binding ColorHex, Converter={StaticResource HexToBrush}}" 
+                                                    BorderBrush="White" BorderThickness="1"
+                                                    Margin="1" Padding="6,3">
+                                                <TextBlock Text="{Binding Class}" 
+                                                          FontWeight="Bold" FontSize="12"
+                                                          Foreground="Black"
+                                                          HorizontalAlignment="Left"
                                                           VerticalAlignment="Center"/>
                                             </Border>
-                                        </Grid>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
-            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- EP маркер (показва се само на правилния ред) -->
+                                <DataGridTemplateColumn Header="EP kWh/m²" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <!-- Маркер (показва се само ако има текст) -->
+                                                <Border Background="#1976D2" BorderBrush="#0D47A1" BorderThickness="2"
+                                                        Padding="6,3" Margin="1" CornerRadius="3">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelectedClass}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding MarkerText}" 
+                                                              FontWeight="Bold" FontSize="11"
+                                                              Foreground="White"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </Grid>
 
             <!-- Информация за източниците на данните -->
             <Border Background="#ECEFF1" BorderBrush="#90A4AE" BorderThickness="1" 
