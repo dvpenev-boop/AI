@@ -9,16 +9,18 @@ namespace EE.Doklad.Models
     /// </summary>
     public enum SectionType
     {
-        Normal,         // Обикновена секция с таблици и текст
-        CoverPage,      // Челна страница (фиксирана на позиция №1)
-        Certificates,   // Удостоверения (фиксирана на позиция №2)
-        ObjectData,     // Данни за обекта (фиксирана на позиция №3)
-        ExternalWalls,  // Външни стени (секция №6)
-        Roof,           // Покрив (секция №7)
-        Floor,          // Под (секция №8)
-        Windows,        // Прозорци и врати (секция №9)
-        Heating,        // Отопление (секция №10)
-        Lighting        // Осветление (секция №15)
+        Normal,                     // Обикновена секция с таблици и текст
+        CoverPage,                  // Челна страница (фиксирана на позиция №1)
+        Certificates,               // Удостоверения (фиксирана на позиция №2)
+        ObjectData,                 // Данни за обекта (фиксирана на позиция №3)
+        ExternalWalls,              // Външни стени (секция №6)
+        Roof,                       // Покрив (секция №7)
+        Floor,                      // Под (секция №8)
+        Windows,                    // Прозорци и врати (секция №9)
+        Heating,                    // Отопление (секция №10)
+        Lighting,                   // Осветление (секция №15)
+        AppliancesAffecting,        // Други разходи влияещи (секция №16)
+        AppliancesNotAffecting      // Други разходи невлияещи (секция №17)
     }
 
     /// <summary>
@@ -91,6 +93,16 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Осветление" (само за Lighting секции)
         /// </summary>
         public LightingSectionData? LightingSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Други разходи влияещи" (само за AppliancesAffecting секции)
+        /// </summary>
+        public AppliancesSectionData? AppliancesAffectingSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Други разходи невлияещи" (само за AppliancesNotAffecting секции)
+        /// </summary>
+        public AppliancesSectionData? AppliancesNotAffectingSectionData { get; set; }
 
         public int Order { get; set; }
 

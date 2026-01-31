@@ -268,6 +268,74 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = lightingEditor;
         }
+        else if (section.Type == ModelSectionType.AppliancesAffecting ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Други разходи влияещи")))
+        {
+            if (section.AppliancesAffectingSectionData == null)
+            {
+                section.AppliancesAffectingSectionData = new Models.AppliancesSectionData
+                {
+                    Title = "16. Други разходи влияещи"
+                };
+            }
+
+            section.Type = ModelSectionType.AppliancesAffecting;
+
+            // Намираме секция 5 (ObjectData) за да извлечем HolidaysPerYear и HeatedArea
+            var objectDataSection2 = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData2 = objectDataSection2?.ObjectDataSectionData;
+
+            if (objectData2 != null)
+            {
+                var holidaysSum = objectData2.MonthlyDaysOffSum;
+                section.AppliancesAffectingSectionData.SetHolidaysPerYear(holidaysSum);
+                
+                if (double.TryParse(objectData2.HeatedArea, out double heatedArea))
+                {
+                    section.AppliancesAffectingSectionData.SetHeatedArea(heatedArea);
+                }
+            }
+
+            var appliancesAffectingEditor = new AppliancesSectionEditor
+            {
+                DataContext = section.AppliancesAffectingSectionData
+            };
+            ContentScrollViewer.Content = appliancesAffectingEditor;
+        }
+        else if (section.Type == ModelSectionType.AppliancesNotAffecting ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Други разходи невлияещи")))
+        {
+            if (section.AppliancesNotAffectingSectionData == null)
+            {
+                section.AppliancesNotAffectingSectionData = new Models.AppliancesSectionData
+                {
+                    Title = "17. Други разходи невлияещи"
+                };
+            }
+
+            section.Type = ModelSectionType.AppliancesNotAffecting;
+
+            // Намираме секция 5 (ObjectData) за да извлечем HolidaysPerYear и HeatedArea
+            var objectDataSection3 = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData3 = objectDataSection3?.ObjectDataSectionData;
+
+            if (objectData3 != null)
+            {
+                var holidaysSum = objectData3.MonthlyDaysOffSum;
+                section.AppliancesNotAffectingSectionData.SetHolidaysPerYear(holidaysSum);
+                
+                if (double.TryParse(objectData3.HeatedArea, out double heatedArea))
+                {
+                    section.AppliancesNotAffectingSectionData.SetHeatedArea(heatedArea);
+                }
+            }
+
+            var appliancesNotAffectingEditor = new AppliancesSectionEditor
+            {
+                DataContext = section.AppliancesNotAffectingSectionData
+            };
+            ContentScrollViewer.Content = appliancesNotAffectingEditor;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor
