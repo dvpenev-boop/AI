@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Diagnostics;
 
 namespace EE.Doklad.Models
 {
@@ -141,7 +142,8 @@ namespace EE.Doklad.Models
                     return 0;
                 }
 
-                return SumParse(DaysOffJanuary)
+                // compute sum
+                var sum = SumParse(DaysOffJanuary)
                        + SumParse(DaysOffFebruary)
                        + SumParse(DaysOffMarch)
                        + SumParse(DaysOffApril)
@@ -153,6 +155,16 @@ namespace EE.Doklad.Models
                        + SumParse(DaysOffOctober)
                        + SumParse(DaysOffNovember)
                        + SumParse(DaysOffDecember);
+
+                // Log for debugging when getter is invoked
+                try
+                {
+                    Debug.WriteLine($"[Debug] MonthlyDaysOffSum getter -> {sum}");
+                    try { System.Console.WriteLine($"[Debug] MonthlyDaysOffSum getter -> {sum}"); } catch { }
+                }
+                catch { }
+
+                return sum;
             }
         }
 

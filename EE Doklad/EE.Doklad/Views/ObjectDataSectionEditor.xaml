@@ -3,9 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
     
+    <UserControl.Resources>
+        <converters:DaysOffSumConverter x:Key="DaysOffSumConverter"/>
+    </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
             <!-- Заглавие -->
@@ -292,110 +296,87 @@
 
             <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
                 <Grid>
-                    <!-- Define columns: label + 12 months + sum -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
                         <ColumnDefinition Width="80"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Header row -->
-                    <Border Grid.ColumnSpan="14" BorderBrush="#888" BorderThickness="0,0,0,1" Background="#D0D0D0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="80"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Месец" Padding="12,8" FontWeight="Bold" FontSize="13"/>
-                            <TextBlock Grid.Column="1" Text="Януари" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="2" Text="Февруари" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="3" Text="Март" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="4" Text="Април" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="5" Text="Май" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="6" Text="Юни" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="7" Text="Юли" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="8" Text="Август" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="9" Text="Септември" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="10" Text="Октомври" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="11" Text="Ноември" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="12" Text="Декември" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                            <TextBlock Grid.Column="13" Text="Сума" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center"/>
-                        </Grid>
-                    </Border>
+                    <!-- Header row: month names -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Месец" Padding="12,8" FontWeight="Bold" FontSize="13" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Ян" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Фев" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Март" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Апр" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" Text="Май" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="6" Text="Юни" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="7" Text="Юли" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="8" Text="Авг" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="9" Text="Септ" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="10" Text="Окт" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="11" Text="Ноем" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="12" Text="Дек" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="13" Text="Сума" Padding="6" FontWeight="Bold" FontSize="13" TextAlignment="Center" Background="#D0D0D0"/>
 
-                    <!-- Input row -->
-                    <Border Grid.Row="1" Grid.ColumnSpan="14" BorderBrush="#888" BorderThickness="0,0,0,0" Background="White">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="80"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Column="0" Text="Дни почивни" Padding="12,10" FontWeight="SemiBold" Background="#F0F0F0" VerticalAlignment="Center"/>
-
-                            <TextBox Grid.Column="1" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJanuary, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="2" Padding="6" TextAlignment="Center" Text="{Binding DaysOffFebruary, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="3" Padding="6" TextAlignment="Center" Text="{Binding DaysOffMarch, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="4" Padding="6" TextAlignment="Center" Text="{Binding DaysOffApril, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="5" Padding="6" TextAlignment="Center" Text="{Binding DaysOffMay, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="6" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJune, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="7" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJuly, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="8" Padding="6" TextAlignment="Center" Text="{Binding DaysOffAugust, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="9" Padding="6" TextAlignment="Center" Text="{Binding DaysOffSeptember, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="10" Padding="6" TextAlignment="Center" Text="{Binding DaysOffOctober, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="11" Padding="6" TextAlignment="Center" Text="{Binding DaysOffNovember, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            <TextBox Grid.Column="12" Padding="6" TextAlignment="Center" Text="{Binding DaysOffDecember, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-
-                            <TextBlock Grid.Column="13" Text="{Binding MonthlyDaysOffSum}" Padding="6" TextAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                        </Grid>
-                    </Border>
+                    <!-- Input row: textboxes for each month -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Почивни дни" Padding="12,10" FontWeight="SemiBold" Background="#F0F0F0" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJanuary, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="2" Padding="6" TextAlignment="Center" Text="{Binding DaysOffFebruary, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="3" Padding="6" TextAlignment="Center" Text="{Binding DaysOffMarch, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="4" Padding="6" TextAlignment="Center" Text="{Binding DaysOffApril, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="5" Padding="6" TextAlignment="Center" Text="{Binding DaysOffMay, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="6" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJune, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="7" Padding="6" TextAlignment="Center" Text="{Binding DaysOffJuly, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="8" Padding="6" TextAlignment="Center" Text="{Binding DaysOffAugust, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="9" Padding="6" TextAlignment="Center" Text="{Binding DaysOffSeptember, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="10" Padding="6" TextAlignment="Center" Text="{Binding DaysOffOctober, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="11" Padding="6" TextAlignment="Center" Text="{Binding DaysOffNovember, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBox Grid.Row="1" Grid.Column="12" Padding="6" TextAlignment="Center" Text="{Binding DaysOffDecember, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                    <TextBlock Grid.Row="1" Grid.Column="13" Padding="6" TextAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource DaysOffSumConverter}">
+                                <Binding Path="DaysOffJanuary"/>
+                                <Binding Path="DaysOffFebruary"/>
+                                <Binding Path="DaysOffMarch"/>
+                                <Binding Path="DaysOffApril"/>
+                                <Binding Path="DaysOffMay"/>
+                                <Binding Path="DaysOffJune"/>
+                                <Binding Path="DaysOffJuly"/>
+                                <Binding Path="DaysOffAugust"/>
+                                <Binding Path="DaysOffSeptember"/>
+                                <Binding Path="DaysOffOctober"/>
+                                <Binding Path="DaysOffNovember"/>
+                                <Binding Path="DaysOffDecember"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
                 </Grid>
             </Border>
 
