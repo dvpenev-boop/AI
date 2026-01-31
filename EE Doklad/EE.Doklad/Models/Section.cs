@@ -17,7 +17,8 @@ namespace EE.Doklad.Models
         Roof,           // Покрив (секция №7)
         Floor,          // Под (секция №8)
         Windows,        // Прозорци и врати (секция №9)
-        Heating         // Отопление (секция №10)
+        Heating,        // Отопление (секция №10)
+        Lighting        // Осветление (секция №15)
     }
 
     /// <summary>
@@ -85,6 +86,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Отопление" (само за Heating секции)
         /// </summary>
         public HeatingSectionData? HeatingSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Осветление" (само за Lighting секции)
+        /// </summary>
+        public LightingSectionData? LightingSectionData { get; set; }
 
         public int Order { get; set; }
 

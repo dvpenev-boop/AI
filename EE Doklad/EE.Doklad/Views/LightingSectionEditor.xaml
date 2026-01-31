@@ -1,0 +1,224 @@
+<UserControl x:Class="EE.Doklad.Views.LightingSectionEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="900"
+             x:Name="LightingEditorControl">
+
+    <UserControl.Resources>
+        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <TextBlock Text="{Binding Title, FallbackValue='Секция 15. Осветление'}"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Margin="0,0,0,15"/>
+
+            <TextBlock Text="Описание:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                     MinHeight="80"
+                     Padding="10"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     FontSize="11"
+                     Margin="0,0,0,20"
+                     BorderBrush="#E0E0E0"
+                     BorderThickness="1"/>
+
+            <!-- Бутони за управление на редове -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="+ Добави осветител" Margin="0,0,10,0" Padding="6,4"
+                        Background="#4CAF50" Foreground="White" BorderThickness="0"
+                        Click="AddLineItem_Click"/>
+                <Button Content="Премахни осветител" Margin="0,0,10,0" Padding="6,4"
+                        Background="#F44336" Foreground="White" BorderThickness="0"
+                        Click="RemoveLineItem_Click"/>
+            </StackPanel>
+
+            <TextBlock Text="Описание на осветителната инсталация на сградата"
+                       FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <!-- Таблица с осветители -->
+            <DataGrid x:Name="LightingGrid"
+                      ItemsSource="{Binding LineItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,0,0,15">
+                <DataGrid.Columns>
+                    <!-- № -->
+                    <DataGridTextColumn Header="№" Binding="{Binding Index}" IsReadOnly="True" Width="40"/>
+                    
+                    <!-- Тип осветително тяло (searchable ComboBox) -->
+                    <DataGridTemplateColumn Header="Тип осветително тяло" Width="250">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox x:Name="LightingComboBox"
+                                          ItemsSource="{Binding ElementName=LightingEditorControl, Path=LightingOptions}"
+                                          DisplayMemberPath="Name"
+                                          SelectedValuePath="Name"
+                                          SelectedValue="{Binding SelectedLightingComponentName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                          IsEditable="True"
+                                          IsTextSearchEnabled="True"
+                                          StaysOpenOnEdit="True"
+                                          TextSearch.TextPath="Name"
+                                          SelectionChanged="LightingComboBox_SelectionChanged"
+                                          Tag="{Binding}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <!-- Мощност [W] - readonly -->
+                    <DataGridTextColumn Header="Мощност&#x0a;[W]" 
+                                        Binding="{Binding PowerW, StringFormat=0}" 
+                                        IsReadOnly="True" 
+                                        Width="80"/>
+                    
+                    <!-- Количество [бр.] -->
+                    <DataGridTextColumn Header="Количество&#x0a;[бр.]" 
+                                        Binding="{Binding Quantity, UpdateSourceTrigger=LostFocus}" 
+                                        Width="90"/>
+                    
+                    <!-- Мощност общо [kW] - readonly -->
+                    <DataGridTextColumn Header="Мощност&#x0a;общо [kW]" 
+                                        Binding="{Binding PowerTotal_kW, StringFormat=0.000}" 
+                                        IsReadOnly="True" 
+                                        Width="90"/>
+                    
+                    <!-- Работен режим [h/day] -->
+                    <DataGridTextColumn Header="Работен&#x0a;режим&#x0a;[h/day]" 
+                                        Binding="{Binding HoursPerDay, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" 
+                                        Width="80"/>
+                    
+                    <!-- Дни седмично [days/week] -->
+                    <DataGridTextColumn Header="Дни&#x0a;седмично&#x0a;[days/week]" 
+                                        Binding="{Binding DaysPerWeek, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" 
+                                        Width="85"/>
+                    
+                    <!-- Работен режим [days/y] - readonly -->
+                    <DataGridTextColumn Header="Работен&#x0a;режим&#x0a;[days/y]" 
+                                        Binding="{Binding WorkingDaysPerYear, StringFormat=0.00}" 
+                                        IsReadOnly="True" 
+                                        Width="85"/>
+                    
+                    <!-- Ke -->
+                    <DataGridTextColumn Header="Ke" 
+                                        Binding="{Binding Ke, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" 
+                                        Width="70"/>
+                    
+                    <!-- Консумирана енергия [kWh/y] - readonly -->
+                    <DataGridTextColumn Header="Консумирана&#x0a;енергия&#x0a;[kWh/y]" 
+                                        Binding="{Binding AnnualEnergy_kWh, StringFormat=0.00}" 
+                                        IsReadOnly="True" 
+                                        Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Ред ОБЩО с детайлни суми под колоните -->
+            <Border BorderBrush="#4CAF50" BorderThickness="2" Padding="8" Margin="0,0,0,20" Background="#E8F5E9">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/><!-- № -->
+                        <ColumnDefinition Width="250"/><!-- Тип -->
+                        <ColumnDefinition Width="80"/><!-- Мощност [W] -->
+                        <ColumnDefinition Width="90"/><!-- Количество -->
+                        <ColumnDefinition Width="90"/><!-- Мощност общо [kW] -->
+                        <ColumnDefinition Width="80"/><!-- h/day -->
+                        <ColumnDefinition Width="85"/><!-- days/week -->
+                        <ColumnDefinition Width="85"/><!-- days/y -->
+                        <ColumnDefinition Width="70"/><!-- Ke -->
+                        <ColumnDefinition Width="100"/><!-- Енергия -->
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" Text="ОБЩО:" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBlock Grid.Column="4" 
+                               Text="{Binding TotalPower_kW, StringFormat='{}{0:0.000}'}" 
+                               FontWeight="Bold" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="5" 
+                               Text="{Binding AverageHoursPerDay, StringFormat='{}{0:0.00}'}" 
+                               FontWeight="Bold" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"
+                               ToolTip="Средно h/day"/>
+                    <TextBlock Grid.Column="6" 
+                               Text="{Binding AverageDaysPerWeek, StringFormat='{}{0:0.00}'}" 
+                               FontWeight="Bold" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"
+                               ToolTip="Средно days/week"/>
+                    <TextBlock Grid.Column="9" 
+                               Text="{Binding TotalAnnualEnergy_kWh, StringFormat='{}{0:0.00}'}" 
+                               FontWeight="Bold" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Едновременна мощност -->
+            <Border BorderBrush="#FF9800" BorderThickness="3" Padding="15" Background="#FFF3E0">
+                <StackPanel>
+                    <TextBlock Text="Изчисление на едновременна мощност" 
+                               FontSize="15" FontWeight="Bold" Margin="0,0,0,10"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" 
+                                   Text="Работен режим (h/седмица):" 
+                                   VerticalAlignment="Center" Margin="0,0,10,5"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" 
+                                   VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,0,5">
+                            <Run Text="{Binding AverageHoursPerDay, Mode=OneWay, StringFormat='{}{0:0.00}'}"/>
+                            <Run Text=" × "/>
+                            <Run Text="{Binding AverageDaysPerWeek, Mode=OneWay, StringFormat='{}{0:0.00}'}"/>
+                            <Run Text=" = "/>
+                            <Run Text="{Binding AverageHoursPerDay, Mode=OneWay, StringFormat='{}{0:0.00}'}" FontWeight="Bold"/>
+                            <Run Text=" h/седмица (закръглено, средно от таблицата)"/>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" 
+                                   Text="Едновременна мощност:" 
+                                   VerticalAlignment="Center" Margin="0,0,10,5" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   VerticalAlignment="Center" FontWeight="Bold" FontSize="13" Margin="0,0,0,5">
+                            <Run Text="{Binding SimultaneousPower_W_per_m2, Mode=OneWay, StringFormat='{}{0:0.00}'}" Foreground="#FF6F00"/>
+                            <Run Text=" W/m²" Foreground="#FF6F00"/>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" 
+                                   Text="Едновременна мощност (общо):" 
+                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" 
+                                   VerticalAlignment="Center" FontWeight="Bold">
+                            <Run Text="{Binding SimultaneousPower_W, Mode=OneWay, StringFormat='{}{0:0.00}'}" Foreground="#E65100"/>
+                            <Run Text=" W" Foreground="#E65100"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <TextBlock Text="* Формула: SimultaneousPower [W/m²] = (Обща енергия [kWh/y] × 1000) / (((365 - Почивни дни) / 7) × Закръглен работен режим × Отопляема площ [m²])" 
+                               FontSize="10" 
+                               FontStyle="Italic" 
+                               Foreground="#666666" 
+                               TextWrapping="Wrap" 
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

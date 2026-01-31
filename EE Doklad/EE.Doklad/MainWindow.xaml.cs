@@ -227,6 +227,47 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = heatingSectionView;
         }
+        else if (section.Type == ModelSectionType.Lighting ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Осветление")))
+        {
+            if (section.LightingSectionData == null)
+                section.LightingSectionData = new Models.LightingSectionData();
+
+            section.Type = ModelSectionType.Lighting;
+
+            // Намираме секция 5 (ObjectData) за да извлечем HolidaysPerYear и HeatedArea
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            if (objectData != null)
+            {
+                var holidaysSum = objectData.MonthlyDaysOffSum;
+                System.Diagnostics.Debug.WriteLine($"[MainWindow] Loading Lighting section - MonthlyDaysOffSum: {holidaysSum}");
+                
+                section.LightingSectionData.SetHolidaysPerYear(holidaysSum);
+                
+                // Извличане на отопляемата площ от ObjectData
+                if (double.TryParse(objectData.HeatedArea, out double heatedArea))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MainWindow] Loading Lighting section - HeatedArea: {heatedArea}");
+                    section.LightingSectionData.SetHeatedArea(heatedArea);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MainWindow] Loading Lighting section - HeatedArea parse failed: {objectData.HeatedArea}");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainWindow] Loading Lighting section - ObjectData is NULL");
+            }
+
+            var lightingEditor = new LightingSectionEditor
+            {
+                DataContext = section.LightingSectionData
+            };
+            ContentScrollViewer.Content = lightingEditor;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor
