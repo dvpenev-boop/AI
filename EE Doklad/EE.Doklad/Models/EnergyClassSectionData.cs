@@ -104,13 +104,13 @@ namespace EE.Doklad.Models
 
                 return CalculatedClass.Value switch
                 {
-                    EnergyClass.A => "#00C853", // Тъмно зелено
-                    EnergyClass.B => "#64DD17", // Светло зелено
-                    EnergyClass.C => "#C6FF00", // Лайм
-                    EnergyClass.D => "#FFD600", // Жълто
-                    EnergyClass.E => "#FFAB00", // Кехлибар
-                    EnergyClass.F => "#FF6D00", // Оранжево
-                    EnergyClass.G => "#DD2C00", // Червено
+                    EnergyClass.A => "#00A651", // Клас A - RGB: 0, 166, 81
+                    EnergyClass.B => "#50B848", // Клас B - RGB: 80, 184, 72
+                    EnergyClass.C => "#BFD730", // Клас C - RGB: 191, 215, 48
+                    EnergyClass.D => "#FFF200", // Клас D - RGB: 255, 242, 0
+                    EnergyClass.E => "#FDB913", // Клас E - RGB: 253, 185, 19
+                    EnergyClass.F => "#F37021", // Клас F - RGB: 248, 112, 33
+                    EnergyClass.G => "#ED1C24", // Клас G - RGB: 239, 28, 36
                     _ => "#CCCCCC"
                 };
             }
@@ -212,13 +212,13 @@ namespace EE.Doklad.Models
         {
             var colorMap = new Dictionary<string, string>
             {
-                ["A"] = "#00C853", // Dark Green
-                ["B"] = "#64DD17", // Light Green
-                ["C"] = "#C6FF00", // Lime
-                ["D"] = "#FFD600", // Yellow
-                ["E"] = "#FFAB00", // Amber
-                ["F"] = "#FF6D00", // Orange
-                ["G"] = "#DD2C00"  // Red
+                ["A"] = "#00A651", // Клас A - RGB: 0, 166, 81
+                ["B"] = "#50B848", // Клас B - RGB: 80, 184, 72
+                ["C"] = "#BFD730", // Клас C - RGB: 191, 215, 48
+                ["D"] = "#FFF200", // Клас D - RGB: 255, 242, 0
+                ["E"] = "#FDB913", // Клас E - RGB: 253, 185, 19
+                ["F"] = "#F37021", // Клас F - RGB: 248, 112, 33
+                ["G"] = "#ED1C24"  // Клас G - RGB: 239, 28, 36
             };
 
             return new List<EnergyClassThresholdRow>

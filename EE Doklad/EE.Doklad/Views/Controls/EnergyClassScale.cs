@@ -134,13 +134,13 @@ namespace EE.Doklad.Views.Controls
             var classes = new[] { "A", "B", "C", "D", "E", "F", "G" };
             var colors = new[]
             {
-                "#00C853", // A - Dark Green
-                "#64DD17", // B - Light Green
-                "#C6FF00", // C - Lime
-                "#FFD600", // D - Yellow
-                "#FFAB00", // E - Amber
-                "#FF6D00", // F - Orange
-                "#DD2C00"  // G - Red
+                "#00A651", // Клас A - RGB: 0, 166, 81
+                "#50B848", // Клас B - RGB: 80, 184, 72
+                "#BFD730", // Клас C - RGB: 191, 215, 48
+                "#FFF200", // Клас D - RGB: 255, 242, 0
+                "#FDB913", // Клас E - RGB: 253, 185, 19
+                "#F37021", // Клас F - RGB: 248, 112, 33
+                "#ED1C24"  // Клас G - RGB: 239, 28, 36
             };
 
             double width = ActualWidth > 0 ? ActualWidth - 20 : 280;

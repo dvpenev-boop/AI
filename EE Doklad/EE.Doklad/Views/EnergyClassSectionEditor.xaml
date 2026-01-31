@@ -11,6 +11,7 @@
     <UserControl.Resources>
         <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisInverse"/>
         <converters:HexToBrushConverter x:Key="HexToBrush"/>
+        <converters:StringMatchToVisibilityConverter x:Key="StringMatchToVis"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
     
@@ -182,16 +183,76 @@
                                 <TextBlock Text="Визуална скала A–G" FontSize="13" FontWeight="Bold" 
                                           Margin="0,0,0,10" HorizontalAlignment="Center"/>
                                 
-                                <controls:EnergyClassScale 
-                                    BandHeight="50"
-                                    MarkerValue="{Binding MarkerValueRounded, Mode=OneWay}"
-                                    NormalizedMarkerPosition="{Binding GetNormalizedMarkerPosition, Mode=OneWay}"
-                                    CurrentClass="{Binding ClassDisplay, Mode=OneWay}"
-                                    Width="300"
-                                    Height="350"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Top"
-                                    Margin="5"/>
+                                <!-- Директна визуализация със StackPanel -->
+                                <Grid Width="280" Height="350" HorizontalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition Height="50"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Клас A -->
+                                    <Border Grid.Row="0" Background="#00A651" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="A" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Клас B -->
+                                    <Border Grid.Row="1" Background="#50B848" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="B" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Клас C -->
+                                    <Border Grid.Row="2" Background="#BFD730" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="C" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Клас D -->
+                                    <Border Grid.Row="3" Background="#FFF200" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="D" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Клас E -->
+                                    <Border Grid.Row="4" Background="#FDB913" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="E" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Клас F -->
+                                    <Border Grid.Row="5" Background="#F37021" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="F" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Клас G -->
+                                    <Border Grid.Row="6" Background="#ED1C24" BorderBrush="White" BorderThickness="2">
+                                        <TextBlock Text="G" FontSize="28" FontWeight="Bold" Foreground="White" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0"/>
+                                    </Border>
+                                    
+                                    <!-- Highlight за текущ клас -->
+                                    <Border Grid.Row="0" BorderBrush="Black" BorderThickness="4" 
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=A}"/>
+                                    <Border Grid.Row="1" BorderBrush="Black" BorderThickness="4"
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=B}"/>
+                                    <Border Grid.Row="2" BorderBrush="Black" BorderThickness="4"
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=C}"/>
+                                    <Border Grid.Row="3" BorderBrush="Black" BorderThickness="4"
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=D}"/>
+                                    <Border Grid.Row="4" BorderBrush="Black" BorderThickness="4"
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=E}"/>
+                                    <Border Grid.Row="5" BorderBrush="Black" BorderThickness="4"
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=F}"/>
+                                    <Border Grid.Row="6" BorderBrush="Black" BorderThickness="4"
+                                           Visibility="{Binding ClassDisplay, Converter={StaticResource StringMatchToVis}, ConverterParameter=G}"/>
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </Grid>
