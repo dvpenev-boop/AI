@@ -681,6 +681,16 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("12. Вентилация"))
+                {
+                    section.Type = SectionType.Ventilation;
+                    section.VentilationSectionData = new VentilationSectionData
+                    {
+                        Title = "Вентилация",
+                        Description = "Попълнете данните за секция: 12. Вентилация"
+                    };
+                    section.StaticText = string.Empty;
+                }
                 else if (laterTitles[i].Contains("14. Топла вода за битови нужди"))
                 {
                     section.Type = SectionType.HotWater;

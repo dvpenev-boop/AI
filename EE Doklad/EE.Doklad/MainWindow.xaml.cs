@@ -260,6 +260,54 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = heatingSectionView;
         }
+        else if (section.Type == ModelSectionType.Ventilation ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Вентилация")))
+        {
+            if (section.VentilationSectionData == null)
+                section.VentilationSectionData = new Models.VentilationSectionData();
+
+            section.Type = ModelSectionType.Ventilation;
+
+            // Намираме секция 5 (ObjectData) за отопляемата площ и климатичната зона
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            // Намираме секция 10 (Heating) за вътрешната температура
+            var heatingSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.Heating);
+            var heatingData = heatingSection?.HeatingSectionData;
+
+            // Получаваме климатични данни от климатичната зона
+            Models.ClimateZoneData? climateData = null;
+            if (objectData != null)
+            {
+                var climateService = new ClimateService(new JsonClimateRepository());
+                if (climateService.TryGetZone(objectData.ClimateZone, out var zone))
+                {
+                    climateData = zone;
+                }
+            }
+
+            // Актуализираме отопляемата площ
+            if (objectData != null && double.TryParse(objectData.HeatedArea, out double heatedArea))
+            {
+                section.VentilationSectionData.HeatedArea_m2 = heatedArea;
+            }
+
+            // Актуализираме вътрешната температура от секция Отопление
+            if (heatingData != null)
+            {
+                section.VentilationSectionData.IndoorTemperature_C = heatingData.DesignTemperature;
+            }
+
+            var ventilationView = new Views.VentilationSectionView
+            {
+                DataContext = new ViewModels.VentilationSectionViewModel(
+                    section.VentilationSectionData,
+                    objectData,
+                    climateData)
+            };
+            ContentScrollViewer.Content = ventilationView;
+        }
         else if (section.Type == ModelSectionType.HotWater ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Топла вода за битови нужди")))
         {
