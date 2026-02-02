@@ -20,7 +20,7 @@ namespace EE.Doklad.Views.FloorPanels
             if (DataContext is FloorHeatedBasementDetail detail)
             {
                 var viewModel = FindFloorSectionViewModel();
-                var newLayer = new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 };
+                var newLayer = new FloorLayer();
                 if (viewModel != null)
                 {
                     newLayer.MaterialOptions = viewModel.MaterialOptions;
@@ -42,7 +42,7 @@ namespace EE.Doklad.Views.FloorPanels
             if (DataContext is FloorHeatedBasementDetail detail)
             {
                 var viewModel = FindFloorSectionViewModel();
-                var newLayer = new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 };
+                var newLayer = new FloorLayer();
                 if (viewModel != null)
                 {
                     newLayer.MaterialOptions = viewModel.MaterialOptions;

@@ -21,7 +21,7 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 var vm = FindFloorSectionViewModel();
                 var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
-                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                var layer = new FloorLayer { MaterialOptions = materialOptions };
                 detail.FloorToBasementLayers.Add(layer);
             }
         }
@@ -40,7 +40,7 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 var vm = FindFloorSectionViewModel();
                 var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
-                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                var layer = new FloorLayer { MaterialOptions = materialOptions };
                 detail.BasementFloorLayers.Add(layer);
             }
         }
@@ -59,7 +59,7 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 var vm = FindFloorSectionViewModel();
                 var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
-                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                var layer = new FloorLayer { MaterialOptions = materialOptions };
                 detail.BasementWallLayers.Add(layer);
             }
         }
@@ -78,7 +78,7 @@ namespace EE.Doklad.Views.FloorPanels
             {
                 var vm = FindFloorSectionViewModel();
                 var materialOptions = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
-                var layer = new FloorLayer { MaterialOptions = materialOptions, Material = "Нов слой", Thickness = 0.1, Lambda = 1.0 };
+                var layer = new FloorLayer { MaterialOptions = materialOptions };
                 detail.WallAboveGradeLayers.Add(layer);
             }
         }

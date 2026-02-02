@@ -333,26 +333,22 @@ namespace EE.Doklad.ViewModels
                     case FloorType.UnheatedBasement:
                         Debug.WriteLine("[FloorSectionViewModel] Creating UnheatedBasement detail");
                         floorItem.UnheatedBasementDetail = new FloorUnheatedBasementDetail();
-                        // Инициализация на слоевете - добавяме по 1 слой във всяка колекция
+                        // Ensure each layers collection has one empty row (same behavior as ExternalAir / Ground)
                         if (!floorItem.UnheatedBasementDetail.FloorToBasementLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to FloorToBasementLayers");
-                            floorItem.UnheatedBasementDetail.FloorToBasementLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
+                            floorItem.UnheatedBasementDetail.FloorToBasementLayers.Add(new FloorLayer());
                         }
                         if (!floorItem.UnheatedBasementDetail.BasementFloorLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to BasementFloorLayers");
-                            floorItem.UnheatedBasementDetail.BasementFloorLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
+                            floorItem.UnheatedBasementDetail.BasementFloorLayers.Add(new FloorLayer());
                         }
                         if (!floorItem.UnheatedBasementDetail.BasementWallLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to BasementWallLayers");
-                            floorItem.UnheatedBasementDetail.BasementWallLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
+                            floorItem.UnheatedBasementDetail.BasementWallLayers.Add(new FloorLayer());
                         }
                         if (!floorItem.UnheatedBasementDetail.WallAboveGradeLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default layer to WallAboveGradeLayers");
-                            floorItem.UnheatedBasementDetail.WallAboveGradeLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
+                            floorItem.UnheatedBasementDetail.WallAboveGradeLayers.Add(new FloorLayer());
                         }
                         SubscribeUnheatedBasementDetail(floorItem);
                         RecalculateUnheatedBasement(floorItem);
@@ -361,15 +357,14 @@ namespace EE.Doklad.ViewModels
                     case FloorType.HeatedBasement:
                         Debug.WriteLine("[FloorSectionViewModel] Creating HeatedBasement detail");
                         floorItem.HeatedBasementDetail = new FloorHeatedBasementDetail();
+                        // Ensure floor and wall layer collections start with one empty row (match Ground/ExternalAir)
                         if (!floorItem.HeatedBasementDetail.FloorLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default floor layer to HeatedBasement");
-                            floorItem.HeatedBasementDetail.FloorLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.2, Lambda = 1.7 });
+                            floorItem.HeatedBasementDetail.FloorLayers.Add(new FloorLayer());
                         }
                         if (!floorItem.HeatedBasementDetail.WallLayers.Any())
                         {
-                            Debug.WriteLine("[FloorSectionViewModel] Adding default wall layer to HeatedBasement");
-                            floorItem.HeatedBasementDetail.WallLayers.Add(new FloorLayer { Material = "Бетон", Thickness = 0.25, Lambda = 1.7 });
+                            floorItem.HeatedBasementDetail.WallLayers.Add(new FloorLayer());
                         }
 
                         // КРИТИЧНО: Създаваме композитна група (2 реда)
