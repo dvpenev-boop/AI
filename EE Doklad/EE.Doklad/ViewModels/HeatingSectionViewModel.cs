@@ -144,8 +144,10 @@ namespace EE.Doklad.ViewModels
             {
                 if (_data.HeatingEfficiency != value)
                 {
-                    var clamped = Math.Clamp(value, 0, 100);
-                    _data.HeatingEfficiency = clamped;
+                    // Allow heating efficiency values greater than 100 (some heat sources may be represented >100%),
+                    // but do not allow negative values.
+                    var bounded = Math.Max(value, 0);
+                    _data.HeatingEfficiency = bounded;
                     OnPropertyChanged(nameof(HeatingEfficiency));
                 }
             }

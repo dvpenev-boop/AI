@@ -157,3 +157,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\EnergyClassSectionEdito
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ResultsSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ConclusionSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ConclusionSectionEditor.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\HotWaterSectionEditor.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\HotWaterSectionEditor.baml

@@ -51,17 +51,17 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double _automaticControl = 96.0;
 
-        /// <summary>
-        /// Енергиен мениджмънт [%] (0-100)
-        /// </summary>
-        [ObservableProperty]
-        private double _energyManagement = 96.0;
+    /// <summary>
+    /// Енергиен мениджмънт [%] (0-100)
+    /// </summary>
+    [ObservableProperty]
+    private double _energyManagement = 96.0;
 
-        /// <summary>
-        /// КПД на топлоснабдяване [%] (0-100)
-        /// </summary>
-        [ObservableProperty]
-        private double _heatingEfficiency = 100.0;
+    /// <summary>
+    /// КПД на топлоснабдяване [%] (>=0, може да бъде над 100)
+    /// </summary>
+    [ObservableProperty]
+    private double _heatingEfficiency = 100.0;
 
         // ========== ОБИТАТЕЛИ ==========
 

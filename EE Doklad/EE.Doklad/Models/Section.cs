@@ -18,6 +18,7 @@ namespace EE.Doklad.Models
         Floor,                      // Под (секция №8)
         Windows,                    // Прозорци и врати (секция №9)
         Heating,                    // Отопление (секция №10)
+        HotWater,                   // Топла вода за битови нужди (секция №14)
         Lighting,                   // Осветление (секция №15)
         AppliancesAffecting,        // Други разходи влияещи (секция №16)
         AppliancesNotAffecting,     // Други разходи невлияещи (секция №17)
@@ -91,6 +92,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Отопление" (само за Heating секции)
         /// </summary>
         public HeatingSectionData? HeatingSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Топла вода за битови нужди" (само за HotWater секции)
+        /// </summary>
+        public HotWaterSectionData? HotWaterSectionData { get; set; }
 
         /// <summary>
         /// Данни за раздел "Осветление" (само за Lighting секции)

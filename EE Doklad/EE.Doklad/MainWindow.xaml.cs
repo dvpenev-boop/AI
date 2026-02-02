@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using EE.Doklad.Models;
+using EE.Doklad.Services;
 using EE.Doklad.ViewModels;
 using EE.Doklad.Views;
 using ModelSection = EE.Doklad.Models.Section;
@@ -259,6 +260,79 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = heatingSectionView;
         }
+        else if (section.Type == ModelSectionType.HotWater ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Топла вода за битови нужди")))
+        {
+            if (section.HotWaterSectionData == null)
+                section.HotWaterSectionData = new Models.HotWaterSectionData();
+
+            section.Type = ModelSectionType.HotWater;
+
+            // Намираме секция 5 (ObjectData) за да извлечем необходимите данни
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            if (objectData != null)
+            {
+                // Брой хора
+                if (int.TryParse(objectData.NumberOfOccupants, out int numberOfPeople))
+                {
+                    section.HotWaterSectionData.SetNumberOfPeople(numberOfPeople);
+                }
+                else
+                {
+                    section.HotWaterSectionData.SetNumberOfPeople(0);
+                }
+
+                // Отопляема площ
+                if (double.TryParse(objectData.HeatedArea, out double heatedArea))
+                {
+                    section.HotWaterSectionData.SetHeatedArea(heatedArea);
+                }
+                else
+                {
+                    section.HotWaterSectionData.SetHeatedArea(0);
+                }
+
+                // Брой дни (почивни дни)
+                var holidaysSum = objectData.MonthlyDaysOffSum;
+                section.HotWaterSectionData.SetHolidaysPerYear(holidaysSum);
+
+                // Days-per-week: compute days (5/6/7) from occupancy schedule in section 5
+                static bool ParsePositive(string? s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return false;
+                    if (double.TryParse(s.Trim(), out double v)) return v > 0.0;
+                    return false;
+                }
+
+                bool work = ParsePositive(objectData.OccupancyWorkdaysHours);
+                bool sat = ParsePositive(objectData.OccupancySaturdayHours);
+                bool sun = ParsePositive(objectData.OccupancySundayHours);
+                int days = work ? 5 + (sat ? 1 : 0) + (sun ? 1 : 0) : 5;
+                section.HotWaterSectionData.SetDaysPerWeek(days);
+
+                // Keep UI reactive: when occupancy fields change, update days in section
+                objectData.PropertyChanged += (s, e) =>
+                {
+                    bool w = ParsePositive(objectData.OccupancyWorkdaysHours);
+                    bool sa = ParsePositive(objectData.OccupancySaturdayHours);
+                    bool su = ParsePositive(objectData.OccupancySundayHours);
+                    int ndays = w ? 5 + (sa ? 1 : 0) + (su ? 1 : 0) : 5;
+                    section.HotWaterSectionData.SetDaysPerWeek(ndays);
+                    if (e.PropertyName != null && e.PropertyName.StartsWith("DaysOff"))
+                    {
+                        section.HotWaterSectionData.SetHolidaysPerYear(objectData.MonthlyDaysOffSum);
+                    }
+                };
+            }
+
+            var hotWaterEditor = new HotWaterSectionEditor
+            {
+                DataContext = section.HotWaterSectionData
+            };
+            ContentScrollViewer.Content = hotWaterEditor;
+        }
         else if (section.Type == ModelSectionType.Lighting ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Осветление")))
         {
@@ -288,6 +362,47 @@ public partial class MainWindow : Window
                 {
                     System.Diagnostics.Debug.WriteLine($"[MainWindow] Loading Lighting section - HeatedArea parse failed: {objectData.HeatedArea}");
                 }
+                
+                // Compute days per week from occupancy schedule (5/6/7) and apply to all line items
+                static bool ParsePositiveLocal(string? s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return false;
+                    if (double.TryParse(s.Trim(), out double v)) return v > 0.0;
+                    return false;
+                }
+
+                bool workL = ParsePositiveLocal(objectData.OccupancyWorkdaysHours);
+                bool satL = ParsePositiveLocal(objectData.OccupancySaturdayHours);
+                bool sunL = ParsePositiveLocal(objectData.OccupancySundayHours);
+                int providerDays = workL ? 5 + (satL ? 1 : 0) + (sunL ? 1 : 0) : 5;
+
+                // Apply providerDays to all existing line items so their WorkingDaysPerYear/AnnualEnergy updates
+                try
+                {
+                    foreach (var item in section.LightingSectionData.LineItems)
+                    {
+                        item.DaysPerWeek = providerDays;
+                    }
+                }
+                catch { }
+
+                // React to changes in ObjectData occupancy schedule
+                objectData.PropertyChanged += (s, e) =>
+                {
+                    bool w2 = ParsePositiveLocal(objectData.OccupancyWorkdaysHours);
+                    bool sa2 = ParsePositiveLocal(objectData.OccupancySaturdayHours);
+                    bool su2 = ParsePositiveLocal(objectData.OccupancySundayHours);
+                    int newDays = w2 ? 5 + (sa2 ? 1 : 0) + (su2 ? 1 : 0) : 5;
+                    foreach (var it in section.LightingSectionData.LineItems)
+                    {
+                        it.DaysPerWeek = newDays;
+                    }
+                    // Also update holidays and heated area if DaysOff changed
+                    if (e.PropertyName != null && e.PropertyName.StartsWith("DaysOff"))
+                    {
+                        section.LightingSectionData.SetHolidaysPerYear(objectData.MonthlyDaysOffSum);
+                    }
+                };
             }
             else
             {
@@ -326,6 +441,37 @@ public partial class MainWindow : Window
                 {
                     section.AppliancesAffectingSectionData.SetHeatedArea(heatedArea);
                 }
+                // Apply provider days to appliances affecting line items
+                static bool ParsePositiveLocal2(string? s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return false;
+                    if (double.TryParse(s.Trim(), out double v)) return v > 0.0;
+                    return false;
+                }
+                bool workA = ParsePositiveLocal2(objectData2.OccupancyWorkdaysHours);
+                bool satA = ParsePositiveLocal2(objectData2.OccupancySaturdayHours);
+                bool sunA = ParsePositiveLocal2(objectData2.OccupancySundayHours);
+                int providerDaysA = workA ? 5 + (satA ? 1 : 0) + (sunA ? 1 : 0) : 5;
+                try
+                {
+                    foreach (var item in section.AppliancesAffectingSectionData.LineItems)
+                        item.DaysPerWeek = providerDaysA;
+                }
+                catch { }
+
+                objectData2.PropertyChanged += (s, e) =>
+                {
+                    bool w2 = ParsePositiveLocal2(objectData2.OccupancyWorkdaysHours);
+                    bool sa2 = ParsePositiveLocal2(objectData2.OccupancySaturdayHours);
+                    bool su2 = ParsePositiveLocal2(objectData2.OccupancySundayHours);
+                    int newDays = w2 ? 5 + (sa2 ? 1 : 0) + (su2 ? 1 : 0) : 5;
+                    foreach (var it in section.AppliancesAffectingSectionData.LineItems)
+                        it.DaysPerWeek = newDays;
+                    if (e.PropertyName != null && e.PropertyName.StartsWith("DaysOff"))
+                    {
+                        section.AppliancesAffectingSectionData.SetHolidaysPerYear(objectData2.MonthlyDaysOffSum);
+                    }
+                };
             }
 
             var appliancesAffectingEditor = new AppliancesSectionEditor
@@ -360,6 +506,37 @@ public partial class MainWindow : Window
                 {
                     section.AppliancesNotAffectingSectionData.SetHeatedArea(heatedArea);
                 }
+                // Apply provider days to appliances not affecting line items
+                static bool ParsePositiveLocal3(string? s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return false;
+                    if (double.TryParse(s.Trim(), out double v)) return v > 0.0;
+                    return false;
+                }
+                bool workB = ParsePositiveLocal3(objectData3.OccupancyWorkdaysHours);
+                bool satB = ParsePositiveLocal3(objectData3.OccupancySaturdayHours);
+                bool sunB = ParsePositiveLocal3(objectData3.OccupancySundayHours);
+                int providerDaysB = workB ? 5 + (satB ? 1 : 0) + (sunB ? 1 : 0) : 5;
+                try
+                {
+                    foreach (var item in section.AppliancesNotAffectingSectionData.LineItems)
+                        item.DaysPerWeek = providerDaysB;
+                }
+                catch { }
+
+                objectData3.PropertyChanged += (s, e) =>
+                {
+                    bool w2 = ParsePositiveLocal3(objectData3.OccupancyWorkdaysHours);
+                    bool sa2 = ParsePositiveLocal3(objectData3.OccupancySaturdayHours);
+                    bool su2 = ParsePositiveLocal3(objectData3.OccupancySundayHours);
+                    int newDays = w2 ? 5 + (sa2 ? 1 : 0) + (su2 ? 1 : 0) : 5;
+                    foreach (var it in section.AppliancesNotAffectingSectionData.LineItems)
+                        it.DaysPerWeek = newDays;
+                    if (e.PropertyName != null && e.PropertyName.StartsWith("DaysOff"))
+                    {
+                        section.AppliancesNotAffectingSectionData.SetHolidaysPerYear(objectData3.MonthlyDaysOffSum);
+                    }
+                };
             }
 
             var appliancesNotAffectingEditor = new AppliancesSectionEditor

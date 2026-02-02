@@ -242,16 +242,16 @@
                             
                             <TextBlock Grid.Column="0" Background="White"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0"/>
+                                <TextBox Text="{Binding OccupancyWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                             <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0"/>
+                                <TextBox Text="{Binding OccupancySaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                             <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0"/>
+                                <TextBox Text="{Binding OccupancySundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                         </Grid>
                     </Border>
@@ -291,16 +291,16 @@
                             
                             <TextBlock Grid.Column="0" Background="White"/>
                                 <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0"/>
+                                <TextBox Text="{Binding HeatingWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                                 <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0"/>
+                                <TextBox Text="{Binding HeatingSaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                                 <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0"/>
+                                <TextBox Text="{Binding HeatingSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                         </Grid>
                     </Border>

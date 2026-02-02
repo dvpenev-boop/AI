@@ -681,6 +681,16 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
+                else if (laterTitles[i].Contains("14. Топла вода за битови нужди"))
+                {
+                    section.Type = SectionType.HotWater;
+                    section.HotWaterSectionData = new HotWaterSectionData
+                    {
+                        Title = "Топла вода за битови нужди (БГВ)",
+                        Description = "Попълнете данните за секция: 14. Топла вода за битови нужди (БГВ)"
+                    };
+                    section.StaticText = string.Empty;
+                }
                 else if (laterTitles[i].Contains("15. Осветление"))
                 {
                     section.Type = SectionType.Lighting;
