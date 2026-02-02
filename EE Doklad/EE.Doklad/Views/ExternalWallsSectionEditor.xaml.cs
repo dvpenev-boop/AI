@@ -42,8 +42,67 @@ namespace EE.Doklad.Views
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            // Ensure column visibility is correct for the current data
+            AttachWallTypesHandlers(e.OldValue as ExternalWallsSectionData, e.NewValue as ExternalWallsSectionData);
             UpdateFacadeColumnsVisibility();
             InjectMaterialOptionsIntoLayers();
+        }
+
+        private void AttachWallTypesHandlers(ExternalWallsSectionData? oldData, ExternalWallsSectionData? newData)
+        {
+            if (oldData != null)
+            {
+                oldData.WallTypes.CollectionChanged -= WallTypes_CollectionChanged;
+                foreach (var wt in oldData.WallTypes)
+                {
+                    wt.PropertyChanged -= WallType_PropertyChanged;
+                }
+            }
+
+            if (newData != null)
+            {
+                newData.WallTypes.CollectionChanged += WallTypes_CollectionChanged;
+                foreach (var wt in newData.WallTypes)
+                {
+                    wt.PropertyChanged += WallType_PropertyChanged;
+                }
+            }
+        }
+
+        private void WallTypes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (ExternalWallType wt in e.OldItems)
+                {
+                    wt.PropertyChanged -= WallType_PropertyChanged;
+                }
+            }
+            if (e.NewItems != null)
+            {
+                foreach (ExternalWallType wt in e.NewItems)
+                {
+                    wt.PropertyChanged += WallType_PropertyChanged;
+                }
+            }
+
+            UpdateFacadeColumnsVisibility();
+        }
+
+        private void WallType_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // Recalculate column visibility if any facade area changed
+            if (e.PropertyName is nameof(ExternalWallType.FacadeEast)
+                or nameof(ExternalWallType.FacadeNorth)
+                or nameof(ExternalWallType.FacadeWest)
+                or nameof(ExternalWallType.FacadeSouth)
+                or nameof(ExternalWallType.FacadeNorthEast)
+                or nameof(ExternalWallType.FacadeNorthWest)
+                or nameof(ExternalWallType.FacadeSouthEast)
+                or nameof(ExternalWallType.FacadeSouthWest))
+            {
+                UpdateFacadeColumnsVisibility();
+            }
         }
 
         private void InjectMaterialOptionsIntoLayers()
@@ -88,6 +147,7 @@ namespace EE.Doklad.Views
             wallType.Layers.Add(layer);
             data.WallTypes.Add(wallType);
             UpdateIndexes(data);
+            UpdateFacadeColumnsVisibility();
         }
 
         private void RemoveWallType_Click(object sender, RoutedEventArgs e)
@@ -101,6 +161,7 @@ namespace EE.Doklad.Views
             {
                 data.WallTypes.Remove(tagged);
                 UpdateIndexes(data);
+                UpdateFacadeColumnsVisibility();
                 return;
             }
 
@@ -108,6 +169,7 @@ namespace EE.Doklad.Views
             {
                 data.WallTypes.RemoveAt(data.WallTypes.Count - 1);
                 UpdateIndexes(data);
+                UpdateFacadeColumnsVisibility();
             }
         }
 
@@ -164,23 +226,123 @@ namespace EE.Doklad.Views
             wallType.SchemeAttachment = new AttachmentData();
         }
 
-        private void FacadeToggle_Changed(object sender, RoutedEventArgs e)
+        private void FacadeOptions_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdateFacadeColumnsVisibility();
+        }
+
+        private void HideEmptyColumns_Changed(object sender, RoutedEventArgs e)
         {
             UpdateFacadeColumnsVisibility();
         }
 
         private void UpdateFacadeColumnsVisibility()
         {
-            if (FacadeToggle == null)
-            {
+            // If grid columns not yet created, skip
+            if (SummaryGrid == null)
                 return;
+
+            // Determine which groups are requested
+            var showCardinal = (FindName("ShowCardinalCheckBox") as CheckBox)?.IsChecked == true;
+            var showRotated = (FindName("ShowRotatedCheckBox") as CheckBox)?.IsChecked == true;
+            var hideEmpty = (FindName("HideEmptyColumnsCheckBox") as CheckBox)?.IsChecked == true;
+
+            // Default behavior: if neither group selected, show both groups (show all directions)
+            if (!showCardinal && !showRotated)
+            {
+                showCardinal = true;
+                showRotated = true;
             }
 
-            var show = FacadeToggle.IsChecked == true;
-            EastColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-            NorthColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-            WestColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-            SouthColumn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+            // Collect totals from data
+            double totalEast = 0, totalNorth = 0, totalWest = 0, totalSouth = 0;
+            double totalNE = 0, totalNW = 0, totalSE = 0, totalSW = 0;
+            if (DataContext is ExternalWallsSectionData data)
+            {
+                foreach (var wt in data.WallTypes)
+                {
+                    totalEast += wt.FacadeEast;
+                    totalNorth += wt.FacadeNorth;
+                    totalWest += wt.FacadeWest;
+                    totalSouth += wt.FacadeSouth;
+                    totalNE += wt.FacadeNorthEast;
+                    totalNW += wt.FacadeNorthWest;
+                    totalSE += wt.FacadeSouthEast;
+                    totalSW += wt.FacadeSouthWest;
+                }
+            }
+
+            // Decide visibility per column (true = visible)
+            bool visNorth = showCardinal ? true : showRotated ? false : false;
+            bool visEast = showCardinal ? true : showRotated ? false : false;
+            bool visWest = showCardinal ? true : showRotated ? false : false;
+            bool visSouth = showCardinal ? true : showRotated ? false : false;
+
+            bool visNE = showRotated ? true : false;
+            bool visNW = showRotated ? true : false;
+            bool visSE = showRotated ? true : false;
+            bool visSW = showRotated ? true : false;
+
+            // If both groups are checked, show all
+            if (showCardinal && showRotated)
+            {
+                visNorth = visEast = visWest = visSouth = visNE = visNW = visSE = visSW = true;
+            }
+
+            // If hideEmpty is set, collapse those with zero totals
+            if (hideEmpty)
+            {
+                if (totalNorth == 0) visNorth = false;
+                if (totalEast == 0) visEast = false;
+                if (totalWest == 0) visWest = false;
+                if (totalSouth == 0) visSouth = false;
+                if (totalNE == 0) visNE = false;
+                if (totalNW == 0) visNW = false;
+                if (totalSE == 0) visSE = false;
+                if (totalSW == 0) visSW = false;
+            }
+
+            // Apply visibility
+            NorthColumn.Visibility = visNorth ? Visibility.Visible : Visibility.Collapsed;
+            NorthEastColumn.Visibility = visNE ? Visibility.Visible : Visibility.Collapsed;
+            EastColumn.Visibility = visEast ? Visibility.Visible : Visibility.Collapsed;
+            SouthEastColumn.Visibility = visSE ? Visibility.Visible : Visibility.Collapsed;
+            SouthColumn.Visibility = visSouth ? Visibility.Visible : Visibility.Collapsed;
+            SouthWestColumn.Visibility = visSW ? Visibility.Visible : Visibility.Collapsed;
+            WestColumn.Visibility = visWest ? Visibility.Visible : Visibility.Collapsed;
+            NorthWestColumn.Visibility = visNW ? Visibility.Visible : Visibility.Collapsed;
+
+            // Re-order display indexes to follow requested order: С, СИ, И, ЮИ, ЮГ, ЮЗ, З, СЗ
+            var desiredOrder = new List<DataGridColumn>
+            {
+                NorthColumn,       // С
+                NorthEastColumn,   // СИ
+                EastColumn,        // И
+                SouthEastColumn,   // ЮИ
+                SouthColumn,       // Ю
+                SouthWestColumn,   // ЮЗ
+                WestColumn,        // З
+                NorthWestColumn    // СЗ
+            };
+
+            // Base index is number of columns before the facade columns (№, Тип стена, A (m²), U (W/m²K)) == 4
+            int baseIndex = 4;
+            // Compute visible and collapsed lists to assign contiguous valid DisplayIndex values
+            var visibleCols = desiredOrder.Where(c => c.Visibility == Visibility.Visible).ToList();
+            var collapsedCols = desiredOrder.Where(c => c.Visibility != Visibility.Visible).ToList();
+
+            int displayPos = baseIndex;
+            // Assign display indexes for visible columns sequentially
+            foreach (var col in visibleCols)
+            {
+                col.DisplayIndex = displayPos++;
+            }
+
+            // Assign remaining display indexes to collapsed columns so indices stay within range
+            foreach (var col in collapsedCols)
+            {
+                col.DisplayIndex = displayPos++;
+            }
         }
 
         // Removed global search/filter handlers to avoid refreshing a shared ICollectionView.

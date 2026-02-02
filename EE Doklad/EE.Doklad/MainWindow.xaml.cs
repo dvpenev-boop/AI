@@ -168,11 +168,36 @@ public partial class MainWindow : Window
 
             section.Type = ModelSectionType.ExternalWalls;
 
-            var externalWallsEditor = new ExternalWallsSectionEditor
+            try
             {
-                DataContext = section.ExternalWallsSectionData
-            };
-            ContentScrollViewer.Content = externalWallsEditor;
+                var externalWallsEditor = new ExternalWallsSectionEditor
+                {
+                    DataContext = section.ExternalWallsSectionData
+                };
+                ContentScrollViewer.Content = externalWallsEditor;
+            }
+            catch (System.Exception ex)
+            {
+                // Surface the error so the user can see what went wrong when selecting the section
+                var errorPanel = new StackPanel { Margin = new Thickness(40, 40, 40, 0) };
+                errorPanel.Children.Add(new TextBlock
+                {
+                    Text = "Грешка при зареждане на секция 'Външни стени':",
+                    FontSize = 16,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 10)
+                });
+                var tb = new TextBox
+                {
+                    Text = ex.ToString(),
+                    TextWrapping = TextWrapping.Wrap,
+                    IsReadOnly = true,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    Height = 300
+                };
+                errorPanel.Children.Add(tb);
+                ContentScrollViewer.Content = errorPanel;
+            }
         }
         else if (section.Type == ModelSectionType.Roof ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Покрив")))

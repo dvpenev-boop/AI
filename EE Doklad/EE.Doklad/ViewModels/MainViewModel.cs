@@ -648,19 +648,12 @@ namespace EE.Doklad.ViewModels
 
                 if (laterTitles[i].Contains("Външни стени"))
                 {
+                    // Start with an empty ExternalWallsSectionData so the user explicitly adds wall types.
                     var externalWallsData = new ExternalWallsSectionData
                     {
                         Title = "Външни стени",
                         Description = "Попълнете данните за външните стени."
                     };
-                    var wallType = new ExternalWallType { Index = 1, Name = "Тип стена 1" };
-                    wallType.Layers.Add(new ExternalWallLayer
-                    {
-                        Material = "Тухла",
-                        Thickness = 0.25,
-                        Lambda = 0.7
-                    });
-                    externalWallsData.WallTypes.Add(wallType);
 
                     section.Type = SectionType.ExternalWalls;
                     section.ExternalWallsSectionData = externalWallsData;

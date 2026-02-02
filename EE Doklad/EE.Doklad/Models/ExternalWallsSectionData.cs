@@ -18,8 +18,8 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private string? _description;
 
-        [ObservableProperty]
-        private bool _showFacadeDistribution;
+    [ObservableProperty]
+    private bool _showFacadeDistribution = true;
 
         public ObservableCollection<ExternalWallType> WallTypes { get; } = new();
     }
