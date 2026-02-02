@@ -12,6 +12,7 @@ namespace EE.Doklad.Views.FloorPanels
         public FloorUnheatedBasementPanel()
         {
             InitializeComponent();
+        DataContextChanged += OnDataContextChanged;
         }
 
         private void AddFloorToBasementLayer_Click(object sender, RoutedEventArgs e)
@@ -165,6 +166,29 @@ namespace EE.Doklad.Views.FloorPanels
             if (DataContext is FloorUnheatedBasementDetail detail)
             {
                 detail.FloorToBasementSchemeAttachment = new EE.Doklad.Models.AttachmentData();
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            InjectMaterialOptionsIntoLayers();
+        }
+
+        private void InjectMaterialOptionsIntoLayers()
+        {
+            var vm = FindFloorSectionViewModel();
+            var options = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+
+            if (DataContext is FloorUnheatedBasementDetail detail && options != null)
+            {
+                foreach (var layer in detail.FloorToBasementLayers)
+                    layer.MaterialOptions = options;
+                foreach (var layer in detail.BasementFloorLayers)
+                    layer.MaterialOptions = options;
+                foreach (var layer in detail.BasementWallLayers)
+                    layer.MaterialOptions = options;
+                foreach (var layer in detail.WallAboveGradeLayers)
+                    layer.MaterialOptions = options;
             }
         }
 

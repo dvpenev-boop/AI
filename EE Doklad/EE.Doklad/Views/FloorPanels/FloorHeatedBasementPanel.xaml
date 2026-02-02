@@ -86,6 +86,7 @@
                                                   SelectedValuePath="Id"
                                                   DisplayMemberPath="Display"
                                                   SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged}"
+                                                  Text="{Binding Material, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   IsEditable="True"
                                                   IsTextSearchEnabled="True"
                                                   StaysOpenOnEdit="True"
@@ -152,6 +153,7 @@
                                                   SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                   SelectedValuePath="Id"
                                                   DisplayMemberPath="Display"
+                                                  Text="{Binding Material, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   IsEditable="True"
                                                   IsTextSearchEnabled="True">
                                             <ComboBox.ItemsPanel>

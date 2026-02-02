@@ -32,14 +32,15 @@
                             <DataGridTemplateColumn Header="Материал" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox ItemsSource="{Binding MaterialOptions}"
-                                                  SelectedValuePath="Id"
-                                                  DisplayMemberPath="Display"
-                                                  SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                  IsEditable="True"
-                                                  IsTextSearchEnabled="True"
-                                                  StaysOpenOnEdit="True"
-                                                  TextSearch.TextPath="Display"/>
+                                            <ComboBox ItemsSource="{Binding MaterialOptions}"
+                                                      SelectedValuePath="Id"
+                                                      DisplayMemberPath="Display"
+                                                      SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                      Text="{Binding Material, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      IsEditable="True"
+                                                      IsTextSearchEnabled="True"
+                                                      StaysOpenOnEdit="True"
+                                                      TextSearch.TextPath="Display"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

@@ -157,6 +157,7 @@
                                                   SelectedValuePath="Id"
                                                   DisplayMemberPath="Display"
                                                   SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged}"
+                                                  Text="{Binding Material, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   IsEditable="True"
                                                   IsTextSearchEnabled="True"
                                                   StaysOpenOnEdit="True"

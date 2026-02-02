@@ -12,6 +12,7 @@ namespace EE.Doklad.Views.FloorPanels
         public FloorUnheatedSpacePanel()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
         }
 
         private void AddLayer_Click(object sender, RoutedEventArgs e)
@@ -58,6 +59,25 @@ namespace EE.Doklad.Views.FloorPanels
         public FloorUnheatedSpaceInput GetInput()
         {
             return DataContext as FloorUnheatedSpaceInput ?? new FloorUnheatedSpaceInput();
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            InjectMaterialOptionsIntoLayers();
+        }
+
+        private void InjectMaterialOptionsIntoLayers()
+        {
+            var vm = FindFloorSectionViewModel();
+            var options = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+
+            if (DataContext is FloorUnheatedSpaceDetail detail && options != null)
+            {
+                foreach (var layer in detail.Layers)
+                {
+                    layer.MaterialOptions = options;
+                }
+            }
         }
 
         public static string? SelectImageFile()

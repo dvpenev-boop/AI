@@ -12,6 +12,7 @@ namespace EE.Doklad.Views.FloorPanels
         public FloorHeatedBasementPanel()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
         }
 
         private void AddFloorLayer_Click(object sender, RoutedEventArgs e)
@@ -136,6 +137,24 @@ namespace EE.Doklad.Views.FloorPanels
         {
             var parent = FindParentView(this);
             return parent?.DataContext as FloorSectionViewModel;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            InjectMaterialOptionsIntoLayers();
+        }
+
+        private void InjectMaterialOptionsIntoLayers()
+        {
+            var vm = FindFloorSectionViewModel();
+            var options = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+            if (DataContext is FloorHeatedBasementDetail detail && options != null)
+            {
+                foreach (var layer in detail.FloorLayers)
+                    layer.MaterialOptions = options;
+                foreach (var layer in detail.WallLayers)
+                    layer.MaterialOptions = options;
+            }
         }
 
         private FloorSectionView? FindParentView(DependencyObject child)

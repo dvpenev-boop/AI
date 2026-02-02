@@ -16,6 +16,7 @@ namespace EE.Doklad.Views.FloorPanels
         public FloorExternalAirPanel()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
         }
 
         private void AreaTextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -203,6 +204,22 @@ namespace EE.Doklad.Views.FloorPanels
                 current = System.Windows.Media.VisualTreeHelper.GetParent(current);
             }
             return null;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            InjectMaterialOptionsIntoLayers();
+        }
+
+        private void InjectMaterialOptionsIntoLayers()
+        {
+            var vm = FindFloorSectionViewModel();
+            var options = vm?.MaterialOptions.ToList() as IReadOnlyList<MaterialOption>;
+            if (DataContext is FloorExternalAirDetail detail && options != null)
+            {
+                foreach (var layer in detail.Layers)
+                    layer.MaterialOptions = options;
+            }
         }
 
         public FloorExternalAirInput GetInput()
