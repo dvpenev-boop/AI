@@ -21,6 +21,7 @@ namespace EE.Doklad.ViewModels
 
         // Calculation result
         private VentilationCalculationResult? _calculationResult;
+    private bool _isAdjustingShares = false; // guard to avoid recursive share updates
 
         public VentilationSectionViewModel(
             VentilationSectionData data,
@@ -34,6 +35,10 @@ namespace EE.Doklad.ViewModels
 
             // Subscribe to data changes
             _data.PropertyChanged += OnDataPropertyChanged;
+            if (_objectData != null)
+            {
+                _objectData.PropertyChanged += OnObjectDataPropertyChanged;
+            }
 
             // Initialize
             Recalculate();
@@ -201,6 +206,22 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource1.Share = clamped;
                     OnPropertyChanged(nameof(EnergySource1Share));
+
+                    // If second source is used, auto-adjust the other share so total is 100%
+                    if (UseSecondEnergySource && _data.EnergySource2 != null && !_isAdjustingShares)
+                    {
+                        try
+                        {
+                            _isAdjustingShares = true;
+                            _data.EnergySource2.Share = Math.Clamp(100.0 - clamped, 0.0, 100.0);
+                            OnPropertyChanged(nameof(EnergySource2Share));
+                        }
+                        finally
+                        {
+                            _isAdjustingShares = false;
+                        }
+                    }
+
                     Recalculate();
                 }
             }
@@ -281,6 +302,23 @@ namespace EE.Doklad.ViewModels
             }
         }
 
+        // --- Energy carrier selector (uses section 18 carriers list)
+        public System.Collections.Generic.IEnumerable<Models.EnergyCarrierInfo> EnergyCarriers => Models.EnergyCarrierInfo.All;
+
+        public Models.EnergyCarrierCode? EnergySource1Carrier
+        {
+            get => _data.EnergySource1.EnergyCarrier;
+            set
+            {
+                if (_data.EnergySource1.EnergyCarrier != value)
+                {
+                    _data.EnergySource1.EnergyCarrier = value;
+                    OnPropertyChanged(nameof(EnergySource1Carrier));
+                    Recalculate();
+                }
+            }
+        }
+
         // ========== ENERGY SOURCE 2 (OPTIONAL) ==========
 
         public bool UseSecondEnergySource
@@ -329,6 +367,22 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource2.Share = clamped;
                     OnPropertyChanged(nameof(EnergySource2Share));
+
+                    // Auto-adjust source1 if needed
+                    if (UseSecondEnergySource && _data.EnergySource1 != null && !_isAdjustingShares)
+                    {
+                        try
+                        {
+                            _isAdjustingShares = true;
+                            _data.EnergySource1.Share = Math.Clamp(100.0 - clamped, 0.0, 100.0);
+                            OnPropertyChanged(nameof(EnergySource1Share));
+                        }
+                        finally
+                        {
+                            _isAdjustingShares = false;
+                        }
+                    }
+
                     Recalculate();
                 }
             }
@@ -346,6 +400,99 @@ namespace EE.Doklad.ViewModels
                     OnPropertyChanged(nameof(EnergySource2GenerationEfficiency));
                     Recalculate();
                 }
+            }
+        }
+
+        // Expose the missing EI2 fields (to mirror EI1)
+        public double EnergySource2EmissionEfficiency
+        {
+            get => _data.EnergySource2?.EmissionEfficiency ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.EmissionEfficiency != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.EmissionEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource2EmissionEfficiency));
+                    Recalculate();
+                }
+            }
+        }
+
+        public double EnergySource2DistributionEfficiency
+        {
+            get => _data.EnergySource2?.DistributionEfficiency ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.DistributionEfficiency != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.DistributionEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource2DistributionEfficiency));
+                    Recalculate();
+                }
+            }
+        }
+
+        public double EnergySource2AutomaticControl
+        {
+            get => _data.EnergySource2?.AutomaticControl ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.AutomaticControl != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.AutomaticControl = clamped;
+                    OnPropertyChanged(nameof(EnergySource2AutomaticControl));
+                    Recalculate();
+                }
+            }
+        }
+
+        public double EnergySource2EnergyManagement
+        {
+            get => _data.EnergySource2?.EnergyManagement ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.EnergyManagement != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.EnergyManagement = clamped;
+                    OnPropertyChanged(nameof(EnergySource2EnergyManagement));
+                    Recalculate();
+                }
+            }
+        }
+
+        // Energy carrier for source 2
+        public Models.EnergyCarrierCode? EnergySource2Carrier
+        {
+            get => _data.EnergySource2?.EnergyCarrier;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.EnergyCarrier != value)
+                {
+                    _data.EnergySource2.EnergyCarrier = value;
+                    OnPropertyChanged(nameof(EnergySource2Carrier));
+                    Recalculate();
+                }
+            }
+        }
+
+        // --- Read-only outputs for results table (per-m2 and absolute)
+        public double AnnualVentilationHeatingEnergy_kWh => _calculationResult?.AnnualVentilationHeatingEnergy_kWh_a ?? 0;
+        public double FinalEnergySource1_kWh => _calculationResult?.FinalEnergySource1_kWh_a ?? 0;
+        public double FinalEnergySource2_kWh => _calculationResult?.FinalEnergySource2_kWh_a ?? 0;
+        public double FinalEnergySource1_kWh_per_m2 => (HeatedArea_m2 > 0) ? (FinalEnergySource1_kWh / HeatedArea_m2) : 0;
+        public double FinalEnergySource2_kWh_per_m2 => (HeatedArea_m2 > 0) ? (FinalEnergySource2_kWh / HeatedArea_m2) : 0;
+        public double OverallHeatGenerationEfficiencyPercent
+        {
+            get
+            {
+                var finalTotal = _calculationResult?.TotalFinalEnergy_kWh_a ?? 0;
+                var heating = _calculationResult?.AnnualVentilationHeatingEnergy_kWh_a ?? 0;
+                if (finalTotal <= 0) return 0;
+                return (heating / finalTotal) * 100.0;
             }
         }
 
@@ -390,6 +537,31 @@ namespace EE.Doklad.ViewModels
 
         private void Recalculate()
         {
+            // If object data contains a ventilation schedule, compute weekly operating hours automatically
+            if (_objectData != null)
+            {
+                double ParseDay(string? s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return 0.0;
+                    if (double.TryParse(s.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double v)) return v;
+                    if (double.TryParse(s.Trim(), out v)) return v;
+                    return 0.0;
+                }
+
+                var workdayHours = ParseDay(_objectData.VentilationWorkdaysHours);
+                var sat = ParseDay(_objectData.VentilationSaturdayHours);
+                var sun = ParseDay(_objectData.VentilationSundayHours);
+
+                // weekly = workdayHours * 5 + saturday + sunday
+                var weekly = workdayHours * 5.0 + sat + sun;
+                weekly = Math.Clamp(weekly, 0.0, 168.0);
+                if (_data.OperatingHoursPerWeek != weekly)
+                {
+                    _data.OperatingHoursPerWeek = weekly;
+                    OnPropertyChanged(nameof(OperatingHoursPerWeek));
+                }
+            }
+
             // Update heated area in data model
             _data.HeatedArea_m2 = HeatedArea_m2;
 
@@ -403,12 +575,35 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(TotalFinalEnergy_kWh_a));
             OnPropertyChanged(nameof(SpecificFinalEnergy_kWh_m2a));
             OnPropertyChanged(nameof(ErrorMessage));
+
+            // New outputs
+            OnPropertyChanged(nameof(AnnualVentilationHeatingEnergy_kWh));
+            OnPropertyChanged(nameof(FinalEnergySource1_kWh));
+            OnPropertyChanged(nameof(FinalEnergySource2_kWh));
+            OnPropertyChanged(nameof(FinalEnergySource1_kWh_per_m2));
+            OnPropertyChanged(nameof(FinalEnergySource2_kWh_per_m2));
+            OnPropertyChanged(nameof(OverallHeatGenerationEfficiencyPercent));
+
+            // Notify carrier bindings
+            OnPropertyChanged(nameof(EnergySource1Carrier));
+            OnPropertyChanged(nameof(EnergySource2Carrier));
         }
 
         private void OnDataPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             // Recalculate when data changes
             Recalculate();
+        }
+
+        private void OnObjectDataPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // Recalculate when relevant object-data schedule fields change
+            if (e.PropertyName == nameof(ObjectDataSectionData.VentilationWorkdaysHours) ||
+                e.PropertyName == nameof(ObjectDataSectionData.VentilationSaturdayHours) ||
+                e.PropertyName == nameof(ObjectDataSectionData.VentilationSundayHours))
+            {
+                Recalculate();
+            }
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

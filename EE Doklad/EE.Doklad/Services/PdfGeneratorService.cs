@@ -1366,19 +1366,19 @@ namespace EE.Doklad.Services
                 tbl.Cell()
                     .Border(1)
                     .Padding(5)
-                    .Text("24")
+                    .Text(data.OccupancyWorkdaysHours ?? "-")
                     .AlignCenter();
 
                 tbl.Cell()
                     .Border(1)
                     .Padding(5)
-                    .Text("24")
+                    .Text(data.OccupancySaturdayHours ?? "-")
                     .AlignCenter();
 
                 tbl.Cell()
                     .Border(1)
                     .Padding(5)
-                    .Text("24")
+                    .Text(data.OccupancySundayHours ?? "-")
                     .AlignCenter();
 
                 // Заголовък - График на отопление
@@ -1422,19 +1422,131 @@ namespace EE.Doklad.Services
                 tbl.Cell()
                     .Border(1)
                     .Padding(5)
-                    .Text("12")
+                    .Text(data.HeatingWorkdaysHours ?? "-")
                     .AlignCenter();
 
                 tbl.Cell()
                     .Border(1)
                     .Padding(5)
-                    .Text("24")
+                    .Text(data.HeatingSaturdayHours ?? "-")
                     .AlignCenter();
 
                 tbl.Cell()
                     .Border(1)
                     .Padding(5)
-                    .Text("24")
+                    .Text(data.HeatingSundayHours ?? "-")
+                    .AlignCenter();
+
+                // Заголовък - График за охлаждане
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("График за охлаждане (ч./ден)")
+                    .SemiBold();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Работни дни")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Събота")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Неделя")
+                    .SemiBold()
+                    .AlignCenter();
+
+                // Данни - График на охлаждане
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("");
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.CoolingWorkdaysHours ?? "-")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.CoolingSaturdayHours ?? "-")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.CoolingSundayHours ?? "-")
+                    .AlignCenter();
+
+                // Заголовък - График за вентилация
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("График за вентилация (ч./ден)")
+                    .SemiBold();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Работни дни")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Събота")
+                    .SemiBold()
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Background(Colors.Grey.Lighten3)
+                    .Padding(5)
+                    .Text("Неделя")
+                    .SemiBold()
+                    .AlignCenter();
+
+                // Данни - График на вентилация
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text("");
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.VentilationWorkdaysHours ?? "-")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.VentilationSaturdayHours ?? "-")
+                    .AlignCenter();
+
+                tbl.Cell()
+                    .Border(1)
+                    .Padding(5)
+                    .Text(data.VentilationSundayHours ?? "-")
                     .AlignCenter();
             });
 

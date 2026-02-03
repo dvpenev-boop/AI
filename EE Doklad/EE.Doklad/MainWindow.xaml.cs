@@ -299,14 +299,28 @@ public partial class MainWindow : Window
                 section.VentilationSectionData.IndoorTemperature_C = heatingData.DesignTemperature;
             }
 
-            var ventilationView = new Views.VentilationSectionView
+            try
             {
-                DataContext = new ViewModels.VentilationSectionViewModel(
-                    section.VentilationSectionData,
-                    objectData,
-                    climateData)
-            };
-            ContentScrollViewer.Content = ventilationView;
+                var ventilationView = new Views.VentilationSectionView
+                {
+                    DataContext = new ViewModels.VentilationSectionViewModel(
+                        section.VentilationSectionData,
+                        objectData,
+                        climateData)
+                };
+                ContentScrollViewer.Content = ventilationView;
+            }
+            catch (System.Exception ex)
+            {
+                // Log the exception to disk for debugging and show a simple message so the user knows
+                try
+                {
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ventilation_view_error.txt"), ex.ToString());
+                }
+                catch { }
+
+                System.Windows.MessageBox.Show("Възникна грешка при отваряне на секция Вентилация. Проверете ventilation_view_error.txt за подробности.", "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         else if (section.Type == ModelSectionType.HotWater ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Топла вода за битови нужди")))

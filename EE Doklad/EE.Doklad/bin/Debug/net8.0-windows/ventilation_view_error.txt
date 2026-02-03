@@ -1,0 +1,14 @@
+System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.Baml2006.TypeConverterMarkupExtension' threw an exception.' Line number '260' and line position '42'.
+ ---> System.FormatException: '0,0,0' value is not valid. It must contain one, two, or four delimited Lengths.
+   at System.Windows.ThicknessConverter.FromString(String s, CultureInfo cultureInfo)
+   at System.Windows.ThicknessConverter.ConvertFrom(ITypeDescriptorContext typeDescriptorContext, CultureInfo cultureInfo, Object source)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+   --- End of inner exception stack trace ---
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
+   at EE.Doklad.Views.VentilationSectionView.InitializeComponent() in E:\AI\EE Doklad\EE.Doklad\Views\VentilationSectionView.xaml:line 1
+   at EE.Doklad.Views.VentilationSectionView..ctor() in E:\AI\EE Doklad\EE.Doklad\Views\VentilationSectionView.xaml.cs:line 13
+   at EE.Doklad.MainWindow.UpdateSectionContent() in E:\AI\EE Doklad\EE.Doklad\MainWindow.xaml.cs:line 304

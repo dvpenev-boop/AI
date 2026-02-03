@@ -84,6 +84,13 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double _generationEfficiency = 100.0;
 
+    /// <summary>
+    /// Selected energy carrier (maps to the Results section energy carriers).
+    /// This is a nullable field: when null the UI may show a default mapping from <see cref="EnergySourceType"/>.
+    /// </summary>
+    [ObservableProperty]
+    private EnergyCarrierCode? _energyCarrier = EnergyCarrierCode.Electricity;
+
         /// <summary>
         /// Изчислява общата ефективност на веригата
         /// </summary>

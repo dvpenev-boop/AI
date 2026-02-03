@@ -312,7 +312,11 @@ namespace EE.Doklad.Services
             }
 
             result.FinalEnergySource1_kWh_a = finalEnergy1;
-            result.Assumptions.Add($"Енергиен източник 1 ({data.EnergySource1.Type}): Дял = {data.EnergySource1.Share:F1}%, Ефективност = {efficiency1:F4}, Крайна енергия = {finalEnergy1:F2} kWh/a");
+            // Show a human-friendly energy carrier if available (from section 18 mapping), otherwise fall back to the energy source type
+            string source1Name = data.EnergySource1.EnergyCarrier.HasValue
+                ? EnergyCarrierInfo.GetByCode(data.EnergySource1.EnergyCarrier.Value)?.DisplayName ?? data.EnergySource1.Type.ToString()
+                : data.EnergySource1.Type.ToString();
+            result.Assumptions.Add($"Енергиен източник 1 ({source1Name}): Дял = {data.EnergySource1.Share:F1}%, Ефективност = {efficiency1:F4}, Крайна енергия = {finalEnergy1:F2} kWh/a");
 
             // Източник 2 (ако е активиран)
             double finalEnergy2 = 0;
@@ -327,7 +331,10 @@ namespace EE.Doklad.Services
                 }
 
                 result.FinalEnergySource2_kWh_a = finalEnergy2;
-                result.Assumptions.Add($"Енергиен източник 2 ({data.EnergySource2.Type}): Дял = {data.EnergySource2.Share:F1}%, Ефективност = {efficiency2:F4}, Крайна енергия = {finalEnergy2:F2} kWh/a");
+                string source2Name = data.EnergySource2.EnergyCarrier.HasValue
+                    ? EnergyCarrierInfo.GetByCode(data.EnergySource2.EnergyCarrier.Value)?.DisplayName ?? data.EnergySource2.Type.ToString()
+                    : data.EnergySource2.Type.ToString();
+                result.Assumptions.Add($"Енергиен източник 2 ({source2Name}): Дял = {data.EnergySource2.Share:F1}%, Ефективност = {efficiency2:F4}, Крайна енергия = {finalEnergy2:F2} kWh/a");
             }
 
             // Обща крайна енергия

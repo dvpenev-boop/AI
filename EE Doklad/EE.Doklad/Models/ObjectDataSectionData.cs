@@ -64,6 +64,26 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private string? _heatingSundayHours;
 
+    // График на охлаждане - отделни колони (работни дни / събота / неделя)
+    [ObservableProperty]
+    private string? _coolingWorkdaysHours;
+
+    [ObservableProperty]
+    private string? _coolingSaturdayHours;
+
+    [ObservableProperty]
+    private string? _coolingSundayHours;
+
+    // График на вентилация - отделни колони (работни дни / събота / неделя)
+    [ObservableProperty]
+    private string? _ventilationWorkdaysHours;
+
+    [ObservableProperty]
+    private string? _ventilationSaturdayHours;
+
+    [ObservableProperty]
+    private string? _ventilationSundayHours;
+
         [ObservableProperty]
         private int _climateZone = 1; // Климатична зона (1-9)
 

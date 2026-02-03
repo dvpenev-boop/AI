@@ -304,6 +304,104 @@
                             </Border>
                         </Grid>
                     </Border>
+                    
+                    <!-- Row 4: График охладяне - заглавия -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="#D0D0D0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="График за охлаждане (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 5: График охлаждане - входни полета -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Background="White"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding CoolingWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding CoolingSaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding CoolingSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 6: График вентилация - заглавия -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="#D0D0D0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="График за вентилация (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 7: График вентилация - входни полета -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Background="White"/>
+                                <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding VentilationWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                                <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding VentilationSaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                                <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding VentilationSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </Border>
 
