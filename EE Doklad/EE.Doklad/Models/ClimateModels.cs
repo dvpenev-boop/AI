@@ -62,6 +62,18 @@ namespace EE.Doklad.Models
         public double[] AvgMonthlyTempC { get; set; } = new double[12];
 
         /// <summary>
+        /// Optional: Number of heating days in each month (length 12). If provided, used directly.
+        /// Values should be between 0 and daysInMonth.
+        /// </summary>
+        public int[]? HeatingDays { get; set; } = null;
+
+        /// <summary>
+        /// Optional: Flags per month whether the month is a heating month (length 12).
+        /// If provided and HeatingDays is null, IsHeatingMonth[m]=true means full month counts.
+        /// </summary>
+        public bool[]? IsHeatingMonth { get; set; } = null;
+
+        /// <summary>
         /// Average monthly relative humidity [%] for months May..Sep only (length 5).
         /// </summary>
         public double[] AvgMonthlyRelHumidityPercentMayToSep { get; set; } = new double[5];

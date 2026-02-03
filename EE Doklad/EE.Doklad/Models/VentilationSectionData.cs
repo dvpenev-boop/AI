@@ -37,6 +37,13 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double _supplyTemperature = 0.0;
 
+    /// <summary>
+    /// Флаг дали температурата на подаване е въведена ръчно от потребителя
+    /// Ако е true - използваме тази стойност; ако е false - калкулаторът може да изчисли Tsup
+    /// </summary>
+    [ObservableProperty]
+    private bool _supplyTemperatureIsUserDefined = false;
+
         /// <summary>
         /// Относителна влажност на подавания въздух [%] (0-100)
         /// </summary>

@@ -123,6 +123,18 @@ namespace EE.Doklad.Models
         /// </summary>
         public double SpecificVentilationHeatingEnergy_kWh_m2a { get; set; }
 
+        /// <summary>
+        /// Принос към отоплението от вентилация (нетен) [kWh/a]
+        /// Положителен = принос (намалява отоплителна нужда)
+        /// Отрицателен = загуба (увеличава отоплителна нужда)
+        /// </summary>
+        public double VentilationHeatingNetContribution_kWh { get; set; }
+
+        /// <summary>
+        /// Специфичен принос към отоплението от вентилация (нетен) [kWh/m²·a]
+        /// </summary>
+        public double VentilationHeatingNetContribution_kWh_m2a { get; set; }
+
         // ========== КРАЙНА ЕНЕРГИЯ (с ефективности) ==========
 
         /// <summary>

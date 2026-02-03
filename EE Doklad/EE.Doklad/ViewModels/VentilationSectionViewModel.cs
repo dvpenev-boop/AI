@@ -21,6 +21,8 @@ namespace EE.Doklad.ViewModels
 
         // Calculation result
         private VentilationCalculationResult? _calculationResult;
+    private bool _showDebug = false;
+    private string _debugText = string.Empty;
     private bool _isAdjustingShares = false; // guard to avoid recursive share updates
 
         public VentilationSectionViewModel(
@@ -91,6 +93,38 @@ namespace EE.Doklad.ViewModels
             }
         }
 
+        /// <summary>
+        /// Покажи временен debug панел (не се съхранява в модел)
+        /// </summary>
+        public bool ShowDebug
+        {
+            get => _showDebug;
+            set
+            {
+                if (_showDebug != value)
+                {
+                    _showDebug = value;
+                    OnPropertyChanged(nameof(ShowDebug));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Текст за debug изход (много редове)
+        /// </summary>
+        public string DebugText
+        {
+            get => _debugText;
+            private set
+            {
+                if (_debugText != value)
+                {
+                    _debugText = value;
+                    OnPropertyChanged(nameof(DebugText));
+                }
+            }
+        }
+
         public double SupplyTemperature
         {
             get => _data.SupplyTemperature;
@@ -99,6 +133,8 @@ namespace EE.Doklad.ViewModels
                 if (_data.SupplyTemperature != value)
                 {
                     _data.SupplyTemperature = value;
+                    // Mark that the user explicitly provided a supply temperature so calculator uses it
+                    _data.SupplyTemperatureIsUserDefined = true;
                     OnPropertyChanged(nameof(SupplyTemperature));
                     Recalculate();
                 }
@@ -524,6 +560,12 @@ namespace EE.Doklad.ViewModels
         public double SpecificVentilationHeatingEnergy_kWh_m2a =>
             _calculationResult?.SpecificVentilationHeatingEnergy_kWh_m2a ?? 0;
 
+        public double VentilationHeatingNetContribution_kWh =>
+            _calculationResult?.VentilationHeatingNetContribution_kWh ?? 0;
+
+        public double VentilationHeatingNetContribution_kWh_m2a =>
+            _calculationResult?.VentilationHeatingNetContribution_kWh_m2a ?? 0;
+
         public double TotalFinalEnergy_kWh_a =>
             _calculationResult?.TotalFinalEnergy_kWh_a ?? 0;
 
@@ -568,10 +610,15 @@ namespace EE.Doklad.ViewModels
             // Perform calculation
             _calculationResult = _calculator.Calculate(_data, _climateData);
 
+            // Populate debug text for UI if needed
+            DebugText = _calculationResult != null ? BuildDebugText(_calculationResult) : string.Empty;
+
             // Notify all output properties
             OnPropertyChanged(nameof(VentilationLossCoefficient_WK));
             OnPropertyChanged(nameof(AnnualVentilationHeatingEnergy_kWh_a));
             OnPropertyChanged(nameof(SpecificVentilationHeatingEnergy_kWh_m2a));
+            OnPropertyChanged(nameof(VentilationHeatingNetContribution_kWh));
+            OnPropertyChanged(nameof(VentilationHeatingNetContribution_kWh_m2a));
             OnPropertyChanged(nameof(TotalFinalEnergy_kWh_a));
             OnPropertyChanged(nameof(SpecificFinalEnergy_kWh_m2a));
             OnPropertyChanged(nameof(ErrorMessage));
@@ -593,6 +640,62 @@ namespace EE.Doklad.ViewModels
         {
             // Recalculate when data changes
             Recalculate();
+        }
+
+        private string BuildDebugText(VentilationCalculationResult result)
+        {
+            if (result == null) return string.Empty;
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("--- Debug: секция 12 - Вентилация (временно) ---");
+            sb.AppendLine($"Климатична зона: {_climateData?.Name ?? "(не е избрана)"}");
+            sb.AppendLine($"Отопляема площ (m2): {result.HeatedArea_m2:F2}");
+            sb.AppendLine($"Дебит (m3/h на m2): {result.AirflowRatePerM2:F3}");
+            double totalAirflow = result.AirflowRatePerM2 * result.HeatedArea_m2;
+            sb.AppendLine($"Общ въздуховод V̇ (m3/h): {totalAirflow:F3}");
+            sb.AppendLine($"Часове на седмица: {result.OperatingHoursPerWeek:F2}");
+            sb.AppendLine(" ");
+            sb.AppendLine("Месец | Te [°C] | Ti [°C] | Tsup [°C] | Hve [W/K] | bVe [-] | t_m [h] | Q_airheat_m [kWh] | Q_contrib_m [kWh]");
+
+            // Alternative rho·c (Wh/(m3·K)) to compare with other software (e.g. 0.34)
+            const double AlternativeRhoCp_Wh_per_m3K = 0.34;
+            double totalQcontrib = 0.0;
+            double totalQcontribAlt = 0.0;
+
+            foreach (var m in result.MonthlyResults)
+            {
+                double qVe = m.VentilationHeatingEnergy_kWh;
+                double hours_m = m.MonthlyOperatingTime_h;
+                double tsup = m.SupplyTemperature_C;
+                double ti = m.IndoorTemperature_C;
+                double te = m.OutdoorTemperature_C;
+                double hve = m.VentilationLossCoefficient_WK;
+                double bve = m.TemperatureControlCoefficient;
+
+                double qContrib = 0.0;
+                double qContribAlt = 0.0;
+                if (hours_m > 0)
+                {
+                    // use Hve [W/K] × (Tsup - Ti) × t_m / 1000 to obtain kWh
+                    qContrib = hve * (tsup - ti) * hours_m / 1000.0;
+
+                    // Alternative: compute hVe from alternative rho*c (Wh/(m3·K))
+                    double hVeAlt = AlternativeRhoCp_Wh_per_m3K * totalAirflow;
+                    qContribAlt = hVeAlt * (tsup - ti) * hours_m / 1000.0;
+                }
+                totalQcontrib += qContrib;
+                totalQcontribAlt += qContribAlt;
+
+                sb.AppendLine($"{m.MonthName.PadRight(7)} | {te,6:0.0} | {ti,5:0.0} | {tsup,6:0.0} | {hve,8:0.0} | {bve,5:0.00} | {hours_m,6:0.0} | {qVe,10:0.00} | {qContrib,10:0.00} | {qContribAlt,10:0.00}");
+            }
+
+            sb.AppendLine(" ");
+            sb.AppendLine($"Сумиран нетен принос (изчислен по месечни) = {totalQcontrib:F2} kWh");
+            sb.AppendLine($"Сумиран нетен принос (алтернативен rho·c={AlternativeRhoCp_Wh_per_m3K:F2}) = {totalQcontribAlt:F2} kWh");
+            sb.AppendLine($"Резултат: VentilationHeatingNetContribution_kWh = {result.VentilationHeatingNetContribution_kWh:F2} kWh");
+            sb.AppendLine("--- Край на debug ---");
+
+            return sb.ToString();
         }
 
         private void OnObjectDataPropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -17,8 +17,10 @@ namespace EE.Doklad.Services
             "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември"
         };
 
-        private const double AirDensity_kg_m3 = 1.2; // Плътност на въздуха [kg/m³]
-        private const double AirSpecificHeat_Wh_kgK = 0.28; // Специфичен топлинен капацитет [Wh/(kg·K)]
+    private const double AirDensity_kg_m3 = 1.2; // Плътност на въздуха [kg/m³]
+    private const double AirSpecificHeat_Wh_kgK = 0.28; // Специфичен топлинен капацитет [Wh/(kg·K)]
+    // Use explicit rho*c per official software (Wh/(m3·K))
+    private const double RhoCp_Wh_per_m3K = 0.34;
 
         /// <summary>
         /// Изчислява вентилационната енергия по българска методология
@@ -73,6 +75,9 @@ namespace EE.Doklad.Services
 
             result.Assumptions.Add($"Годишна вентилационна енергия за отопление = {annualEnergy_kWh:F2} kWh/a");
             result.Assumptions.Add($"Специфична вентилационна енергия = {result.SpecificVentilationHeatingEnergy_kWh_m2a:F2} kWh/m²·a");
+
+            // Стъпка 5б: Изчисляване на нетен принос към отоплението от вентилация (нова функционалност)
+            CalculateNetHeatingContribution(data, result);
 
             // Стъпка 6: Изчисляване на крайна енергия с ефективности
             CalculateFinalEnergy(data, result);
@@ -138,7 +143,8 @@ namespace EE.Doklad.Services
         private double CalculateVentilationLossCoefficient(double airflow_m3_h)
         {
             // Наредба RD-02-20-3, Section 12, formula (3.27)
-            double hVe = AirDensity_kg_m3 * AirSpecificHeat_Wh_kgK * airflow_m3_h;
+            // Hve = rho*c * Vdot  (use explicit rho*c value to match official software)
+            double hVe = RhoCp_Wh_per_m3K * airflow_m3_h;
             return hVe;
         }
 
@@ -173,13 +179,32 @@ namespace EE.Doklad.Services
                 supplyTemp = minExhaustTemp_C;
             }
 
-            // Максималната температура на подаване не може да надвиши вътрешната температура
-            if (supplyTemp > indoorTemp_C)
-            {
-                supplyTemp = indoorTemp_C;
-            }
+            // NOTE: Clamp to indoor temperature REMOVED - supply temp can be > Ti (heating contribution) or < Ti (loss)
 
             return supplyTemp;
+        }
+
+        /// <summary>
+        /// Compute the post-heat-recovery temperature (temperature after HR stages,
+        /// before any minimum exhaust-air clamp). This is used to compute the
+        /// energy required to heat air from post-HR to Tsup.
+        /// </summary>
+        private double CalculatePostHeatRecoveryTemperature(
+            double outdoorTemp_C,
+            double indoorTemp_C,
+            double firstStageEfficiency,
+            double secondStageEfficiency,
+            double maxTempDiffSecondStage)
+        {
+            // First stage
+            double tempAfterFirstStage = outdoorTemp_C +
+                (firstStageEfficiency / 100.0) * (indoorTemp_C - outdoorTemp_C);
+
+            // Second stage (limited by maximum allowed temperature rise in second stage)
+            double tempAfterSecondStage = tempAfterFirstStage +
+                (secondStageEfficiency / 100.0) * Math.Min(maxTempDiffSecondStage, indoorTemp_C - tempAfterFirstStage);
+
+            return tempAfterSecondStage;
         }
 
         /// <summary>
@@ -203,11 +228,107 @@ namespace EE.Doklad.Services
 
             double bVe = (indoorTemp_C - supplyTemp_C) / denominator;
 
-            // Коефициентът трябва да бъде между 0 и 1
-            if (bVe < 0) bVe = 0;
-            if (bVe > 1) bVe = 1;
-
+            // NOTE: Do not clamp bVe to [0,1] — return the raw value (can be negative or >1)
             return bVe;
+        }
+
+        /// <summary>
+        /// Изчислява нетен принос към отоплението от вентилация
+        /// Положителен = принос (Tsup > Ti, намалява отоплителна нужда)
+        /// Отрицателен = загуба (Tsup < Ti, увеличава отоплителна нужда)
+        /// </summary>
+        private void CalculateNetHeatingContribution(
+            VentilationSectionData data,
+            VentilationCalculationResult result)
+        {
+            // Compute signed net contribution as the sum of monthly contributions so the
+            // annual value equals the debug/monthly breakdown shown in the UI.
+
+            double totalAirflow_m3ph = data.AirflowRatePerM2 * data.HeatedArea_m2;
+            double netContribution_kWh = 0.0;
+
+            foreach (var monthly in result.MonthlyResults)
+            {
+                double supplyTemp_C = monthly.SupplyTemperature_C;
+                double indoorTemp_C = monthly.IndoorTemperature_C;
+
+                // Use the monthly operating time already computed for this month
+                // (this takes heating-season days into account).
+                double hours_m = monthly.MonthlyOperatingTime_h;
+
+                // Use Hve (ventilation loss coefficient) to compute signed contribution
+                double hVe_m_WK = monthly.VentilationLossCoefficient_WK;
+                // Q_contrib_m = Hve * (Tsup - Ti) * hours_m / 1000
+                double Q_contrib_m_kWh = hVe_m_WK * (supplyTemp_C - indoorTemp_C) * hours_m / 1000.0;
+
+                netContribution_kWh += Q_contrib_m_kWh;
+            }
+
+            result.VentilationHeatingNetContribution_kWh = netContribution_kWh;
+            result.VentilationHeatingNetContribution_kWh_m2a =
+                data.HeatedArea_m2 > 0 ? netContribution_kWh / data.HeatedArea_m2 : 0;
+
+            result.Assumptions.Add($"Нетен принос към отоплението от вентилация = {netContribution_kWh:F2} kWh/a ({result.VentilationHeatingNetContribution_kWh_m2a:F2} kWh/m²·a)");
+        }
+
+        /// <summary>
+        /// Връща броя дни от дадения месец, които попадат в отоплителния сезон, зададен в climateData.HeatingSeason
+        /// Формат на HeatingSeason.Start/End: "MM-dd" (пример: "10-21").
+        /// Поддържа сезони, които пресичат края на календарната година (wrap-around).
+        /// </summary>
+        private int GetHeatingSeasonDaysInMonth(int yearRef, int monthNumber, ClimateZoneData climateData)
+        {
+            // Default: whole month
+            int daysInMonth = DateTime.DaysInMonth(yearRef, monthNumber);
+
+            if (climateData?.HeatingSeason == null || string.IsNullOrWhiteSpace(climateData.HeatingSeason.Start) || string.IsNullOrWhiteSpace(climateData.HeatingSeason.End))
+            {
+                return daysInMonth;
+            }
+
+            // Parse start and end
+            if (!TryParseMonthDay(climateData.HeatingSeason.Start, out int startM, out int startD) ||
+                !TryParseMonthDay(climateData.HeatingSeason.End, out int endM, out int endD))
+            {
+                return daysInMonth;
+            }
+
+            DateTime startDate = new DateTime(yearRef, startM, Math.Min(startD, DateTime.DaysInMonth(yearRef, startM)));
+            DateTime endDate = new DateTime(yearRef, endM, Math.Min(endD, DateTime.DaysInMonth(yearRef, endM)));
+            if (endDate < startDate)
+            {
+                // season wraps into next year
+                endDate = endDate.AddYears(1);
+            }
+
+            int count = 0;
+            for (int d = 1; d <= daysInMonth; d++)
+            {
+                DateTime dt = new DateTime(yearRef, monthNumber, d);
+                // check both this year and next year in case season wrapped
+                if (IsDateInRange(dt, startDate, endDate) || IsDateInRange(dt.AddYears(1), startDate, endDate))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private bool TryParseMonthDay(string s, out int month, out int day)
+        {
+            month = 1; day = 1;
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            var parts = s.Split('-');
+            if (parts.Length != 2) return false;
+            if (!int.TryParse(parts[0], out month)) return false;
+            if (!int.TryParse(parts[1], out day)) return false;
+            return true;
+        }
+
+        private bool IsDateInRange(DateTime dt, DateTime start, DateTime end)
+        {
+            return dt >= start && dt <= end;
         }
 
         /// <summary>
@@ -231,19 +352,29 @@ namespace EE.Doklad.Services
                 double outdoorTemp_C = climateData.Monthly.AvgMonthlyTempC[month];
                 double indoorTemp_C = data.IndoorTemperature_C;
 
-                // Дни в месеца
-                int daysInMonth = DateTime.DaysInMonth(2024, monthNumber); // Използваме 2024 като референтна година
+                // Дни в отоплителния сезон за този месец (вземаме под внимание отоплителния период на климатичната зона)
+                int daysInMonth = GetHeatingSeasonDaysInMonth(2024, monthNumber, climateData);
+                // Compute monthly operating hours from heating-season days (precise fractional value)
                 double monthlyOperatingTime_h = hoursPerDay * daysInMonth;
 
                 // Стъпка 2: Изчисляване на температурата на подаване θₛᵤₚ
-                // Наредба RD-02-20-3, Section 12, item 3.5
-                double supplyTemp_C = CalculateSupplyTemperature(
-                    outdoorTemp_C,
-                    indoorTemp_C,
-                    data.FirstStageRecuperationEfficiency,
-                    data.SecondStageRecuperationEfficiency,
-                    data.MaxTemperatureDifferenceSecondStage,
-                    data.MinExhaustAirTemperature);
+                // BUG FIX: Use user-entered supply temperature if explicitly provided; otherwise compute
+                double supplyTemp_C;
+                if (data.SupplyTemperatureIsUserDefined)
+                {
+                    supplyTemp_C = data.SupplyTemperature;
+                }
+                else
+                {
+                    // Compute from heat recovery efficiencies (Наредба RD-02-20-3, Section 12, item 3.5)
+                    supplyTemp_C = CalculateSupplyTemperature(
+                        outdoorTemp_C,
+                        indoorTemp_C,
+                        data.FirstStageRecuperationEfficiency,
+                        data.SecondStageRecuperationEfficiency,
+                        data.MaxTemperatureDifferenceSecondStage,
+                        data.MinExhaustAirTemperature);
+                }
 
                 // Стъпка 3: Изчисляване на коефициента на температурен контрол bᵥₑ,ₖ
                 // Наредба RD-02-20-3, Section 12, formula (3.28)
@@ -251,19 +382,21 @@ namespace EE.Doklad.Services
                     indoorTemp_C,
                     supplyTemp_C,
                     outdoorTemp_C);
+                // Стъпка 4: Изчисляване на месечната енергия за загряване на подавания въздух (Q_airheat)
+                // Q_airheat_m = Hᵥₑ × max(0, Tsup - T_afterHR) × tₘ  (kWh)
+                double tAfterHR = CalculatePostHeatRecoveryTemperature(
+                    outdoorTemp_C,
+                    indoorTemp_C,
+                    data.FirstStageRecuperationEfficiency,
+                    data.SecondStageRecuperationEfficiency,
+                    data.MaxTemperatureDifferenceSecondStage);
 
-                // Стъпка 4: Изчисляване на месечната вентилационна енергия за отопление
-                // Наредба RD-02-20-3, Section 12, formula (3.26)
-                // Qᵥₑ,ₘ = Hᵥₑ × bᵥₑ,ₖ × (θᵢ - θₑ) × tₘ
-                double qVe_m_Wh = 0;
-                
-                // Изчисляваме само когато θᵢ > θₑ (отоплителен режим)
-                if (indoorTemp_C > outdoorTemp_C)
-                {
-                    qVe_m_Wh = hVe_WK * bVe * (indoorTemp_C - outdoorTemp_C) * monthlyOperatingTime_h;
-                }
+                double deltaHeat_K = Math.Max(0.0, supplyTemp_C - tAfterHR);
+                double qAirHeat_m_kWh = hVe_WK * deltaHeat_K * monthlyOperatingTime_h / 1000.0;
 
-                double qVe_m_kWh = qVe_m_Wh / 1000.0;
+                // Also compute signed monthly contribution (kept separate):
+                // Q_contrib_m = Hᵥₑ × (Tsup - Ti) × tₘ  (kWh) — may be +/−
+                double qContrib_m_kWh = hVe_WK * (supplyTemp_C - indoorTemp_C) * monthlyOperatingTime_h / 1000.0;
 
                 monthlyResults.Add(new VentilationMonthlyResult
                 {
@@ -275,7 +408,8 @@ namespace EE.Doklad.Services
                     TemperatureControlCoefficient = bVe,
                     VentilationLossCoefficient_WK = hVe_WK,
                     MonthlyOperatingTime_h = monthlyOperatingTime_h,
-                    VentilationHeatingEnergy_kWh = qVe_m_kWh
+                    // Keep existing field but repurpose to mean "energy for heating supply air" (non-negative)
+                    VentilationHeatingEnergy_kWh = qAirHeat_m_kWh
                 });
             }
 
