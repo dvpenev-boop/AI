@@ -1,0 +1,597 @@
+<UserControl x:Class="EE.Doklad.Views.UnconditionedZonesSectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EE.Doklad.Views"
+             xmlns:models="clr-namespace:EE.Doklad.Models"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
+        <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
+        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+        <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="{Binding Data.Title}" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="1" Text="{Binding Data.Description}" FontSize="14" Foreground="Gray" Margin="0,0,0,20" TextWrapping="Wrap"/>
+
+        <!-- Zone Management Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
+            <Button Content="+ Добави зона" 
+                    Command="{Binding AddZoneCommand}" 
+                    Padding="10,5" 
+                    Margin="0,0,10,0"
+                    Background="#4CAF50"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+            <Button Content="🗑 Изтрий зона" 
+                    Command="{Binding DeleteZoneCommand}"
+                    Padding="10,5"
+                    Margin="0,0,10,0"
+                    Background="#F44336"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+            <Button Content="🧪 Стартирай тест" 
+                    Click="RunTest_Click"
+                    Padding="10,5"
+                    Background="#2196F3"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+        </StackPanel>
+
+        <!-- Main Content: Zones List + Details -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Zones List -->
+            <Border Grid.Column="0" BorderBrush="LightGray" BorderThickness="1" Padding="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Зони:" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <ListBox ItemsSource="{Binding Data.Zones}"
+                             SelectedItem="{Binding SelectedZone}"
+                             DisplayMemberPath="Name"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Zone Details -->
+            <Border Grid.Column="2" BorderBrush="LightGray" BorderThickness="1" Padding="15">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedZone}" Value="{x:Null}">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Zone Info -->
+                        <TextBlock Text="Информация за зоната:" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+                        
+                        <Grid Margin="0,0,0,20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Име:" VerticalAlignment="Center" Margin="0,0,10,5"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedZone.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Тип:" VerticalAlignment="Center" Margin="0,0,10,5"/>
+                            <ComboBox Grid.Row="1" Grid.Column="1" 
+                                      SelectedItem="{Binding SelectedZone.Type}" 
+                                      Margin="0,0,0,5">
+                                <ComboBox.Items>
+                                    <models:ZtuType>External</models:ZtuType>
+                                    <models:ZtuType>Internal</models:ZtuType>
+                                </ComboBox.Items>
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Бележки:" VerticalAlignment="Top" Margin="0,5,10,0"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" 
+                                     Text="{Binding SelectedZone.Notes, UpdateSourceTrigger=PropertyChanged}" 
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     MinHeight="60"
+                                     Margin="0,0,0,5"/>
+                        </Grid>
+
+                        <!-- TabControl for Elements -->
+                        <TabControl>
+                            <!-- Tab 1: Elements to External Environment -->
+                            <TabItem Header="Елементи към външна среда">
+                                <StackPanel Margin="10">
+                                    <Button Content="+ Добави елемент" 
+                                            Command="{Binding AddElementToExternalCommand}"
+                                            Padding="8,4"
+                                            Margin="0,0,0,10"
+                                            HorizontalAlignment="Left"/>
+
+                                    <DataGrid ItemsSource="{Binding SelectedZone.ElementsToExternal}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="All">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="№" Binding="{Binding}" Width="40" IsReadOnly="True">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Header="Име" Binding="{Binding Name}" Width="200"/>
+                                            <DataGridComboBoxColumn Header="Вид детайл" SelectedItemBinding="{Binding Kind}" Width="150">
+                                                <DataGridComboBoxColumn.ElementStyle>
+                                                    <Style TargetType="ComboBox">
+                                                        <Setter Property="ItemsSource">
+                                                            <Setter.Value>
+                                                                <x:Array Type="models:ElementKind">
+                                                                    <models:ElementKind>Wall</models:ElementKind>
+                                                                    <models:ElementKind>Roof</models:ElementKind>
+                                                                    <models:ElementKind>Floor</models:ElementKind>
+                                                                </x:Array>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </DataGridComboBoxColumn.ElementStyle>
+                                            </DataGridComboBoxColumn>
+                                            <DataGridTextColumn Header="A (m²)" Binding="{Binding Area}" Width="100"/>
+                                            <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding UValue, StringFormat=F3}" Width="100" IsReadOnly="True"/>
+                                            <DataGridTemplateColumn Header="Действия" Width="80">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="🗑" 
+                                                                Command="{Binding DataContext.DeleteElementToExternalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Cursor="Hand"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                        
+                                        <!-- Row Details: Layers Construction -->
+                                        <DataGrid.RowDetailsTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#F9F9F9" BorderBrush="#DDD" BorderThickness="1" Margin="40,10" Padding="15">
+                                                    <StackPanel>
+                                                        <!-- Element Info Header -->
+                                                        <Grid Margin="0,0,0,15">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                                <TextBlock Text="Вид детайл: " FontWeight="SemiBold" Margin="0,0,5,0"/>
+                                                                <ComboBox SelectedItem="{Binding Kind, UpdateSourceTrigger=PropertyChanged}" Width="150">
+                                                                    <ComboBox.Items>
+                                                                        <models:ElementKind>Wall</models:ElementKind>
+                                                                        <models:ElementKind>Roof</models:ElementKind>
+                                                                        <models:ElementKind>Floor</models:ElementKind>
+                                                                    </ComboBox.Items>
+                                                                </ComboBox>
+                                                                <TextBlock Text="  |  Rsi = " FontWeight="SemiBold" Margin="15,0,5,0"/>
+                                                                <TextBlock FontWeight="Normal">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="0.13 m²K/W"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Kind}" Value="Roof">
+                                                                                    <Setter Property="Text" Value="0.10 m²K/W"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Kind}" Value="Floor">
+                                                                                    <Setter Property="Text" Value="0.17 m²K/W"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                                <TextBlock Text="  |  Rse = " FontWeight="SemiBold" Margin="15,0,5,0"/>
+                                                                <TextBlock Text="0.04 m²K/W (към външна среда)" FontWeight="Normal"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                        
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <!-- Left: Layers Grid -->
+                                                            <StackPanel Width="650" Margin="0,0,20,0">
+                                                                <TextBlock Text="Конструкция по слоеве:" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                                            <DataGrid ItemsSource="{Binding Layers}"
+                                                                      AutoGenerateColumns="False"
+                                                                      CanUserAddRows="False"
+                                                                      CanUserDeleteRows="False"
+                                                                      Height="180"
+                                                                      HeadersVisibility="Column">
+                                                                <DataGrid.Columns>
+                                                                    <DataGridTemplateColumn Header="Материал" Width="*">
+                                                                        <DataGridTemplateColumn.CellTemplate>
+                                                                            <DataTemplate>
+                                                                                <ComboBox ItemsSource="{Binding MaterialOptions}"
+                                                                                          SelectedValuePath="Id"
+                                                                                          DisplayMemberPath="Display"
+                                                                                          SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                                          IsEditable="True"
+                                                                                          IsTextSearchEnabled="True"
+                                                                                          StaysOpenOnEdit="True"
+                                                                                          TextSearch.TextPath="Display"/>
+                                                                            </DataTemplate>
+                                                                        </DataGridTemplateColumn.CellTemplate>
+                                                                    </DataGridTemplateColumn>
+                                                                    <DataGridTextColumn Header="δ (mm)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" Width="90"/>
+                                                                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90" IsReadOnly="True"/>
+                                                                    <DataGridTextColumn Header="R (m²K/W)" Binding="{Binding R, StringFormat=0.000}" Width="100" IsReadOnly="True"/>
+                                                                </DataGrid.Columns>
+                                                            </DataGrid>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                                <Button Content="+ Слой" Click="AddLayer_Click" Tag="{Binding}" 
+                                                                        Padding="10,4" Margin="0,0,10,0"
+                                                                        Background="#4CAF50" Foreground="White" BorderThickness="0"/>
+                                                                <Button Content="- Премахни слой" Click="RemoveLayer_Click" Tag="{Binding}" 
+                                                                        Padding="10,4"
+                                                                        Background="#F44336" Foreground="White" BorderThickness="0"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                        
+                                                        <!-- Right: Scheme -->
+                                                        <Border BorderBrush="#AAAAAA" BorderThickness="1" Width="240" Height="240" Padding="10">
+                                                            <StackPanel>
+                                                                <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                                                <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="150" VerticalAlignment="Center">
+                                                                    <Grid>
+                                                                        <Image Stretch="Uniform"
+                                                                               Visibility="{Binding SchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                                                               Source="{Binding SchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                                                        <TextBlock Text="Няма изображение" 
+                                                                                   HorizontalAlignment="Center" 
+                                                                                   VerticalAlignment="Center"
+                                                                                   Foreground="Gray"
+                                                                                   Visibility="{Binding SchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                                                                    </Grid>
+                                                                </Border>
+                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                                                                    <Button Content="Качи" Click="UploadScheme_Click" Tag="{Binding}" 
+                                                                            Padding="10,4" Margin="0,0,8,0" 
+                                                                            Background="#2196F3" Foreground="White" BorderThickness="0"/>
+                                                                    <Button Content="Премахни" Click="RemoveScheme_Click" Tag="{Binding}" 
+                                                                            Padding="10,4" 
+                                                                            Background="#9E9E9E" Foreground="White" BorderThickness="0"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGrid.RowDetailsTemplate>
+                                    </DataGrid>
+                                </StackPanel>
+                            </TabItem>
+
+                            <!-- Tab 2: Elements to Boundary (Conditioned Spaces) -->
+                            <TabItem Header="Разделящи елементи към климатизирани помещения">
+                                <StackPanel Margin="10">
+                                    <Button Content="+ Добави елемент" 
+                                            Command="{Binding AddElementToBoundaryCommand}"
+                                            Padding="8,4"
+                                            Margin="0,0,0,10"
+                                            HorizontalAlignment="Left"/>
+
+                                    <DataGrid ItemsSource="{Binding SelectedZone.ElementsToBoundary}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="All">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="№" Binding="{Binding}" Width="40" IsReadOnly="True">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Header="Име" Binding="{Binding Name}" Width="200"/>
+                                            <DataGridComboBoxColumn Header="Вид детайл" SelectedItemBinding="{Binding Kind}" Width="150">
+                                                <DataGridComboBoxColumn.ElementStyle>
+                                                    <Style TargetType="ComboBox">
+                                                        <Setter Property="ItemsSource">
+                                                            <Setter.Value>
+                                                                <x:Array Type="models:ElementKind">
+                                                                    <models:ElementKind>Wall</models:ElementKind>
+                                                                    <models:ElementKind>Roof</models:ElementKind>
+                                                                    <models:ElementKind>Floor</models:ElementKind>
+                                                                </x:Array>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </DataGridComboBoxColumn.ElementStyle>
+                                            </DataGridComboBoxColumn>
+                                            <DataGridTextColumn Header="A (m²)" Binding="{Binding Area}" Width="100"/>
+                                            <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding UValue, StringFormat=F3}" Width="100" IsReadOnly="True"/>
+                                            <DataGridTemplateColumn Header="Действия" Width="80">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="🗑" 
+                                                                Command="{Binding DataContext.DeleteElementToBoundaryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Cursor="Hand"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                        
+                                        <!-- Row Details: Layers Construction -->
+                                        <DataGrid.RowDetailsTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#F9F9F9" BorderBrush="#DDD" BorderThickness="1" Margin="40,10" Padding="15">
+                                                    <StackPanel>
+                                                        <!-- Element Info Header -->
+                                                        <Grid Margin="0,0,0,15">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                                <TextBlock Text="Вид детайл: " FontWeight="SemiBold" Margin="0,0,5,0"/>
+                                                                <ComboBox SelectedItem="{Binding Kind, UpdateSourceTrigger=PropertyChanged}" Width="150">
+                                                                    <ComboBox.Items>
+                                                                        <models:ElementKind>Wall</models:ElementKind>
+                                                                        <models:ElementKind>Roof</models:ElementKind>
+                                                                        <models:ElementKind>Floor</models:ElementKind>
+                                                                    </ComboBox.Items>
+                                                                </ComboBox>
+                                                                <TextBlock Text="  |  Rsi = " FontWeight="SemiBold" Margin="15,0,5,0"/>
+                                                                <TextBlock FontWeight="Normal">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="0.13 m²K/W"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Kind}" Value="Roof">
+                                                                                    <Setter Property="Text" Value="0.10 m²K/W"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Kind}" Value="Floor">
+                                                                                    <Setter Property="Text" Value="0.17 m²K/W"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                                <TextBlock Text="  |  &quot;Rse&quot; = Rsi (симетрично към ztu)" FontWeight="Normal" Margin="15,0,0,0"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                        
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <!-- Left: Layers Grid -->
+                                                            <StackPanel Width="650" Margin="0,0,20,0">
+                                                                <TextBlock Text="Конструкция по слоеве:" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                                            <DataGrid ItemsSource="{Binding Layers}"
+                                                                      AutoGenerateColumns="False"
+                                                                      CanUserAddRows="False"
+                                                                      CanUserDeleteRows="False"
+                                                                      Height="180"
+                                                                      HeadersVisibility="Column">
+                                                                <DataGrid.Columns>
+                                                                    <DataGridTemplateColumn Header="Материал" Width="*">
+                                                                        <DataGridTemplateColumn.CellTemplate>
+                                                                            <DataTemplate>
+                                                                                <ComboBox ItemsSource="{Binding MaterialOptions}"
+                                                                                          SelectedValuePath="Id"
+                                                                                          DisplayMemberPath="Display"
+                                                                                          SelectedValue="{Binding SelectedMaterialId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                                          IsEditable="True"
+                                                                                          IsTextSearchEnabled="True"
+                                                                                          StaysOpenOnEdit="True"
+                                                                                          TextSearch.TextPath="Display"/>
+                                                                            </DataTemplate>
+                                                                        </DataGridTemplateColumn.CellTemplate>
+                                                                    </DataGridTemplateColumn>
+                                                                    <DataGridTextColumn Header="δ (mm)" Binding="{Binding Thickness, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}" Width="90"/>
+                                                                    <DataGridTextColumn Header="λ (W/mK)" Binding="{Binding Lambda, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="90" IsReadOnly="True"/>
+                                                                    <DataGridTextColumn Header="R (m²K/W)" Binding="{Binding R, StringFormat=0.000}" Width="100" IsReadOnly="True"/>
+                                                                </DataGrid.Columns>
+                                                            </DataGrid>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                                <Button Content="+ Слой" Click="AddLayer_Click" Tag="{Binding}" 
+                                                                        Padding="10,4" Margin="0,0,10,0"
+                                                                        Background="#4CAF50" Foreground="White" BorderThickness="0"/>
+                                                                <Button Content="- Премахни слой" Click="RemoveLayer_Click" Tag="{Binding}" 
+                                                                        Padding="10,4"
+                                                                        Background="#F44336" Foreground="White" BorderThickness="0"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                        
+                                                        <!-- Right: Scheme -->
+                                                        <Border BorderBrush="#AAAAAA" BorderThickness="1" Width="240" Height="240" Padding="10">
+                                                            <StackPanel>
+                                                                <TextBlock Text="Схема" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                                                <Border BorderBrush="#DDDDDD" BorderThickness="1" Height="150" VerticalAlignment="Center">
+                                                                    <Grid>
+                                                                        <Image Stretch="Uniform"
+                                                                               Visibility="{Binding SchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}}"
+                                                                               Source="{Binding SchemeAttachment, Converter={StaticResource AttachmentToImageSourceConverter}}"/>
+                                                                        <TextBlock Text="Няма изображение" 
+                                                                                   HorizontalAlignment="Center" 
+                                                                                   VerticalAlignment="Center"
+                                                                                   Foreground="Gray"
+                                                                                   Visibility="{Binding SchemeAttachment, Converter={StaticResource AttachmentToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                                                                    </Grid>
+                                                                </Border>
+                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                                                                    <Button Content="Качи" Click="UploadScheme_Click" Tag="{Binding}" 
+                                                                            Padding="10,4" Margin="0,0,8,0" 
+                                                                            Background="#2196F3" Foreground="White" BorderThickness="0"/>
+                                                                    <Button Content="Премахни" Click="RemoveScheme_Click" Tag="{Binding}" 
+                                                                            Padding="10,4" 
+                                                                            Background="#9E9E9E" Foreground="White" BorderThickness="0"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGrid.RowDetailsTemplate>
+                                    </DataGrid>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+
+                        <!-- Calculation Section -->
+                        <GroupBox Header="Месечни изчисления" Margin="0,20,0,0">
+                            <StackPanel>
+                                <!-- Temperature Input -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Вътрешна температура (°C):" VerticalAlignment="Center" Width="200"/>
+                                    <TextBox Text="{Binding IndoorTemperatureC, UpdateSourceTrigger=PropertyChanged}" 
+                                             Width="100" 
+                                             Margin="5,0,0,0"/>
+                                    <Button Content="Изчисли" 
+                                            Command="{Binding CalculateCommand}" 
+                                            Margin="10,0,0,0"
+                                            Padding="15,5"/>
+                                </StackPanel>
+
+                                <!-- Results Table -->
+                                <DataGrid ItemsSource="{Binding CalculationResults.Months}" 
+                                          AutoGenerateColumns="False" 
+                                          IsReadOnly="True"
+                                          HeadersVisibility="Column"
+                                          CanUserAddRows="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="№" Binding="{Binding MonthNumber}" Width="40"/>
+                                        <DataGridTextColumn Header="Месец" Binding="{Binding MonthName}" Width="100"/>
+                                        <DataGridTextColumn Header="θe (°C)" Binding="{Binding OutdoorTempC, StringFormat=F1}" Width="80"/>
+                                        <DataGridTextColumn Header="Hztu,e (W/K)" Binding="{Binding HztuE_WK, StringFormat=F2}" Width="100"/>
+                                        <DataGridTextColumn Header="Hztc-ztu (W/K)" Binding="{Binding HztcZtu_WK, StringFormat=F2}" Width="110"/>
+                                        <DataGridTextColumn Header="Hztu,tot (W/K)" Binding="{Binding HztuTot_WK, StringFormat=F2}" Width="110"/>
+                                        <DataGridTextColumn Header="bztu" Binding="{Binding Bztu, StringFormat=F3}" Width="80"/>
+                                        <DataGridTextColumn Header="θztu (°C)" Binding="{Binding TempZtu_C, StringFormat=F1}" Width="90"/>
+                                    </DataGrid.Columns>
+                                    <DataGrid.Style>
+                                        <Style TargetType="DataGrid">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CalculationResults}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGrid.Style>
+                                </DataGrid>
+
+                                <!-- Info Message when no results -->
+                                <TextBlock Text="Натиснете 'Изчисли' за да видите месечните резултати"
+                                           Foreground="Gray"
+                                           FontStyle="Italic"
+                                           Margin="0,10,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CalculationResults}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Топлопреминаване по елементи -->
+                        <GroupBox Header="📊 Топлопреминаване по елементи (Hel)" 
+                                  Margin="0,15,0,0"
+                                  Padding="10"
+                                  Visibility="{Binding ElementInfluences, Converter={StaticResource CollectionToVisibilityConverter}}">
+                            <StackPanel>
+                                <DataGrid 
+                                    ItemsSource="{Binding ElementInfluences}" 
+                                    AutoGenerateColumns="False" 
+                                    IsReadOnly="True"
+                                    CanUserAddRows="False"
+                                    CanUserDeleteRows="False"
+                                    HeadersVisibility="Column"
+                                    GridLinesVisibility="Horizontal"
+                                    AlternatingRowBackground="#F9F9F9"
+                                    RowBackground="White"
+                                    BorderBrush="#DDD"
+                                    BorderThickness="1"
+                                    MaxHeight="400">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn 
+                                            Header="Елемент" 
+                                            Binding="{Binding ElementName}" 
+                                            Width="*"
+                                            MinWidth="150"/>
+                                        <DataGridTextColumn 
+                                            Header="Месец" 
+                                            Binding="{Binding MonthName}" 
+                                            Width="100"/>
+                                        <DataGridTextColumn 
+                                            Header="U (W/m²K)" 
+                                            Binding="{Binding U, StringFormat=N3}" 
+                                            Width="100"/>
+                                        <DataGridTextColumn 
+                                            Header="A (m²)" 
+                                            Binding="{Binding Area, StringFormat=N2}" 
+                                            Width="80"/>
+                                        <DataGridTextColumn 
+                                            Header="bztu / (1-bztu)" 
+                                            Binding="{Binding BztuFactor, StringFormat=N3}" 
+                                            Width="120"/>
+                                        <DataGridTextColumn 
+                                            Header="Hel (W/K)" 
+                                            Binding="{Binding Hel, StringFormat=N2}" 
+                                            Width="100">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                    <Setter Property="Foreground" Value="#2E7D32"/>
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <TextBlock 
+                                    Text="ℹ️ Hel = bztu × U × A (за елементи към външна среда) или (1-bztu) × U × A (за елементи към отопляемо пространство)" 
+                                    FontStyle="Italic" 
+                                    Foreground="#555" 
+                                    Margin="0,10,0,0"
+                                    TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

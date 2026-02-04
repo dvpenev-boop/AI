@@ -242,6 +242,20 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = windowsSectionView;
         }
+        else if (section.Type == ModelSectionType.UnconditionedZones ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Неклиматизирани зони")))
+        {
+            if (section.UnconditionedZoneSectionData == null)
+                section.UnconditionedZoneSectionData = new Models.UnconditionedZoneSectionData();
+
+            section.Type = ModelSectionType.UnconditionedZones;
+
+            var unconditionedZonesView = new UnconditionedZonesSectionView
+            {
+                DataContext = new ViewModels.UnconditionedZonesSectionViewModel(section.UnconditionedZoneSectionData)
+            };
+            ContentScrollViewer.Content = unconditionedZonesView;
+        }
         else if (section.Type == ModelSectionType.Heating ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Отопление")))
         {

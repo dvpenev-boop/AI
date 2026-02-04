@@ -17,15 +17,16 @@ namespace EE.Doklad.Models
         Roof,                       // Покрив (секция №7)
         Floor,                      // Под (секция №8)
         Windows,                    // Прозорци и врати (секция №9)
-        Heating,                    // Отопление (секция №10)
-        Ventilation,                // Вентилация (секция №12)
-        HotWater,                   // Топла вода за битови нужди (секция №14)
-        Lighting,                   // Осветление (секция №15)
-        AppliancesAffecting,        // Други разходи влияещи (секция №16)
-        AppliancesNotAffecting,     // Други разходи невлияещи (секция №17)
+        UnconditionedZones,         // Неклиматизирани зони (секция №10)
+        Heating,                    // Отопление (секция №11 след добавяне на UnconditionedZones)
+        Ventilation,                // Вентилация (секция №13 след добавяне на UnconditionedZones)
+        HotWater,                   // Топла вода за битови нужди (секция №15 след добавяне на UnconditionedZones)
+        Lighting,                   // Осветление (секция №16 след добавяне на UnconditionedZones)
+        AppliancesAffecting,        // Други разходи влияещи (секция №17 след добавяне на UnconditionedZones)
+        AppliancesNotAffecting,     // Други разходи невлияещи (секция №18 след добавяне на UnconditionedZones)
         Results,                    // Резултати (секция за изчисления)
-        EnergyClass,                // Клас на енергопотребление (секция №19)
-        Conclusion                  // Заключение (секция №20)
+        EnergyClass,                // Клас на енергопотребление (секция №20 след добавяне на UnconditionedZones)
+        Conclusion                  // Заключение (секция №21 след добавяне на UnconditionedZones)
     }
 
     /// <summary>
@@ -88,6 +89,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Прозорци и врати" (само за Windows секции)
         /// </summary>
         public WindowsSectionData? WindowsSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Неклиматизирани зони" (само за UnconditionedZones секции)
+        /// </summary>
+        public UnconditionedZoneSectionData? UnconditionedZoneSectionData { get; set; }
 
         /// <summary>
         /// Данни за раздел "Отопление" (само за Heating секции)

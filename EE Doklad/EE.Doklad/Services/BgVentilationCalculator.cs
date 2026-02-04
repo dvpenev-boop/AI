@@ -30,7 +30,8 @@ namespace EE.Doklad.Services
         /// <returns>Резултат от изчислението</returns>
         public VentilationCalculationResult Calculate(
             VentilationSectionData data,
-            ClimateZoneData? climateData)
+            ClimateZoneData? climateData,
+            int[]? monthlyDaysOff = null)
         {
             var result = new VentilationCalculationResult
             {
@@ -60,7 +61,8 @@ namespace EE.Doklad.Services
             result.MonthlyResults = CalculateMonthlyResults(
                 data,
                 climateData!,
-                hVe_WK);
+                hVe_WK,
+                monthlyDaysOff);
 
             // Стъпка 5: Годишни резултати
             double annualEnergy_kWh = 0;
@@ -337,7 +339,8 @@ namespace EE.Doklad.Services
         private List<VentilationMonthlyResult> CalculateMonthlyResults(
             VentilationSectionData data,
             ClimateZoneData climateData,
-            double hVe_WK)
+            double hVe_WK,
+            int[]? monthlyDaysOff = null)
         {
             var monthlyResults = new List<VentilationMonthlyResult>();
 
@@ -354,6 +357,23 @@ namespace EE.Doklad.Services
 
                 // Дни в отоплителния сезон за този месец (вземаме под внимание отоплителния период на климатичната зона)
                 int daysInMonth = GetHeatingSeasonDaysInMonth(2024, monthNumber, climateData);
+
+                // If the caller supplied monthly days-off (from section 5), subtract the
+                // number of holidays that fall within the heating-season portion of the month.
+                // We only have a count of holidays per month (not dates). The rule used here
+                // follows the product requirement: if the month has any heating-season days
+                // (even partially), assume holidays entered for that month fall inside the
+                // heating season and subtract them from the heating-season days. Do not
+                // subtract more days than the heating-season days in the month.
+                if (monthlyDaysOff != null && monthlyDaysOff.Length >= 12)
+                {
+                    int holidays = Math.Max(0, monthlyDaysOff[month]); // month is zero-based index
+                    if (holidays > 0 && daysInMonth > 0)
+                    {
+                        daysInMonth = Math.Max(0, daysInMonth - Math.Min(holidays, daysInMonth));
+                    }
+                }
+
                 // Compute monthly operating hours from heating-season days (precise fractional value)
                 double monthlyOperatingTime_h = hoursPerDay * daysInMonth;
 

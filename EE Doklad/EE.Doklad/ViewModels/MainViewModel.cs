@@ -623,17 +623,18 @@ namespace EE.Doklad.ViewModels
                 "7. Покрив",
                 "8. Под",
                 "9. Прозорци и врати",
-                "10. Отопление",
-                "11. Охлаждане",
-                "12. Вентилация",
-                "13. Помпи",
-                "14. Топла вода за битови нужди (БГВ)",
-                "15. Осветление",
-                "16. Други разходи влияещи",
-                "17. Други разходи не влияещи",
-                "18. Резултати сграда",
-                "19. Клас на енергопотребление",
-                "20. Заключение"
+                "10. Неклиматизирани зони (ztu)",
+                "11. Отопление",
+                "12. Охлаждане",
+                "13. Вентилация",
+                "14. Помпи",
+                "15. Топла вода за битови нужди (БГВ)",
+                "16. Осветление",
+                "17. Други разходи влияещи",
+                "18. Други разходи не влияещи",
+                "19. Резултати сграда",
+                "20. Клас на енергопотребление",
+                "21. Заключение"
             };
 
             for (int i = 0; i < laterTitles.Length; i++)
@@ -671,7 +672,17 @@ namespace EE.Doklad.ViewModels
                     section.FloorSectionData = new FloorSectionData();
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("Отопление"))
+                else if (laterTitles[i].Contains("10. Неклиматизирани зони"))
+                {
+                    section.Type = SectionType.UnconditionedZones;
+                    section.UnconditionedZoneSectionData = new UnconditionedZoneSectionData
+                    {
+                        Title = "Неклиматизирани зони (ztu)",
+                        Description = "Попълнете данните за неклиматизирани зони."
+                    };
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("11. Отопление"))
                 {
                     section.Type = SectionType.Heating;
                     section.HeatingSectionData = new HeatingSectionData
@@ -681,27 +692,27 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("12. Вентилация"))
+                else if (laterTitles[i].Contains("13. Вентилация"))
                 {
                     section.Type = SectionType.Ventilation;
                     section.VentilationSectionData = new VentilationSectionData
                     {
                         Title = "Вентилация",
-                        Description = "Попълнете данните за секция: 12. Вентилация"
+                        Description = "Попълнете данните за секция: 13. Вентилация"
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("14. Топла вода за битови нужди"))
+                else if (laterTitles[i].Contains("15. Топла вода за битови нужди"))
                 {
                     section.Type = SectionType.HotWater;
                     section.HotWaterSectionData = new HotWaterSectionData
                     {
                         Title = "Топла вода за битови нужди (БГВ)",
-                        Description = "Попълнете данните за секция: 14. Топла вода за битови нужди (БГВ)"
+                        Description = "Попълнете данните за секция: 15. Топла вода за битови нужди (БГВ)"
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("15. Осветление"))
+                else if (laterTitles[i].Contains("16. Осветление"))
                 {
                     section.Type = SectionType.Lighting;
                     section.LightingSectionData = new LightingSectionData
@@ -711,7 +722,7 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("16. Други разходи влияещи"))
+                else if (laterTitles[i].Contains("17. Други разходи влияещи"))
                 {
                     section.Type = SectionType.AppliancesAffecting;
                     section.AppliancesAffectingSectionData = new AppliancesSectionData
@@ -721,7 +732,7 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("17. Други разходи не влияещи"))
+                else if (laterTitles[i].Contains("18. Други разходи не влияещи"))
                 {
                     section.Type = SectionType.AppliancesNotAffecting;
                     section.AppliancesNotAffectingSectionData = new AppliancesSectionData
@@ -731,7 +742,7 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("18. Резултати сграда"))
+                else if (laterTitles[i].Contains("19. Резултати сграда"))
                 {
                     section.Type = SectionType.Results;
                     section.ResultsSectionData = new ResultsSectionData
@@ -741,7 +752,7 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("19. Клас на енергопотребление"))
+                else if (laterTitles[i].Contains("20. Клас на енергопотребление"))
                 {
                     section.Type = SectionType.EnergyClass;
                     section.EnergyClassSectionData = new EnergyClassSectionData
@@ -752,7 +763,7 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                else if (laterTitles[i].Contains("20. Заключение"))
+                else if (laterTitles[i].Contains("21. Заключение"))
                 {
                     section.Type = SectionType.Conclusion;
                     section.ConclusionSectionData = new ConclusionSectionData

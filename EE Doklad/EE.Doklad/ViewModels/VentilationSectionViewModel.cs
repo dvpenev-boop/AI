@@ -607,8 +607,35 @@ namespace EE.Doklad.ViewModels
             // Update heated area in data model
             _data.HeatedArea_m2 = HeatedArea_m2;
 
-            // Perform calculation
-            _calculationResult = _calculator.Calculate(_data, _climateData);
+            // Prepare monthly days-off array (from section 5). If object data is not
+            // available, pass null. Values are counts per calendar month (Jan..Dec).
+            int[]? monthlyDaysOff = null;
+            if (_objectData != null)
+            {
+                monthlyDaysOff = new int[12];
+                int ParseInt(string? s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return 0;
+                    if (int.TryParse(s.Trim(), out int v)) return Math.Max(0, v);
+                    return 0;
+                }
+
+                monthlyDaysOff[0] = ParseInt(_objectData.DaysOffJanuary);
+                monthlyDaysOff[1] = ParseInt(_objectData.DaysOffFebruary);
+                monthlyDaysOff[2] = ParseInt(_objectData.DaysOffMarch);
+                monthlyDaysOff[3] = ParseInt(_objectData.DaysOffApril);
+                monthlyDaysOff[4] = ParseInt(_objectData.DaysOffMay);
+                monthlyDaysOff[5] = ParseInt(_objectData.DaysOffJune);
+                monthlyDaysOff[6] = ParseInt(_objectData.DaysOffJuly);
+                monthlyDaysOff[7] = ParseInt(_objectData.DaysOffAugust);
+                monthlyDaysOff[8] = ParseInt(_objectData.DaysOffSeptember);
+                monthlyDaysOff[9] = ParseInt(_objectData.DaysOffOctober);
+                monthlyDaysOff[10] = ParseInt(_objectData.DaysOffNovember);
+                monthlyDaysOff[11] = ParseInt(_objectData.DaysOffDecember);
+            }
+
+            // Perform calculation (pass monthly days-off so holidays are excluded from heating-season hours)
+            _calculationResult = _calculator.Calculate(_data, _climateData, monthlyDaysOff);
 
             // Populate debug text for UI if needed
             DebugText = _calculationResult != null ? BuildDebugText(_calculationResult) : string.Empty;
