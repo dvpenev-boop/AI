@@ -1,8 +1,13 @@
-System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.Baml2006.TypeConverterMarkupExtension' threw an exception.' Line number '260' and line position '42'.
- ---> System.FormatException: '0,0,0' value is not valid. It must contain one, two, or four delimited Lengths.
-   at System.Windows.ThicknessConverter.FromString(String s, CultureInfo cultureInfo)
-   at System.Windows.ThicknessConverter.ConvertFrom(ITypeDescriptorContext typeDescriptorContext, CultureInfo cultureInfo, Object source)
-   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
+System.Windows.Markup.XamlParseException: 'Set property 'System.Windows.Controls.ItemsControl.ItemTemplate' threw an exception.' Line number '235' and line position '146'.
+ ---> System.InvalidOperationException: Cannot set both DisplayMemberPath and ItemTemplate.
+   at System.Windows.Controls.ItemsControl.CheckTemplateSource()
+   at System.Windows.Controls.ItemsControl.OnItemTemplateChanged(DataTemplate oldItemTemplate, DataTemplate newItemTemplate)
+   at System.Windows.FrameworkElement.OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+   at System.Windows.DependencyObject.NotifyPropertyChange(DependencyPropertyChangedEventArgs args)
+   at System.Windows.DependencyObject.UpdateEffectiveValue(EntryIndex entryIndex, DependencyProperty dp, PropertyMetadata metadata, EffectiveValueEntry oldEntry, EffectiveValueEntry& newEntry, Boolean coerceWithDeferredReference, Boolean coerceWithCurrentValue, OperationType operationType)
+   at System.Windows.DependencyObject.SetValueCommon(DependencyProperty dp, Object value, PropertyMetadata metadata, Boolean coerceWithDeferredReference, Boolean coerceWithCurrentValue, OperationType operationType, Boolean isInternal)
+   at System.Windows.DependencyObject.SetValue(DependencyProperty dp, Object value)
+   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.SetValue(Object inst, XamlMember property, Object value)
    --- End of inner exception stack trace ---
    at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
    at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
@@ -10,5 +15,5 @@ System.Windows.Markup.XamlParseException: 'Provide value on 'System.Windows.Baml
    at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
    at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
    at EE.Doklad.Views.VentilationSectionView.InitializeComponent() in E:\AI\EE Doklad\EE.Doklad\Views\VentilationSectionView.xaml:line 1
-   at EE.Doklad.Views.VentilationSectionView..ctor() in E:\AI\EE Doklad\EE.Doklad\Views\VentilationSectionView.xaml.cs:line 13
+   at EE.Doklad.Views.VentilationSectionView..ctor() in E:\AI\EE Doklad\EE.Doklad\Views\VentilationSectionView.xaml.cs:line 17
    at EE.Doklad.MainWindow.UpdateSectionContent() in E:\AI\EE Doklad\EE.Doklad\MainWindow.xaml.cs:line 304

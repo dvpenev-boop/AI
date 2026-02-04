@@ -34,14 +34,37 @@
         <Style x:Key="EnergyComboBoxItemStyle" TargetType="ComboBoxItem">
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="Black"/>
+            <!-- Compact vertical spacing: small vertical padding, single-line height -->
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <!-- Ensure popup is wide enough like section 18 without changing closed ComboBox width -->
+            <Setter Property="MinWidth" Value="300"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="EnergySourceComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="FontSize" Value="12"/>
+            <!-- Match section 18 visual: slightly smaller font and larger padding -->
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <!-- Ensure drop-down items are white with black text -->
+            <!-- Ensure drop-down items are white with black text and have a blue selected state -->
             <Setter Property="ItemContainerStyle" Value="{StaticResource EnergyComboBoxItemStyle}"/>
+            <!-- Make the closed ComboBox white with dark text and a blue border for accessibility -->
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#1976D2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <!-- Limit dropdown height but allow enough space to show many items -->
+            <Setter Property="MaxDropDownHeight" Value="420"/>
         </Style>
     </UserControl.Resources>
 
@@ -197,18 +220,30 @@
                         <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#1976D2" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <ComboBox ItemsSource="{x:Static models:EnergyCarrierInfo.All}"
+                        <ComboBox x:Name="EnergyCarrierCombo1"
+                                  ItemsSource="{x:Static models:EnergyCarrierInfo.All}"
                                   SelectedValuePath="Code"
-                                  DisplayMemberPath="DisplayName"
                                   SelectedValue="{Binding EnergySource1Carrier, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Padding="6"
-                                  FontSize="12"
+                                  Padding="6,2"
+                                  FontSize="11"
                                   HorizontalAlignment="Stretch"
-                                  Margin="4"
-                                  Background="#1976D2"
-                                  Foreground="White"
-                                  BorderThickness="0"
-                                  Style="{StaticResource EnergySourceComboBoxStyle}"/>
+                                  Margin="2"
+                                  Style="{StaticResource EnergySourceComboBoxStyle}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" FontSize="11" LineHeight="13" LineStackingStrategy="BlockLineHeight" Padding="0"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="#0066CC" Margin="0,2,0,1"/>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ComboBox.GroupStyle>
+                        </ComboBox>
                     </Border>
 
                     <!-- Row 1: Дял -->
@@ -295,18 +330,30 @@
                         <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#1976D2" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <ComboBox ItemsSource="{x:Static models:EnergyCarrierInfo.All}"
+                        <ComboBox x:Name="EnergyCarrierCombo2"
+                                  ItemsSource="{x:Static models:EnergyCarrierInfo.All}"
                                   SelectedValuePath="Code"
-                                  DisplayMemberPath="DisplayName"
                                   SelectedValue="{Binding EnergySource2Carrier, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Padding="6"
-                                  FontSize="12"
+                                  Padding="6,2"
+                                  FontSize="11"
                                   HorizontalAlignment="Stretch"
-                                  Margin="4"
-                                  Background="#1976D2"
-                                  Foreground="White"
-                                  BorderThickness="0"
-                                  Style="{StaticResource EnergySourceComboBoxStyle}"/>
+                                  Margin="2"
+                                  Style="{StaticResource EnergySourceComboBoxStyle}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" FontSize="11" LineHeight="13" LineStackingStrategy="BlockLineHeight" Padding="0"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="#0066CC" Margin="0,2,0,1"/>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ComboBox.GroupStyle>
+                        </ComboBox>
                     </Border>
 
                     <!-- Row 1: Дял -->
@@ -393,9 +440,9 @@
                         <TextBlock Text="Потребна енергия (kWh)" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13" HorizontalAlignment="Center"/>
                     </Border>
 
-                    <!-- Row 1: Енергия за загряване на въздуха -->
+                    <!-- Row 1: Енергия за загряване на въздуха (нетна) -->
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергия за загряване на въздуха" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="Енергия за загряване на въздуха (нетна)" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding SpecificVentilationHeatingEnergy_kWh_m2a, Mode=OneWay, StringFormat=0.00}" 
@@ -453,14 +500,16 @@
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
 
-                    <!-- Row 5: Обща ефективност на генериране на топлина -->
+                    <!-- Row 5: Обща потребна енергия (след преустройства/ефективности) -->
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Обща ефективност на генериране на топлина, %" Padding="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Обща потребна енергия" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </Border>
+                    <!-- Покажи общата крайна енергия след преобразуване (ЕИ1+ЕИ2) на m² -->
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBox Text="{Binding OverallHeatGenerationEfficiencyPercent, Mode=OneWay, StringFormat=0.0}" 
+                        <TextBox Text="{Binding SpecificFinalEnergy_kWh_m2a, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
+                    <!-- Общата енергия в kWh/a (както беше) -->
                     <Border Grid.Row="5" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding TotalFinalEnergy_kWh_a, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
