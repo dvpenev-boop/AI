@@ -30,6 +30,7 @@ namespace EE.Doklad.Views
             try
             {
                 UnconditionedZonesCalculatorTest.RunTest();
+                UnconditionedZonesSeasonalTests.RunAll();
                 
                 MessageBox.Show(
                     "Тестът завърши успешно!\n\nПроверете Output прозореца (Debug) за детайлни резултати.",
@@ -52,18 +53,14 @@ namespace EE.Doklad.Views
             if (sender is not Button button || button.Tag is not ZtuElement element) 
                 return;
 
-            if (DataContext is not UnconditionedZonesSectionViewModel vm) 
+            if (DataContext is not UnconditionedZonesSectionViewModel vm)
                 return;
 
-            var layer = new ZtuLayer 
-            { 
-                MaterialName = "Избери материал",
-                Thickness = 100.0,
-                Lambda = 1.0,
-                MaterialOptions = vm.MaterialOptions.ToList()
-            };
-
-            element.Layers.Add(layer);
+            // Use the ViewModel command to add a layer so the VM can attach handlers and recalculate U
+            if (vm.AddLayerCommand.CanExecute(element))
+            {
+                vm.AddLayerCommand.Execute(element);
+            }
         }
 
         private void RemoveLayer_Click(object sender, RoutedEventArgs e)
@@ -71,9 +68,23 @@ namespace EE.Doklad.Views
             if (sender is not Button button || button.Tag is not ZtuElement element) 
                 return;
 
+            if (DataContext is not UnconditionedZonesSectionViewModel vm)
+                return;
+
             if (element.Layers.Count > 0)
             {
-                element.Layers.RemoveAt(element.Layers.Count - 1);
+                var last = element.Layers[element.Layers.Count - 1];
+                // Use the ViewModel delete command so it can recalc U properly
+                var param = (element, last);
+                if (vm.DeleteLayerCommand.CanExecute(param))
+                {
+                    vm.DeleteLayerCommand.Execute(param);
+                }
+                else
+                {
+                    // fallback: remove and attempt to force recalc via reflection (best-effort)
+                    element.Layers.RemoveAt(element.Layers.Count - 1);
+                }
             }
         }
 

@@ -171,4 +171,36 @@ public partial class UnconditionedZoneSectionData : ObservableObject
     /// Списък с неклиматизирани зони
     /// </summary>
     public ObservableCollection<ZtuZone> Zones { get; } = new();
+
+    // ====== Нови полета за двурежимен вход (зима/лято) ======
+    /// <summary>
+    /// Вътрешна температура - ЛЯТО (°C). Фиксирано по спецификация (по подразбиране 25°C).
+    /// </summary>
+    [ObservableProperty]
+    private double _thetaIntSummer = 25.0;
+
+    /// <summary>
+    /// Ако е true, използваме ръчно зададена зимна температура вместо автоматично изчислената.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isWinterTempOverride = false;
+
+    /// <summary>
+    /// Ръчно зададена зимна температура (nullable). Използва се само ако IsWinterTempOverride == true.
+    /// </summary>
+    [ObservableProperty]
+    private double? _thetaIntWinterOverride = null;
+    
+    // ====== Temperatures of the unconditioned space (adjacent space) used for Qtr ======
+    /// <summary>
+    /// Температура на неклиматизираното помещение - ЗИМА (°C)
+    /// </summary>
+    [ObservableProperty]
+    private double _thetaAdjWinter = 5.0;
+
+    /// <summary>
+    /// Температура на неклиматизираното помещение - ЛЯТО (°C)
+    /// </summary>
+    [ObservableProperty]
+    private double _thetaAdjSummer = 25.0;
 }

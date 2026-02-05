@@ -48,18 +48,75 @@ namespace EE.Doklad.Services
             return results;
         }
 
+        /// <summary>
+        /// New overload: seasonal temperatures per month. thetaIntSummer is used for months May..Sep (5..9),
+        /// winter months use thetaIntWinterCalc[m] unless isWinterOverride==true in which case winterOverrideValue is used.
+        /// </summary>
+        public ZtuMonthlyResults CalculateWithSeasonalTemps(
+            ZtuZone zone,
+            ClimateZoneData climateData,
+            double thetaIntSummer = 25.0,
+            double[]? thetaIntWinterCalc = null,
+            bool isWinterOverride = false,
+            double? winterOverrideValue = null)
+        {
+            var results = new ZtuMonthlyResults
+            {
+                ZoneName = zone.Name,
+                ZoneType = zone.Type
+            };
+
+            for (int month = 0; month < 12; month++)
+            {
+                double thetaUsed;
+                int monthNumber = month + 1;
+                if (monthNumber >= 5 && monthNumber <= 9)
+                {
+                    // May..Sep -> summer fixed
+                    thetaUsed = thetaIntSummer;
+                }
+                else
+                {
+                    if (isWinterOverride && winterOverrideValue.HasValue)
+                    {
+                        thetaUsed = winterOverrideValue.Value;
+                    }
+                    else if (thetaIntWinterCalc != null && thetaIntWinterCalc.Length == 12)
+                    {
+                        thetaUsed = thetaIntWinterCalc[month];
+                    }
+                    else
+                    {
+                        // fallback
+                        thetaUsed = winterOverrideValue ?? 20.0;
+                    }
+                }
+
+                var monthly = CalculateMonth(
+                    zone,
+                    month,
+                    climateData.Monthly.AvgMonthlyTempC[month],
+                    thetaUsed);
+
+                results.Months.Add(monthly);
+            }
+
+            return results;
+        }
+
         private ZtuMonthlyResult CalculateMonth(
             ZtuZone zone,
             int monthIndex,
             double outdoorTempC,
-            double indoorTempC)
+            double thetaIntUsed)
         {
             var result = new ZtuMonthlyResult
             {
                 MonthNumber = monthIndex + 1,
                 MonthName = MonthNames[monthIndex],
                 OutdoorTempC = outdoorTempC,
-                IndoorTempC = indoorTempC
+                IndoorTempC = thetaIntUsed,
+                ThetaIntUsed_C = thetaIntUsed
             };
 
             // Стъпка 1: Hztu,e,m = Σ(Uk,m * Ak) за елементите към външна среда
@@ -93,8 +150,8 @@ namespace EE.Doklad.Services
             }
             result.Bztu = bztu;
 
-            // Стъпка 5: θztu,m = θe,a,m + bztu,m * (θint - θe,a,m)
-            double tempZtu = outdoorTempC + bztu * (indoorTempC - outdoorTempC);
+            // Стъпка 5: θztu,m = θe,a,m + bztu,m * (θint_used - θe,a,m)
+            double tempZtu = outdoorTempC + bztu * (thetaIntUsed - outdoorTempC);
             result.TempZtu_C = tempZtu;
 
             return result;
@@ -120,16 +177,18 @@ namespace EE.Doklad.Services
                 foreach (var element in zone.ElementsToBoundary)
                 {
                     double hel = 0.0;
+                    double factor = 0.0;
 
-                    // За ztue (External): Hel,k,m = bztu,m * Uk,m * Ak
-                    // За ztui (Internal): Hel,k,m = (1 - bztu,m) * Uk,m * Ak
+                    // For External ztu: factor = bztu; for Internal: factor = 1 - bztu
                     if (zone.Type == ZtuType.External)
                     {
-                        hel = bztu * element.UValue * element.Area;
+                        factor = bztu;
+                        hel = factor * element.UValue * element.Area;
                     }
                     else // Internal
                     {
-                        hel = (1.0 - bztu) * element.UValue * element.Area;
+                        factor = 1.0 - bztu;
+                        hel = factor * element.UValue * element.Area;
                     }
 
                     influences.Add(new ZtuElementInfluence
@@ -140,12 +199,92 @@ namespace EE.Doklad.Services
                         UValue = element.UValue,
                         Area = element.Area,
                         Bztu = bztu,
+                        BztuFactor = factor,
                         Hel_WK = hel
                     });
                 }
             }
 
             return influences;
+        }
+
+        /// <summary>
+        /// Compute Qtr (kWh) per month for separating elements given existing monthlyResults and object/heat data
+        /// </summary>
+        public ZtuQtrResults CalculateQtrResults(
+            ZtuZone zone,
+            ZtuMonthlyResults monthlyResults,
+            ObjectDataSectionData? objectData,
+            HeatingSectionData? heatingData,
+            UnconditionedZoneSectionData? unconditionedSectionData,
+            ClimateZoneData climateData,
+            int yearRef = 2024)
+        {
+            var qtrResults = new ZtuQtrResults();
+
+            // Sum UA for separating elements is available per month in monthlyResults.Months[m].HztcZtu_WK
+            // Compute heating hours via HeatingScheduleService
+            var heatingHours = EE.Doklad.Services.HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climateData, yearRef);
+            var coolingHours = EE.Doklad.Services.HeatingScheduleService.ComputeCoolingHoursPerMonth(objectData, yearRef);
+
+            // Compute thetaIntCalcHeating (effective indoor temperature for heating) from heating module/object data
+            var thetaIntCalcHeating = ScheduleHelper.ComputeThetaIntCalcH(objectData, heatingData, climateData, yearRef);
+
+            for (int m = 0; m < 12; m++)
+            {
+                var monthly = monthlyResults.Months[m];
+                double sumUA_sep = monthly.HztcZtu_WK; // W/K
+
+                // Determine thetaAdjUsed (adjacent unconditioned space temperature)
+                double thetaAdjWinter = unconditionedSectionData?.ThetaAdjWinter ?? 5.0;
+                double thetaAdjSummer = unconditionedSectionData?.ThetaAdjSummer ?? 25.0;
+
+                // Heating: use thetaAdjWinter as per requirement
+                double thetaAdjUsed_heating = thetaAdjWinter;
+
+                // Cooling: use thetaAdjSummer
+                double thetaAdjUsed_cooling = thetaAdjSummer;
+
+                double heatingHours_m = heatingHours != null && heatingHours.Length == 12 ? heatingHours[m] : 0.0;
+                double coolingHours_m = coolingHours != null && coolingHours.Length == 12 ? coolingHours[m] : 0.0;
+
+                // theta for heated indoor (from heating module) or fallback 20°C
+                double thetaHeatedHeat = 20.0;
+                if (thetaIntCalcHeating != null && thetaIntCalcHeating.Length == 12)
+                    thetaHeatedHeat = thetaIntCalcHeating[m];
+
+                // Qtr heating
+                double deltaT_heat = thetaHeatedHeat - thetaAdjUsed_heating;
+                double q_heat_kWh = 0.0;
+                if (deltaT_heat > 0 && sumUA_sep > 0 && heatingHours_m > 0)
+                {
+                    q_heat_kWh = Math.Max(0.0, sumUA_sep * deltaT_heat) * heatingHours_m / 1000.0;
+                }
+
+                // Qtr cooling (temporary May..Sep)
+                double thetaHeatedCool = 25.0; // project temp for cooling
+                double deltaT_cool = thetaAdjUsed_cooling - thetaHeatedCool;
+                double q_cool_kWh = 0.0;
+                if (deltaT_cool > 0 && sumUA_sep > 0 && coolingHours_m > 0)
+                {
+                    q_cool_kWh = Math.Max(0.0, sumUA_sep * deltaT_cool) * coolingHours_m / 1000.0;
+                }
+
+                qtrResults.Months.Add(new ZtuQtrMonthResult
+                {
+                    MonthNumber = m + 1,
+                    MonthName = monthly.MonthName,
+                    OutdoorTempC = monthly.OutdoorTempC,
+                    ThetaAdjUsed_C = heatingHours_m > 0 ? thetaAdjUsed_heating : (coolingHours_m > 0 ? thetaAdjUsed_cooling : thetaAdjUsed_heating),
+                    SumUA_Separating_WK = sumUA_sep,
+                    HeatingHours_h = heatingHours_m,
+                    CoolingHours_h = coolingHours_m,
+                    Qtr_heat_kWh = q_heat_kWh,
+                    Qtr_cool_kWh = q_cool_kWh
+                });
+            }
+
+            return qtrResults;
         }
     }
 
@@ -168,6 +307,10 @@ namespace EE.Doklad.Services
         public string MonthName { get; set; } = string.Empty;
         public double OutdoorTempC { get; set; }
         public double IndoorTempC { get; set; }
+        /// <summary>
+        /// The internal temperature used for this month (°C) — either summer fixed or winter calculated/overridden
+        /// </summary>
+        public double ThetaIntUsed_C { get; set; }
 
         /// <summary>
         /// Топлопреминаване на ztu към външна среда (W/K)
@@ -196,6 +339,48 @@ namespace EE.Doklad.Services
     }
 
     /// <summary>
+    /// Qtr results (heating / cooling through separating elements) for one month
+    /// </summary>
+    public class ZtuQtrMonthResult
+    {
+        public int MonthNumber { get; set; }
+        public string MonthName { get; set; } = string.Empty;
+        public double OutdoorTempC { get; set; }
+        /// <summary>
+        /// Temperature of the unconditioned space used for this calculation (adjacent)
+        /// </summary>
+        public double ThetaAdjUsed_C { get; set; }
+        /// <summary>
+        /// ΣUA for separating elements (Hztc-ztu) (W/K)
+        /// </summary>
+        public double SumUA_Separating_WK { get; set; }
+        /// <summary>
+        /// Effective heating hours (h) for this month based on schedule + holidays
+        /// </summary>
+        public double HeatingHours_h { get; set; }
+        /// <summary>
+        /// Cooling hours (temporary: May..Sep full month hours)
+        /// </summary>
+        public double CoolingHours_h { get; set; }
+        /// <summary>
+        /// Q through separating elements that affects heating (kWh)
+        /// </summary>
+        public double Qtr_heat_kWh { get; set; }
+        /// <summary>
+        /// Q through separating elements that affects cooling (kWh)
+        /// </summary>
+        public double Qtr_cool_kWh { get; set; }
+    }
+
+    public class ZtuQtrResults
+    {
+        public List<ZtuQtrMonthResult> Months { get; } = new();
+        public double Annual_Qtr_heat_kWh => Months.Sum(m => m.Qtr_heat_kWh);
+        public double Annual_Qtr_cool_kWh => Months.Sum(m => m.Qtr_cool_kWh);
+    }
+
+
+    /// <summary>
     /// Влияние на един елемент на ztu върху Htr за един месец
     /// </summary>
     public class ZtuElementInfluence
@@ -211,5 +396,14 @@ namespace EE.Doklad.Services
         /// Редуцирано топлопреминаване (W/K)
         /// </summary>
         public double Hel_WK { get; set; }
+
+        // ==== Presentation-friendly aliases used by the view XAML (backwards compatible names) ==== 
+        public double U => UValue;
+        public double Hel => Hel_WK;
+
+        /// <summary>
+        /// Factor applied to U*A for this element (bztu for external, 1-bztu for internal)
+        /// </summary>
+        public double BztuFactor { get; set; }
     }
 }

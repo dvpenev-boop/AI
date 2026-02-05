@@ -250,9 +250,15 @@ public partial class MainWindow : Window
 
             section.Type = ModelSectionType.UnconditionedZones;
 
+            // Provide object data and heating data to the viewmodel so section 10 can compute seasonal temps
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+            var heatingSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.Heating);
+            var heatingData = heatingSection?.HeatingSectionData;
+
             var unconditionedZonesView = new UnconditionedZonesSectionView
             {
-                DataContext = new ViewModels.UnconditionedZonesSectionViewModel(section.UnconditionedZoneSectionData)
+                DataContext = new ViewModels.UnconditionedZonesSectionViewModel(section.UnconditionedZoneSectionData, objectData, heatingData)
             };
             ContentScrollViewer.Content = unconditionedZonesView;
         }

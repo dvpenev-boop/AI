@@ -14,6 +14,8 @@ namespace EE.Doklad.ViewModels
         private readonly UnconditionedZoneSectionData _data;
         private readonly MaterialsService _materialsService;
         private readonly UnconditionedZonesCalculator _calculator;
+        private readonly ObjectDataSectionData? _objectData;
+        private readonly HeatingSectionData? _heatingData;
 
         [ObservableProperty]
         private ZtuZone? _selectedZone;
@@ -24,16 +26,21 @@ namespace EE.Doklad.ViewModels
         [ObservableProperty]
         private System.Collections.Generic.List<ZtuElementInfluence>? _elementInfluences;
 
+    [ObservableProperty]
+    private ZtuQtrResults? _qtrResults;
+
         [ObservableProperty]
         private double _indoorTemperatureC = 20.0;
 
         public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
 
-        public UnconditionedZonesSectionViewModel(UnconditionedZoneSectionData data)
+        public UnconditionedZonesSectionViewModel(UnconditionedZoneSectionData data, ObjectDataSectionData? objectData = null, HeatingSectionData? heatingData = null)
         {
             _data = data;
             _materialsService = new MaterialsService(new JsonMaterialsRepository());
             _calculator = new UnconditionedZonesCalculator();
+            _objectData = objectData;
+            _heatingData = heatingData;
             LoadMaterialOptions();
 
             // Attach handlers to zones collection
@@ -61,6 +68,9 @@ namespace EE.Doklad.ViewModels
                     InjectMaterialOptionsIntoElements(zone);
                 }
             }
+
+            // Re-evaluate whether Calculate can execute (zones changed)
+            CalculateCommand.NotifyCanExecuteChanged();
         }
 
         private void Elements_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -81,6 +91,9 @@ namespace EE.Doklad.ViewModels
                     element.Layers.CollectionChanged -= Layers_CollectionChanged;
                 }
             }
+
+            // Elements changed may affect whether Calculate can execute
+            CalculateCommand.NotifyCanExecuteChanged();
         }
 
         private void Layers_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -322,21 +335,28 @@ namespace EE.Doklad.ViewModels
         {
             if (SelectedZone == null) return;
 
-            // За демо целите използваме климатична зона 3 (София)
-            // В реална имплементация се вземат от MainViewModel/Document
             var climateService = new ClimateService(new JsonClimateRepository());
-            var climateData = climateService.GetZone(3);
 
+            // Try obtain climate zone from object data if available; fallback to zone 3
+            int climateZoneId = _objectData?.ClimateZone ?? 3;
+            var climateData = climateService.GetZone(climateZoneId);
             if (climateData == null)
             {
-                System.Diagnostics.Debug.WriteLine("Cannot load climate data for zone 3");
+                System.Diagnostics.Debug.WriteLine($"Cannot load climate data for zone {climateZoneId}");
                 return;
             }
 
-            CalculationResults = _calculator.Calculate(
+            // Compute thetaIntCalcH per month from section 5 + heating section data
+            double[] thetaIntWinterCalc = ScheduleHelper.ComputeThetaIntCalcH(_objectData, _heatingData, climateData);
+
+            // Use Data.ThetaIntSummer and override flags from section data
+            CalculationResults = _calculator.CalculateWithSeasonalTemps(
                 SelectedZone,
                 climateData,
-                IndoorTemperatureC);
+                thetaIntSummer: _data.ThetaIntSummer,
+                thetaIntWinterCalc: thetaIntWinterCalc,
+                isWinterOverride: _data.IsWinterTempOverride,
+                winterOverrideValue: _data.ThetaIntWinterOverride);
 
             // Изчисляваме влиянието на елементите върху Htr
             if (CalculationResults != null)
@@ -344,6 +364,15 @@ namespace EE.Doklad.ViewModels
                 ElementInfluences = _calculator.CalculateInfluenceOnHtr(
                     SelectedZone,
                     CalculationResults);
+ 
+                // Compute Qtr results (heating/cooling through separating elements)
+                QtrResults = _calculator.CalculateQtrResults(
+                    SelectedZone,
+                    CalculationResults,
+                    _objectData,
+                    _heatingData,
+                    _data,
+                    climateData);
             }
         }
 

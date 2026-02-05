@@ -467,16 +467,35 @@
                         <!-- Calculation Section -->
                         <GroupBox Header="Месечни изчисления" Margin="0,20,0,0">
                             <StackPanel>
-                                <!-- Temperature Input -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <TextBlock Text="Вътрешна температура (°C):" VerticalAlignment="Center" Width="200"/>
-                                    <TextBox Text="{Binding IndoorTemperatureC, UpdateSourceTrigger=PropertyChanged}" 
-                                             Width="100" 
-                                             Margin="5,0,0,0"/>
-                                    <Button Content="Изчисли" 
-                                            Command="{Binding CalculateCommand}" 
-                                            Margin="10,0,0,0"
-                                            Padding="15,5"/>
+                                <!-- Temperature Input (winter/summer modes) -->
+                                <StackPanel Margin="0,0,0,10">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <TextBlock Text="Вътрешна температура – ЗИМА (°C):" VerticalAlignment="Center" Width="200"/>
+                                        <TextBox Width="100" Margin="5,0,0,0"
+                                                 Text="{Binding Data.ThetaIntWinterOverride, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, TargetNullValue=''}"
+                                                 IsEnabled="{Binding Data.IsWinterTempOverride}"
+                                                 />
+                                        <CheckBox Content="Ръчно задаване" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                  IsChecked="{Binding Data.IsWinterTempOverride, Mode=TwoWay}"/>
+                                        <TextBlock Text="ℹ️" Margin="8,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock.ToolTip>
+                                                <ToolTip>Зимен режим (отопление) използва графика от секция 5; летен режим е фиксиран (Май–Сеп, 25°C) за да работи софтуера.</ToolTip>
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <TextBlock Text="Вътрешна температура – ЛЯТО (°C):" VerticalAlignment="Center" Width="200"/>
+                                        <TextBox Width="100" Margin="5,0,0,0"
+                                                 Text="{Binding Data.ThetaIntSummer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Изчисли" 
+                                                Command="{Binding CalculateCommand}" 
+                                                Margin="0,0,0,0"
+                                                Padding="15,5"/>
+                                    </StackPanel>
                                 </StackPanel>
 
                                 <!-- Results Table -->
@@ -505,6 +524,37 @@
                                         </Style>
                                     </DataGrid.Style>
                                 </DataGrid>
+
+                                <!-- Qtr results: Heating / Cooling through separating elements -->
+                                <GroupBox Header="Qtr (kWh) — Разделящи елементи" Margin="0,12,0,0">
+                                    <StackPanel>
+                                        <DataGrid ItemsSource="{Binding QtrResults.Months}"
+                                                  AutoGenerateColumns="False"
+                                                  IsReadOnly="True"
+                                                  CanUserAddRows="False"
+                                                  HeadersVisibility="Column">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="№" Binding="{Binding MonthNumber}" Width="40"/>
+                                                <DataGridTextColumn Header="Месец" Binding="{Binding MonthName}" Width="120"/>
+                                                <DataGridTextColumn Header="θe (°C)" Binding="{Binding OutdoorTempC, StringFormat=F1}" Width="80"/>
+                                                <DataGridTextColumn Header="θadj (°C)" Binding="{Binding ThetaAdjUsed_C, StringFormat=F1}" Width="90"/>
+                                                <DataGridTextColumn Header="ΣUA_sep (W/K)" Binding="{Binding SumUA_Separating_WK, StringFormat=F2}" Width="110"/>
+                                                <DataGridTextColumn Header="Часове отопл. (h)" Binding="{Binding HeatingHours_h, StringFormat=F0}" Width="110"/>
+                                                <DataGridTextColumn Header="Часове охл. (h)" Binding="{Binding CoolingHours_h, StringFormat=F0}" Width="110"/>
+                                                <DataGridTextColumn Header="Qtr отопл. (kWh)" Binding="{Binding Qtr_heat_kWh, StringFormat=F2}" Width="120"/>
+                                                <DataGridTextColumn Header="Qtr охл. (kWh)" Binding="{Binding Qtr_cool_kWh, StringFormat=F2}" Width="120"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                                            <TextBlock Text="Годишно отопление (kWh): " FontWeight="SemiBold" Margin="0,0,8,0"/>
+                                            <TextBlock Text="{Binding QtrResults.Annual_Qtr_heat_kWh, StringFormat=F2}" />
+                                            <TextBlock Text="    "/>
+                                            <TextBlock Text="Годишно охлаждане (kWh): " FontWeight="SemiBold" Margin="12,0,8,0"/>
+                                            <TextBlock Text="{Binding QtrResults.Annual_Qtr_cool_kWh, StringFormat=F2}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
 
                                 <!-- Info Message when no results -->
                                 <TextBlock Text="Натиснете 'Изчисли' за да видите месечните резултати"
