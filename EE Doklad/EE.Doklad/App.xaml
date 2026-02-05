@@ -7,5 +7,45 @@
     <Application.Resources>
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <!-- Global converters and styles for ComboBoxes / editable inputs so UI is consistent on first render -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <Style x:Key="EditableTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#2196F3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="EnergyComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="MinWidth" Value="300"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="EnergySourceComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource EnergyComboBoxItemStyle}"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#1976D2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="MaxDropDownHeight" Value="420"/>
+        </Style>
     </Application.Resources>
 </Application>

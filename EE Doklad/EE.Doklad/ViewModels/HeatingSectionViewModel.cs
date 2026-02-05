@@ -16,6 +16,7 @@ namespace EE.Doklad.ViewModels
     {
         private readonly HeatingSectionData _data;
         private readonly ObjectDataSectionData? _objectData;
+        private bool _isAdjustingShares = false; // guard to avoid recursive share updates
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -149,6 +150,274 @@ namespace EE.Doklad.ViewModels
                     var bounded = Math.Max(value, 0);
                     _data.HeatingEfficiency = bounded;
                     OnPropertyChanged(nameof(HeatingEfficiency));
+                }
+            }
+        }
+
+        // ========== ENERGY SOURCE 1 PROPERTIES (for heating) ==========
+
+        public double EnergySource1Share
+        {
+            get => _data.EnergySource1.Share;
+            set
+            {
+                if (_data.EnergySource1.Share != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource1.Share = clamped;
+                    OnPropertyChanged(nameof(EnergySource1Share));
+
+                    // If second source is used, auto-adjust the other share so total is 100%
+                    if (UseSecondEnergySource && _data.EnergySource2 != null && !_isAdjustingShares)
+                    {
+                        try
+                        {
+                            _isAdjustingShares = true;
+                            _data.EnergySource2.Share = Math.Clamp(100.0 - clamped, 0.0, 100.0);
+                            OnPropertyChanged(nameof(EnergySource2Share));
+                        }
+                        finally
+                        {
+                            _isAdjustingShares = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        public double EnergySource1EmissionEfficiency
+        {
+            get => _data.EnergySource1.EmissionEfficiency;
+            set
+            {
+                if (_data.EnergySource1.EmissionEfficiency != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource1.EmissionEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource1EmissionEfficiency));
+                }
+            }
+        }
+
+        public double EnergySource1DistributionEfficiency
+        {
+            get => _data.EnergySource1.DistributionEfficiency;
+            set
+            {
+                if (_data.EnergySource1.DistributionEfficiency != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource1.DistributionEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource1DistributionEfficiency));
+                }
+            }
+        }
+
+        public double EnergySource1AutomaticControl
+        {
+            get => _data.EnergySource1.AutomaticControl;
+            set
+            {
+                if (_data.EnergySource1.AutomaticControl != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource1.AutomaticControl = clamped;
+                    OnPropertyChanged(nameof(EnergySource1AutomaticControl));
+                }
+            }
+        }
+
+        public double EnergySource1EnergyManagement
+        {
+            get => _data.EnergySource1.EnergyManagement;
+            set
+            {
+                if (_data.EnergySource1.EnergyManagement != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource1.EnergyManagement = clamped;
+                    OnPropertyChanged(nameof(EnergySource1EnergyManagement));
+                }
+            }
+        }
+
+        public double EnergySource1GenerationEfficiency
+        {
+            get => _data.EnergySource1.GenerationEfficiency;
+            set
+            {
+                if (_data.EnergySource1.GenerationEfficiency != value)
+                {
+                    var clamped = Math.Max(value, 0); // Can be > 100 for heat pumps
+                    _data.EnergySource1.GenerationEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource1GenerationEfficiency));
+                }
+            }
+        }
+
+        public Models.EnergyCarrierCode? EnergySource1Carrier
+        {
+            get => _data.EnergySource1.EnergyCarrier;
+            set
+            {
+                if (_data.EnergySource1.EnergyCarrier != value)
+                {
+                    _data.EnergySource1.EnergyCarrier = value;
+                    OnPropertyChanged(nameof(EnergySource1Carrier));
+                }
+            }
+        }
+
+        // ========== ENERGY SOURCE 2 PROPERTIES (optional) ==========
+
+        public bool UseSecondEnergySource
+        {
+            get => _data.UseSecondEnergySource;
+            set
+            {
+                if (_data.UseSecondEnergySource != value)
+                {
+                    _data.UseSecondEnergySource = value;
+                    // If disabling second source, force shares to 100/0
+                    if (!value)
+                    {
+                        if (_data.EnergySource1 != null)
+                        {
+                            _data.EnergySource1.Share = 100.0;
+                            OnPropertyChanged(nameof(EnergySource1Share));
+                        }
+                        if (_data.EnergySource2 != null)
+                        {
+                            _data.EnergySource2.Share = 0.0;
+                            OnPropertyChanged(nameof(EnergySource2Share));
+                        }
+                    }
+                    else
+                    {
+                        // Ensure energySource2 exists
+                        if (_data.EnergySource2 == null)
+                        {
+                            _data.EnergySource2 = new VentilationEnergySource
+                            {
+                                Type = EnergySourceType.Electricity,
+                                Share = 0.0
+                            };
+                        }
+                    }
+
+                    OnPropertyChanged(nameof(UseSecondEnergySource));
+                }
+            }
+        }
+
+        public double EnergySource2Share
+        {
+            get => _data.EnergySource2?.Share ?? 0;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.Share != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.Share = clamped;
+                    OnPropertyChanged(nameof(EnergySource2Share));
+
+                    // Auto-adjust source1 if needed
+                    if (UseSecondEnergySource && _data.EnergySource1 != null && !_isAdjustingShares)
+                    {
+                        try
+                        {
+                            _isAdjustingShares = true;
+                            _data.EnergySource1.Share = Math.Clamp(100.0 - clamped, 0.0, 100.0);
+                            OnPropertyChanged(nameof(EnergySource1Share));
+                        }
+                        finally
+                        {
+                            _isAdjustingShares = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        public double EnergySource2EmissionEfficiency
+        {
+            get => _data.EnergySource2?.EmissionEfficiency ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.EmissionEfficiency != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.EmissionEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource2EmissionEfficiency));
+                }
+            }
+        }
+
+        public double EnergySource2DistributionEfficiency
+        {
+            get => _data.EnergySource2?.DistributionEfficiency ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.DistributionEfficiency != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.DistributionEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource2DistributionEfficiency));
+                }
+            }
+        }
+
+        public double EnergySource2AutomaticControl
+        {
+            get => _data.EnergySource2?.AutomaticControl ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.AutomaticControl != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.AutomaticControl = clamped;
+                    OnPropertyChanged(nameof(EnergySource2AutomaticControl));
+                }
+            }
+        }
+
+        public double EnergySource2EnergyManagement
+        {
+            get => _data.EnergySource2?.EnergyManagement ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.EnergyManagement != value)
+                {
+                    var clamped = Math.Clamp(value, 0, 100);
+                    _data.EnergySource2.EnergyManagement = clamped;
+                    OnPropertyChanged(nameof(EnergySource2EnergyManagement));
+                }
+            }
+        }
+
+        public double EnergySource2GenerationEfficiency
+        {
+            get => _data.EnergySource2?.GenerationEfficiency ?? 100;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.GenerationEfficiency != value)
+                {
+                    var clamped = Math.Max(value, 0);
+                    _data.EnergySource2.GenerationEfficiency = clamped;
+                    OnPropertyChanged(nameof(EnergySource2GenerationEfficiency));
+                }
+            }
+        }
+
+        public Models.EnergyCarrierCode? EnergySource2Carrier
+        {
+            get => _data.EnergySource2?.EnergyCarrier;
+            set
+            {
+                if (_data.EnergySource2 != null && _data.EnergySource2.EnergyCarrier != value)
+                {
+                    _data.EnergySource2.EnergyCarrier = value;
+                    OnPropertyChanged(nameof(EnergySource2Carrier));
                 }
             }
         }

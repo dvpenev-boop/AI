@@ -63,6 +63,26 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private double _heatingEfficiency = 100.0;
 
+    // ========== ЕНЕРГИЕН ИЗТОЧНИК ЗА ОТОПЛЕНИЕ (по аналог с вентилация) ==========
+
+    /// <summary>
+    /// Енергиен източник 1 (ЕИ1)
+    /// </summary>
+    [ObservableProperty]
+    private VentilationEnergySource _energySource1 = new();
+
+    /// <summary>
+    /// Енергиен източник 2 (ЕИ2) - опционален
+    /// </summary>
+    [ObservableProperty]
+    private VentilationEnergySource? _energySource2 = null;
+
+    /// <summary>
+    /// Използва ли се втори енергиен източник
+    /// </summary>
+    [ObservableProperty]
+    private bool _useSecondEnergySource = false;
+
         // ========== ОБИТАТЕЛИ ==========
 
         /// <summary>
