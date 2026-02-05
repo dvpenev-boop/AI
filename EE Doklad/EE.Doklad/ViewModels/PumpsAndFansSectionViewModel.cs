@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -60,6 +61,8 @@ namespace EE.Doklad.ViewModels
 
         // ========== 15.1 ОТОПЛЕНИЕ ==========
 
+        public ObservableCollection<PumpFanHeatingRow> HeatingRows => _data.HeatingRows;
+
         public string HeatingEM
         {
             get => _data.HeatingEM ?? "0.96";
@@ -79,6 +82,8 @@ namespace EE.Doklad.ViewModels
         public double HeatingAnnualHours => _data.HeatingAnnualHours;
 
         // ========== 15.2 ОХЛАЖДАНЕ ==========
+
+        public ObservableCollection<PumpFanCoolingRow> CoolingRows => _data.CoolingRows;
 
         public string CoolingEM
         {
