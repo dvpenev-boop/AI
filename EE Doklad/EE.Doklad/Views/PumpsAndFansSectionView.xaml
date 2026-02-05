@@ -1,0 +1,395 @@
+<UserControl x:Class="EE.Doklad.Views.PumpsAndFansSectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:EE.Doklad.Models"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,20,0,10"/>
+        </Style>
+
+        <Style x:Key="SubHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,15,0,8"/>
+            <Setter Property="Foreground" Value="#333"/>
+        </Style>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="HeaderLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource LabelStyle}">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,8"/>
+        </Style>
+
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#DDD"/>
+        </Style>
+
+        <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="#F9F9F9"/>
+            <Setter Property="Foreground" Value="#555"/>
+        </Style>
+
+        <Style x:Key="ResultLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,10,0,5"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <!-- Заглавие -->
+            <TextBlock Text="15. Помпи и вентилатори"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Margin="0,0,0,15"/>
+
+            <!-- Описание -->
+            <TextBlock Text="Описание:"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,5"/>
+
+            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                     MinHeight="80"
+                     Padding="10"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     FontSize="11"
+                     Margin="0,0,0,20"
+                     BorderBrush="#E0E0E0"
+                    />
+
+            <!-- ========== 15.1 ОТОПЛЕНИЕ ========== -->
+            <TextBlock Text="15.1 Помпи и вентилатори – ОТОПЛЕНИЕ"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Автоматично изчислени часове -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Годишни часове на работа (автоматично изчислени):"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+                <TextBlock Text="{Binding HeatingAnnualHours, StringFormat='{}{0:F0} ч/год'}"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#2196F3"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Таблица за отопление -->
+            <Border BorderBrush="#888" Margin="0,0,0,15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Header Row -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+
+                    <!-- Data Rows -->
+                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#888">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="250"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="200"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="120"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                        <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Add/Remove Row Buttons -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
+                        <Button Content="+ Добави ред" Padding="10,5" Margin="0,0,10,0" Click="AddHeatingRow_Click"/>
+                        <Button Content="- Изтрий ред" Padding="10,5" Click="RemoveHeatingRow_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- EM коефициент и резултати за отопление -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Енергиен мениджмънт и поддръжка (EM):"
+                               FontSize="11"
+                               Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding HeatingEM, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             Width="100"
+                             HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding HeatingTotalAnnualConsumption, StringFormat='Обща консумация: {0:F2} kWh/год'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding HeatingSpecificPower, StringFormat='Специфична мощност: {0:F3} W/m²'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ========== 15.2 ОХЛАЖДАНЕ ========== -->
+            <TextBlock Text="15.2 Помпи и вентилатори – ОХЛАЖДАНЕ"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Автоматично изчислени часове -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Годишни часове на работа (автоматично изчислени, 1 май – 30 септември):"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+                <TextBlock Text="{Binding CoolingAnnualHours, StringFormat='{}{0:F0} ч/год'}"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#2196F3"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Таблица за охлаждане -->
+            <Border BorderBrush="#888" Margin="0,0,0,15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Header Row -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+
+                    <!-- Data Rows -->
+                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#888">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="250"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="200"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="120"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                        <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                        <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Add/Remove Row Buttons -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
+                        <Button Content="+ Добави ред" Padding="10,5" Margin="0,0,10,0" Click="AddCoolingRow_Click"/>
+                        <Button Content="- Изтрий ред" Padding="10,5" Click="RemoveCoolingRow_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- EM коефициент и резултати за охлаждане -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Енергиен мениджмънт и поддръжка (EM):"
+                               FontSize="11"
+                               Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding CoolingEM, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             Width="100"
+                             HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CoolingTotalAnnualConsumption, StringFormat='Обща консумация: {0:F2} kWh/год'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding CoolingSpecificPower, StringFormat='Специфична мощност: {0:F3} W/m²'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ========== 15.3 БГВ ========== -->
+            <TextBlock Text="15.3 Помпа за БГВ"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Автоматично изчислени часове -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Годишни часове на работа (автоматично изчислени):"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+                <TextBlock Text="{Binding DhwAnnualHours, StringFormat='{}{0:F0} ч/год'}"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#2196F3"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Таблица за БГВ -->
+            <Border BorderBrush="#888" Margin="0,0,0,15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Header Row -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Часове/ден" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+
+                    <!-- Data Row -->
+                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding DhwPumpNominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DhwPumpQuantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding DhwPumpHoursPerDay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                    <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding DhwPumpMode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                    <TextBox Grid.Row="1" Grid.Column="4" Text="{Binding DhwAnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                    <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding DhwTotalAnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                </Grid>
+            </Border>
+
+            <!-- EM коефициент и резултати за БГВ -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Енергиен мениджмънт и поддръжка (EM):"
+                               FontSize="11"
+                               Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding DhwEM, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             Width="100"
+                             HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding DhwSpecificPower, StringFormat='Специфична мощност: {0:F3} W/m²'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ========== ОБЩО ЗА СЕКЦИЯ 15 ========== -->
+            <Border BorderBrush="#2196F3" Background="#E3F2FD" Padding="15" Margin="0,20,0,0">
+                <StackPanel>
+                    <TextBlock Text="ОБЩО ЗА СЕКЦИЯ 15"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="#1976D2"
+                               Margin="0,0,0,10"/>
+
+                    <TextBlock Text="{Binding TotalAnnualConsumption, StringFormat='Обща годишна консумация: {0:F2} kWh/год'}"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               Margin="0,0,0,5"/>
+
+                    <TextBlock Text="{Binding TotalSpecificPower, StringFormat='Обща специфична мощност: {0:F3} W/m²'}"
+                               FontSize="13"
+                               FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ========== ГЕНЕРИРАН ТЕКСТ ЗА ДОКЛАД ========== -->
+            <TextBlock Text="Текст за енергиен доклад:"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <Border BorderBrush="#E0E0E0" Background="#FAFAFA" Padding="15">
+                <TextBlock Text="{Binding GeneratedReportText}"
+                           TextWrapping="Wrap"
+                           FontSize="11"
+                           LineHeight="20"/>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

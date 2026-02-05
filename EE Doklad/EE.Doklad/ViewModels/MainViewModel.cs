@@ -628,7 +628,7 @@ namespace EE.Doklad.ViewModels
                 "12. Охлаждане",
                 "13. Вентилация Отопление",
                 "14. Вентилация Охлаждане",
-                "15. Помпи",
+                "15. Помпи и вентилатори",
                 "16. Топла вода за битови нужди (БГВ)",
                 "17. Осветление",
                 "18. Други разходи влияещи",
@@ -713,7 +713,17 @@ namespace EE.Doklad.ViewModels
                     };
                     section.StaticText = string.Empty;
                 }
-                // Помпи: няма специален SectionType, използваме нормална секция
+                // Помпи и вентилатори
+                else if (laterTitles[i].Contains("15. Помпи и вентилатори"))
+                {
+                    section.Type = SectionType.PumpsAndFans;
+                    section.PumpsAndFansSectionData = new PumpsAndFansSectionData
+                    {
+                        Title = "Помпи и вентилатори",
+                        Description = "Попълнете данните за помпи и вентилатори."
+                    };
+                    section.StaticText = string.Empty;
+                }
                 else if (laterTitles[i].Contains("16. Топла вода за битови нужди"))
                 {
                     section.Type = SectionType.HotWater;

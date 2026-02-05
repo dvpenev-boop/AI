@@ -20,7 +20,8 @@ namespace EE.Doklad.Models
         UnconditionedZones,         // Неклиматизирани зони (секция №10)
         Heating,                    // Отопление (секция №11 след добавяне на UnconditionedZones)
         Ventilation,                // Вентилация (секция №13 след добавяне на UnconditionedZones)
-        HotWater,                   // Топла вода за битови нужди (секция №15 след добавяне на UnconditionedZones)
+        HotWater,                   // Топла вода за битови нужди (секция №14 след добавяне на UnconditionedZones)
+        PumpsAndFans,               // Помпи и вентилатори (секция №15)
         Lighting,                   // Осветление (секция №16 след добавяне на UnconditionedZones)
         AppliancesAffecting,        // Други разходи влияещи (секция №17 след добавяне на UnconditionedZones)
         AppliancesNotAffecting,     // Други разходи невлияещи (секция №18 след добавяне на UnconditionedZones)
@@ -109,6 +110,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Топла вода за битови нужди" (само за HotWater секции)
         /// </summary>
         public HotWaterSectionData? HotWaterSectionData { get; set; }
+
+        /// <summary>
+        /// Данни за раздел "Помпи и вентилатори" (само за PumpsAndFans секции)
+        /// </summary>
+        public PumpsAndFansSectionData? PumpsAndFansSectionData { get; set; }
 
         /// <summary>
         /// Данни за раздел "Осветление" (само за Lighting секции)

@@ -443,6 +443,38 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = hotWaterEditor;
         }
+        else if (section.Type == ModelSectionType.PumpsAndFans ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Помпи и вентилатори")))
+        {
+            try
+            {
+                if (section.PumpsAndFansSectionData == null)
+                    section.PumpsAndFansSectionData = new Models.PumpsAndFansSectionData();
+
+                section.Type = ModelSectionType.PumpsAndFans;
+
+                // Намираме секция 5 (ObjectData) за автоматично изчисление на часове
+                var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+                var objectData = objectDataSection?.ObjectDataSectionData;
+
+                var pumpsAndFansView = new PumpsAndFansSectionView
+                {
+                    DataContext = new ViewModels.PumpsAndFansSectionViewModel(section.PumpsAndFansSectionData, objectData)
+                };
+                ContentScrollViewer.Content = pumpsAndFansView;
+            }
+            catch (System.Exception ex)
+            {
+                // Log the exception to disk for debugging
+                try
+                {
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "pumps_fans_view_error.txt"), ex.ToString());
+                }
+                catch { }
+
+                System.Windows.MessageBox.Show($"Грешка при отваряне на секция Помпи и вентилатори:\n{ex.Message}", "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         else if (section.Type == ModelSectionType.Lighting ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Осветление")))
         {
