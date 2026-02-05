@@ -486,8 +486,9 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <TextBlock Text="Вътрешна температура – ЛЯТО (°C):" VerticalAlignment="Center" Width="200"/>
+                                        <!-- bind to ThetaAdjSummer (adjacent unconditioned-space summer temperature) so Qtr cooling uses this value -->
                                         <TextBox Width="100" Margin="5,0,0,0"
-                                                 Text="{Binding Data.ThetaIntSummer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                 Text="{Binding Data.ThetaAdjSummer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
@@ -537,7 +538,8 @@
                                                 <DataGridTextColumn Header="№" Binding="{Binding MonthNumber}" Width="40"/>
                                                 <DataGridTextColumn Header="Месец" Binding="{Binding MonthName}" Width="120"/>
                                                 <DataGridTextColumn Header="θe (°C)" Binding="{Binding OutdoorTempC, StringFormat=F1}" Width="80"/>
-                                                <DataGridTextColumn Header="θadj (°C)" Binding="{Binding ThetaAdjUsed_C, StringFormat=F1}" Width="90"/>
+                                                <DataGridTextColumn Header="θadj (зима) (°C)" Binding="{Binding ThetaAdjHeat_C, StringFormat=F1}" Width="90"/>
+                                                <DataGridTextColumn Header="θadj (лято) (°C)" Binding="{Binding ThetaAdjCool_C, StringFormat=F1}" Width="90"/>
                                                 <DataGridTextColumn Header="ΣUA_sep (W/K)" Binding="{Binding SumUA_Separating_WK, StringFormat=F2}" Width="110"/>
                                                 <DataGridTextColumn Header="Часове отопл. (h)" Binding="{Binding HeatingHours_h, StringFormat=F0}" Width="110"/>
                                                 <DataGridTextColumn Header="Часове охл. (h)" Binding="{Binding CoolingHours_h, StringFormat=F0}" Width="110"/>

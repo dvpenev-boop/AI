@@ -248,6 +248,14 @@ namespace EE.Doklad.Services
                 double heatingHours_m = heatingHours != null && heatingHours.Length == 12 ? heatingHours[m] : 0.0;
                 double coolingHours_m = coolingHours != null && coolingHours.Length == 12 ? coolingHours[m] : 0.0;
 
+                // TEMPORARY FILTER: only consider cooling hours for May..Sep (months 5..9, zero-based 4..8)
+                // Remove month filter when full cooling season/calendar is implemented.
+                // TODO: Remove month filter when full cooling season/calendar is implemented.
+                if (m < 4 || m > 8)
+                {
+                    coolingHours_m = 0.0;
+                }
+
                 // theta for heated indoor (from heating module) or fallback 20°C
                 double thetaHeatedHeat = 20.0;
                 if (thetaIntCalcHeating != null && thetaIntCalcHeating.Length == 12)
@@ -275,7 +283,9 @@ namespace EE.Doklad.Services
                     MonthNumber = m + 1,
                     MonthName = monthly.MonthName,
                     OutdoorTempC = monthly.OutdoorTempC,
-                    ThetaAdjUsed_C = heatingHours_m > 0 ? thetaAdjUsed_heating : (coolingHours_m > 0 ? thetaAdjUsed_cooling : thetaAdjUsed_heating),
+                    // keep explicit heat/cool adjacent temperatures so UI and calculations can show both
+                    ThetaAdjHeat_C = thetaAdjUsed_heating,
+                    ThetaAdjCool_C = thetaAdjUsed_cooling,
                     SumUA_Separating_WK = sumUA_sep,
                     HeatingHours_h = heatingHours_m,
                     CoolingHours_h = coolingHours_m,
@@ -346,10 +356,15 @@ namespace EE.Doklad.Services
         public int MonthNumber { get; set; }
         public string MonthName { get; set; } = string.Empty;
         public double OutdoorTempC { get; set; }
-        /// <summary>
-        /// Temperature of the unconditioned space used for this calculation (adjacent)
-        /// </summary>
-        public double ThetaAdjUsed_C { get; set; }
+    /// <summary>
+    /// Temperature of the unconditioned space used for heating (adjacent)
+    /// </summary>
+    public double ThetaAdjHeat_C { get; set; }
+
+    /// <summary>
+    /// Temperature of the unconditioned space used for cooling (adjacent)
+    /// </summary>
+    public double ThetaAdjCool_C { get; set; }
         /// <summary>
         /// ΣUA for separating elements (Hztc-ztu) (W/K)
         /// </summary>

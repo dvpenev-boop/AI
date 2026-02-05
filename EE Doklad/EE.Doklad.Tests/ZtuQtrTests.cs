@@ -176,5 +176,32 @@ namespace EE.Doklad.Tests
             // Sum cooling May..Sep should be larger for B
             Assert.True(qB.Annual_Qtr_cool_kWh > qA.Annual_Qtr_cool_kWh);
         }
+
+        [Fact]
+        public void CoolingHours_Filter_Applies_JanZero_JulNonZero()
+        {
+            var zone = new ZtuZone { Name = "Z1", Type = ZtuType.External };
+            var monthlyResults = new ZtuMonthlyResults();
+            for (int m = 0; m < 12; m++) monthlyResults.Months.Add(new ZtuMonthlyResult { MonthNumber = m + 1, MonthName = "M", OutdoorTempC = 0.0, HztcZtu_WK = (m>=4 && m<=8?100.0:0.0) });
+
+            var objectData = new ObjectDataSectionData();
+            // Ensure cooling schedule is present so service returns non-zero hours
+            objectData.CoolingWorkdaysHours = "24";
+            objectData.CoolingSaturdayHours = "24";
+            objectData.CoolingSundayHours = "24";
+
+            var heatingData = new HeatingSectionData();
+            var climate = new ClimateZoneData();
+
+            var calc = new UnconditionedZonesCalculator();
+            var uncond = new UnconditionedZoneSectionData { ThetaAdjSummer = 35.0 };
+
+            var q = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncond, climate, 2024);
+
+            // January index 0 must have zero cooling hours per temporary filter
+            Assert.Equal(0.0, q.Months[0].CoolingHours_h);
+            // July index 6 should have non-zero cooling hours
+            Assert.True(q.Months[6].CoolingHours_h > 0.0);
+        }
     }
 }
