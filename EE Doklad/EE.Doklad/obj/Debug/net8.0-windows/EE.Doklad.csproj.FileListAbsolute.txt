@@ -163,3 +163,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\VentilationSectionView.
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\VentilationSectionView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\UnconditionedZonesSectionView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\UnconditionedZonesSectionView.baml
+e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\VentilationCoolingSectionView.g.cs
+e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\VentilationCoolingSectionView.baml

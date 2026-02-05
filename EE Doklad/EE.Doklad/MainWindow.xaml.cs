@@ -262,8 +262,8 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = unconditionedZonesView;
         }
-        else if (section.Type == ModelSectionType.Heating ||
-                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Отопление")))
+    else if (section.Type == ModelSectionType.Heating ||
+         (section.Type == ModelSectionType.Normal && !string.IsNullOrEmpty(section.Title) && section.Title.Contains("Отопление")))
         {
             if (section.HeatingSectionData == null)
                 section.HeatingSectionData = new Models.HeatingSectionData();
@@ -280,8 +280,36 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = heatingSectionView;
         }
+        else if (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Вентилация Охлаждане"))
+        {
+            // Special-case: Ventilation (cooling) - standalone UI without linking to other sections
+            if (section.VentilationSectionData == null)
+                section.VentilationSectionData = new Models.VentilationSectionData();
+
+            section.Type = ModelSectionType.Ventilation;
+
+            try
+            {
+                var ventCoolingView = new Views.VentilationCoolingSectionView
+                {
+                    // Pass only the section data to avoid automatic linking to ObjectData/Heating
+                    DataContext = new ViewModels.VentilationSectionViewModel(section.VentilationSectionData)
+                };
+                ContentScrollViewer.Content = ventCoolingView;
+            }
+            catch (System.Exception ex)
+            {
+                try
+                {
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ventilation_view_error.txt"), ex.ToString());
+                }
+                catch { }
+
+                System.Windows.MessageBox.Show("Възникна грешка при отваряне на секция Вентилация Охлаждане. Проверете ventilation_view_error.txt за подробности.", "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         else if (section.Type == ModelSectionType.Ventilation ||
-                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Вентилация")))
+                 (section.Type == ModelSectionType.Normal && !string.IsNullOrEmpty(section.Title) && section.Title.Contains("Вентилация")))
         {
             if (section.VentilationSectionData == null)
                 section.VentilationSectionData = new Models.VentilationSectionData();

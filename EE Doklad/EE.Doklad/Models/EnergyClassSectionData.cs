@@ -61,7 +61,7 @@ namespace EE.Doklad.Models
         private BuildingTypeCode? _buildingType;
 
         /// <summary>
-        /// EP - Годишна специфична енергия от секция 18 [kWh/m²] (readonly - set externally)
+    /// EP - Годишна специфична енергия от секция 'Резултати сграда' [kWh/m²] (readonly - set externally)
         /// </summary>
         [ObservableProperty]
         private double? _energyPerformance;
@@ -184,13 +184,13 @@ namespace EE.Doklad.Models
             get
             {
                 if (!BuildingType.HasValue && !EnergyPerformance.HasValue)
-                    return "Изберете тип сграда в секция 5 и въведете/изчислете данните в секция 18 'Резултати сграда'.";
+                    return "Изберете тип сграда в секция 5 и въведете/изчислете данните в секция 'Резултати сграда'.";
                 
                 if (!BuildingType.HasValue)
                     return "Изберете тип сграда в секция 5 'Данни за обекта'.";
                 
                 if (!EnergyPerformance.HasValue)
-                    return "Въведете/изчислете данните в секция 18 'Резултати сграда'.";
+                    return "Въведете/изчислете данните в секция 'Резултати сграда'.";
                 
                 return string.Empty;
             }

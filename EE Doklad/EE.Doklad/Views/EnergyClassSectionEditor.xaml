@@ -59,12 +59,8 @@
                     </TextBlock>
                     
                     <TextBlock TextWrapping="Wrap" FontSize="12" Margin="15,0,0,10">
-                        <Run Text="• EP (годишна специфична енергия) от секция 18 "/>
-                        <Run Text="'Резултати сграда'" FontStyle="Italic"/>
-                        <Run Text=" → ред "/>
-                        <Run Text="'ОБЩО'" FontWeight="Bold"/>
-                        <Run Text=" → колона "/>
-                        <Run Text="'kWh/m²'" FontWeight="Bold"/>
+                        <Run Text="• EP (годишна специфична енергия) от секция 'Резултати сграда' "/>
+                        <Run Text="(ред 'ОБЩО' → колона 'kWh/m²')" FontWeight="Bold"/>
                     </TextBlock>
 
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#555">
@@ -306,8 +302,8 @@
                         <Run Text="'Данни за обекта' → Тип сграда" FontStyle="Italic"/>
                     </TextBlock>
                     <TextBlock TextWrapping="Wrap" FontSize="11">
-                        <Run Text="• EP стойност: Секция 18 " FontWeight="SemiBold"/>
-                        <Run Text="'Резултати сграда' → Ред 'ОБЩО' → Колона 'kWh/m²'" FontStyle="Italic"/>
+                        <Run Text="• EP стойност: Секция 'Резултати сграда' " FontWeight="SemiBold"/>
+                        <Run Text="→ Ред 'ОБЩО' → Колона 'kWh/m²'" FontStyle="Italic"/>
                     </TextBlock>
                 </StackPanel>
             </Border>

@@ -34,9 +34,9 @@ namespace EE.Doklad.ViewModels
             _report = report;
             Data = data;
 
-            // Намираме секция 5 "Данни за обекта"
-            var objectSection = _report.Sections.FirstOrDefault(s => 
-                s.Type == SectionType.ObjectData || 
+            // Намираме секция 5 "Данни за обекта" (предпочитаме SectionType, но пазим title-fallback)
+            var objectSection = _report.Sections.FirstOrDefault(s =>
+                s.Type == SectionType.ObjectData ||
                 (s.Title != null && s.Title.Contains("Данни за обекта")));
 
             if (objectSection?.ObjectDataSectionData != null)
@@ -45,10 +45,10 @@ namespace EE.Doklad.ViewModels
                 _objectDataSection.PropertyChanged += ObjectDataSection_PropertyChanged;
             }
 
-            // Намираме секция 18 "Резултати сграда"
-            var resultsSection = _report.Sections.FirstOrDefault(s => 
-                s.Type == SectionType.Results || 
-                (s.Title != null && (s.Title.Contains("Резултати сграда") || s.Title.Contains("18."))));
+            // Намираме секция "Резултати сграда" (предпочитаме SectionType, но пазим title-fallback)
+            var resultsSection = _report.Sections.FirstOrDefault(s =>
+                s.Type == SectionType.Results ||
+                (s.Title != null && s.Title.Contains("Резултати сграда")));
 
             if (resultsSection?.ResultsSectionData != null)
             {
