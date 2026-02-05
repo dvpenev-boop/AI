@@ -98,65 +98,130 @@
                            VerticalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Таблица за отопление -->
-            <Border BorderBrush="#888" Margin="0,0,0,15">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="250"/>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Таблици за отопление: 15.1.1 Помпи и 15.1.2 Вентилатори -->
+            <StackPanel Margin="0,0,0,15">
+                <!-- 15.1.1 Помпи -->
+                <TextBlock Text="15.1.1 Помпи" Style="{StaticResource SubHeaderStyle}"/>
+                <Border BorderBrush="#888" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Header Row -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <!-- Header Row -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
 
-                    <!-- Data Rows -->
-                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingRows}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="#888">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="250"/>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="200"/>
-                                            <ColumnDefinition Width="120"/>
-                                            <ColumnDefinition Width="120"/>
-                                        </Grid.ColumnDefinitions>
+                        <!-- Data Rows (pumps) -->
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingPumpsView}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#888">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="200"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
-                                        <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                            <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                            <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                    <!-- Add/Remove Row Buttons -->
-                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
-                        <Button Content="+ Добави ред" Padding="10,5" Margin="0,0,10,0" Click="AddHeatingRow_Click"/>
-                        <Button Content="- Изтрий ред" Padding="10,5" Click="RemoveHeatingRow_Click"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                        <!-- Add/Remove Row Buttons (pumps) -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
+                            <Button Content="+ Добави помпа" Padding="10,5" Margin="0,0,10,0" Click="AddHeatingPump_Click"/>
+                            <Button Content="- Изтрий помпа" Padding="10,5" Click="RemoveHeatingPump_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 15.1.2 Вентилатори -->
+                <TextBlock Text="15.1.2 Вентилатори" Style="{StaticResource SubHeaderStyle}"/>
+                <Border BorderBrush="#888">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Header Row -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+
+                        <!-- Data Rows (fans) -->
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingFansView}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#888">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="200"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                            <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Add/Remove Row Buttons (fans) -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
+                            <Button Content="+ Добави вентилатор" Padding="10,5" Margin="0,0,10,0" Click="AddHeatingFan_Click"/>
+                            <Button Content="- Изтрий вентилатор" Padding="10,5" Click="RemoveHeatingFan_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
 
             <!-- EM коефициент и резултати за отопление -->
             <Grid Margin="0,0,0,20">
@@ -178,7 +243,13 @@
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding HeatingTotalAnnualConsumption, StringFormat='Обща консумация: {0:F2} kWh/год'}"
                                Style="{StaticResource ResultLabelStyle}"/>
-                    <TextBlock Text="{Binding HeatingSpecificPower, StringFormat='Специфична мощност: {0:F3} W/m²'}"
+                    <TextBlock Text="{Binding HeatingPumpsTotalAnnualConsumption, StringFormat='Помпи (отопление) - консумация: {0:F2} kWh/год'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding HeatingFansTotalAnnualConsumption, StringFormat='Вентилатори (вентилация) - консумация: {0:F2} kWh/год'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding HeatingPumpsSpecificPower, StringFormat='Помпи (отопление) - {0:F3} W/m²'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding HeatingFansSpecificPower, StringFormat='Вентилатори (вентилация) - {0:F3} W/m²'}"
                                Style="{StaticResource ResultLabelStyle}"/>
                 </StackPanel>
             </Grid>
@@ -200,65 +271,130 @@
                            VerticalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Таблица за охлаждане -->
-            <Border BorderBrush="#888" Margin="0,0,0,15">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="250"/>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Таблици за охлаждане: 15.2.1 Помпи и 15.2.2 Вентилатори -->
+            <StackPanel Margin="0,0,0,15">
+                <!-- 15.2.1 Помпи -->
+                <TextBlock Text="15.2.1 Помпи" Style="{StaticResource SubHeaderStyle}"/>
+                <Border BorderBrush="#888" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Header Row -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <!-- Header Row -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
 
-                    <!-- Data Rows -->
-                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingRows}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="#888">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="250"/>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="200"/>
-                                            <ColumnDefinition Width="120"/>
-                                            <ColumnDefinition Width="120"/>
-                                        </Grid.ColumnDefinitions>
+                        <!-- Data Rows (pumps) -->
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingPumpsView}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#888">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="200"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
-                                        <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
-                                        <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                            <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                            <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                    <!-- Add/Remove Row Buttons -->
-                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
-                        <Button Content="+ Добави ред" Padding="10,5" Margin="0,0,10,0" Click="AddCoolingRow_Click"/>
-                        <Button Content="- Изтрий ред" Padding="10,5" Click="RemoveCoolingRow_Click"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                        <!-- Add/Remove Row Buttons (pumps) -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
+                            <Button Content="+ Добави помпа" Padding="10,5" Margin="0,0,10,0" Click="AddCoolingPump_Click"/>
+                            <Button Content="- Изтрий помпа" Padding="10,5" Click="RemoveCoolingPump_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 15.2.2 Вентилатори -->
+                <TextBlock Text="15.2.2 Вентилатори" Style="{StaticResource SubHeaderStyle}"/>
+                <Border BorderBrush="#888">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Header Row -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Тип устройство" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Мощност [W]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Брой" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Режим" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Часове [ч/год]" Style="{StaticResource HeaderLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
+
+                        <!-- Data Rows (fans) -->
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingFansView}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#888">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="200"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Column="0" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="1" Text="{Binding NominalPower, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="2" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="3" Text="{Binding Mode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" BorderBrush="#DDD"/>
+                                            <TextBox Grid.Column="4" Text="{Binding AnnualHours, Mode=OneWay, StringFormat='{}{0:F0}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                            <TextBox Grid.Column="5" Text="{Binding AnnualConsumption, Mode=OneWay, StringFormat='{}{0:F2}'}" Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" IsReadOnly="True"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Add/Remove Row Buttons (fans) -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="10">
+                            <Button Content="+ Добави вентилатор" Padding="10,5" Margin="0,0,10,0" Click="AddCoolingFan_Click"/>
+                            <Button Content="- Изтрий вентилатор" Padding="10,5" Click="RemoveCoolingFan_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
 
             <!-- EM коефициент и резултати за охлаждане -->
             <Grid Margin="0,0,0,20">
@@ -280,7 +416,13 @@
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding CoolingTotalAnnualConsumption, StringFormat='Обща консумация: {0:F2} kWh/год'}"
                                Style="{StaticResource ResultLabelStyle}"/>
-                    <TextBlock Text="{Binding CoolingSpecificPower, StringFormat='Специфична мощност: {0:F3} W/m²'}"
+                    <TextBlock Text="{Binding CoolingPumpsTotalAnnualConsumption, StringFormat='Помпи (охлаждане) - консумация: {0:F2} kWh/год'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding CoolingFansTotalAnnualConsumption, StringFormat='Вентилатори (вентилация) - консумация: {0:F2} kWh/год'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding CoolingPumpsSpecificPower, StringFormat='Помпи (охлаждане) - {0:F3} W/m²'}"
+                               Style="{StaticResource ResultLabelStyle}"/>
+                    <TextBlock Text="{Binding CoolingFansSpecificPower, StringFormat='Вентилатори (вентилация) - {0:F3} W/m²'}"
                                Style="{StaticResource ResultLabelStyle}"/>
                 </StackPanel>
             </Grid>

@@ -39,6 +39,19 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double _heatingAnnualHours; // часове/год (read-only)
 
+    // Под-групи за 15.1: Помпи / Вентилатори
+    [ObservableProperty]
+    private double _heatingPumpsTotalAnnualConsumption; // kWh/год
+
+    [ObservableProperty]
+    private double _heatingPumpsSpecificPower; // W/m²
+
+    [ObservableProperty]
+    private double _heatingFansTotalAnnualConsumption; // kWh/год
+
+    [ObservableProperty]
+    private double _heatingFansSpecificPower; // W/m²
+
         // ========== 15.2 ОХЛАЖДАНЕ ==========
 
         [ObservableProperty]
@@ -56,6 +69,19 @@ namespace EE.Doklad.Models
 
         [ObservableProperty]
         private double _coolingAnnualHours; // часове/год (read-only)
+
+    // Под-групи за 15.2: Помпи / Вентилатори
+    [ObservableProperty]
+    private double _coolingPumpsTotalAnnualConsumption; // kWh/год
+
+    [ObservableProperty]
+    private double _coolingPumpsSpecificPower; // W/m²
+
+    [ObservableProperty]
+    private double _coolingFansTotalAnnualConsumption; // kWh/год
+
+    [ObservableProperty]
+    private double _coolingFansSpecificPower; // W/m²
 
         // ========== 15.3 БГВ ==========
 
@@ -94,15 +120,27 @@ namespace EE.Doklad.Models
 
         // ========== ГЕНЕРИРАН ТЕКСТ ЗА ДОКЛАД ==========
 
-        public string GeneratedReportText =>
-            "Електрическата консумация на помпите и вентилаторите е определена " +
-            "на база реални инсталирани мощности и автоматично изчислени " +
-            "годишни часове на работа, съобразени с климатичната зона, " +
-            "отоплителния сезон, фиксирания период за охлаждане, " +
-            "графиците на експлоатация и почивните дни на сградата. " +
-            "Специфичната мощност [W/m²] е изчислена чрез нормализиране " +
-            "спрямо отопляемата площ и коефициент за енергиен мениджмънт " +
-            "и поддръжка.";
+        public string GeneratedReportText
+        {
+            get
+            {
+                // Compose a concise report including subgroup totals
+                string nl = System.Environment.NewLine;
+                return
+                    $"Електрическата консумация на помпите и вентилаторите е определена на база реални инсталирани мощности и автоматично изчислени годишни часове на работа.{nl}{nl}" +
+                    $"15.1 Отопление:{nl}" +
+                    $"  - Общо: {HeatingTotalAnnualConsumption:F2} kWh/год; Специфична мощност: {HeatingSpecificPower:F3} W/m²{nl}" +
+                    $"  - 15.1.1 Помпи (отопление): {HeatingPumpsTotalAnnualConsumption:F2} kWh/год; {HeatingPumpsSpecificPower:F3} W/m²{nl}" +
+                    $"  - 15.1.2 Вентилатори (вентилация): {HeatingFansTotalAnnualConsumption:F2} kWh/год; {HeatingFansSpecificPower:F3} W/m²{nl}{nl}" +
+                    $"15.2 Охлаждане:{nl}" +
+                    $"  - Общо: {CoolingTotalAnnualConsumption:F2} kWh/год; Специфична мощност: {CoolingSpecificPower:F3} W/m²{nl}" +
+                    $"  - 15.2.1 Помпи (охлаждане): {CoolingPumpsTotalAnnualConsumption:F2} kWh/год; {CoolingPumpsSpecificPower:F3} W/m²{nl}" +
+                    $"  - 15.2.2 Вентилатори (вентилация): {CoolingFansTotalAnnualConsumption:F2} kWh/год; {CoolingFansSpecificPower:F3} W/m²{nl}{nl}" +
+                    $"15.3 Помпа за БГВ:{nl}" +
+                    $"  - Общо: {DhwTotalAnnualConsumption:F2} kWh/год; Специфична мощност: {DhwSpecificPower:F3} W/m²{nl}{nl}" +
+                    $"ОБЩО ЗА СЕКЦИЯ 15: {TotalAnnualConsumption:F2} kWh/год; Обща специфична мощност: {TotalSpecificPower:F3} W/m²";
+            }
+        }
     }
 
     /// <summary>

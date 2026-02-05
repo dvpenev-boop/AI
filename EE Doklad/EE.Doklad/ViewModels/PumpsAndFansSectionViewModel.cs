@@ -17,6 +17,11 @@ namespace EE.Doklad.ViewModels
     {
         private readonly PumpsAndFansSectionData _data;
         private readonly ObjectDataSectionData? _objectData;
+        // CollectionViewSources for filtered UI views
+        private System.Windows.Data.CollectionViewSource? _heatingPumpsCvs;
+        private System.Windows.Data.CollectionViewSource? _heatingFansCvs;
+        private System.Windows.Data.CollectionViewSource? _coolingPumpsCvs;
+        private System.Windows.Data.CollectionViewSource? _coolingFansCvs;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -37,11 +42,119 @@ namespace EE.Doklad.ViewModels
             }
 
             // Subscribe to collection changes
-            _data.HeatingRows.CollectionChanged += (s, e) => RecalculateHeating();
-            _data.CoolingRows.CollectionChanged += (s, e) => RecalculateCooling();
+            _data.HeatingRows.CollectionChanged += (s, e) => {
+                RecalculateHeating();
+                RefreshHeatingViews();
+                MaintainHeatingRowSubscriptions();
+            };
+            _data.CoolingRows.CollectionChanged += (s, e) => {
+                RecalculateCooling();
+                RefreshCoolingViews();
+                MaintainCoolingRowSubscriptions();
+            };
+
+            // Initialize collection view sources for filtered tables
+            InitializeCollectionViews();
+            MaintainHeatingRowSubscriptions();
+            MaintainCoolingRowSubscriptions();
 
             // Initial calculation
             RecalculateAll();
+        }
+
+        private void InitializeCollectionViews()
+        {
+            // Heating pumps/fans
+            _heatingPumpsCvs = new System.Windows.Data.CollectionViewSource { Source = _data.HeatingRows };
+            _heatingPumpsCvs.Filter += (s, e) =>
+            {
+                if (e.Item is PumpFanHeatingRow row)
+                {
+                    var deviceType = row.DeviceType ?? string.Empty;
+                    e.Accepted = deviceType.IndexOf("Вентил", StringComparison.OrdinalIgnoreCase) < 0;
+                }
+                else e.Accepted = false;
+            };
+
+            _heatingFansCvs = new System.Windows.Data.CollectionViewSource { Source = _data.HeatingRows };
+            _heatingFansCvs.Filter += (s, e) =>
+            {
+                if (e.Item is PumpFanHeatingRow row)
+                {
+                    var deviceType = row.DeviceType ?? string.Empty;
+                    e.Accepted = deviceType.IndexOf("Вентил", StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+                else e.Accepted = false;
+            };
+
+            // Cooling pumps/fans
+            _coolingPumpsCvs = new System.Windows.Data.CollectionViewSource { Source = _data.CoolingRows };
+            _coolingPumpsCvs.Filter += (s, e) =>
+            {
+                if (e.Item is PumpFanCoolingRow row)
+                {
+                    var deviceType = row.DeviceType ?? string.Empty;
+                    e.Accepted = deviceType.IndexOf("Вентил", StringComparison.OrdinalIgnoreCase) < 0;
+                }
+                else e.Accepted = false;
+            };
+
+            _coolingFansCvs = new System.Windows.Data.CollectionViewSource { Source = _data.CoolingRows };
+            _coolingFansCvs.Filter += (s, e) =>
+            {
+                if (e.Item is PumpFanCoolingRow row)
+                {
+                    var deviceType = row.DeviceType ?? string.Empty;
+                    e.Accepted = deviceType.IndexOf("Вентил", StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+                else e.Accepted = false;
+            };
+        }
+
+        private void RefreshHeatingViews()
+        {
+            _heatingPumpsCvs?.View?.Refresh();
+            _heatingFansCvs?.View?.Refresh();
+        }
+
+        private void RefreshCoolingViews()
+        {
+            _coolingPumpsCvs?.View?.Refresh();
+            _coolingFansCvs?.View?.Refresh();
+        }
+
+        private void MaintainHeatingRowSubscriptions()
+        {
+            foreach (var row in _data.HeatingRows)
+            {
+                row.PropertyChanged -= HeatingRow_PropertyChanged;
+                row.PropertyChanged += HeatingRow_PropertyChanged;
+            }
+        }
+
+        private void HeatingRow_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PumpFanHeatingRow.DeviceType))
+            {
+                RefreshHeatingViews();
+            }
+        }
+
+        private void MaintainCoolingRowSubscriptions()
+        {
+            foreach (var row in _data.CoolingRows)
+            {
+                row.PropertyChanged -= CoolingRow_PropertyChanged;
+                row.PropertyChanged += CoolingRow_PropertyChanged;
+            }
+        }
+
+        private void CoolingRow_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PumpFanCoolingRow.DeviceType))
+            {
+                RefreshCoolingViews();
+            }
         }
 
         // ========== PROPERTIES ==========
@@ -81,6 +194,12 @@ namespace EE.Doklad.ViewModels
         public double HeatingSpecificPower => _data.HeatingSpecificPower;
         public double HeatingAnnualHours => _data.HeatingAnnualHours;
 
+    // 15.1.1 / 15.1.2 subgroup totals
+    public double HeatingPumpsTotalAnnualConsumption => _data.HeatingPumpsTotalAnnualConsumption;
+    public double HeatingPumpsSpecificPower => _data.HeatingPumpsSpecificPower;
+    public double HeatingFansTotalAnnualConsumption => _data.HeatingFansTotalAnnualConsumption;
+    public double HeatingFansSpecificPower => _data.HeatingFansSpecificPower;
+
         // ========== 15.2 ОХЛАЖДАНЕ ==========
 
         public ObservableCollection<PumpFanCoolingRow> CoolingRows => _data.CoolingRows;
@@ -102,6 +221,18 @@ namespace EE.Doklad.ViewModels
         public double CoolingTotalAnnualConsumption => _data.CoolingTotalAnnualConsumption;
         public double CoolingSpecificPower => _data.CoolingSpecificPower;
         public double CoolingAnnualHours => _data.CoolingAnnualHours;
+
+    // 15.2.1 / 15.2.2 subgroup totals
+    public double CoolingPumpsTotalAnnualConsumption => _data.CoolingPumpsTotalAnnualConsumption;
+    public double CoolingPumpsSpecificPower => _data.CoolingPumpsSpecificPower;
+    public double CoolingFansTotalAnnualConsumption => _data.CoolingFansTotalAnnualConsumption;
+    public double CoolingFansSpecificPower => _data.CoolingFansSpecificPower;
+
+    // Expose filtered views for UI
+    public System.ComponentModel.ICollectionView? HeatingPumpsView => _heatingPumpsCvs?.View;
+    public System.ComponentModel.ICollectionView? HeatingFansView => _heatingFansCvs?.View;
+    public System.ComponentModel.ICollectionView? CoolingPumpsView => _coolingPumpsCvs?.View;
+    public System.ComponentModel.ICollectionView? CoolingFansView => _coolingFansCvs?.View;
 
         // ========== 15.3 БГВ ==========
 
@@ -245,18 +376,34 @@ namespace EE.Doklad.ViewModels
             var heatingHours = CalculateHeatingSeasonHours();
             _data.HeatingAnnualHours = heatingHours;
 
-            // Calculate consumption for each row
+
+            // Calculate consumption for each row and split into pumps vs fans
             double totalConsumption = 0;
+            double pumpsConsumption = 0;
+            double fansConsumption = 0;
+
+            // ventilation-based hours for fans
+            var ventilationHours = CalculateVentilationAnnualHours();
+
             foreach (var row in _data.HeatingRows)
             {
-                row.AnnualHours = heatingHours;
+                var deviceType = row.DeviceType ?? string.Empty;
+                bool isFan = deviceType.IndexOf("Вентил", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                // Assign appropriate annual hours: pumps -> heatingHours, fans -> ventilationHours
+                row.AnnualHours = isFan ? ventilationHours : heatingHours;
 
                 if (TryParseDouble(row.NominalPower, out double power) &&
                     TryParseDouble(row.Quantity, out double qty))
                 {
                     // kWh = (W × Брой × Годишни часове) / 1000
-                    row.AnnualConsumption = (power * qty * heatingHours) / 1000.0;
+                    row.AnnualConsumption = (power * qty * row.AnnualHours) / 1000.0;
                     totalConsumption += row.AnnualConsumption;
+
+                    if (isFan)
+                        fansConsumption += row.AnnualConsumption;
+                    else
+                        pumpsConsumption += row.AnnualConsumption;
                 }
                 else
                 {
@@ -264,10 +411,16 @@ namespace EE.Doklad.ViewModels
                 }
             }
 
-            _data.HeatingTotalAnnualConsumption = totalConsumption;
+            // Store totals
+            _data.HeatingPumpsTotalAnnualConsumption = pumpsConsumption;
+            _data.HeatingFansTotalAnnualConsumption = fansConsumption;
 
-            // Calculate specific power [W/m²]
-            _data.HeatingSpecificPower = CalculateSpecificPower(totalConsumption, HeatingEM);
+            _data.HeatingTotalAnnualConsumption = pumpsConsumption + fansConsumption;
+
+            // Calculate specific power [W/m²] per subgroup and overall
+            _data.HeatingPumpsSpecificPower = CalculateSpecificPower(pumpsConsumption, HeatingEM);
+            _data.HeatingFansSpecificPower = CalculateSpecificPower(fansConsumption, HeatingEM);
+            _data.HeatingSpecificPower = CalculateSpecificPower(_data.HeatingTotalAnnualConsumption, HeatingEM);
 
             NotifyHeatingPropertiesChanged();
         }
@@ -426,18 +579,34 @@ namespace EE.Doklad.ViewModels
             var coolingHours = CalculateCoolingSeasonHours();
             _data.CoolingAnnualHours = coolingHours;
 
-            // Calculate consumption for each row
+
+            // Calculate consumption for each row and split into pumps vs fans
             double totalConsumption = 0;
+            double pumpsConsumption = 0;
+            double fansConsumption = 0;
+
+            // ventilation-based hours for fans
+            var ventilationHours = CalculateVentilationAnnualHours();
+
             foreach (var row in _data.CoolingRows)
             {
-                row.AnnualHours = coolingHours;
+                var deviceType = row.DeviceType ?? string.Empty;
+                bool isFan = deviceType.IndexOf("Вентил", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                // Assign appropriate annual hours: pumps -> coolingHours, fans -> ventilationHours
+                row.AnnualHours = isFan ? ventilationHours : coolingHours;
 
                 if (TryParseDouble(row.NominalPower, out double power) &&
                     TryParseDouble(row.Quantity, out double qty))
                 {
                     // kWh = (W × Брой × Годишни часове) / 1000
-                    row.AnnualConsumption = (power * qty * coolingHours) / 1000.0;
+                    row.AnnualConsumption = (power * qty * row.AnnualHours) / 1000.0;
                     totalConsumption += row.AnnualConsumption;
+
+                    if (isFan)
+                        fansConsumption += row.AnnualConsumption;
+                    else
+                        pumpsConsumption += row.AnnualConsumption;
                 }
                 else
                 {
@@ -445,10 +614,16 @@ namespace EE.Doklad.ViewModels
                 }
             }
 
-            _data.CoolingTotalAnnualConsumption = totalConsumption;
+            // Store totals
+            _data.CoolingPumpsTotalAnnualConsumption = pumpsConsumption;
+            _data.CoolingFansTotalAnnualConsumption = fansConsumption;
 
-            // Calculate specific power [W/m²]
-            _data.CoolingSpecificPower = CalculateSpecificPower(totalConsumption, CoolingEM);
+            _data.CoolingTotalAnnualConsumption = pumpsConsumption + fansConsumption;
+
+            // Calculate specific power [W/m²] per subgroup and overall
+            _data.CoolingPumpsSpecificPower = CalculateSpecificPower(pumpsConsumption, CoolingEM);
+            _data.CoolingFansSpecificPower = CalculateSpecificPower(fansConsumption, CoolingEM);
+            _data.CoolingSpecificPower = CalculateSpecificPower(_data.CoolingTotalAnnualConsumption, CoolingEM);
 
             NotifyCoolingPropertiesChanged();
         }
@@ -470,6 +645,38 @@ namespace EE.Doklad.ViewModels
 
             // Months: May (5), June (6), July (7), August (8), September (9)
             for (int month = 5; month <= 9; month++)
+            {
+                var daysInMonth = DateTime.DaysInMonth(2024, month);
+                var daysOff = GetDaysOffForMonth(month);
+                int activeDays = daysInMonth - daysOff;
+
+                // Calculate average hours per day
+                double avgHoursPerDay = 0;
+                if (workdaysHours > 0) avgHoursPerDay += workdaysHours * 5;
+                if (saturdayHours > 0) avgHoursPerDay += saturdayHours;
+                if (sundayHours > 0) avgHoursPerDay += sundayHours;
+                avgHoursPerDay /= 7.0;
+
+                totalHours += activeDays * avgHoursPerDay;
+            }
+
+            return totalHours;
+        }
+
+        private double CalculateVentilationAnnualHours()
+        {
+            if (_objectData == null) return 0;
+
+            var workdaysHours = ParseDouble(_objectData.VentilationWorkdaysHours);
+            var saturdayHours = ParseDouble(_objectData.VentilationSaturdayHours);
+            var sundayHours = ParseDouble(_objectData.VentilationSundayHours);
+
+            if (workdaysHours == 0 && saturdayHours == 0 && sundayHours == 0)
+                return 0;
+
+            double totalHours = 0;
+
+            for (int month = 1; month <= 12; month++)
             {
                 var daysInMonth = DateTime.DaysInMonth(2024, month);
                 var daysOff = GetDaysOffForMonth(month);
@@ -586,6 +793,7 @@ namespace EE.Doklad.ViewModels
 
             OnPropertyChanged(nameof(TotalAnnualConsumption));
             OnPropertyChanged(nameof(TotalSpecificPower));
+            OnPropertyChanged(nameof(GeneratedReportText));
         }
 
         // ========== SPECIFIC POWER CALCULATION ==========
@@ -685,6 +893,10 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(HeatingTotalAnnualConsumption));
             OnPropertyChanged(nameof(HeatingSpecificPower));
             OnPropertyChanged(nameof(HeatingAnnualHours));
+            OnPropertyChanged(nameof(HeatingPumpsTotalAnnualConsumption));
+            OnPropertyChanged(nameof(HeatingPumpsSpecificPower));
+            OnPropertyChanged(nameof(HeatingFansTotalAnnualConsumption));
+            OnPropertyChanged(nameof(HeatingFansSpecificPower));
             RecalculateTotal();
         }
 
@@ -693,6 +905,10 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(CoolingTotalAnnualConsumption));
             OnPropertyChanged(nameof(CoolingSpecificPower));
             OnPropertyChanged(nameof(CoolingAnnualHours));
+            OnPropertyChanged(nameof(CoolingPumpsTotalAnnualConsumption));
+            OnPropertyChanged(nameof(CoolingPumpsSpecificPower));
+            OnPropertyChanged(nameof(CoolingFansTotalAnnualConsumption));
+            OnPropertyChanged(nameof(CoolingFansSpecificPower));
             RecalculateTotal();
         }
 
