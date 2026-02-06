@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Diagnostics;
 
 namespace EE.Doklad.Models
@@ -74,6 +75,19 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private string? _coolingSundayHours;
 
+    // Охладителен сезон - само месец и ден (imaginary period, no year)
+    [ObservableProperty]
+    private int? _coolingSeasonStartDay;
+
+    [ObservableProperty]
+    private int? _coolingSeasonStartMonth;
+
+    [ObservableProperty]
+    private int? _coolingSeasonEndDay;
+
+    [ObservableProperty]
+    private int? _coolingSeasonEndMonth;
+
     // График на вентилация - отделни колони (работни дни / събота / неделя)
     [ObservableProperty]
     private string? _ventilationWorkdaysHours;
@@ -83,6 +97,16 @@ namespace EE.Doklad.Models
 
     [ObservableProperty]
     private string? _ventilationSundayHours;
+
+    // График Вентилация Охлаждане - отделни колони (работни дни / събота / неделя)
+    [ObservableProperty]
+    private string? _ventilationCoolingWorkdaysHours;
+
+    [ObservableProperty]
+    private string? _ventilationCoolingSaturdayHours;
+
+    [ObservableProperty]
+    private string? _ventilationCoolingSundayHours;
 
         [ObservableProperty]
         private int _climateZone = 1; // Климатична зона (1-9)
@@ -313,6 +337,51 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(HeatingSeasonInfo));
         }
 
+        // Notify that CoolingSeasonInfo and CoolingDaysCount change when components change
+        partial void OnCoolingSeasonStartDayChanged(int? value)
+        {
+            ClampCoolingDay(ref _coolingSeasonStartDay, _coolingSeasonStartMonth);
+            OnPropertyChanged(nameof(CoolingSeasonInfo));
+            OnPropertyChanged(nameof(CoolingDaysCount));
+        }
+
+        partial void OnCoolingSeasonStartMonthChanged(int? value)
+        {
+            // clamp start day to valid range for month
+            ClampCoolingDay(ref _coolingSeasonStartDay, value);
+            OnPropertyChanged(nameof(CoolingSeasonInfo));
+            OnPropertyChanged(nameof(CoolingDaysCount));
+        }
+
+        partial void OnCoolingSeasonEndDayChanged(int? value)
+        {
+            ClampCoolingDay(ref _coolingSeasonEndDay, _coolingSeasonEndMonth);
+            OnPropertyChanged(nameof(CoolingSeasonInfo));
+            OnPropertyChanged(nameof(CoolingDaysCount));
+        }
+
+        partial void OnCoolingSeasonEndMonthChanged(int? value)
+        {
+            ClampCoolingDay(ref _coolingSeasonEndDay, value);
+            OnPropertyChanged(nameof(CoolingSeasonInfo));
+            OnPropertyChanged(nameof(CoolingDaysCount));
+        }
+
+        private void ClampCoolingDay(ref int? dayField, int? month)
+        {
+            if (!dayField.HasValue || !month.HasValue)
+                return;
+            int m = month.Value;
+            if (m < 1 || m > 12)
+            {
+                dayField = null;
+                return;
+            }
+            int max = MonthLengths[m - 1];
+            if (dayField.Value < 1) dayField = 1;
+            if (dayField.Value > max) dayField = max;
+        }
+
         // Синхронизация между BuildingType (старо поле) и BuildingTypeCode (ново поле)
         partial void OnBuildingTypeCodeChanged(BuildingTypeCode? value)
         {
@@ -378,5 +447,57 @@ namespace EE.Doklad.Models
             9 => "Начало: 28 октомври; Край: 5 април",
             _ => string.Empty
         };
+
+        // month lengths for non-leap year and Bulgarian month names
+        private static readonly int[] MonthLengths = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+        private static readonly string[] MonthNames = { "януари", "февруари", "март", "април", "май", "юни", "юли", "август", "септември", "октомври", "ноември", "декември" };
+
+        /// <summary>
+        /// Display string for the cooling season as entered by the user (day + month, no year)
+        /// </summary>
+        public string CoolingSeasonInfo
+        {
+            get
+            {
+                string Format(int d, int m) => $"{d} {MonthNames[m - 1]}";
+
+                if (CoolingSeasonStartDay.HasValue && CoolingSeasonStartMonth.HasValue && CoolingSeasonEndDay.HasValue && CoolingSeasonEndMonth.HasValue)
+                {
+                    return $"Начало: {Format(CoolingSeasonStartDay.Value, CoolingSeasonStartMonth.Value)}; Край: {Format(CoolingSeasonEndDay.Value, CoolingSeasonEndMonth.Value)}";
+                }
+                if (CoolingSeasonStartDay.HasValue && CoolingSeasonStartMonth.HasValue)
+                    return $"Начало: {Format(CoolingSeasonStartDay.Value, CoolingSeasonStartMonth.Value)}";
+                if (CoolingSeasonEndDay.HasValue && CoolingSeasonEndMonth.HasValue)
+                    return $"Край: {Format(CoolingSeasonEndDay.Value, CoolingSeasonEndMonth.Value)}";
+                return "-";
+            }
+        }
+
+        /// <summary>
+        /// Total number of days in the cooling season (assumes non-leap year). Returns 0 if start or end not set.
+        /// Inclusive of both start and end days.
+        /// </summary>
+        public int CoolingDaysCount
+        {
+            get
+            {
+                if (!CoolingSeasonStartDay.HasValue || !CoolingSeasonStartMonth.HasValue || !CoolingSeasonEndDay.HasValue || !CoolingSeasonEndMonth.HasValue)
+                    return 0;
+
+                int start = DayOfYear(CoolingSeasonStartMonth.Value, CoolingSeasonStartDay.Value);
+                int end = DayOfYear(CoolingSeasonEndMonth.Value, CoolingSeasonEndDay.Value);
+                if (start <= end)
+                    return end - start + 1;
+                // wrap around year
+                return (365 - start + 1) + end;
+            }
+        }
+
+        private static int DayOfYear(int month, int day)
+        {
+            int sum = 0;
+            for (int i = 0; i < month - 1; i++) sum += MonthLengths[i];
+            return sum + day;
+        }
     }
 }

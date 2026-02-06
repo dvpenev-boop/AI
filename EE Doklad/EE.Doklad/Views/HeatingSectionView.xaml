@@ -37,6 +37,11 @@
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
         
+        <!-- Backwards-compatible alias used across views: ensure editable textboxes are vertically centered -->
+        <Style x:Key="EditableTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+            <!-- keep defaults from InputTextBoxStyle; individual TextBoxes set Width/TextAlignment -->
+        </Style>
+        
         <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="Background" Value="#F9F9F9"/>
@@ -53,7 +58,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
             <!-- Заглавие -->
-            <TextBlock Text="10. Отопление"
+            <TextBlock Text="11. Отопление"
                        FontSize="18" 
                        FontWeight="Bold" 
                        Margin="0,0,0,15"/>

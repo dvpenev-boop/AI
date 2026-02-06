@@ -9,6 +9,10 @@
     
     <UserControl.Resources>
         <converters:DaysOffSumConverter x:Key="DaysOffSumConverter"/>
+        <converters:HeatingSeasonStartDayConverter x:Key="HeatingSeasonStartDayConverter" />
+        <converters:HeatingSeasonStartMonthConverter x:Key="HeatingSeasonStartMonthConverter" />
+        <converters:HeatingSeasonEndDayConverter x:Key="HeatingSeasonEndDayConverter" />
+        <converters:HeatingSeasonEndMonthConverter x:Key="HeatingSeasonEndMonthConverter" />
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
@@ -40,10 +44,10 @@
                        FontWeight="Bold"
                        Margin="0,0,0,10"/>
 
-            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
+            <Border x:Name="ObjectDataBorder" BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
                 <StackPanel>
                     <!-- Row 0: Наименование на сграда -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -59,7 +63,7 @@
                     </Border>
 
                     <!-- Row 1: Адрес -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -75,7 +79,7 @@
                     </Border>
 
                     <!-- Row 2: Тип сграда -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -108,7 +112,7 @@
                     </Border>
 
                     <!-- Row 3: Собственост -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -124,7 +128,7 @@
                     </Border>
 
                     <!-- Row 4: Година на построяване -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -140,7 +144,7 @@
                     </Border>
 
                     <!-- Row 5: Брой обитатели -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -156,7 +160,7 @@
                     </Border>
 
                     <!-- Row 6: Климатична зона -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -182,8 +186,8 @@
                         </Grid>
                     </Border>
 
-                    <!-- Row 7: Отоплителен сезон -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                    <!-- Row 7: Отоплителен сезон (visual layout matched to cooling season) -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -191,9 +195,144 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Отоплителен сезон" Padding="12,10" VerticalAlignment="Center"
                                        FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
-                            <TextBox Grid.Column="1" Text="{Binding HeatingSeasonInfo, Mode=OneWay}" IsReadOnly="True"
-                                     Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12"
-                                     BorderThickness="0"/>
+                            <Border Grid.Column="1" Padding="12,6" Background="Transparent" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Начало:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12"/>
+                                        <TextBlock Text="{Binding HeatingSeasonInfo, Converter={StaticResource HeatingSeasonStartDayConverter}}" Width="40" VerticalAlignment="Center" TextAlignment="Center"/>
+                                        <TextBlock Text="{Binding HeatingSeasonInfo, Converter={StaticResource HeatingSeasonStartMonthConverter}}" Width="90" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                                        <TextBlock Text="Край:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12"/>
+                                        <TextBlock Text="{Binding HeatingSeasonInfo, Converter={StaticResource HeatingSeasonEndDayConverter}}" Width="40" VerticalAlignment="Center" TextAlignment="Center"/>
+                                        <TextBlock Text="{Binding HeatingSeasonInfo, Converter={StaticResource HeatingSeasonEndMonthConverter}}" Width="90" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <!-- Row 8: Охладителен сезон (start/end) -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="#F0F0F0" Padding="12,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Охладителен сезон" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12"/>
+                                    <!-- Checkbox to enable/disable cooling season inputs. Default unchecked (not active). -->
+                                    <CheckBox x:Name="CoolingSeasonEnabledCheckBox" IsChecked="False" VerticalAlignment="Center" Margin="12,0,0,0"
+                                              ToolTip="Отметнете за активиране на данните за охладителен сезон"/>
+                                </StackPanel>
+                            </Border>
+                <Border Grid.Column="1" Padding="12,6" Background="Transparent" VerticalAlignment="Center"
+                    IsEnabled="{Binding IsChecked, ElementName=CoolingSeasonEnabledCheckBox}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Начало:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12"/>
+                                        <ComboBox x:Name="CoolingStartDayCombo" SelectionChanged="CoolingStartDayCombo_SelectionChanged" SelectedValuePath="Tag" SelectedValue="{Binding CoolingSeasonStartDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="40" Height="24" VerticalAlignment="Center">
+                                            <!-- Days 1..31 -->
+                                            <ComboBoxItem Tag="1">1</ComboBoxItem>
+                                            <ComboBoxItem Tag="2">2</ComboBoxItem>
+                                            <ComboBoxItem Tag="3">3</ComboBoxItem>
+                                            <ComboBoxItem Tag="4">4</ComboBoxItem>
+                                            <ComboBoxItem Tag="5">5</ComboBoxItem>
+                                            <ComboBoxItem Tag="6">6</ComboBoxItem>
+                                            <ComboBoxItem Tag="7">7</ComboBoxItem>
+                                            <ComboBoxItem Tag="8">8</ComboBoxItem>
+                                            <ComboBoxItem Tag="9">9</ComboBoxItem>
+                                            <ComboBoxItem Tag="10">10</ComboBoxItem>
+                                            <ComboBoxItem Tag="11">11</ComboBoxItem>
+                                            <ComboBoxItem Tag="12">12</ComboBoxItem>
+                                            <ComboBoxItem Tag="13">13</ComboBoxItem>
+                                            <ComboBoxItem Tag="14">14</ComboBoxItem>
+                                            <ComboBoxItem Tag="15">15</ComboBoxItem>
+                                            <ComboBoxItem Tag="16">16</ComboBoxItem>
+                                            <ComboBoxItem Tag="17">17</ComboBoxItem>
+                                            <ComboBoxItem Tag="18">18</ComboBoxItem>
+                                            <ComboBoxItem Tag="19">19</ComboBoxItem>
+                                            <ComboBoxItem Tag="20">20</ComboBoxItem>
+                                            <ComboBoxItem Tag="21">21</ComboBoxItem>
+                                            <ComboBoxItem Tag="22">22</ComboBoxItem>
+                                            <ComboBoxItem Tag="23">23</ComboBoxItem>
+                                            <ComboBoxItem Tag="24">24</ComboBoxItem>
+                                            <ComboBoxItem Tag="25">25</ComboBoxItem>
+                                            <ComboBoxItem Tag="26">26</ComboBoxItem>
+                                            <ComboBoxItem Tag="27">27</ComboBoxItem>
+                                            <ComboBoxItem Tag="28">28</ComboBoxItem>
+                                            <ComboBoxItem Tag="29">29</ComboBoxItem>
+                                            <ComboBoxItem Tag="30">30</ComboBoxItem>
+                                            <ComboBoxItem Tag="31">31</ComboBoxItem>
+                                        </ComboBox>
+                                        <ComboBox x:Name="CoolingStartMonthCombo" SelectionChanged="CoolingStartMonthCombo_SelectionChanged" SelectedValuePath="Tag" SelectedValue="{Binding CoolingSeasonStartMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="90" Margin="6,0,0,0" Height="24" VerticalAlignment="Center">
+                                            <ComboBoxItem Tag="1">януари</ComboBoxItem>
+                                            <ComboBoxItem Tag="2">февруари</ComboBoxItem>
+                                            <ComboBoxItem Tag="3">март</ComboBoxItem>
+                                            <ComboBoxItem Tag="4">април</ComboBoxItem>
+                                            <ComboBoxItem Tag="5">май</ComboBoxItem>
+                                            <ComboBoxItem Tag="6">юни</ComboBoxItem>
+                                            <ComboBoxItem Tag="7">юли</ComboBoxItem>
+                                            <ComboBoxItem Tag="8">август</ComboBoxItem>
+                                            <ComboBoxItem Tag="9">септември</ComboBoxItem>
+                                            <ComboBoxItem Tag="10">октомври</ComboBoxItem>
+                                            <ComboBoxItem Tag="11">ноември</ComboBoxItem>
+                                            <ComboBoxItem Tag="12">декември</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                                        <TextBlock Text="Край:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12"/>
+                                        <ComboBox x:Name="CoolingEndDayCombo" SelectionChanged="CoolingEndDayCombo_SelectionChanged" SelectedValuePath="Tag" SelectedValue="{Binding CoolingSeasonEndDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="40" Height="24" VerticalAlignment="Center">
+                                            <!-- Days 1..31 -->
+                                            <ComboBoxItem Tag="1">1</ComboBoxItem>
+                                            <ComboBoxItem Tag="2">2</ComboBoxItem>
+                                            <ComboBoxItem Tag="3">3</ComboBoxItem>
+                                            <ComboBoxItem Tag="4">4</ComboBoxItem>
+                                            <ComboBoxItem Tag="5">5</ComboBoxItem>
+                                            <ComboBoxItem Tag="6">6</ComboBoxItem>
+                                            <ComboBoxItem Tag="7">7</ComboBoxItem>
+                                            <ComboBoxItem Tag="8">8</ComboBoxItem>
+                                            <ComboBoxItem Tag="9">9</ComboBoxItem>
+                                            <ComboBoxItem Tag="10">10</ComboBoxItem>
+                                            <ComboBoxItem Tag="11">11</ComboBoxItem>
+                                            <ComboBoxItem Tag="12">12</ComboBoxItem>
+                                            <ComboBoxItem Tag="13">13</ComboBoxItem>
+                                            <ComboBoxItem Tag="14">14</ComboBoxItem>
+                                            <ComboBoxItem Tag="15">15</ComboBoxItem>
+                                            <ComboBoxItem Tag="16">16</ComboBoxItem>
+                                            <ComboBoxItem Tag="17">17</ComboBoxItem>
+                                            <ComboBoxItem Tag="18">18</ComboBoxItem>
+                                            <ComboBoxItem Tag="19">19</ComboBoxItem>
+                                            <ComboBoxItem Tag="20">20</ComboBoxItem>
+                                            <ComboBoxItem Tag="21">21</ComboBoxItem>
+                                            <ComboBoxItem Tag="22">22</ComboBoxItem>
+                                            <ComboBoxItem Tag="23">23</ComboBoxItem>
+                                            <ComboBoxItem Tag="24">24</ComboBoxItem>
+                                            <ComboBoxItem Tag="25">25</ComboBoxItem>
+                                            <ComboBoxItem Tag="26">26</ComboBoxItem>
+                                            <ComboBoxItem Tag="27">27</ComboBoxItem>
+                                            <ComboBoxItem Tag="28">28</ComboBoxItem>
+                                            <ComboBoxItem Tag="29">29</ComboBoxItem>
+                                            <ComboBoxItem Tag="30">30</ComboBoxItem>
+                                            <ComboBoxItem Tag="31">31</ComboBoxItem>
+                                        </ComboBox>
+                                        <ComboBox x:Name="CoolingEndMonthCombo" SelectionChanged="CoolingEndMonthCombo_SelectionChanged" SelectedValuePath="Tag" SelectedValue="{Binding CoolingSeasonEndMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="90" Margin="6,0,0,0" Height="24" VerticalAlignment="Center">
+                                            <ComboBoxItem Tag="1">януари</ComboBoxItem>
+                                            <ComboBoxItem Tag="2">февруари</ComboBoxItem>
+                                            <ComboBoxItem Tag="3">март</ComboBoxItem>
+                                            <ComboBoxItem Tag="4">април</ComboBoxItem>
+                                            <ComboBoxItem Tag="5">май</ComboBoxItem>
+                                            <ComboBoxItem Tag="6">юни</ComboBoxItem>
+                                            <ComboBoxItem Tag="7">юли</ComboBoxItem>
+                                            <ComboBoxItem Tag="8">август</ComboBoxItem>
+                                            <ComboBoxItem Tag="9">септември</ComboBoxItem>
+                                            <ComboBoxItem Tag="10">октомври</ComboBoxItem>
+                                            <ComboBoxItem Tag="11">ноември</ComboBoxItem>
+                                            <ComboBoxItem Tag="12">декември</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </Border>
                 </StackPanel>
@@ -211,13 +350,13 @@
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="График на обитаване (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <TextBlock Grid.Column="0" Text="График на обитаване" Padding="12,8" FontWeight="Bold" FontSize="13"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -234,13 +373,13 @@
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Background="White"/>
+                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBox Text="{Binding OccupancyWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
@@ -260,13 +399,13 @@
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="График на отопление (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <TextBlock Grid.Column="0" Text="График на отопление" Padding="12,8" FontWeight="Bold" FontSize="13"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -280,16 +419,16 @@
                     </Border>
 
                     <!-- Row 3: График отопление - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Background="White"/>
+                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
                                 <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBox Text="{Binding HeatingWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
@@ -309,13 +448,13 @@
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="График за охлаждане (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <TextBlock Grid.Column="0" Text="График за охлаждане" Padding="12,8" FontWeight="Bold" FontSize="13"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -332,13 +471,13 @@
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Background="White"/>
+                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBox Text="{Binding CoolingWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
@@ -358,13 +497,13 @@
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="График за вентилация (ч./ден)" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <TextBlock Grid.Column="0" Text="График за вентилация Отопление" Padding="12,8" FontWeight="Bold" FontSize="13"/>
                             <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -378,16 +517,16 @@
                     </Border>
 
                     <!-- Row 7: График вентилация - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,0">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Background="White"/>
+                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
                                 <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBox Text="{Binding VentilationWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
@@ -398,6 +537,55 @@
                             </Border>
                                 <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
                                 <TextBox Text="{Binding VentilationSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Row 8: График Вентилация Охлаждане - заглавия -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="#D0D0D0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="График за вентилация Охлаждане" Padding="12,8" FontWeight="Bold" FontSize="13"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 9: График Вентилация Охлаждане - входни полета -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
+                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding VentilationCoolingWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding VentilationCoolingSaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
+                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
+                            </Border>
+                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
+                                <TextBox Text="{Binding VentilationCoolingSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
                                          TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
                             </Border>
                         </Grid>
