@@ -193,9 +193,15 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Отоплителен сезон" Padding="12,10" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" FontSize="12" Background="#F0F0F0"/>
-                            <Border Grid.Column="1" Padding="12,6" Background="Transparent" VerticalAlignment="Center">
+                            <Border Grid.Column="0" Background="#F0F0F0" Padding="12,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Отоплителен сезон" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12"/>
+                                    <!-- Checkbox to enable/disable heating season (new) -->
+                                    <CheckBox x:Name="HeatingSeasonEnabledCheckBox" IsChecked="{Binding HeatingSeasonEnabled, Mode=TwoWay}" VerticalAlignment="Center" Margin="12,0,0,0"
+                                              ToolTip="Отметнете за активиране на данните за отоплителен сезон"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="1" Padding="12,6" Background="Transparent" VerticalAlignment="Center" IsEnabled="{Binding HeatingSeasonEnabled}">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="Начало:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12"/>
@@ -221,13 +227,13 @@
                             <Border Grid.Column="0" Background="#F0F0F0" Padding="12,10">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="Охладителен сезон" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12"/>
-                                    <!-- Checkbox to enable/disable cooling season inputs. Default unchecked (not active). -->
-                                    <CheckBox x:Name="CoolingSeasonEnabledCheckBox" IsChecked="False" VerticalAlignment="Center" Margin="12,0,0,0"
+                                    <!-- Checkbox to enable/disable cooling season inputs. Bound to model property. -->
+                                    <CheckBox x:Name="CoolingSeasonEnabledCheckBox" IsChecked="{Binding CoolingSeasonEnabled, Mode=TwoWay}" VerticalAlignment="Center" Margin="12,0,0,0"
                                               ToolTip="Отметнете за активиране на данните за охладителен сезон"/>
                                 </StackPanel>
                             </Border>
                 <Border Grid.Column="1" Padding="12,6" Background="Transparent" VerticalAlignment="Center"
-                    IsEnabled="{Binding IsChecked, ElementName=CoolingSeasonEnabledCheckBox}">
+                    IsEnabled="{Binding CoolingSeasonEnabled}">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="Начало:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12"/>
@@ -396,7 +402,7 @@
                     </Border>
 
                     <!-- Row 2: График отопление - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -419,7 +425,7 @@
                     </Border>
 
                     <!-- Row 3: График отопление - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -445,7 +451,7 @@
                     </Border>
                     
                     <!-- Row 4: График охладяне - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding CoolingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -468,7 +474,7 @@
                     </Border>
 
                     <!-- Row 5: График охлаждане - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding CoolingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -494,7 +500,7 @@
                     </Border>
 
                     <!-- Row 6: График вентилация - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -517,7 +523,7 @@
                     </Border>
 
                     <!-- Row 7: График вентилация - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -543,7 +549,7 @@
                     </Border>
                     
                     <!-- Row 8: График Вентилация Охлаждане - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding CoolingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="#D0D0D0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -566,7 +572,7 @@
                     </Border>
 
                     <!-- Row 9: График Вентилация Охлаждане - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding CoolingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>

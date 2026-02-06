@@ -88,6 +88,14 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private int? _coolingSeasonEndMonth;
 
+        // Whether cooling season is enabled (controls visibility of cooling-related UI and data)
+        [ObservableProperty]
+        private bool _coolingSeasonEnabled;
+
+    // Whether heating season is enabled (controls visibility of heating-related UI and data)
+    [ObservableProperty]
+    private bool _heatingSeasonEnabled = true;
+
     // График на вентилация - отделни колони (работни дни / събота / неделя)
     [ObservableProperty]
     private string? _ventilationWorkdaysHours;
@@ -367,6 +375,58 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(CoolingDaysCount));
         }
 
+        // When the enabled flag changes, if disabled -> clear cooling-related values (reset to initial state)
+        partial void OnCoolingSeasonEnabledChanged(bool value)
+        {
+            if (!value)
+            {
+                // Clear cooling schedule fields
+                CoolingWorkdaysHours = null;
+                CoolingSaturdayHours = null;
+                CoolingSundayHours = null;
+
+                // Clear cooling season dates
+                CoolingSeasonStartDay = null;
+                CoolingSeasonStartMonth = null;
+                CoolingSeasonEndDay = null;
+                CoolingSeasonEndMonth = null;
+
+                // Clear ventilation-cooling schedules
+                VentilationCoolingWorkdaysHours = null;
+                VentilationCoolingSaturdayHours = null;
+                VentilationCoolingSundayHours = null;
+
+                // Notify that dependent display properties changed
+                OnPropertyChanged(nameof(CoolingSeasonInfo));
+                OnPropertyChanged(nameof(CoolingDaysCount));
+            }
+        }
+
+        // When the heating enabled flag changes, clear related fields when disabled
+        partial void OnHeatingSeasonEnabledChanged(bool value)
+        {
+            if (!value)
+            {
+                // Clear heating schedule fields
+                HeatingWorkdaysHours = null;
+                HeatingSaturdayHours = null;
+                HeatingSundayHours = null;
+
+                // Clear ventilation (heating) schedule fields
+                VentilationWorkdaysHours = null;
+                VentilationSaturdayHours = null;
+                VentilationSundayHours = null;
+
+                // Notify that heating display property changed
+                OnPropertyChanged(nameof(HeatingSeasonInfo));
+            }
+            else
+            {
+                // When re-enabled, update display of HeatingSeasonInfo
+                OnPropertyChanged(nameof(HeatingSeasonInfo));
+            }
+        }
+
         private void ClampCoolingDay(ref int? dayField, int? month)
         {
             if (!dayField.HasValue || !month.HasValue)
@@ -380,6 +440,121 @@ namespace EE.Doklad.Models
             int max = MonthLengths[m - 1];
             if (dayField.Value < 1) dayField = 1;
             if (dayField.Value > max) dayField = max;
+        }
+
+        // Clamp schedule hours string fields to numeric range [0..24]
+        private void ClampHoursString(ref string? field, string? incoming, string propertyName)
+        {
+            if (string.IsNullOrWhiteSpace(incoming))
+            {
+                field = null;
+                OnPropertyChanged(propertyName);
+                return;
+            }
+
+            // allow fractional hours (e.g. "8.5"), parse using current culture
+            if (double.TryParse(incoming.Trim(), out double v))
+            {
+                if (double.IsNaN(v) || double.IsInfinity(v))
+                {
+                    field = null;
+                    OnPropertyChanged(propertyName);
+                    return;
+                }
+
+                if (v < 0.0) v = 0.0;
+                if (v > 24.0) v = 24.0;
+
+                // store cleaned value: null for zero, otherwise string representation
+                var s = v == 0.0 ? null : v.ToString();
+                if (field != s)
+                {
+                    field = s;
+                    OnPropertyChanged(propertyName);
+                }
+            }
+            else
+            {
+                // Non-numeric: clear the field
+                field = null;
+                OnPropertyChanged(propertyName);
+            }
+        }
+
+        // Partial change handlers for schedule fields -> enforce 0..24 range
+        partial void OnOccupancyWorkdaysHoursChanged(string? value)
+        {
+            ClampHoursString(ref _occupancyWorkdaysHours, value, nameof(OccupancyWorkdaysHours));
+        }
+
+        partial void OnOccupancySaturdayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _occupancySaturdayHours, value, nameof(OccupancySaturdayHours));
+        }
+
+        partial void OnOccupancySundayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _occupancySundayHours, value, nameof(OccupancySundayHours));
+        }
+
+        partial void OnHeatingWorkdaysHoursChanged(string? value)
+        {
+            ClampHoursString(ref _heatingWorkdaysHours, value, nameof(HeatingWorkdaysHours));
+        }
+
+        partial void OnHeatingSaturdayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _heatingSaturdayHours, value, nameof(HeatingSaturdayHours));
+        }
+
+        partial void OnHeatingSundayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _heatingSundayHours, value, nameof(HeatingSundayHours));
+        }
+
+        partial void OnCoolingWorkdaysHoursChanged(string? value)
+        {
+            ClampHoursString(ref _coolingWorkdaysHours, value, nameof(CoolingWorkdaysHours));
+        }
+
+        partial void OnCoolingSaturdayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _coolingSaturdayHours, value, nameof(CoolingSaturdayHours));
+        }
+
+        partial void OnCoolingSundayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _coolingSundayHours, value, nameof(CoolingSundayHours));
+        }
+
+        partial void OnVentilationWorkdaysHoursChanged(string? value)
+        {
+            ClampHoursString(ref _ventilationWorkdaysHours, value, nameof(VentilationWorkdaysHours));
+        }
+
+        partial void OnVentilationSaturdayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _ventilationSaturdayHours, value, nameof(VentilationSaturdayHours));
+        }
+
+        partial void OnVentilationSundayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _ventilationSundayHours, value, nameof(VentilationSundayHours));
+        }
+
+        partial void OnVentilationCoolingWorkdaysHoursChanged(string? value)
+        {
+            ClampHoursString(ref _ventilationCoolingWorkdaysHours, value, nameof(VentilationCoolingWorkdaysHours));
+        }
+
+        partial void OnVentilationCoolingSaturdayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _ventilationCoolingSaturdayHours, value, nameof(VentilationCoolingSaturdayHours));
+        }
+
+        partial void OnVentilationCoolingSundayHoursChanged(string? value)
+        {
+            ClampHoursString(ref _ventilationCoolingSundayHours, value, nameof(VentilationCoolingSundayHours));
         }
 
         // Синхронизация между BuildingType (старо поле) и BuildingTypeCode (ново поле)
@@ -434,7 +609,7 @@ namespace EE.Doklad.Models
             }
         }
 
-        public string HeatingSeasonInfo => ClimateZone switch
+        public string HeatingSeasonInfo => HeatingSeasonEnabled ? ClimateZone switch
         {
             1 => "Начало: 21 октомври; Край: 20 април",
             2 => "Начало: 21 октомври; Край: 25 април",
@@ -446,7 +621,7 @@ namespace EE.Doklad.Models
             8 => "Начало: 28 октомври; Край: 6 април",
             9 => "Начало: 28 октомври; Край: 5 април",
             _ => string.Empty
-        };
+        } : "-";
 
         // month lengths for non-leap year and Bulgarian month names
         private static readonly int[] MonthLengths = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
