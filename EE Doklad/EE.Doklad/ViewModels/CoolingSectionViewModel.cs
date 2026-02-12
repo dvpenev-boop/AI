@@ -82,6 +82,21 @@ namespace EE.Doklad.ViewModels
             }
         }
 
+        private string _relativeHumidityText;
+        public string RelativeHumidityText
+        {
+            get => _relativeHumidityText;
+            set
+            {
+                if (_relativeHumidityText != value)
+                {
+                    _relativeHumidityText = value;
+                    OnPropertyChanged(nameof(RelativeHumidityText));
+                    ValidateAndSetRelativeHumidity(value);
+                }
+            }
+        }
+
         public double EmissionEfficiency
         {
             get => _data.EmissionEfficiency;
@@ -619,6 +634,23 @@ namespace EE.Doklad.ViewModels
             }
         }
 
+        private string? _relativeHumidityError;
+        public string? RelativeHumidityError
+        {
+            get => _relativeHumidityError;
+            private set
+            {
+                if (_relativeHumidityError != value)
+                {
+                    _relativeHumidityError = value;
+                    OnPropertyChanged(nameof(RelativeHumidityError));
+                    OnPropertyChanged(nameof(HasRelativeHumidityError));
+                }
+            }
+        }
+
+        public bool HasRelativeHumidityError => !string.IsNullOrEmpty(RelativeHumidityError);
+
         public bool HasReductionTemperatureError => !string.IsNullOrEmpty(ReductionTemperatureError);
 
         private string? _cooledAreaError;
@@ -658,6 +690,7 @@ namespace EE.Doklad.ViewModels
             _infiltrationText = _data.Infiltration.ToString("F2", CultureInfo.InvariantCulture);
             _designTemperatureText = _data.DesignTemperature.ToString("F2", CultureInfo.InvariantCulture);
             _reductionTemperatureText = _data.ReductionTemperature.ToString("F2", CultureInfo.InvariantCulture);
+            _relativeHumidityText = _data.RelativeHumidity.ToString("F2", CultureInfo.InvariantCulture);
 
             // Subscribe към промени в ObjectData за брой обитатели
             if (_objectData != null)
@@ -785,6 +818,40 @@ namespace EE.Doklad.ViewModels
             else
             {
                 ReductionTemperatureError = "Невалидно число";
+            }
+        }
+
+        private void ValidateAndSetRelativeHumidity(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                RelativeHumidityError = "Полето е задължително";
+                return;
+            }
+
+            var normalized = text.Replace(',', '.');
+
+            if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
+            {
+                if (value < 0 || value > 100)
+                {
+                    RelativeHumidityError = "Стойността трябва да е между 0 и 100";
+                    return;
+                }
+
+                value = Math.Round(value, 2);
+                _data.RelativeHumidity = value;
+                RelativeHumidityError = null;
+
+                if (_relativeHumidityText != value.ToString("F2", CultureInfo.InvariantCulture))
+                {
+                    _relativeHumidityText = value.ToString("F2", CultureInfo.InvariantCulture);
+                    OnPropertyChanged(nameof(RelativeHumidityText));
+                }
+            }
+            else
+            {
+                RelativeHumidityError = "Невалидно число";
             }
         }
 

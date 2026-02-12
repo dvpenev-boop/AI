@@ -107,6 +107,13 @@ namespace EE.Doklad.Models
         public double h_sup_kJkg { get; set; }
         public double DeltaH_kJkg { get; set; }
 
+    public double x_e_kgkg { get; set; }
+    public double x_sup_kgkg { get; set; }
+
+    public double Q_sens_kWh { get; set; }
+    public double Q_lat_kWh { get; set; }
+    public double Q_total_kWh { get; set; }
+
         public double SensibleCooling_kWh { get; set; }
         public double SensibleHeating_kWh { get; set; }
         public double TotalCooling_kWh { get; set; }
@@ -117,6 +124,14 @@ namespace EE.Doklad.Models
         public double h_in_kJkg { get; set; }
         public double h_mix_kJkg { get; set; }
         public double T_mix_C { get; set; }
+        // Psychrometric debug (supply / outdoor)
+        public double p_ws_sup_Pa { get; set; }
+        public double p_w_sup_Pa { get; set; }
+        public double W_sup_kgkg { get; set; }
+
+        public double p_ws_out_Pa { get; set; }
+        public double p_w_out_Pa { get; set; }
+        public double W_out_kgkg { get; set; }
     }
 
     public sealed class VentilationCoolingDebugInfo
@@ -160,6 +175,7 @@ namespace EE.Doklad.Models
         public double NeedEnergy2_kWh { get; set; }
 
         public List<VentilationCoolingMonthlyDebug> Months { get; set; } = new();
+        public System.Collections.Generic.List<string> Warnings { get; set; } = new();
     }
 
     public sealed class VentilationCoolingCalculationOutput

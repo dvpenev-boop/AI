@@ -131,13 +131,32 @@
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="Температура на понижение [°C]" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="0" Text="Температура с повишение [°C]" Style="{StaticResource LabelStyle}"/>
                             <StackPanel Grid.Column="1">
                                 <TextBox Text="{Binding ReductionTemperatureText, UpdateSourceTrigger=PropertyChanged}"
                                     Style="{StaticResource EditableTextBoxStyle}" Width="120" TextAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{Binding ReductionTemperatureError}"
                                           Style="{StaticResource ErrorTextStyle}"
                                           Visibility="{Binding HasReductionTemperatureError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Относителна влажност -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="320"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Относителна влажност [%]" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBox Text="{Binding RelativeHumidityText, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{StaticResource EditableTextBoxStyle}" Width="120" TextAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding RelativeHumidityError}"
+                                          Style="{StaticResource ErrorTextStyle}"
+                                          Visibility="{Binding HasRelativeHumidityError, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </StackPanel>
                         </Grid>
                     </Border>

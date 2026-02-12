@@ -19,6 +19,7 @@ namespace EE.Doklad.Services
         private const double AirDensity_kg_m3 = 1.2; // rho
         private const double AirSpecificHeat_kJ_kgK = 1.005; // cp
         private const double StandardPressure_Pa = 101325.0;
+    private const double WaterLatentHeat_kJ_kg = 2501.0; // h_fg
 
         public VentilationCoolingCalculationOutput Calculate(
             VentilationSectionData data,
@@ -212,12 +213,42 @@ namespace EE.Doklad.Services
                     qv_fresh = qv_total * (1.0 - recircPct);
                     qv_rec = qv_total - qv_fresh;
                     t_mix = (qv_fresh * te_m + qv_rec * t_in) / Math.Max(1e-6, qv_total);
+                }
 
-                    if (hasRh)
+                // psychrometric intermediate holders
+                double pwsOut = 0.0, pwOut = 0.0, WOut = 0.0;
+                double pwsSup = 0.0, pwSup = 0.0, WSup = 0.0;
+                double pwsIn = 0.0, pwIn = 0.0, WIn = 0.0;
+                double W_mix = 0.0;
+
+                double h_e_m = 0.0;
+                double h_sup = 0.0;
+
+                if (hasRh)
+                {
+                    // compute psychrometric values for outdoor, supply and inlet (t_in)
+                    var outDet = ComputeEnthalpyDetailed(te_m, rh_m!.Value);
+                    h_e_m = outDet.h_kJkg;
+                    pwsOut = outDet.p_ws_Pa;
+                    pwOut = outDet.p_w_Pa;
+                    WOut = outDet.W_kgkg;
+
+                    var supDet = ComputeEnthalpyDetailed(data.SupplyTemperature, data.RelativeHumidity);
+                    h_sup = supDet.h_kJkg;
+                    pwsSup = supDet.p_ws_Pa;
+                    pwSup = supDet.p_w_Pa;
+                    WSup = supDet.W_kgkg;
+
+                    var inDet = ComputeEnthalpyDetailed(t_in, rh_in);
+                    h_in = inDet.h_kJkg;
+                    pwsIn = inDet.p_ws_Pa;
+                    pwIn = inDet.p_w_Pa;
+                    WIn = inDet.W_kgkg;
+
+                    if (data.CoolingCalculationMode == VentilationCoolingCalculationMode.MechanicalRecirculation3112)
                     {
-                        h_in = ComputeEnthalpy(t_in, rh_in);
-                        double h_e = ComputeEnthalpy(te_m, rh_m!.Value);
-                        h_mix = (qv_fresh * h_e + qv_rec * h_in) / Math.Max(1e-6, qv_total);
+                        h_mix = (qv_fresh * h_e_m + qv_rec * h_in) / Math.Max(1e-6, qv_total);
+                        W_mix = (qv_fresh * WOut + qv_rec * WIn) / Math.Max(1e-6, qv_total);
                     }
                 }
 
@@ -229,23 +260,59 @@ namespace EE.Doklad.Services
                 double e_sens_cool = p_sens_cool * hours_m / 3600.0; // kWh
                 double e_sens_heat = p_sens_heat * hours_m / 3600.0; // kWh
 
-                double h_e_m = 0.0;
-                double h_sup = 0.0;
                 double deltaH = 0.0;
                 double e_tot = 0.0;
                 double e_lat = 0.0;
+                double e_total_signed = 0.0;
+                double e_lat_signed = 0.0;
+                double e_sens_signed = 0.0;
+                double x_source = 0.0;
 
                 if (hasRh)
                 {
-                    h_e_m = ComputeEnthalpy(te_m, rh_m!.Value);
-                    h_sup = ComputeEnthalpy(data.SupplyTemperature, data.RelativeHumidity);
+                    // use enthalpies computed earlier (outdoor/supply/inlet)
+                    bool isRecirc = data.CoolingCalculationMode == VentilationCoolingCalculationMode.MechanicalRecirculation3112;
+                    double h_source = isRecirc ? h_mix : h_e_m;
+                    x_source = isRecirc ? W_mix : WOut;
 
-                    double h_source = data.CoolingCalculationMode == VentilationCoolingCalculationMode.MechanicalRecirculation3112 ? h_mix : h_e_m;
-                    deltaH = Math.Max(0.0, h_source - h_sup);
+                    deltaH = h_source - h_sup;
 
-                    double p_tot = m_dot * deltaH; // kJ/h
-                    e_tot = p_tot * hours_m / 3600.0; // kWh
-                    e_lat = Math.Max(0.0, e_tot - e_sens_cool);
+                    if (data.CoolingCalculationMode == VentilationCoolingCalculationMode.FreshAirProcessed3113)
+                    {
+                        e_total_signed = m_dot * deltaH * hours_m / 3600.0; // kWh
+                        double m_dot_dry = m_dot / Math.Max(1e-6, 1.0 + x_source);
+                        e_lat_signed = m_dot_dry * (x_source - WSup) * WaterLatentHeat_kJ_kg * hours_m / 3600.0; // kWh
+                        e_sens_signed = e_total_signed - e_lat_signed;
+
+                        if (e_total_signed >= 0.0)
+                        {
+                            e_tot = e_total_signed;
+                            e_lat = Math.Max(0.0, e_lat_signed);
+                            e_sens_cool = e_tot - e_lat;
+                            e_sens_heat = 0.0;
+                        }
+                        else
+                        {
+                            e_tot = 0.0;
+                            e_lat = 0.0;
+                            e_sens_cool = 0.0;
+                            e_sens_heat = Math.Abs(e_sens_signed);
+                        }
+                    }
+                    else
+                    {
+                        deltaH = Math.Max(0.0, deltaH);
+
+                        double p_tot = m_dot * deltaH; // kJ/h
+                        e_tot = p_tot * hours_m / 3600.0; // kWh
+                        e_lat = Math.Max(0.0, e_tot - e_sens_cool);
+                    }
+
+                    // Sanity warning: common mistaken inputs
+                    if (Math.Abs(data.SupplyTemperature - 18.0) < 0.001 && data.RelativeHumidity >= 90.0 && h_sup > 45.0)
+                    {
+                        debug.Warnings.Add($"WARNING: h_sup seems high ({h_sup:F2} kJ/kg) for Tsup={data.SupplyTemperature}°C RH={data.RelativeHumidity}%. Check RH units and Tsup source.");
+                    }
                 }
 
                 totalSensibleCool_kWh += e_sens_cool;
@@ -288,6 +355,11 @@ namespace EE.Doklad.Services
                     h_e_kJkg = h_e_m,
                     h_sup_kJkg = h_sup,
                     DeltaH_kJkg = deltaH,
+                    x_e_kgkg = x_source,
+                    x_sup_kgkg = WSup,
+                    Q_sens_kWh = hasRh && data.CoolingCalculationMode == VentilationCoolingCalculationMode.FreshAirProcessed3113 ? e_sens_signed : (e_sens_cool - e_sens_heat),
+                    Q_lat_kWh = hasRh && data.CoolingCalculationMode == VentilationCoolingCalculationMode.FreshAirProcessed3113 ? e_lat_signed : e_lat,
+                    Q_total_kWh = hasRh && data.CoolingCalculationMode == VentilationCoolingCalculationMode.FreshAirProcessed3113 ? e_total_signed : e_tot,
                     SensibleCooling_kWh = e_sens_cool,
                     SensibleHeating_kWh = e_sens_heat,
                     TotalCooling_kWh = e_tot,
@@ -297,6 +369,15 @@ namespace EE.Doklad.Services
                     h_in_kJkg = h_in,
                     h_mix_kJkg = h_mix,
                     T_mix_C = t_mix
+                    ,
+                    // psychrometric debug
+                    p_ws_sup_Pa = pwsSup,
+                    p_w_sup_Pa = pwSup,
+                    W_sup_kgkg = WSup,
+
+                    p_ws_out_Pa = pwsOut,
+                    p_w_out_Pa = pwOut,
+                    W_out_kgkg = WOut
                 });
             }
 
@@ -509,6 +590,16 @@ namespace EE.Doklad.Services
             double w = 0.62198 * pw / Math.Max(1e-6, (StandardPressure_Pa - pw));
             double h = 1.006 * tempC + w * (2501.0 + 1.86 * tempC); // kJ/kg dry air
             return h;
+        }
+
+        private static (double h_kJkg, double p_ws_Pa, double p_w_Pa, double W_kgkg) ComputeEnthalpyDetailed(double tempC, double rhPercent, double pPa = StandardPressure_Pa)
+        {
+            double rh = Math.Clamp(rhPercent, 0.0, 100.0) / 100.0;
+            double p_ws = 610.94 * Math.Exp((17.625 * tempC) / (tempC + 243.04)); // Pa
+            double p_w = rh * p_ws;
+            double W = 0.62198 * p_w / Math.Max(1e-9, (pPa - p_w));
+            double h = 1.006 * tempC + W * (2501.0 + 1.86 * tempC); // kJ/kg dry air
+            return (h, p_ws, p_w, W);
         }
     }
 }

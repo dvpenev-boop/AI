@@ -93,7 +93,32 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        public double OperatingHoursPerWeek => _calculationOutput?.Result.OperatingHoursPerWeek ?? 0;
+        public double OperatingHoursPerWeek
+        {
+            get
+            {
+                // Show the nominal weekly hours derived from the building schedules (before subtracting days-off)
+                if (_objectData != null)
+                {
+                    double workdayHours = ParseHours(_objectData.VentilationCoolingWorkdaysHours);
+                    double saturdayHours = ParseHours(_objectData.VentilationCoolingSaturdayHours);
+                    double sundayHours = ParseHours(_objectData.VentilationCoolingSundayHours);
+                    // Nominal week: 5 workdays + 1 saturday + 1 sunday
+                    return workdayHours * 5.0 + saturdayHours + sundayHours;
+                }
+
+                // Fallback to the calculated average (rare)
+                return _calculationOutput?.Result.OperatingHoursPerWeek ?? 0.0;
+            }
+        }
+
+        private static double ParseHours(string? s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return 0.0;
+            if (double.TryParse(s.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v)) return v;
+            if (double.TryParse(s.Trim(), out v)) return v;
+            return 0.0;
+        }
 
         public double AirflowRatePerM2
         {
@@ -605,12 +630,12 @@ namespace EE.Doklad.ViewModels
             sb.AppendLine($"{debug.HolidaysSourceNote}");
             sb.AppendLine($"Total workdays: {debug.TotalWorkdays:F1}, Total hours: {debug.TotalHours:F1}");
             sb.AppendLine(" ");
-            sb.AppendLine("Month | days_in_season | rest | holidays | workdays | t_m[h] | Te | RH | h_e | h_sup | Δh | e_sens_cool | e_sens_heat | e_tot | e_lat");
+            sb.AppendLine("Month | days_in_season | rest | holidays | workdays | t_m[h] | Te | RH | x_e | x_sup | h_e | h_sup | Δh | Q_sens | Q_lat | Q_total | e_sens_cool | e_sens_heat | e_tot | e_lat");
 
             foreach (var m in debug.Months)
             {
                 var rh = m.HasRH ? m.RH_m_percent?.ToString("F1", CultureInfo.InvariantCulture) : "n/a";
-                sb.AppendLine($"{m.MonthName.PadRight(7)} | {m.DaysInSeason,5} | {m.RestDays,4} | {m.Holidays,4} | {m.WorkingDays,7:0.0} | {m.WorkingHours_h,6:0.0} | {m.Te_m_C,5:0.0} | {rh,5} | {m.h_e_kJkg,6:0.0} | {m.h_sup_kJkg,6:0.0} | {m.DeltaH_kJkg,5:0.0} | {m.SensibleCooling_kWh,10:0.00} | {m.SensibleHeating_kWh,10:0.00} | {m.TotalCooling_kWh,7:0.00} | {m.Latent_kWh,7:0.00}");
+                sb.AppendLine($"{m.MonthName.PadRight(7)} | {m.DaysInSeason,5} | {m.RestDays,4} | {m.Holidays,4} | {m.WorkingDays,7:0.0} | {m.WorkingHours_h,6:0.0} | {m.Te_m_C,5:0.0} | {rh,5} | {m.x_e_kgkg,5:0.000} | {m.x_sup_kgkg,5:0.000} | {m.h_e_kJkg,6:0.0} | {m.h_sup_kJkg,6:0.0} | {m.DeltaH_kJkg,5:0.0} | {m.Q_sens_kWh,7:0.00} | {m.Q_lat_kWh,7:0.00} | {m.Q_total_kWh,7:0.00} | {m.SensibleCooling_kWh,10:0.00} | {m.SensibleHeating_kWh,10:0.00} | {m.TotalCooling_kWh,7:0.00} | {m.Latent_kWh,7:0.00}");
             }
 
             sb.AppendLine(" ");

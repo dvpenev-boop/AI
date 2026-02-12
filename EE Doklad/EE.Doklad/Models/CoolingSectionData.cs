@@ -25,13 +25,13 @@ namespace EE.Doklad.Models
         /// Проектна температура [°C] - може да има дробна стойност (напр. 21.00)
         /// </summary>
         [ObservableProperty]
-        private double _designTemperature = 20.0;
+    private double _designTemperature = 25.0;
 
         /// <summary>
         /// Temperatura на понижение [°C]
         /// </summary>
         [ObservableProperty]
-        private double _reductionTemperature = 16.0;
+    private double _reductionTemperature = 25.0;
 
         /// <summary>
         /// Ефективност на отдаване [%] (0-100)
@@ -90,5 +90,11 @@ namespace EE.Doklad.Models
         /// </summary>
         [ObservableProperty]
         private ActivityLevel _selectedActivityLevel = ActivityLevel.Cinema;
+
+    /// <summary>
+    /// Относителна влажност [%] - десетична стойност 0-100
+    /// </summary>
+    [ObservableProperty]
+    private double _relativeHumidity = 50.0;
     }
 }
