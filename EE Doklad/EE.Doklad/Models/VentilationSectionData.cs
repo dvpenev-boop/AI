@@ -50,6 +50,18 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double _relativeHumidity = 0.0;
 
+    /// <summary>
+    /// Режим на изчисление за вентилация-охлаждане (3.11.2 или 3.11.3)
+    /// </summary>
+    [ObservableProperty]
+    private VentilationCoolingCalculationMode _coolingCalculationMode = VentilationCoolingCalculationMode.FreshAirProcessed3113;
+
+    /// <summary>
+    /// Дял рециркулация [%] (0-100)
+    /// </summary>
+    [ObservableProperty]
+    private double _recirculationPercent = 0.0;
+
         /// <summary>
         /// Ефективност на първа степен на рекуперация [%] (0-100)
         /// Термична ефективност на топлообменника за рекуперация

@@ -298,18 +298,22 @@ public partial class MainWindow : Window
         }
         else if (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Вентилация Охлаждане"))
         {
-            // Special-case: Ventilation (cooling) - standalone UI without linking to other sections
             if (section.VentilationSectionData == null)
                 section.VentilationSectionData = new Models.VentilationSectionData();
 
             section.Type = ModelSectionType.Ventilation;
 
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            var coolingSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.Normal && !string.IsNullOrEmpty(s.Title) && s.Title.Contains("Охлаждане"));
+            var coolingData = coolingSection?.CoolingSectionData;
+
             try
             {
                 var ventCoolingView = new Views.VentilationCoolingSectionView
                 {
-                    // Pass only the section data to avoid automatic linking to ObjectData/Heating
-                    DataContext = new ViewModels.VentilationSectionViewModel(section.VentilationSectionData)
+                    DataContext = new ViewModels.VentilationCoolingSectionViewModel(section.VentilationSectionData, objectData, coolingData)
                 };
                 ContentScrollViewer.Content = ventCoolingView;
             }
