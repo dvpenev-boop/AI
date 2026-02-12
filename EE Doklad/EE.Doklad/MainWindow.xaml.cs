@@ -280,6 +280,22 @@ public partial class MainWindow : Window
             };
             ContentScrollViewer.Content = heatingSectionView;
         }
+        else if (section.Type == ModelSectionType.Normal &&
+                 !string.IsNullOrEmpty(section.Title) && section.Title.Contains("12. Охлаждане"))
+        {
+            if (section.CoolingSectionData == null)
+                section.CoolingSectionData = new Models.CoolingSectionData();
+
+            // Намираме секция 5 (ObjectData) за да извлечем броя обитатели
+            var objectDataSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            var coolingSectionView = new Views.CoolingSectionView
+            {
+                DataContext = new ViewModels.CoolingSectionViewModel(section.CoolingSectionData, objectData)
+            };
+            ContentScrollViewer.Content = coolingSectionView;
+        }
         else if (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Вентилация Охлаждане"))
         {
             // Special-case: Ventilation (cooling) - standalone UI without linking to other sections

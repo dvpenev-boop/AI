@@ -101,6 +101,11 @@ namespace EE.Doklad.Models
         /// </summary>
         public HeatingSectionData? HeatingSectionData { get; set; }
 
+    /// <summary>
+    /// Данни за раздел "Охлаждане" (секция №12)
+    /// </summary>
+    public CoolingSectionData? CoolingSectionData { get; set; }
+
         /// <summary>
         /// Данни за раздел "Вентилация" (само за Ventilation секции)
         /// </summary>

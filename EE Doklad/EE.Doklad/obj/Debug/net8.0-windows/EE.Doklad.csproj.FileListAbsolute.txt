@@ -167,3 +167,5 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\refint\EE.Doklad.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.pdb
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.genruntimeconfig.cache
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\ref\EE.Doklad.dll
+e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoolingSectionView.g.cs
+e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoolingSectionView.baml

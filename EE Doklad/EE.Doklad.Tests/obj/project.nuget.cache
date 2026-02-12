@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "YI3osM0Rfts=",
+  "dgSpecHash": "wMO2bpXr5iQ=",
   "success": true,
-  "projectFilePath": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
+  "projectFilePath": "e:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\dimit\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\dimit\\.nuget\\packages\\microsoft.codecoverage\\17.11.0\\microsoft.codecoverage.17.11.0.nupkg.sha512",
