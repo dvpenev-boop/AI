@@ -11,6 +11,7 @@
     <UserControl.Resources>
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
         <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+        <converters:ClimateDatabaseConverter x:Key="ClimateDatabaseConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
@@ -294,10 +295,15 @@
                             <TextBlock Grid.Column="0" Text="Климатична база данни:" 
                                        VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
                             <ComboBox Grid.Column="1" 
-                                      SelectedValue="{Binding CoolingClimateDatabase, UpdateSourceTrigger=PropertyChanged}"
-                                      Padding="5" FontSize="12" HorizontalAlignment="Left" Width="200">
-                                <ComboBoxItem Content="БДС (Български стандарт)" Tag="0"/>
-                                <ComboBoxItem Content="ASHRAE (международен стандарт)" Tag="1"/>
+                                      SelectedItem="{Binding CoolingClimateDatabase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Padding="5" FontSize="12" HorizontalAlignment="Left" Width="250">
+                                <models:ClimateDatabase>BG</models:ClimateDatabase>
+                                <models:ClimateDatabase>ASHRAE</models:ClimateDatabase>
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource ClimateDatabaseConverter}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
                             </ComboBox>
                         </Grid>
                     </StackPanel>
@@ -313,8 +319,6 @@
                         <!-- Таблица с параметри -->
                         <Grid Margin="10">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -364,68 +368,44 @@
                                 <TextBlock Text="m³/h" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
-                            <!-- Row 3: Exhaust airflow (editable) -->
+                            <!-- Row 3: Supply temperature (editable) -->
                             <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
-                                <TextBlock Text="Дебит на отточен въздух" Padding="10,5" FontSize="11"/>
-                            </Border>
-                            <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                                <TextBox Text="{Binding CoolingExhaustAirflow, StringFormat=F2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                         Style="{StaticResource EditableTextBoxStyle}" Padding="5" FontSize="11"/>
-                            </Border>
-                            <Border Grid.Row="3" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                                <TextBlock Text="m³/h" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-
-                            <!-- Row 4: Supply temperature (editable) -->
-                            <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
                                 <TextBlock Text="Температура на подавания въздух" Padding="10,5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding CoolingSupplyTemperature, StringFormat=F2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
                                          Style="{StaticResource EditableTextBoxStyle}" Padding="5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="4" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="3" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBlock Text="°C" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
-                            <!-- Row 5: Indoor temperature (editable) -->
-                            <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
-                                <TextBlock Text="Температура на вътрешния въздух" Padding="10,5" FontSize="11"/>
-                            </Border>
-                            <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                                <TextBox Text="{Binding CoolingIndoorTemperature, StringFormat=F2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                         Style="{StaticResource EditableTextBoxStyle}" Padding="5" FontSize="11"/>
-                            </Border>
-                            <Border Grid.Row="5" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                                <TextBlock Text="°C" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-
-                            <!-- Row 6: Relative humidity (editable) -->
-                            <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                            <!-- Row 4: Relative humidity (editable) -->
+                            <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
                                 <TextBlock Text="Относителна влажност на подавания въздух" Padding="10,5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding CoolingRelativeHumidity, StringFormat=F2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
                                          Style="{StaticResource EditableTextBoxStyle}" Padding="5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="6" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="4" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBlock Text="%" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
-                            <!-- Row 7: Climate zone (readonly from section 5) -->
-                            <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                            <!-- Row 5: Climate zone (readonly from section 5) -->
+                            <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
                                 <TextBlock Text="Климатична зона" Padding="10,5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding ClimateZoneDisplay, Mode=OneWay}" 
                                          Style="{StaticResource ReadOnlyTextBoxStyle}" Padding="5" FontSize="11"/>
                             </Border>
 
-                            <!-- Row 8: Cooling season (readonly from section 5) -->
-                            <Border Grid.Row="8" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                            <!-- Row 6: Cooling season (readonly from section 5) -->
+                            <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
                                 <TextBlock Text="Охладителен период" Padding="10,5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding CoolingSeasonDisplay, Mode=OneWay}" 
                                          Style="{StaticResource ReadOnlyTextBoxStyle}" Padding="5" FontSize="11"/>
                             </Border>

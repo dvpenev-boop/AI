@@ -46,6 +46,12 @@ namespace EE.Doklad.ViewModels
             {
                 _objectData.PropertyChanged += OnObjectDataPropertyChanged;
                 UpdateClimateZone();
+                
+                // Subscribe to nested CoolingSchedules changes
+                if (_objectData.CoolingSchedules != null)
+                {
+                    SubscribeToCoolingSchedules(_objectData.CoolingSchedules);
+                }
             }
 
             _data.PropertyChanged += OnDataPropertyChanged;
@@ -589,6 +595,49 @@ namespace EE.Doklad.ViewModels
             Recalculate();
         }
 
+        /// <summary>
+        /// Subscribe to nested CoolingSchedules property changes
+        /// </summary>
+        private void SubscribeToCoolingSchedules(CoolingSchedulesModel schedules)
+        {
+            schedules.PropertyChanged += OnCoolingSchedulesChanged;
+            
+            // Subscribe to nested WeeklySchedule changes
+            if (schedules.VentilationCoolingSchedule != null)
+            {
+                schedules.VentilationCoolingSchedule.PropertyChanged += OnScheduleChanged;
+                
+                // Subscribe to nested WeeklyTimeRange changes
+                if (schedules.VentilationCoolingSchedule.Workdays != null)
+                    schedules.VentilationCoolingSchedule.Workdays.PropertyChanged += OnTimeRangeChanged;
+                if (schedules.VentilationCoolingSchedule.Saturday != null)
+                    schedules.VentilationCoolingSchedule.Saturday.PropertyChanged += OnTimeRangeChanged;
+                if (schedules.VentilationCoolingSchedule.Sunday != null)
+                    schedules.VentilationCoolingSchedule.Sunday.PropertyChanged += OnTimeRangeChanged;
+            }
+        }
+
+        private void OnCoolingSchedulesChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HoursPerWeek));
+            OnPropertyChanged(nameof(WorkDaysSeason));
+            OnPropertyChanged(nameof(WorkHoursSeason));
+        }
+
+        private void OnScheduleChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HoursPerWeek));
+            OnPropertyChanged(nameof(WorkDaysSeason));
+            OnPropertyChanged(nameof(WorkHoursSeason));
+        }
+
+        private void OnTimeRangeChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HoursPerWeek));
+            OnPropertyChanged(nameof(WorkDaysSeason));
+            OnPropertyChanged(nameof(WorkHoursSeason));
+        }
+
         private void OnObjectDataPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ObjectDataSectionData.ClimateZone) ||
@@ -601,6 +650,7 @@ namespace EE.Doklad.ViewModels
                 e.PropertyName == nameof(ObjectDataSectionData.VentilationCoolingSaturdayHours) ||
                 e.PropertyName == nameof(ObjectDataSectionData.VentilationCoolingSundayHours) ||
                 e.PropertyName == nameof(ObjectDataSectionData.CooledArea) ||
+                e.PropertyName == nameof(ObjectDataSectionData.CoolingSchedules) ||
                 e.PropertyName?.StartsWith("DaysOff", StringComparison.OrdinalIgnoreCase) == true)
             {
                 if (e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonEnabled))
@@ -608,6 +658,18 @@ namespace EE.Doklad.ViewModels
                     OnPropertyChanged(nameof(IsCoolingSeasonEnabled));
                     OnPropertyChanged(nameof(CoolingSeasonWarning));
                 }
+
+                // Update computed properties for new methodology
+                if (e.PropertyName == nameof(ObjectDataSectionData.CoolingSchedules) ||
+                    e.PropertyName?.StartsWith("DaysOff", StringComparison.OrdinalIgnoreCase) == true ||
+                    e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonStartMonth) ||
+                    e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonEndMonth))
+                {
+                    OnPropertyChanged(nameof(HoursPerWeek));
+                    OnPropertyChanged(nameof(WorkDaysSeason));
+                    OnPropertyChanged(nameof(WorkHoursSeason));
+                }
+
                 Recalculate();
             }
         }
@@ -843,20 +905,20 @@ namespace EE.Doklad.ViewModels
                 if (!IsMonthInCoolingSeason(m, startMonth, endMonth)) continue;
 
                 var (workDays_m, satCount_m, sunCount_m) = CalendarService.GetCalendarCounts(year, m);
-                int offDays_m = _data.OffDaysPerMonth[m - 1];
+                int offDays_m = GetOffDaysForMonth(m);
 
-                // Effective work days per day type
+                // Effective work days per day type (if hours are 0:00-0:00, no occupancy)
                 double effectiveWorkdays = (hoursWorkday > 0) ? workDays_m : 0.0;
                 double effectiveSaturdays = (hoursSaturday > 0) ? satCount_m : 0.0;
                 double effectiveSundays = (hoursSunday > 0) ? sunCount_m : 0.0;
 
-                // k_m coefficient
+                // k_m coefficient: only applies to effective workdays (Mon-Fri with occupancy)
                 double workDays_m_total = effectiveWorkdays + effectiveSaturdays + effectiveSundays;
-                double offDays_m_effective = Math.Min(offDays_m, workDays_m_total);
-                double k_m = (workDays_m_total > 0) ? Math.Max(0.0, (workDays_m_total - offDays_m_effective) / workDays_m_total) : 0.0;
+                double offDays_m_effective = Math.Min(offDays_m, effectiveWorkdays); // OffDays apply ONLY to Mon-Fri
+                double k_m = (effectiveWorkdays > 0) ? Math.Max(0.0, (effectiveWorkdays - offDays_m_effective) / effectiveWorkdays) : 1.0;
 
-                // Corrected days
-                double correctedDays = k_m * workDays_m_total;
+                // Corrected days: scale only Mon-Fri by k_m, Sat/Sun remain unchanged
+                double correctedDays = (k_m * effectiveWorkdays) + effectiveSaturdays + effectiveSundays;
                 totalDays += correctedDays;
             }
 
@@ -881,25 +943,52 @@ namespace EE.Doklad.ViewModels
                 if (!IsMonthInCoolingSeason(m, startMonth, endMonth)) continue;
 
                 var (workDays_m, satCount_m, sunCount_m) = CalendarService.GetCalendarCounts(year, m);
-                int offDays_m = _data.OffDaysPerMonth[m - 1];
+                int offDays_m = GetOffDaysForMonth(m);
 
-                // Effective work days per day type
+                // Effective work days per day type (if hours are 0:00-0:00, no occupancy)
                 double effectiveWorkdays = (hoursWorkday > 0) ? workDays_m : 0.0;
                 double effectiveSaturdays = (hoursSaturday > 0) ? satCount_m : 0.0;
                 double effectiveSundays = (hoursSunday > 0) ? sunCount_m : 0.0;
 
-                // k_m coefficient
-                double workDays_m_total = effectiveWorkdays + effectiveSaturdays + effectiveSundays;
-                double offDays_m_effective = Math.Min(offDays_m, workDays_m_total);
-                double k_m = (workDays_m_total > 0) ? Math.Max(0.0, (workDays_m_total - offDays_m_effective) / workDays_m_total) : 0.0;
+                // k_m coefficient: only applies to Mon-Fri workdays
+                double offDays_m_effective = Math.Min(offDays_m, effectiveWorkdays); // OffDays apply ONLY to Mon-Fri
+                double k_m = (effectiveWorkdays > 0) ? Math.Max(0.0, (effectiveWorkdays - offDays_m_effective) / effectiveWorkdays) : 1.0;
 
-                // Corrected hours
-                double hoursThisMonth = effectiveWorkdays * hoursWorkday + effectiveSaturdays * hoursSaturday + effectiveSundays * hoursSunday;
-                double correctedHours = k_m * hoursThisMonth;
-                totalHours += correctedHours;
+                // Corrected hours: scale only Mon-Fri hours by k_m, Sat/Sun remain unchanged
+                double hoursThisMonth = (k_m * effectiveWorkdays * hoursWorkday) + (effectiveSaturdays * hoursSaturday) + (effectiveSundays * hoursSunday);
+                totalHours += hoursThisMonth;
             }
 
             return totalHours;
+        }
+
+        /// <summary>
+        /// Връща OffDays за конкретен месец от ObjectData.
+        /// </summary>
+        private int GetOffDaysForMonth(int month)
+        {
+            if (_objectData == null) return 0;
+
+            string? offDaysStr = month switch
+            {
+                1 => _objectData.DaysOffJanuary,
+                2 => _objectData.DaysOffFebruary,
+                3 => _objectData.DaysOffMarch,
+                4 => _objectData.DaysOffApril,
+                5 => _objectData.DaysOffMay,
+                6 => _objectData.DaysOffJune,
+                7 => _objectData.DaysOffJuly,
+                8 => _objectData.DaysOffAugust,
+                9 => _objectData.DaysOffSeptember,
+                10 => _objectData.DaysOffOctober,
+                11 => _objectData.DaysOffNovember,
+                12 => _objectData.DaysOffDecember,
+                _ => null
+            };
+
+            if (string.IsNullOrWhiteSpace(offDaysStr)) return 0;
+            if (int.TryParse(offDaysStr, out int result)) return Math.Max(0, result);
+            return 0;
         }
 
         /// <summary>
