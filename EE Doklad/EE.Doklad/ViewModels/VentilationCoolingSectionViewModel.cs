@@ -2,8 +2,12 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text;
+using System.Windows.Input;
+using Microsoft.Win32;
 using EE.Doklad.Models;
+using EE.Doklad.Models.Climate;
 using EE.Doklad.Services;
+using EE.Doklad.Services.Climate;
 
 namespace EE.Doklad.ViewModels
 {
@@ -15,6 +19,7 @@ namespace EE.Doklad.ViewModels
         private readonly VentilationSectionData _data;
         private readonly ObjectDataSectionData? _objectData;
         private readonly CoolingSectionData? _coolingData;
+        private readonly Report? _report;
         private readonly ClimateService _climateService;
         private ClimateZoneData? _climateData;
         private readonly VentCoolingCalculatorMonthly _calculator;
@@ -34,11 +39,13 @@ namespace EE.Doklad.ViewModels
         public VentilationCoolingSectionViewModel(
             VentilationSectionData data,
             ObjectDataSectionData? objectData,
-            CoolingSectionData? coolingData)
+            CoolingSectionData? coolingData,
+            Report? report = null)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             _objectData = objectData;
             _coolingData = coolingData;
+            _report = report;
             _calculator = new VentCoolingCalculatorMonthly();
             _climateService = new ClimateService(new JsonClimateRepository());
 
@@ -742,7 +749,116 @@ namespace EE.Doklad.ViewModels
                 {
                     _data.CoolingClimateDatabase = value;
                     OnPropertyChanged(nameof(CoolingClimateDatabase));
+                    OnPropertyChanged(nameof(EpwFileDisplayName));
+                    OnPropertyChanged(nameof(EpwFileDisplayColor));
+                    OnPropertyChanged(nameof(EpwLocationInfo));
                     // TODO: Recalculate if needed for new methodology
+                }
+            }
+        }
+
+        /// <summary>
+        /// Име на EPW файл за показване в UI.
+        /// </summary>
+        public string EpwFileDisplayName
+        {
+            get
+            {
+                if (CoolingClimateDatabase != ClimateDatabase.ASHRAE)
+                    return string.Empty;
+
+                if (_report?.EmbeddedEpwData != null)
+                    return _report.EmbeddedEpwData.OriginalFileName;
+
+                return "(не е избран EPW файл)";
+            }
+        }
+
+        /// <summary>
+        /// Цвят на текста за EPW файл (червен ако липсва, нормален ако има).
+        /// </summary>
+        public string EpwFileDisplayColor
+        {
+            get
+            {
+                if (CoolingClimateDatabase != ClimateDatabase.ASHRAE)
+                    return "#000000";
+
+                return _report?.EmbeddedEpwData != null ? "#000000" : "#CC0000";
+            }
+        }
+
+        /// <summary>
+        /// Информация за местоположението от EPW файл.
+        /// </summary>
+        public string? EpwLocationInfo
+        {
+            get
+            {
+                if (CoolingClimateDatabase != ClimateDatabase.ASHRAE)
+                    return null;
+
+                return _report?.EmbeddedEpwData?.GetDisplayName();
+            }
+        }
+
+        /// <summary>
+        /// Command за зареждане на EPW файл.
+        /// </summary>
+        public ICommand LoadEpwFileCommand => new RelayCommand(_ => LoadEpwFile());
+
+        private void LoadEpwFile()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "EPW файлове (*.epw)|*.epw|Всички файлове (*.*)|*.*",
+                Title = "Изберете EPW файл"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var parser = new EpwParser();
+                    var result = parser.ParseFile(dialog.FileName);
+
+                    if (!result.Success)
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"Грешка при парсване на EPW файл:\n\n{result.ErrorMessage}",
+                            "Грешка",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Вграждаме данните в Report
+                    if (_report != null)
+                    {
+                        _report.EmbeddedEpwData = result.ToEmbeddedData();
+                        _report.ModifiedDate = DateTime.Now;
+                    }
+
+                    // Обновяваме UI
+                    OnPropertyChanged(nameof(EpwFileDisplayName));
+                    OnPropertyChanged(nameof(EpwFileDisplayColor));
+                    OnPropertyChanged(nameof(EpwLocationInfo));
+
+                    System.Windows.MessageBox.Show(
+                        $"EPW файлът е зареден успешно!\n\n{result.GetDisplayName()}\n\n8760 часови записа",
+                        "Успех",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+
+                    // TODO: Recalculate if cooling calculations are active
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Неочаквана грешка:\n\n{ex.Message}",
+                        "Грешка",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error);
                 }
             }
         }

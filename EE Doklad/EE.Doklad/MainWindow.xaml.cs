@@ -313,7 +313,7 @@ public partial class MainWindow : Window
             {
                 var ventCoolingView = new Views.VentilationCoolingSectionView
                 {
-                    DataContext = new ViewModels.VentilationCoolingSectionViewModel(section.VentilationSectionData, objectData, coolingData)
+                    DataContext = new ViewModels.VentilationCoolingSectionViewModel(section.VentilationSectionData, objectData, coolingData, viewModel.CurrentReport)
                 };
                 ContentScrollViewer.Content = ventCoolingView;
             }

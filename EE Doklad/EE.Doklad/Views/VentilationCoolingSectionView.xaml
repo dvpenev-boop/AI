@@ -12,6 +12,8 @@
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
         <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
         <converters:ClimateDatabaseConverter x:Key="ClimateDatabaseConverter"/>
+        <converters:StringMatchToVisibilityConverter x:Key="StringMatchToVisibilityConverter"/>
+        <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
@@ -305,6 +307,48 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
+                        </Grid>
+
+                        <!-- EPW File Picker (видим само когато е избран ASHRAE) -->
+                        <Grid Margin="10,0,10,10" 
+                              Visibility="{Binding CoolingClimateDatabase, Converter={StaticResource StringMatchToVisibilityConverter}, ConverterParameter=ASHRAE}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Label -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                       Text="EPW файл:" 
+                                       VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+
+                            <!-- File Name Display -->
+                            <TextBlock Grid.Row="0" Grid.Column="1" 
+                                       Text="{Binding EpwFileDisplayName}" 
+                                       VerticalAlignment="Center" FontSize="12" 
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{Binding EpwFileDisplayColor}"
+                                       Margin="0,0,10,0"/>
+
+                            <!-- Load Button -->
+                            <Button Grid.Row="0" Grid.Column="2" 
+                                    Content="Избери EPW файл..." 
+                                    Command="{Binding LoadEpwFileCommand}"
+                                    Padding="10,5" FontSize="12" 
+                                    Background="#0066CC" Foreground="White"
+                                    BorderThickness="0" Cursor="Hand"/>
+
+                            <!-- Location Info (когато има зареден файл) -->
+                            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                       Text="{Binding EpwLocationInfo}"
+                                       FontSize="11" FontStyle="Italic" Foreground="#666"
+                                       Margin="0,5,0,0"
+                                       Visibility="{Binding EpwLocationInfo, Converter={StaticResource CollectionToVisibilityConverter}}"/>
                         </Grid>
                     </StackPanel>
                 </Border>

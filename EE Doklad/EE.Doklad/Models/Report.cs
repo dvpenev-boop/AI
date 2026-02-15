@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Newtonsoft.Json;
+using EE.Doklad.Models.Climate;
 
 namespace EE.Doklad.Models
 {
@@ -22,6 +23,12 @@ namespace EE.Doklad.Models
         /// Ако е null или празен - всички секции са включени.
         /// </summary>
         public HashSet<string>? EnabledSections { get; set; }
+
+        /// <summary>
+        /// Вградени EPW климатични данни (ако е избран ASHRAE/EPW източник).
+        /// Сериализира се заедно с доклада - пер-доклад данни без external dependencies.
+        /// </summary>
+        public EpwEmbeddedData? EmbeddedEpwData { get; set; }
 
         /// <summary>
         /// Проверява дали дадена секция е включена за експорт.
