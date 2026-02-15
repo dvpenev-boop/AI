@@ -77,7 +77,21 @@
                        Margin="0,0,0,15"
                        Foreground="#D32F2F"/>
 
-            <!-- Статичен текст -->
+            <!-- Warning text (when heating season is NOT enabled) -->
+            <Border Background="#FFF3CD" BorderBrush="#FFC107" BorderThickness="2" Padding="12" Margin="0,0,0,15"
+                    Visibility="{Binding HeatingSeasonWarning, Converter={StaticResource StringToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding HeatingSeasonWarning}" 
+                               FontSize="13" FontWeight="SemiBold" 
+                               Foreground="#856404" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Main content (disabled when heating season is NOT enabled) -->
+            <StackPanel IsEnabled="{Binding IsHeatingSeasonEnabled}">
+
+                <!-- Статичен текст -->
             <TextBlock Text="Попълнете данните за секция: 12. Вентилация"
                        FontSize="12"
                        FontStyle="Italic"
@@ -522,6 +536,8 @@
                 <TextBox Text="{Binding DebugText, Mode=OneWay}" Style="{StaticResource ReadOnlyTextBoxStyle}" FontFamily="Consolas" FontSize="12" 
                          TextWrapping="NoWrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" Height="300"/>
             </Border>
+
+            </StackPanel> <!-- End of IsEnabled wrapper -->
 
             <!-- Информационна бележка -->
             <Border Background="#FFEBEE" BorderBrush="#D32F2F" BorderThickness="1" Padding="15" Margin="0,10,0,0">

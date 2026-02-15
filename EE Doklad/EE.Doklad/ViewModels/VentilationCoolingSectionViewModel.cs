@@ -26,6 +26,11 @@ namespace EE.Doklad.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Expose ObjectData for XAML binding (e.g., to CoolingSchedules).
+        /// </summary>
+        public ObjectDataSectionData? ObjectData => _objectData;
+
         public VentilationCoolingSectionViewModel(
             VentilationSectionData data,
             ObjectDataSectionData? objectData,
@@ -220,8 +225,13 @@ namespace EE.Doklad.ViewModels
 
         public double WorkingHoursInSeason => _calculationOutput?.Result.TotalWorkingHours ?? 0.0;
 
-        public string CoolingSeasonWarning => (_calculationOutput != null && !_calculationOutput.Result.CoolingSeasonEnabled)
-            ? "Охладителният сезон не е активен."
+        /// <summary>
+        /// Указва дали охладителният период е включен (контролира gating на секцията)
+        /// </summary>
+        public bool IsCoolingSeasonEnabled => _objectData?.CoolingSeasonEnabled ?? false;
+
+        public string CoolingSeasonWarning => !IsCoolingSeasonEnabled
+            ? "Не е избран охладителен период."
             : string.Empty;
 
         // Energy source 1/2 bindings (same as section 13)
@@ -593,6 +603,11 @@ namespace EE.Doklad.ViewModels
                 e.PropertyName == nameof(ObjectDataSectionData.CooledArea) ||
                 e.PropertyName?.StartsWith("DaysOff", StringComparison.OrdinalIgnoreCase) == true)
             {
+                if (e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonEnabled))
+                {
+                    OnPropertyChanged(nameof(IsCoolingSeasonEnabled));
+                    OnPropertyChanged(nameof(CoolingSeasonWarning));
+                }
                 Recalculate();
             }
         }
@@ -650,6 +665,260 @@ namespace EE.Doklad.ViewModels
 
             return sb.ToString();
         }
+
+        // ========== NEW METHODOLOGY: COOLING PARAMETERS + k_m LOGIC ==========
+
+        /// <summary>
+        /// Избор на климатична база данни за охлаждане.
+        /// </summary>
+        public ClimateDatabase CoolingClimateDatabase
+        {
+            get => _data.CoolingClimateDatabase;
+            set
+            {
+                if (_data.CoolingClimateDatabase != value)
+                {
+                    _data.CoolingClimateDatabase = value;
+                    OnPropertyChanged(nameof(CoolingClimateDatabase));
+                    // TODO: Recalculate if needed for new methodology
+                }
+            }
+        }
+
+        /// <summary>
+        /// Работни часове на седмица (readonly) - изчислено от графици за охлаждане.
+        /// </summary>
+        public double HoursPerWeek
+        {
+            get
+            {
+                if (_objectData?.CoolingSchedules == null) return 0.0;
+                return _objectData.CoolingSchedules.VentilationCoolingSchedule?.GetHoursPerWeek() ?? 0.0;
+            }
+        }
+
+        /// <summary>
+        /// Дебит на приточен въздух [m³/h] за охлаждане.
+        /// </summary>
+        public double CoolingSupplyAirflow
+        {
+            get => _data.CoolingSupplyAirflow;
+            set
+            {
+                var clamped = Math.Max(0.0, value);
+                if (Math.Abs(_data.CoolingSupplyAirflow - clamped) > 0.0001)
+                {
+                    _data.CoolingSupplyAirflow = clamped;
+                    OnPropertyChanged(nameof(CoolingSupplyAirflow));
+                    // TODO: Recalculate
+                }
+            }
+        }
+
+        /// <summary>
+        /// Дебит на отточен въздух [m³/h] за охлаждане.
+        /// </summary>
+        public double CoolingExhaustAirflow
+        {
+            get => _data.CoolingExhaustAirflow;
+            set
+            {
+                var clamped = Math.Max(0.0, value);
+                if (Math.Abs(_data.CoolingExhaustAirflow - clamped) > 0.0001)
+                {
+                    _data.CoolingExhaustAirflow = clamped;
+                    OnPropertyChanged(nameof(CoolingExhaustAirflow));
+                    // TODO: Recalculate
+                }
+            }
+        }
+
+        /// <summary>
+        /// Температура на подавания въздух при охлаждане [°C].
+        /// </summary>
+        public double CoolingSupplyTemperature
+        {
+            get => _data.CoolingSupplyTemperature;
+            set
+            {
+                if (Math.Abs(_data.CoolingSupplyTemperature - value) > 0.0001)
+                {
+                    _data.CoolingSupplyTemperature = value;
+                    OnPropertyChanged(nameof(CoolingSupplyTemperature));
+                    // TODO: Recalculate
+                }
+            }
+        }
+
+        /// <summary>
+        /// Температура на вътрешния въздух при охлаждане [°C].
+        /// </summary>
+        public double CoolingIndoorTemperature
+        {
+            get => _data.CoolingIndoorTemperature;
+            set
+            {
+                if (Math.Abs(_data.CoolingIndoorTemperature - value) > 0.0001)
+                {
+                    _data.CoolingIndoorTemperature = value;
+                    OnPropertyChanged(nameof(CoolingIndoorTemperature));
+                    // TODO: Recalculate
+                }
+            }
+        }
+
+        /// <summary>
+        /// Относителна влажност на подавания въздух при охлаждане [%] (0-100).
+        /// </summary>
+        public double CoolingRelativeHumidity
+        {
+            get => _data.CoolingRelativeHumidity;
+            set
+            {
+                var clamped = Math.Clamp(value, 0.0, 100.0);
+                if (Math.Abs(_data.CoolingRelativeHumidity - clamped) > 0.0001)
+                {
+                    _data.CoolingRelativeHumidity = clamped;
+                    OnPropertyChanged(nameof(CoolingRelativeHumidity));
+                    // TODO: Recalculate
+                }
+            }
+        }
+
+        /// <summary>
+        /// Изчислени работни дни за сезона (readonly) - базирано на графици и k_m корекция.
+        /// </summary>
+        public double WorkDaysSeason
+        {
+            get
+            {
+                if (_objectData == null || !_objectData.CoolingSeasonEnabled) return 0.0;
+
+                var schedule = _objectData.CoolingSchedules?.VentilationCoolingSchedule;
+                if (schedule == null) return 0.0;
+
+                double hoursWorkday = schedule.Workdays?.GetHours() ?? 0.0;
+                double hoursSaturday = schedule.Saturday?.GetHours() ?? 0.0;
+                double hoursSunday = schedule.Sunday?.GetHours() ?? 0.0;
+
+                return CalculateSeasonalWorkDays(hoursWorkday, hoursSaturday, hoursSunday);
+            }
+        }
+
+        /// <summary>
+        /// Изчислени работни часове за сезона (readonly) - базирано на графици и k_m корекция.
+        /// </summary>
+        public double WorkHoursSeason
+        {
+            get
+            {
+                if (_objectData == null || !_objectData.CoolingSeasonEnabled) return 0.0;
+
+                var schedule = _objectData.CoolingSchedules?.VentilationCoolingSchedule;
+                if (schedule == null) return 0.0;
+
+                double hoursWorkday = schedule.Workdays?.GetHours() ?? 0.0;
+                double hoursSaturday = schedule.Saturday?.GetHours() ?? 0.0;
+                double hoursSunday = schedule.Sunday?.GetHours() ?? 0.0;
+
+                return CalculateSeasonalWorkHours(hoursWorkday, hoursSaturday, hoursSunday);
+            }
+        }
+
+        /// <summary>
+        /// Изчислява общ брой работни дни за сезона с k_m корекция.
+        /// </summary>
+        private double CalculateSeasonalWorkDays(double hoursWorkday, double hoursSaturday, double hoursSunday)
+        {
+            if (_objectData == null || !_objectData.CoolingSeasonEnabled) return 0.0;
+
+            int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
+            int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
+            int year = DateTime.Now.Year;
+
+            double totalDays = 0.0;
+
+            for (int m = 1; m <= 12; m++)
+            {
+                if (!IsMonthInCoolingSeason(m, startMonth, endMonth)) continue;
+
+                var (workDays_m, satCount_m, sunCount_m) = CalendarService.GetCalendarCounts(year, m);
+                int offDays_m = _data.OffDaysPerMonth[m - 1];
+
+                // Effective work days per day type
+                double effectiveWorkdays = (hoursWorkday > 0) ? workDays_m : 0.0;
+                double effectiveSaturdays = (hoursSaturday > 0) ? satCount_m : 0.0;
+                double effectiveSundays = (hoursSunday > 0) ? sunCount_m : 0.0;
+
+                // k_m coefficient
+                double workDays_m_total = effectiveWorkdays + effectiveSaturdays + effectiveSundays;
+                double offDays_m_effective = Math.Min(offDays_m, workDays_m_total);
+                double k_m = (workDays_m_total > 0) ? Math.Max(0.0, (workDays_m_total - offDays_m_effective) / workDays_m_total) : 0.0;
+
+                // Corrected days
+                double correctedDays = k_m * workDays_m_total;
+                totalDays += correctedDays;
+            }
+
+            return totalDays;
+        }
+
+        /// <summary>
+        /// Изчислява общ брой работни часове за сезона с k_m корекция.
+        /// </summary>
+        private double CalculateSeasonalWorkHours(double hoursWorkday, double hoursSaturday, double hoursSunday)
+        {
+            if (_objectData == null || !_objectData.CoolingSeasonEnabled) return 0.0;
+
+            int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
+            int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
+            int year = DateTime.Now.Year;
+
+            double totalHours = 0.0;
+
+            for (int m = 1; m <= 12; m++)
+            {
+                if (!IsMonthInCoolingSeason(m, startMonth, endMonth)) continue;
+
+                var (workDays_m, satCount_m, sunCount_m) = CalendarService.GetCalendarCounts(year, m);
+                int offDays_m = _data.OffDaysPerMonth[m - 1];
+
+                // Effective work days per day type
+                double effectiveWorkdays = (hoursWorkday > 0) ? workDays_m : 0.0;
+                double effectiveSaturdays = (hoursSaturday > 0) ? satCount_m : 0.0;
+                double effectiveSundays = (hoursSunday > 0) ? sunCount_m : 0.0;
+
+                // k_m coefficient
+                double workDays_m_total = effectiveWorkdays + effectiveSaturdays + effectiveSundays;
+                double offDays_m_effective = Math.Min(offDays_m, workDays_m_total);
+                double k_m = (workDays_m_total > 0) ? Math.Max(0.0, (workDays_m_total - offDays_m_effective) / workDays_m_total) : 0.0;
+
+                // Corrected hours
+                double hoursThisMonth = effectiveWorkdays * hoursWorkday + effectiveSaturdays * hoursSaturday + effectiveSundays * hoursSunday;
+                double correctedHours = k_m * hoursThisMonth;
+                totalHours += correctedHours;
+            }
+
+            return totalHours;
+        }
+
+        /// <summary>
+        /// Проверка дали месец е в охладителния сезон.
+        /// </summary>
+        private bool IsMonthInCoolingSeason(int month, int startMonth, int endMonth)
+        {
+            if (startMonth <= endMonth)
+            {
+                return month >= startMonth && month <= endMonth;
+            }
+            else
+            {
+                // Wraparound (например октомври-март)
+                return month >= startMonth || month <= endMonth;
+            }
+        }
+
+        // ========== END OF NEW METHODOLOGY ==========
 
         protected virtual void OnPropertyChanged(string propertyName)
         {

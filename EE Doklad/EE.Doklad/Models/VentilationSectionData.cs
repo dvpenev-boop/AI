@@ -56,6 +56,53 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private VentilationCoolingCalculationMode _coolingCalculationMode = VentilationCoolingCalculationMode.FreshAirProcessed3113;
 
+    // ========== COOLING CALCULATION PARAMETERS (NEW METHODOLOGY) ==========
+
+    /// <summary>
+    /// Избор на климатична база данни (BG vs ASHRAE) за вентилация охлаждане.
+    /// </summary>
+    [ObservableProperty]
+    private ClimateDatabase _coolingClimateDatabase = ClimateDatabase.BG;
+
+    /// <summary>
+    /// Допълнителни почивни дни по месеци (извън събота/неделя): официални празници, ваканции и др.
+    /// Масив от 12 елемента (януари = index 0, ..., декември = index 11).
+    /// </summary>
+    [ObservableProperty]
+    private int[] _offDaysPerMonth = new int[12]; // Default: all zeros
+
+    /// <summary>
+    /// Дебит на приточен въздух [m³/h] за охлаждане.
+    /// </summary>
+    [ObservableProperty]
+    private double _coolingSupplyAirflow = 0.0;
+
+    /// <summary>
+    /// Дебит на отточен въздух [m³/h] за охлаждане.
+    /// </summary>
+    [ObservableProperty]
+    private double _coolingExhaustAirflow = 0.0;
+
+    /// <summary>
+    /// Температура на подавания въздух при охлаждане [°C].
+    /// </summary>
+    [ObservableProperty]
+    private double _coolingSupplyTemperature = 0.0;
+
+    /// <summary>
+    /// Температура на вътрешния въздух при охлаждане [°C].
+    /// </summary>
+    [ObservableProperty]
+    private double _coolingIndoorTemperature = 0.0;
+
+    /// <summary>
+    /// Относителна влажност на подавания въздух при охлаждане [%] (0-100).
+    /// </summary>
+    [ObservableProperty]
+    private double _coolingRelativeHumidity = 0.0;
+
+    // ========== END OF NEW METHODOLOGY PARAMETERS ==========
+
     /// <summary>
     /// Дял рециркулация [%] (0-100)
     /// </summary>

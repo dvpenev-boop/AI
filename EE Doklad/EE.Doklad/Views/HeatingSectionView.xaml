@@ -63,21 +63,35 @@
                        FontWeight="Bold" 
                        Margin="0,0,0,15"/>
 
-            <!-- Описание (свободен текст) -->
-            <TextBlock Text="Описание:"
-                       FontSize="12"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,5"/>
-            
-            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                     MinHeight="80"
-                     Padding="10"
-                     TextWrapping="Wrap"
-                     VerticalScrollBarVisibility="Auto"
-                     FontSize="11"
-                     Margin="0,0,0,20"
-                     BorderBrush="#E0E0E0"
-                     BorderThickness="1"/>
+            <!-- Warning text (when heating season is NOT enabled) -->
+            <Border Background="#FFF3CD" BorderBrush="#FFC107" BorderThickness="2" Padding="12" Margin="0,0,0,15"
+                    Visibility="{Binding HeatingSeasonWarning, Converter={StaticResource StringToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding HeatingSeasonWarning}" 
+                               FontSize="13" FontWeight="SemiBold" 
+                               Foreground="#856404" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Main content (disabled when heating season is NOT enabled) -->
+            <StackPanel IsEnabled="{Binding IsHeatingSeasonEnabled}">
+
+                <!-- Описание (свободен текст) -->
+                <TextBlock Text="Описание:"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,5"/>
+                
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         MinHeight="80"
+                         Padding="10"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         FontSize="11"
+                         Margin="0,0,0,20"
+                         BorderBrush="#E0E0E0"
+                         BorderThickness="1"/>
 
             <!-- СЕКЦИЯ 1: РЪЧНИ ПАРАМЕТРИ -->
             <TextBlock Text="Ръчни параметри:" Style="{StaticResource SectionHeaderStyle}"/>
@@ -497,6 +511,8 @@
                     </Border>
                 </StackPanel>
             </Border>
+
+            </StackPanel> <!-- End of IsEnabled wrapper -->
 
             <!-- Информационна бележка -->
             <Border Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="1" Padding="15" Margin="0,10,0,0">

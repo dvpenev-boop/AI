@@ -20,6 +20,21 @@ namespace EE.Doklad.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Указва дали охладителният период е включен (контролира gating на секцията)
+        /// </summary>
+        public bool IsCoolingSeasonEnabled => _objectData?.CoolingSeasonEnabled ?? false;
+
+        /// <summary>
+        /// Информационен текст, когато охладителният период не е избран
+        /// </summary>
+        public string CoolingSeasonWarning => IsCoolingSeasonEnabled ? string.Empty : "Не е избран охладителен период.";
+
+        /// <summary>
+        /// Достъп до централните данни за обекта (за binding на графиците)
+        /// </summary>
+        public ObjectDataSectionData? ObjectData => _objectData;
+
         // ========== PROPERTIES ==========
 
         public string Description
@@ -719,6 +734,11 @@ namespace EE.Doklad.ViewModels
                 OnPropertyChanged(nameof(TotalOccupantHeatPerAreaDisplay));
                 OnPropertyChanged(nameof(TotalLatentHeatPerArea));
                 OnPropertyChanged(nameof(TotalLatentHeatPerAreaDisplay));
+            }
+            else if (e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonEnabled))
+            {
+                OnPropertyChanged(nameof(IsCoolingSeasonEnabled));
+                OnPropertyChanged(nameof(CoolingSeasonWarning));
             }
         }
 

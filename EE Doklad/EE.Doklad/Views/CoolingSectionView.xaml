@@ -10,6 +10,7 @@
 
     <UserControl.Resources>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
 
         <!-- Note: energy-related styles and converters are defined at Application scope (App.xaml)
              to ensure ComboBox item container styles are available to the popup visual root on first show.
@@ -63,23 +64,230 @@
                        FontWeight="Bold" 
                        Margin="0,0,0,15"/>
 
-            <!-- Описание (свободен текст) -->
-            <TextBlock Text="Описание:"
-                       FontSize="12"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,5"/>
-            
-            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                     MinHeight="80"
-                     Padding="10"
-                     TextWrapping="Wrap"
-                     VerticalScrollBarVisibility="Auto"
-                     FontSize="11"
-                     Margin="0,0,0,20"
-                     BorderBrush="#E0E0E0"
-                     BorderThickness="1"/>
+            <!-- Warning text (when cooling season is NOT enabled) -->
+            <Border Background="#FFF3CD" BorderBrush="#FFC107" BorderThickness="2" Padding="12" Margin="0,0,0,15"
+                    Visibility="{Binding CoolingSeasonWarning, Converter={StaticResource StringToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding CoolingSeasonWarning}" 
+                               FontSize="13" FontWeight="SemiBold" 
+                               Foreground="#856404" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
 
-            <!-- СЕКЦИЯ 1: РЪЧНИ ПАРАМЕТРИ -->
+            <!-- Main content (disabled when cooling season is NOT enabled) -->
+            <StackPanel IsEnabled="{Binding IsCoolingSeasonEnabled}">
+
+                <!-- Описание (свободен текст) -->
+                <TextBlock Text="Описание:"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,5"/>
+                
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         MinHeight="80"
+                         Padding="10"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         FontSize="11"
+                         Margin="0,0,0,20"
+                         BorderBrush="#E0E0E0"
+                         BorderThickness="1"/>
+
+                <!-- ГРАФИЦИ ЗА ОХЛАДИТЕЛЕН ПЕРИОД (от ObjectData.CoolingSchedules) -->
+                <Border BorderBrush="#0066CC" BorderThickness="2" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Графици за охладителен период" 
+                                   FontSize="14" FontWeight="Bold" Padding="12,10" 
+                                   Background="#E6F2FF" Foreground="#0066CC"/>
+
+                        <!-- A) График за обитаване – охладителен период -->
+                        <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="A) График за обитаване – охладителен период" 
+                                           FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Раб.дни:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="1" Text="{Binding ObjectData.CoolingSchedules.OccupancyCoolingSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="3" Text="{Binding ObjectData.CoolingSchedules.OccupancyCoolingSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="5" Text="Съб:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="6" Text="{Binding ObjectData.CoolingSchedules.OccupancyCoolingSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="8" Text="{Binding ObjectData.CoolingSchedules.OccupancyCoolingSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="10" Text="Нед:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="11" Text="{Binding ObjectData.CoolingSchedules.OccupancyCoolingSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="13" Text="{Binding ObjectData.CoolingSchedules.OccupancyCoolingSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- B) График за охлаждане -->
+                        <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="B) График за охлаждане" 
+                                           FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Раб.дни:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="1" Text="{Binding ObjectData.CoolingSchedules.CoolingSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="3" Text="{Binding ObjectData.CoolingSchedules.CoolingSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="5" Text="Съб:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="6" Text="{Binding ObjectData.CoolingSchedules.CoolingSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="8" Text="{Binding ObjectData.CoolingSchedules.CoolingSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="10" Text="Нед:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="11" Text="{Binding ObjectData.CoolingSchedules.CoolingSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="13" Text="{Binding ObjectData.CoolingSchedules.CoolingSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- C) График за вентилация охлаждане -->
+                        <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="C) График за вентилация охлаждане" 
+                                           FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Раб.дни:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="1" Text="{Binding ObjectData.CoolingSchedules.VentilationCoolingSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="3" Text="{Binding ObjectData.CoolingSchedules.VentilationCoolingSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="5" Text="Съб:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="6" Text="{Binding ObjectData.CoolingSchedules.VentilationCoolingSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="8" Text="{Binding ObjectData.CoolingSchedules.VentilationCoolingSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="10" Text="Нед:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="11" Text="{Binding ObjectData.CoolingSchedules.VentilationCoolingSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="13" Text="{Binding ObjectData.CoolingSchedules.VentilationCoolingSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- D) График за вентилиране с външен въздух -->
+                        <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="D) График за вентилиране с външен въздух" 
+                                           FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Раб.дни:" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="1" Text="{Binding ObjectData.CoolingSchedules.OutdoorAirVentSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="3" Text="{Binding ObjectData.CoolingSchedules.OutdoorAirVentSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="5" Text="Съб:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="6" Text="{Binding ObjectData.CoolingSchedules.OutdoorAirVentSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="8" Text="{Binding ObjectData.CoolingSchedules.OutdoorAirVentSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    
+                                    <TextBlock Grid.Column="10" Text="Нед:" VerticalAlignment="Center" Margin="8,0,5,0" FontSize="11"/>
+                                    <TextBox Grid.Column="11" Text="{Binding ObjectData.CoolingSchedules.OutdoorAirVentSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                    <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center" FontSize="11"/>
+                                    <TextBox Grid.Column="13" Text="{Binding ObjectData.CoolingSchedules.OutdoorAirVentSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="4" TextAlignment="Center" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Ръчни входове -->
             <TextBlock Text="Ръчни параметри:" Style="{StaticResource SectionHeaderStyle}"/>
             
             <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20" Width="470" HorizontalAlignment="Left">
@@ -520,6 +728,8 @@
                               Visibility="{Binding HasCooledAreaError, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </StackPanel>
             </Border>
+
+            </StackPanel> <!-- End of IsEnabled wrapper -->
 
             <!-- Информационна бележка -->
             <Border Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="1" Padding="15" Margin="0,10,0,0">

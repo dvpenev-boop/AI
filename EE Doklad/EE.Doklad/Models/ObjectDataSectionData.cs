@@ -116,6 +116,13 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private string? _ventilationCoolingSundayHours;
 
+        /// <summary>
+        /// НОВИ графици за охладителен период (с TimeSpan начало/край)
+        /// Единен модел, споделен между секции 5, 12 и 14
+        /// </summary>
+        [ObservableProperty]
+        private CoolingSchedulesModel _coolingSchedules = new();
+
         [ObservableProperty]
         private int _climateZone = 1; // Климатична зона (1-9)
 

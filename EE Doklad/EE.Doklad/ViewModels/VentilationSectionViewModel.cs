@@ -19,6 +19,16 @@ namespace EE.Doklad.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Указва дали отоплителният сезон е включен (контролира gating на секцията)
+        /// </summary>
+        public bool IsHeatingSeasonEnabled => _objectData?.HeatingSeasonEnabled ?? true;
+
+        /// <summary>
+        /// Информационен текст, когато отоплителният сезон не е избран
+        /// </summary>
+        public string HeatingSeasonWarning => IsHeatingSeasonEnabled ? string.Empty : "Не е избран отоплителен сезон.";
+
         // Calculation result
         private VentilationCalculationResult? _calculationResult;
     private bool _showDebug = false;
@@ -733,6 +743,11 @@ namespace EE.Doklad.ViewModels
                 e.PropertyName == nameof(ObjectDataSectionData.VentilationSundayHours))
             {
                 Recalculate();
+            }
+            else if (e.PropertyName == nameof(ObjectDataSectionData.HeatingSeasonEnabled))
+            {
+                OnPropertyChanged(nameof(IsHeatingSeasonEnabled));
+                OnPropertyChanged(nameof(HeatingSeasonWarning));
             }
         }
 
