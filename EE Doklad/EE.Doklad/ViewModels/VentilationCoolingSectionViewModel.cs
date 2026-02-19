@@ -8,6 +8,9 @@ using EE.Doklad.Models;
 using EE.Doklad.Models.Climate;
 using EE.Doklad.Services;
 using EE.Doklad.Services.Climate;
+using EE.Doklad.Services.Psychrometrics;
+using EE.Doklad.Services.Schedule;
+using EE.Doklad.Services.VentCooling;
 
 namespace EE.Doklad.ViewModels
 {
@@ -25,9 +28,12 @@ namespace EE.Doklad.ViewModels
         private readonly VentCoolingCalculatorMonthly _calculator;
 
         private VentilationCoolingCalculationOutput? _calculationOutput;
+        private VentCoolingOutputV2 _outputV2 = new VentCoolingOutputV2 { IsValid = false, ErrorMessage = "Не е изчислено." };
         private bool _showDebug;
         private string _debugText = string.Empty;
         private bool _isAdjustingShares = false;
+
+        private readonly VentCoolingEngineV2 _engineV2 = new();
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -532,6 +538,48 @@ namespace EE.Doklad.ViewModels
         public double TotalFinalEnergy_kWh => _calculationOutput?.Result.TotalFinalEnergy_kWh ?? 0.0;
         public double SpecificFinalEnergy_kWh_m2 => _calculationOutput?.Result.SpecificFinalEnergy_kWh_m2 ?? 0.0;
 
+        // ── Engine V2 results (нова методика 7257_1 §3.14) ───────────────────────
+
+        /// <summary>Ефективност на рекуперация η_r [%] (0-100). Входен параметър.</summary>
+        public double RecuperationEfficiency
+        {
+            get => _data.FirstStageRecuperationEfficiency;
+            set
+            {
+                var clamped = Math.Clamp(value, 0.0, 100.0);
+                if (Math.Abs(_data.FirstStageRecuperationEfficiency - clamped) > 0.0001)
+                {
+                    _data.FirstStageRecuperationEfficiency = clamped;
+                    OnPropertyChanged(nameof(RecuperationEfficiency));
+                    Recalculate();
+                }
+            }
+        }
+
+        // Нетни енергии [kWh/m²]
+        public double V2_CoolNet_kWhm2     => _outputV2.TotalCoolNet_kWhm2;
+        public double V2_HeatNet_kWhm2     => _outputV2.TotalHeatNet_kWhm2;
+        public double V2_DryNet_kWhm2      => _outputV2.TotalDryNet_kWhm2;
+        public double V2_VentContrib_kWhm2 => _outputV2.TotalVentContrib_kWhm2;
+        public double V2_TotalNet_kWhm2    => _outputV2.TotalNetEnergy_kWhm2;
+
+        // Потребна доставена енергия [kWh/m²]
+        public double V2_FinalEI1_kWhm2    => _outputV2.FinalEnergyEI1_kWhm2;
+        public double V2_FinalEI2_kWhm2    => _outputV2.FinalEnergyEI2_kWhm2;
+        public double V2_TotalFinal_kWhm2  => _outputV2.TotalFinalEnergy_kWhm2;
+
+        // Абсолютни стойности [kWh]
+        public double V2_CoolNet_kWh       => _outputV2.TotalCoolNet_kWh;
+        public double V2_HeatNet_kWh       => _outputV2.TotalHeatNet_kWh;
+        public double V2_DryNet_kWh        => _outputV2.TotalDryNet_kWh;
+        public double V2_TotalFinal_kWh    => _outputV2.TotalFinalEnergy_kWh;
+
+        public double V2_WorkingDays       => _outputV2.TotalWorkingDays;
+        public double V2_WorkingHours      => _outputV2.TotalWorkingHours;
+
+        public string V2_ErrorMessage      => !_outputV2.IsValid ? _outputV2.ErrorMessage ?? string.Empty : string.Empty;
+        public bool   V2_IsValid           => _outputV2.IsValid;
+
         public double CooledArea_m2
         {
             get
@@ -553,7 +601,9 @@ namespace EE.Doklad.ViewModels
             UpdateClimateZone();
 
             _calculationOutput = _calculator.Calculate(_data, _objectData, _climateData, _coolingData);
-            DebugText = _calculationOutput != null ? BuildDebugText(_calculationOutput) : string.Empty;
+            _outputV2 = RunEngineV2();
+
+            DebugText = BuildDebugText(_calculationOutput, _outputV2);
 
             OnPropertyChanged(nameof(OperatingHoursPerWeek));
             OnPropertyChanged(nameof(CooledArea_m2));
@@ -581,6 +631,181 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(ErrorMessage));
             OnPropertyChanged(nameof(EnergySource1Carrier));
             OnPropertyChanged(nameof(EnergySource2Carrier));
+
+            // V2 properties
+            OnPropertyChanged(nameof(V2_CoolNet_kWhm2));
+            OnPropertyChanged(nameof(V2_HeatNet_kWhm2));
+            OnPropertyChanged(nameof(V2_DryNet_kWhm2));
+            OnPropertyChanged(nameof(V2_VentContrib_kWhm2));
+            OnPropertyChanged(nameof(V2_TotalNet_kWhm2));
+            OnPropertyChanged(nameof(V2_FinalEI1_kWhm2));
+            OnPropertyChanged(nameof(V2_FinalEI2_kWhm2));
+            OnPropertyChanged(nameof(V2_TotalFinal_kWhm2));
+            OnPropertyChanged(nameof(V2_CoolNet_kWh));
+            OnPropertyChanged(nameof(V2_HeatNet_kWh));
+            OnPropertyChanged(nameof(V2_DryNet_kWh));
+            OnPropertyChanged(nameof(V2_TotalFinal_kWh));
+            OnPropertyChanged(nameof(V2_WorkingDays));
+            OnPropertyChanged(nameof(V2_WorkingHours));
+            OnPropertyChanged(nameof(V2_ErrorMessage));
+            OnPropertyChanged(nameof(V2_IsValid));
+        }
+
+        /// <summary>
+        /// Изгражда VentCoolingInputV2 и изпълнява Engine V2.
+        /// Използва BgAvgClimateProvider при BG данни.
+        /// </summary>
+        private VentCoolingOutputV2 RunEngineV2()
+        {
+            static VentCoolingOutputV2 Fail(string msg) =>
+                new VentCoolingOutputV2 { IsValid = false, ErrorMessage = msg };
+
+            if (_objectData == null)  return Fail("Липсват данни за обекта (секция 5).");
+            if (_climateData == null) return Fail("Липсват климатични данни. Изберете климатична зона.");
+            if (!_objectData.CoolingSeasonEnabled) return Fail("Охладителният сезон не е активиран.");
+
+            // ── Season ───────────────────────────────────────────────────────────
+            if (!_objectData.CoolingSeasonStartMonth.HasValue || !_objectData.CoolingSeasonStartDay.HasValue ||
+                !_objectData.CoolingSeasonEndMonth.HasValue   || !_objectData.CoolingSeasonEndDay.HasValue)
+                return Fail("Не са въведени дати на охладителния сезон.");
+
+            int yearRef = DateTime.Now.Year;
+            int sm = _objectData.CoolingSeasonStartMonth.Value, sd = _objectData.CoolingSeasonStartDay.Value;
+            int em = _objectData.CoolingSeasonEndMonth.Value,   ed = _objectData.CoolingSeasonEndDay.Value;
+            var seasonStart = new DateTime(yearRef, sm, Math.Min(sd, DateTime.DaysInMonth(yearRef, sm)));
+            var seasonEnd   = new DateTime(yearRef, em, Math.Min(ed, DateTime.DaysInMonth(yearRef, em)));
+            if (seasonEnd < seasonStart) seasonEnd = seasonEnd.AddYears(1);
+
+            // ── Area + airflow ────────────────────────────────────────────────────
+            if (!double.TryParse(_objectData.CooledArea, NumberStyles.Float, CultureInfo.InvariantCulture, out double area) || area <= 0)
+                return Fail($"Невалидна охлаждаема площ: '{_objectData.CooledArea}'. Трябва да е > 0.");
+            if (_data.CoolingSupplyAirflow <= 0)
+                return Fail("Дебитът на приточен въздух трябва да е > 0.");
+
+            // ── Schedule (from CoolingSchedules model) ────────────────────────────
+            var ventSched = _objectData.CoolingSchedules?.VentilationCoolingSchedule;
+            var coolSched = _objectData.CoolingSchedules?.CoolingSchedule;
+
+            WeeklyScheduleConfig ventConfig;
+            WeeklyScheduleConfig? coolConfig = null;
+
+            if (ventSched != null && (ventSched.Workdays.GetHours() > 0 || ventSched.Saturday.GetHours() > 0 || ventSched.Sunday.GetHours() > 0))
+            {
+                // Derive StartHour/EndHour from TimeSpan schedule
+                ventConfig = BuildWeeklyConfig(ventSched);
+                if (coolSched != null && (coolSched.Workdays.GetHours() > 0 || coolSched.Saturday.GetHours() > 0 || coolSched.Sunday.GetHours() > 0))
+                    coolConfig = BuildWeeklyConfig(coolSched);
+            }
+            else
+            {
+                // Fallback to legacy string-based schedule hours from objectData
+                double wdH  = ParseHours(_objectData.VentilationCoolingWorkdaysHours);
+                double satH = ParseHours(_objectData.VentilationCoolingSaturdayHours);
+                double sunH = ParseHours(_objectData.VentilationCoolingSundayHours);
+                if (wdH <= 0 && satH <= 0 && sunH <= 0)
+                    return Fail("Не са въведени работни часове за вентилация охлаждане (нито в График C, нито в legacy полетата).");
+
+                int runH = (int)Math.Round(wdH > 0 ? wdH : (satH > 0 ? satH : sunH));
+                runH = Math.Max(1, Math.Min(24, runH));
+                ventConfig = new WeeklyScheduleConfig
+                {
+                    TimeRange      = new DailyTimeRange { StartHour = 0, EndHour = runH - 1 },
+                    WorkdaysActive = wdH  > 0,
+                    SaturdayActive = satH > 0,
+                    SundayActive   = sunH > 0,
+                };
+            }
+
+            if (!ventConfig.IsValid)
+                return Fail($"Невалиден график за вентилация: StartHour={ventConfig.TimeRange.StartHour} EndHour={ventConfig.TimeRange.EndHour}.");
+
+            // ── Days-off ──────────────────────────────────────────────────────────
+            var daysOff = new int[12];
+            for (int m = 1; m <= 12; m++)
+                daysOff[m - 1] = GetOffDaysForMonth(m);
+
+            // ── EI1/EI2 ──────────────────────────────────────────────────────────
+            var ei1 = new EnergySourceConfigV2
+            {
+                Share_Pct       = _data.EnergySource1.Share,
+                TotalEfficiency = Math.Max(0.001, _data.EnergySource1.TotalEfficiency),
+                Label           = "ЕИ1",
+            };
+            EnergySourceConfigV2? ei2 = null;
+            if (_data.UseSecondEnergySource && _data.EnergySource2 != null)
+            {
+                ei2 = new EnergySourceConfigV2
+                {
+                    Share_Pct       = _data.EnergySource2.Share,
+                    TotalEfficiency = Math.Max(0.001, _data.EnergySource2.TotalEfficiency),
+                    Label           = "ЕИ2",
+                };
+            }
+
+            // ── Barometric pressure ───────────────────────────────────────────────
+            double bPa = _climateData.GetEffectiveBarometricPressure();
+
+            // ── Recuperation ──────────────────────────────────────────────────────
+            double eta_r = Math.Clamp(_data.FirstStageRecuperationEfficiency / 100.0, 0.0, 1.0);
+
+            var input = new VentCoolingInputV2
+            {
+                AirflowSpec_m3hm2       = _data.CoolingSupplyAirflow,   // [m³/h·m²] – потребителят въвежда специфичен дебит
+                CooledArea_m2           = area,
+                SupplyTemperature_C     = _data.CoolingSupplyTemperature,
+                SupplyRH_Pct            = _data.CoolingRelativeHumidity > 0 ? _data.CoolingRelativeHumidity : 60.0,
+                BarometricPressure_Pa   = bPa,
+                RecuperationEfficiency  = eta_r,
+                ExtractAirTemperature_C = _data.CoolingIndoorTemperature > 0 ? _data.CoolingIndoorTemperature : (double?)null,
+                VentSchedule            = ventConfig,
+                CoolSchedule            = coolConfig,
+                SeasonStart             = seasonStart,
+                SeasonEnd               = seasonEnd,
+                DaysOffPerMonth         = daysOff,
+                EnergySource1           = ei1,
+                EnergySource2           = ei2,
+            };
+
+            // ── Climate provider ──────────────────────────────────────────────────
+            var provider = new BgAvgClimateProvider(_climateData);
+
+            try
+            {
+                return _engineV2.Calculate(input, provider.GetHourlyData, isBgAvgMode: true, yearRef: yearRef);
+            }
+            catch (Exception ex)
+            {
+                return Fail($"Грешка при изчислението: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Конвертира WeeklySchedule (TimeSpan) → WeeklyScheduleConfig (int hours).
+        /// </summary>
+        private static WeeklyScheduleConfig BuildWeeklyConfig(WeeklySchedule sched)
+        {
+            // Determine dominant time range (workdays preferred)
+            var range = sched.Workdays.GetHours() > 0 ? sched.Workdays
+                      : sched.Saturday.GetHours() > 0 ? sched.Saturday
+                      : sched.Sunday;
+
+            // StartHour: integral part of StartTime
+            int startH = (int)range.StartTime.TotalHours;
+            startH = Math.Clamp(startH, 0, 23);
+
+            // RunHours: duration of occupancy (rounded to nearest integer, min 1)
+            int runH = Math.Max(1, (int)Math.Round(range.GetHours()));
+
+            // EndHour (inclusive): last active hour of the day
+            int endH = Math.Min(23, startH + runH - 1);
+
+            return new WeeklyScheduleConfig
+            {
+                TimeRange      = new DailyTimeRange { StartHour = startH, EndHour = endH },
+                WorkdaysActive = sched.Workdays.GetHours() > 0,
+                SaturdayActive = sched.Saturday.GetHours() > 0,
+                SundayActive   = sched.Sunday.GetHours()   > 0,
+            };
         }
 
         private void UpdateClimateZone()
@@ -689,9 +914,17 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        private string BuildDebugText(VentilationCoolingCalculationOutput output)
+        private string BuildDebugText(VentilationCoolingCalculationOutput? output, VentCoolingOutputV2 v2)
         {
             var sb = new StringBuilder();
+
+            if (output == null)
+            {
+                sb.AppendLine("(няма legacy изчисление)");
+                AppendV2Debug(sb, v2);
+                return sb.ToString();
+            }
+
             var result = output.Result;
             var debug = output.Debug;
 
@@ -732,7 +965,71 @@ namespace EE.Doklad.ViewModels
             sb.AppendLine($"EI2 efficiency = {debug.CombinedEfficiency2:F4}, Need_EI2 = {debug.NeedEnergy2_kWh:F2} kWh");
             sb.AppendLine("--- Край на debug ---");
 
+            AppendV2Debug(sb, v2);
+
             return sb.ToString();
+        }
+
+        private static void AppendV2Debug(StringBuilder sb, VentCoolingOutputV2 v2)
+        {
+            sb.AppendLine();
+            sb.AppendLine("════════════════════════════════════════════════════════");
+            sb.AppendLine("  ENGINE V2  (Наредба 7257_1 §3.14, психрометрия)");
+            sb.AppendLine("════════════════════════════════════════════════════════");
+
+            if (!v2.IsValid)
+            {
+                sb.AppendLine($"  ГРЕШКА: {v2.ErrorMessage}");
+                return;
+            }
+
+            // ── Input snapshot ────────────────────────────────────────────────────
+            if (!string.IsNullOrEmpty(v2.DebugInputSummary))
+            {
+                sb.AppendLine("  Входни параметри:");
+                foreach (var line in v2.DebugInputSummary.Split('\n'))
+                    if (!string.IsNullOrWhiteSpace(line))
+                        sb.AppendLine($"    {line.Trim()}");
+                sb.AppendLine();
+            }
+
+            sb.AppendLine($"  Работни дни сезон : {v2.TotalWorkingDays:F1}  |  Работни часове: {v2.TotalWorkingHours:F1}");
+            sb.AppendLine();
+            sb.AppendLine("  Резултати [kWh/m²]:");
+            sb.AppendLine($"    Охлаждане нетна        : {v2.TotalCoolNet_kWhm2,8:F3}");
+            sb.AppendLine($"    Загряване              : {v2.TotalHeatNet_kWhm2,8:F3}");
+            sb.AppendLine($"    Изсушаване (латентна)  : {v2.TotalDryNet_kWhm2,8:F3}");
+            sb.AppendLine($"    Принос вент. охлаждане : {v2.TotalVentContrib_kWhm2,8:F3}");
+            sb.AppendLine($"    Обща нетна             : {v2.TotalNetEnergy_kWhm2,8:F3}");
+            sb.AppendLine();
+            sb.AppendLine("  Потребна доставена [kWh/m²]:");
+            sb.AppendLine($"    ЕИ 1                   : {v2.FinalEnergyEI1_kWhm2,8:F3}");
+            sb.AppendLine($"    ЕИ 2                   : {v2.FinalEnergyEI2_kWhm2,8:F3}");
+            sb.AppendLine($"    Обща                   : {v2.TotalFinalEnergy_kWhm2,8:F3}");
+            sb.AppendLine();
+
+            if (v2.MonthlyResults.Count > 0)
+            {
+                sb.AppendLine("  Месечна разбивка:");
+                sb.AppendLine($"  {"Месец",-12} {"Дни",5} {"Часове",7} {"h_out",7} {"h_sup",7} {"Охл.",8} {"Заг.",8} {"Изс.",8} {"Принос",8}");
+                foreach (var mr in v2.MonthlyResults)
+                {
+                    sb.AppendLine($"  {mr.MonthName,-12} {mr.WorkingDays,5:F1} {mr.WorkingHours,7:F1}" +
+                                  $" {mr.Avg_h_out_kJkg,7:F1} {mr.Avg_h_sup_kJkg,7:F1}" +
+                                  $" {mr.E_cool_net_kWhm2,8:F3} {mr.E_heat_net_kWhm2,8:F3}" +
+                                  $" {mr.E_dry_net_kWhm2,8:F3} {mr.E_vent_contrib_net_kWhm2,8:F3}");
+                }
+            }
+
+            if (v2.Warnings.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("  Предупреждения:");
+                foreach (var w in v2.Warnings)
+                    sb.AppendLine($"    ⚠ {w}");
+            }
+
+            sb.AppendLine("════════════════════════════════════════════════════════");
         }
 
         // ========== NEW METHODOLOGY: COOLING PARAMETERS + k_m LOGIC ==========

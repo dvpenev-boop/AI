@@ -38,7 +38,55 @@ namespace EE.Doklad.Models
         /// </summary>
         public int DegreeDays19C { get; set; }
 
+        /// <summary>
+        /// Representative barometric pressure [Pa] for the climate zone (altitude-based).
+        /// Used when BG_avg climate dataset is active (no hourly B data).
+        /// Populated from <see cref="ClimateZonePressureDefaults.GetPressure"/> if not set in the JSON.
+        /// </summary>
+        public double? BarometricPressure_Pa { get; set; }
+
+        /// <summary>
+        /// Returns the effective barometric pressure: value from JSON if present,
+        /// otherwise the zone-altitude default from <see cref="ClimateZonePressureDefaults"/>.
+        /// </summary>
+        public double GetEffectiveBarometricPressure()
+            => BarometricPressure_Pa is > 0
+                ? BarometricPressure_Pa.Value
+                : ClimateZonePressureDefaults.GetPressure(Id);
+
         public MonthlyClimateData Monthly { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Default barometric pressures [Pa] per BG climate zone (altitude-derived).
+    /// Source: Наредба 7257_1, табл. 3.14 / зонови средни стойности.
+    /// Used when the JSON climate dataset does not contain explicit B values.
+    /// Trade-off: single scalar per zone is accurate enough for monthly BG_avg calculations
+    /// (max altitude variation within a zone is ~300 m ⇒ ~3600 Pa ≈ 3.6% error on x).
+    /// For EPW/ASHRAE data the hourly B from the file should be used directly.
+    /// </summary>
+    public static class ClimateZonePressureDefaults
+    {
+        private static readonly double[] _pressuresByZone = new double[]
+        {
+            101000.0, // Zone 1
+            99200.0,  // Zone 2
+            101200.0, // Zone 3
+            98300.0,  // Zone 4
+            100900.0, // Zone 5
+            99400.0,  // Zone 6
+            94400.0,  // Zone 7 (highest altitude)
+            100600.0, // Zone 8
+            99400.0,  // Zone 9
+        };
+
+        /// <param name="zoneId">1-based zone identifier (1..9).</param>
+        public static double GetPressure(int zoneId)
+        {
+            if (zoneId < 1 || zoneId > _pressuresByZone.Length)
+                return 101325.0; // ISA sea-level fallback
+            return _pressuresByZone[zoneId - 1];
+        }
     }
 
     public sealed class HeatingSeasonInfo
