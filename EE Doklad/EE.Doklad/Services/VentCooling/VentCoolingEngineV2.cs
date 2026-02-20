@@ -295,7 +295,7 @@ namespace EE.Doklad.Services.VentCooling
             // ── Energy sources (EI1/EI2) ──────────────────────────────────────────
             ApplyEnergySources(input, netTotal, area, output);
 
-            // ── Debug input snapshot ──────────────────────────────────────────────
+            // ── Debug input snapshot (extended) ───────────────────────────────────
             double q_total_dbg = input.AirflowSpec_m3hm2 * area;
             var ds = new System.Text.StringBuilder();
             ds.AppendLine($"qv_spec = {input.AirflowSpec_m3hm2:F4} m³/h·m²   (A={area:F0} m²  →  qv = {q_total_dbg:F1} m³/h)");
@@ -303,6 +303,16 @@ namespace EE.Doklad.Services.VentCooling
             ds.AppendLine($"η_r = {input.RecuperationEfficiency * 100.0:F1}%   T_extract = {(input.ExtractAirTemperature_C.HasValue ? input.ExtractAirTemperature_C.Value.ToString("F1") : "n/a")} °C   RH_extract = {(input.ExtractAirRH_Pct.HasValue ? input.ExtractAirRH_Pct.Value.ToString("F1") : "50.0")}%");
             ds.AppendLine($"График: {input.VentSchedule.TimeRange}   Пн-Пт={input.VentSchedule.WorkdaysActive}  Съб={input.VentSchedule.SaturdayActive}  Нед={input.VentSchedule.SundayActive}");
             ds.AppendLine($"Сезон: {input.SeasonStart:dd.MM} – {input.SeasonEnd:dd.MM}");
+            ds.AppendLine();
+            ds.AppendLine($"Сезонни суми (kWh): totalCool={totalCool:F3}  totalDry={totalDry:F3}  totalContrib={totalContrib:F3}  netTotal={netTotal:F3}");
+            ds.AppendLine($"Normalized (kWh/m2): TotalNet={output.TotalNetEnergy_kWhm2:F4}  TotalFinal={output.TotalFinalEnergy_kWhm2:F4}");
+            ds.AppendLine($"EnergySource1: Share={input.EnergySource1.Share_Pct:F1}%  TotalEfficiency={input.EnergySource1.TotalEfficiency:F3}");
+            if (input.EnergySource2 != null)
+                ds.AppendLine($"EnergySource2: Share={input.EnergySource2.Share_Pct:F1}%  TotalEfficiency={input.EnergySource2.TotalEfficiency:F3}");
+
+            if (netTotal <= 0.0)
+                ds.AppendLine("NOTE: Нетна енергия <= 0 → няма необходима доставена енергия (ЕИ1/ЕИ2 ще бъдат 0).");
+
             output.DebugInputSummary = ds.ToString();
 
             output.IsValid = true;

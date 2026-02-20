@@ -25,12 +25,15 @@ namespace EE.Doklad.ViewModels
         private readonly Report? _report;
         private readonly ClimateService _climateService;
         private ClimateZoneData? _climateData;
-        private readonly VentCoolingCalculatorMonthly _calculator;
-
-        private VentilationCoolingCalculationOutput? _calculationOutput;
+    // Legacy monthly calculator removed; Engine V2 provides outputs.
         private VentCoolingOutputV2 _outputV2 = new VentCoolingOutputV2 { IsValid = false, ErrorMessage = "Не е изчислено." };
         private bool _showDebug;
-        private string _debugText = string.Empty;
+    private string _debugText = string.Empty;
+    // Optional override prefix that replaces the displayed DebugText when non-null.
+    // We use this to prefix the existing Engine V2 debug with Cooling (Section 12)
+    // sourced values (design temperature, "температура с повишение" and RH) so
+    // the UI shows the correct zone setpoint coming from Section 12.
+    private string? _debugTextOverride = null;
         private bool _isAdjustingShares = false;
 
         private readonly VentCoolingEngineV2 _engineV2 = new();
@@ -52,7 +55,7 @@ namespace EE.Doklad.ViewModels
             _objectData = objectData;
             _coolingData = coolingData;
             _report = report;
-            _calculator = new VentCoolingCalculatorMonthly();
+            // legacy calculator removed; Engine V2 will be used instead
             _climateService = new ClimateService(new JsonClimateRepository());
 
             if (_objectData != null)
@@ -106,14 +109,52 @@ namespace EE.Doklad.ViewModels
 
         public string DebugText
         {
-            get => _debugText;
+            get => _debugTextOverride ?? _debugText;
             private set
             {
                 if (_debugText != value)
                 {
                     _debugText = value;
+                    // When the engine updates the raw debug text we rebuild the override
+                    // so that the displayed DebugText prefixed with Section 12 info is kept
+                    // in sync.
+                    UpdateDebugOverride();
                     OnPropertyChanged(nameof(DebugText));
                 }
+            }
+        }
+
+        // Build or refresh the DebugText override which prefixes the engine's debug
+        // output with the Cooling section (Section 12) design temperature, the
+        // "температура с повишение" and the RH (informational only).
+        private void UpdateDebugOverride()
+        {
+            try
+            {
+                if (_coolingData != null)
+                {
+                    var prefix = new StringBuilder();
+                    prefix.AppendLine($"T_zone (from Section 12 - Охлаждане) : {_coolingData.DesignTemperature:F2} °C");
+                    prefix.AppendLine($"Температура с повишение : {_coolingData.ReductionTemperature:F2} °C  (informational)");
+                    prefix.AppendLine($"RH (Cooling section) : {_coolingData.RelativeHumidity:F1} %  (informational)");
+                    prefix.AppendLine();
+
+                    _debugTextOverride = prefix.ToString() + _debugText;
+                }
+                else
+                {
+                    // No Cooling section available — clear the override so the existing
+                    // debug (which may use Section 14 values) is shown unchanged.
+                    _debugTextOverride = null;
+                }
+
+                // Notify UI that DebugText may have changed due to override update.
+                OnPropertyChanged(nameof(DebugText));
+            }
+            catch
+            {
+                // Never throw from a debug helper — fall back to showing the raw text.
+                _debugTextOverride = null;
             }
         }
 
@@ -131,8 +172,8 @@ namespace EE.Doklad.ViewModels
                     return workdayHours * 5.0 + saturdayHours + sundayHours;
                 }
 
-                // Fallback to the calculated average (rare)
-                return _calculationOutput?.Result.OperatingHoursPerWeek ?? 0.0;
+                // Fallback: no object data — return 0 (legacy calculator removed)
+                return 0.0;
             }
         }
 
@@ -240,9 +281,9 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        public double WorkingDaysInSeason => _calculationOutput?.Result.TotalWorkingDays ?? 0.0;
+    public double WorkingDaysInSeason => _outputV2.TotalWorkingDays;
 
-        public double WorkingHoursInSeason => _calculationOutput?.Result.TotalWorkingHours ?? 0.0;
+    public double WorkingHoursInSeason => _outputV2.TotalWorkingHours;
 
         /// <summary>
         /// Указва дали охладителният период е включен (контролира gating на секцията)
@@ -521,22 +562,22 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        // Outputs
-        public double SensibleCooling_kWh => _calculationOutput?.Result.SensibleCoolingEnergy_kWh ?? 0.0;
-        public double SensibleCooling_kWh_m2 => _calculationOutput?.Result.SensibleCoolingEnergy_kWh_m2 ?? 0.0;
-        public double SensibleHeating_kWh => _calculationOutput?.Result.SensibleHeatingEnergy_kWh ?? 0.0;
-        public double SensibleHeating_kWh_m2 => _calculationOutput?.Result.SensibleHeatingEnergy_kWh_m2 ?? 0.0;
-        public double Latent_kWh => _calculationOutput?.Result.LatentEnergy_kWh ?? 0.0;
-        public double Latent_kWh_m2 => _calculationOutput?.Result.LatentEnergy_kWh_m2 ?? 0.0;
-        public double NetCoolingContribution_kWh => _calculationOutput?.Result.NetCoolingContribution_kWh ?? 0.0;
-        public double NetCoolingContribution_kWh_m2 => _calculationOutput?.Result.NetCoolingContribution_kWh_m2 ?? 0.0;
+    // Outputs (mapped to Engine V2)
+    public double SensibleCooling_kWh => _outputV2.TotalCoolNet_kWh;
+    public double SensibleCooling_kWh_m2 => _outputV2.TotalCoolNet_kWhm2;
+    public double SensibleHeating_kWh => _outputV2.TotalHeatNet_kWh;
+    public double SensibleHeating_kWh_m2 => _outputV2.TotalHeatNet_kWhm2;
+    public double Latent_kWh => _outputV2.TotalDryNet_kWh;
+    public double Latent_kWh_m2 => _outputV2.TotalDryNet_kWhm2;
+    public double NetCoolingContribution_kWh => _outputV2.TotalVentContrib_kWhm2 * CooledArea_m2;
+    public double NetCoolingContribution_kWh_m2 => _outputV2.TotalVentContrib_kWhm2;
 
-        public double FinalEnergySource1_kWh => _calculationOutput?.Result.FinalEnergySource1_kWh ?? 0.0;
-        public double FinalEnergySource2_kWh => _calculationOutput?.Result.FinalEnergySource2_kWh ?? 0.0;
-        public double FinalEnergySource1_kWh_m2 => CooledArea_m2 > 0 ? FinalEnergySource1_kWh / CooledArea_m2 : 0.0;
-        public double FinalEnergySource2_kWh_m2 => CooledArea_m2 > 0 ? FinalEnergySource2_kWh / CooledArea_m2 : 0.0;
-        public double TotalFinalEnergy_kWh => _calculationOutput?.Result.TotalFinalEnergy_kWh ?? 0.0;
-        public double SpecificFinalEnergy_kWh_m2 => _calculationOutput?.Result.SpecificFinalEnergy_kWh_m2 ?? 0.0;
+    public double FinalEnergySource1_kWh => _outputV2.FinalEnergyEI1_kWhm2 * CooledArea_m2;
+    public double FinalEnergySource2_kWh => _outputV2.FinalEnergyEI2_kWhm2 * CooledArea_m2;
+    public double FinalEnergySource1_kWh_m2 => _outputV2.FinalEnergyEI1_kWhm2;
+    public double FinalEnergySource2_kWh_m2 => _outputV2.FinalEnergyEI2_kWhm2;
+    public double TotalFinalEnergy_kWh => _outputV2.TotalFinalEnergy_kWh;
+    public double SpecificFinalEnergy_kWh_m2 => _outputV2.TotalFinalEnergy_kWhm2;
 
         // ── Engine V2 results (нова методика 7257_1 §3.14) ───────────────────────
 
@@ -594,16 +635,16 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        public string ErrorMessage => _calculationOutput?.Result.IsValid == false ? _calculationOutput.Result.ErrorMessage ?? string.Empty : string.Empty;
+    public string ErrorMessage => V2_ErrorMessage;
 
         private void Recalculate()
         {
             UpdateClimateZone();
 
-            _calculationOutput = _calculator.Calculate(_data, _objectData, _climateData, _coolingData);
+            // legacy calculation removed
             _outputV2 = RunEngineV2();
 
-            DebugText = BuildDebugText(_calculationOutput, _outputV2);
+            DebugText = BuildDebugText(_outputV2);
 
             OnPropertyChanged(nameof(OperatingHoursPerWeek));
             OnPropertyChanged(nameof(CooledArea_m2));
@@ -756,7 +797,12 @@ namespace EE.Doklad.ViewModels
                 SupplyRH_Pct            = _data.CoolingRelativeHumidity > 0 ? _data.CoolingRelativeHumidity : 60.0,
                 BarometricPressure_Pa   = bPa,
                 RecuperationEfficiency  = eta_r,
-                ExtractAirTemperature_C = _data.CoolingIndoorTemperature > 0 ? _data.CoolingIndoorTemperature : (double?)null,
+                // Prefer the Cooling section (Section 12) design temperature when present.
+                // This ensures the engine uses the project temperature from Section 12
+                // rather than a local Section 14 field.
+                ExtractAirTemperature_C = _coolingData != null
+                    ? _coolingData.DesignTemperature
+                    : (_data.CoolingIndoorTemperature > 0 ? _data.CoolingIndoorTemperature : (double?)null),
                 VentSchedule            = ventConfig,
                 CoolSchedule            = coolConfig,
                 SeasonStart             = seasonStart,
@@ -914,59 +960,28 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        private string BuildDebugText(VentilationCoolingCalculationOutput? output, VentCoolingOutputV2 v2)
+        private string BuildDebugText(VentCoolingOutputV2 v2)
         {
+            // Show zone setpoint (used as extract/indoor temperature) and humidity info
             var sb = new StringBuilder();
+            sb.AppendLine();
+            sb.AppendLine("  Zone setpoint used for calculations:");
+            if (_data.CoolingIndoorTemperature > 0.0)
+                sb.AppendLine($"    T_zone (CoolingIndoorTemperature) : {_data.CoolingIndoorTemperature,6:F1} °C");
+            else
+                sb.AppendLine("    T_zone (CoolingIndoorTemperature) : (not set) -> engine will use fallback behavior");
 
-            if (output == null)
-            {
-                sb.AppendLine("(няма legacy изчисление)");
-                AppendV2Debug(sb, v2);
-                return sb.ToString();
-            }
+            // There is no separate 'zone RH' field; show the supply RH and note what the engine will use for extract RH
+            if (_data.CoolingRelativeHumidity > 0.0)
+                sb.AppendLine($"    RH_supply (CoolingRelativeHumidity) : {_data.CoolingRelativeHumidity,6:F1} %");
+            else
+                sb.AppendLine("    RH_supply (CoolingRelativeHumidity) : (not set)");
 
-            var result = output.Result;
-            var debug = output.Debug;
+            sb.AppendLine("    Note: engine uses ExtractAirTemperature if set (T_zone) and ExtractAirRH if provided; otherwise RH_extract defaults to 50%.");
+            sb.AppendLine();
 
-            sb.AppendLine("--- Debug: секция 14 - Вентилация (охлаждане) ---");
-            sb.AppendLine($"Климатична зона: {debug.ClimateZoneName}");
-            sb.AppendLine($"Сезон активен: {debug.SeasonEnabled}");
-            if (debug.SeasonStart.HasValue && debug.SeasonEnd.HasValue)
-            {
-                sb.AppendLine($"SeasonStart: {debug.SeasonStart:dd.MM.yyyy}, SeasonEnd: {debug.SeasonEnd:dd.MM.yyyy}");
-            }
-
-            sb.AppendLine($"A_cool = {debug.AreaCooled_m2:F2} m2");
-            sb.AppendLine($"qv_spec = {debug.AirflowRatePerM2:F3} m3/h·m2");
-            sb.AppendLine($"qv = {debug.AirflowTotal_m3h:F2} m3/h");
-            sb.AppendLine($"m_dot = {debug.MassFlow_kg_h:F2} kg/h");
-            sb.AppendLine($"Tsup = {debug.SupplyTemperature_C:F1} °C, RHsup = {debug.SupplyRH_percent:F1}%");
-            sb.AppendLine($"Mode = {debug.Mode}, Recirc% = {debug.RecirculationPercent:F1}%");
-            sb.AppendLine($"T_in = {debug.T_in_C:F1} °C, RH_in = {debug.RH_in_percent:F1}% (assumed: {debug.RH_in_assumed})");
-            sb.AppendLine($"Schedule h/day: workday={debug.WorkdayHours:F1}, sat={debug.SaturdayHours:F1}, sun={debug.SundayHours:F1}");
-            sb.AppendLine($"{debug.HolidaysSourceNote}");
-            sb.AppendLine($"Total workdays: {debug.TotalWorkdays:F1}, Total hours: {debug.TotalHours:F1}");
-            sb.AppendLine(" ");
-            sb.AppendLine("Month | days_in_season | rest | holidays | workdays | t_m[h] | Te | RH | x_e | x_sup | h_e | h_sup | Δh | Q_sens | Q_lat | Q_total | e_sens_cool | e_sens_heat | e_tot | e_lat");
-
-            foreach (var m in debug.Months)
-            {
-                var rh = m.HasRH ? m.RH_m_percent?.ToString("F1", CultureInfo.InvariantCulture) : "n/a";
-                sb.AppendLine($"{m.MonthName.PadRight(7)} | {m.DaysInSeason,5} | {m.RestDays,4} | {m.Holidays,4} | {m.WorkingDays,7:0.0} | {m.WorkingHours_h,6:0.0} | {m.Te_m_C,5:0.0} | {rh,5} | {m.x_e_kgkg,5:0.000} | {m.x_sup_kgkg,5:0.000} | {m.h_e_kJkg,6:0.0} | {m.h_sup_kJkg,6:0.0} | {m.DeltaH_kJkg,5:0.0} | {m.Q_sens_kWh,7:0.00} | {m.Q_lat_kWh,7:0.00} | {m.Q_total_kWh,7:0.00} | {m.SensibleCooling_kWh,10:0.00} | {m.SensibleHeating_kWh,10:0.00} | {m.TotalCooling_kWh,7:0.00} | {m.Latent_kWh,7:0.00}");
-            }
-
-            sb.AppendLine(" ");
-            sb.AppendLine($"e_sens_cool = {debug.SensibleCooling_kWh_m2:F2} kWh/m2");
-            sb.AppendLine($"e_sens_heat = {debug.SensibleHeating_kWh_m2:F2} kWh/m2");
-            sb.AppendLine($"e_lat = {debug.Latent_kWh_m2:F2} kWh/m2");
-            sb.AppendLine($"Contribution (net) = e_sens_cool + e_lat = {debug.NetCoolingContribution_kWh_m2:F2} kWh/m2");
-            sb.AppendLine($"NetEnergyTotal = e_sens_cool + e_sens_heat + e_lat = {debug.NetEnergyTotal_kWh_m2:F2} kWh/m2");
-            sb.AppendLine($"EI1 efficiency = {debug.CombinedEfficiency1:F4}, Need_EI1 = {debug.NeedEnergy1_kWh:F2} kWh");
-            sb.AppendLine($"EI2 efficiency = {debug.CombinedEfficiency2:F4}, Need_EI2 = {debug.NeedEnergy2_kWh:F2} kWh");
-            sb.AppendLine("--- Край на debug ---");
-
+            // Then append the detailed Engine V2 debug block
             AppendV2Debug(sb, v2);
-
             return sb.ToString();
         }
 
