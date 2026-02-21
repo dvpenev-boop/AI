@@ -1001,11 +1001,11 @@
                         <TextBlock Text="Принос към охлаждането от вентилация (нетен)" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
-                        <TextBox Text="{Binding V2_VentContrib_kWhm2, Mode=OneWay, StringFormat=0.00}" 
+                        <TextBox Text="{Binding NetCoolingContribution_kWh_m2, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,1">
-                        <TextBox Text="{Binding V2_VentContrib_kWh, Mode=OneWay, StringFormat=N2}" 
+                        <TextBox Text="{Binding NetCoolingContribution_kWh, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
 

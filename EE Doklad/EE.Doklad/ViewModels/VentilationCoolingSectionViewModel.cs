@@ -27,6 +27,8 @@ namespace EE.Doklad.ViewModels
         private ClimateZoneData? _climateData;
     // Legacy monthly calculator removed; Engine V2 provides outputs.
         private VentCoolingOutputV2 _outputV2 = new VentCoolingOutputV2 { IsValid = false, ErrorMessage = "Не е изчислено." };
+        // Нетен принос към охлаждането – изчислен по новата формула (BaseFactor × ΔT, f_on от графиците).
+        private VentCoolingContributionResult _contribResult = new VentCoolingContributionResult { IsValid = false, ErrorMessage = "Не е изчислено." };
         private bool _showDebug;
     private string _debugText = string.Empty;
     // Optional override prefix that replaces the displayed DebugText when non-null.
@@ -569,8 +571,41 @@ namespace EE.Doklad.ViewModels
     public double SensibleHeating_kWh_m2 => _outputV2.TotalHeatNet_kWhm2;
     public double Latent_kWh => _outputV2.TotalDryNet_kWh;
     public double Latent_kWh_m2 => _outputV2.TotalDryNet_kWhm2;
-    public double NetCoolingContribution_kWh => _outputV2.TotalVentContrib_kWhm2 * CooledArea_m2;
-    public double NetCoolingContribution_kWh_m2 => _outputV2.TotalVentContrib_kWhm2;
+    public double NetCoolingContribution_kWh => _contribResult.Net_kWh;
+    public double NetCoolingContribution_kWh_m2 => _contribResult.Net_kWhm2;
+
+    // ── Допълнителни полета от новото изчисление на нетния принос ────────────
+    /// <summary>Сценарий с проектна температура [kWh/m²].</summary>
+    public double NetContrib_ScenarioDesign_kWhm2 => _contribResult.ScenarioDesign_kWhm2;
+    /// <summary>Сценарий с повишена температура [kWh/m²].</summary>
+    public double NetContrib_ScenarioRaised_kWhm2 => _contribResult.ScenarioRaised_kWhm2;
+    /// <summary>Минимален сценарий [kWh/m²].</summary>
+    public double NetContrib_Min_kWhm2 => _contribResult.Min_kWhm2;
+    /// <summary>Максимален сценарий [kWh/m²].</summary>
+    public double NetContrib_Max_kWhm2 => _contribResult.Max_kWhm2;
+    /// <summary>Коефициент на застъпване на графиците f_on [0..1].</summary>
+    public double NetContrib_Fon => _contribResult.F_on;
+    /// <summary>Base factor ρCp·q·H/1000 [kWh/m²·K].</summary>
+    public double NetContrib_BaseFactor => _contribResult.BaseFactor;
+
+    /// <summary>
+    /// Общ брой работни часове за сезона – UI поле „Основни параметри" (Секция 14).
+    /// Използва се директно в изчислението на нетния принос.
+    /// </summary>
+    public double TotalWorkHoursSeason
+    {
+        get => _data.TotalWorkHoursSeason;
+        set
+        {
+            var clamped = Math.Max(0.0, value);
+            if (Math.Abs(_data.TotalWorkHoursSeason - clamped) > 0.001)
+            {
+                _data.TotalWorkHoursSeason = clamped;
+                OnPropertyChanged(nameof(TotalWorkHoursSeason));
+                Recalculate();
+            }
+        }
+    }
 
     public double FinalEnergySource1_kWh => _outputV2.FinalEnergyEI1_kWhm2 * CooledArea_m2;
     public double FinalEnergySource2_kWh => _outputV2.FinalEnergyEI2_kWhm2 * CooledArea_m2;
@@ -644,6 +679,9 @@ namespace EE.Doklad.ViewModels
             // legacy calculation removed
             _outputV2 = RunEngineV2();
 
+            // Нетен принос към охлаждането (нова формула – замества старата психрометрична)
+            _contribResult = RunContribCalculator();
+
             DebugText = BuildDebugText(_outputV2);
 
             OnPropertyChanged(nameof(OperatingHoursPerWeek));
@@ -662,6 +700,13 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(Latent_kWh_m2));
             OnPropertyChanged(nameof(NetCoolingContribution_kWh));
             OnPropertyChanged(nameof(NetCoolingContribution_kWh_m2));
+            OnPropertyChanged(nameof(NetContrib_ScenarioDesign_kWhm2));
+            OnPropertyChanged(nameof(NetContrib_ScenarioRaised_kWhm2));
+            OnPropertyChanged(nameof(NetContrib_Min_kWhm2));
+            OnPropertyChanged(nameof(NetContrib_Max_kWhm2));
+            OnPropertyChanged(nameof(NetContrib_Fon));
+            OnPropertyChanged(nameof(NetContrib_BaseFactor));
+            OnPropertyChanged(nameof(TotalWorkHoursSeason));
 
             OnPropertyChanged(nameof(FinalEnergySource1_kWh));
             OnPropertyChanged(nameof(FinalEnergySource2_kWh));
@@ -826,6 +871,49 @@ namespace EE.Doklad.ViewModels
         }
 
         /// <summary>
+        /// Изгражда VentCoolingContributionInput и изпълнява новата формула за
+        /// „Принос към охлаждането от вентилация (нетен)".
+        ///
+        /// Входни данни:
+        ///   • Airflow_m3ph_per_m2   – _data.CoolingSupplyAirflow    (Специфичен дебит)
+        ///   • SupplyAirTemp_C       – _data.CoolingSupplyTemperature (Темп. на подавания въздух)
+        ///   • TotalWorkHoursSeason  – _data.TotalWorkHoursSeason     (готово поле от UI – НЕ преизчислява)
+        ///   • RoomTemp_Design_C     – _coolingData.DesignTemperature (Проектна температура, Секция 12)
+        ///   • RoomTemp_Raised_C     – _coolingData.ReductionTemperature (Температура с повишение, Секция 12)
+        ///   • CoolingArea_m2        – от ObjectData.CooledArea
+        ///   • CoolingSchedule       – График B (от CoolingSchedules)
+        ///   • VentCoolingSchedule   – График C (от CoolingSchedules)
+        /// </summary>
+        private VentCoolingContributionResult RunContribCalculator()
+        {
+            static VentCoolingContributionResult Fail(string msg) =>
+                new VentCoolingContributionResult { IsValid = false, ErrorMessage = msg };
+
+            if (_objectData == null)  return Fail("Липсват данни за обекта (секция 5).");
+            if (_coolingData == null) return Fail("Липсват данни за охлаждане (секция 12).");
+
+            // Площ
+            if (!double.TryParse(_objectData.CooledArea, NumberStyles.Float, CultureInfo.InvariantCulture, out double area) || area < 0.0)
+                area = 0.0;
+
+            var contribInput = new VentCoolingContributionInput
+            {
+                Airflow_m3ph_per_m2  = _data.CoolingSupplyAirflow,
+                SupplyAirTemp_C      = _data.CoolingSupplyTemperature,
+                // WorkHoursSeason е вече изчисленото readonly property от секция 14 UI
+                // ("Общ брой работни часове за сезона") – НЕ се взима от _data.TotalWorkHoursSeason (=0)
+                TotalWorkHoursSeason = WorkHoursSeason,
+                RoomTemp_Design_C    = _coolingData.DesignTemperature,
+                RoomTemp_Raised_C    = _coolingData.ReductionTemperature,
+                CoolingArea_m2       = area,
+                CoolingSchedule      = _objectData.CoolingSchedules?.CoolingSchedule,
+                VentCoolingSchedule  = _objectData.CoolingSchedules?.VentilationCoolingSchedule,
+            };
+
+            return VentCoolingContributionCalculator.Calculate(contribInput);
+        }
+
+        /// <summary>
         /// Конвертира WeeklySchedule (TimeSpan) → WeeklyScheduleConfig (int hours).
         /// </summary>
         private static WeeklyScheduleConfig BuildWeeklyConfig(WeeklySchedule sched)
@@ -954,7 +1042,8 @@ namespace EE.Doklad.ViewModels
 
         private void OnCoolingDataPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CoolingSectionData.DesignTemperature))
+            if (e.PropertyName == nameof(CoolingSectionData.DesignTemperature) ||
+                e.PropertyName == nameof(CoolingSectionData.ReductionTemperature))
             {
                 Recalculate();
             }
@@ -982,7 +1071,61 @@ namespace EE.Doklad.ViewModels
 
             // Then append the detailed Engine V2 debug block
             AppendV2Debug(sb, v2);
+
+            // Append new contribution calculation debug
+            AppendContribDebug(sb, _contribResult, WorkHoursSeason, _data.CoolingSupplyAirflow, _data.CoolingSupplyTemperature,
+                _coolingData?.DesignTemperature, _coolingData?.ReductionTemperature);
+
             return sb.ToString();
+        }
+
+        private static void AppendContribDebug(StringBuilder sb, VentCoolingContributionResult r,
+            double ventSeasonHours, double airflow, double supplyTemp,
+            double? tRoomDesign = null, double? tRoomRaised = null)
+        {
+            sb.AppendLine();
+            sb.AppendLine("════════════════════════════════════════════════════════");
+            sb.AppendLine("  ПРИНОС КЪМ ОХЛАЖДАНЕТО ОТ ВЕНТИЛАЦИЯ (нов метод)");
+            sb.AppendLine("════════════════════════════════════════════════════════");
+
+            if (!r.IsValid)
+            {
+                sb.AppendLine($"  ГРЕШКА: {r.ErrorMessage}");
+                return;
+            }
+
+            // Входни параметри (за верификация)
+            sb.AppendLine($"  Входни параметри:");
+            sb.AppendLine($"    q (дебит)           = {airflow,10:F4}  m³/h·m²");
+            sb.AppendLine($"    T_supply            = {supplyTemp,10:F2}  °C");
+            sb.AppendLine($"    H_season            = {ventSeasonHours,10:F2}  h  (WorkHoursSeason, 2026)");
+            sb.AppendLine($"    T_room_design       = {(tRoomDesign.HasValue ? $"{tRoomDesign.Value,6:F2} °C  (Секция 12 – Проектна температура)" : "?  (липсва Секция 12)")}");
+            sb.AppendLine($"    T_room_raised       = {(tRoomRaised.HasValue ? $"{tRoomRaised.Value,6:F2} °C  (Секция 12 – Температура с повишение)" : "?  (липсва Секция 12)")}");
+            sb.AppendLine();
+            sb.AppendLine($"  Формула: BaseFactor = 0.34 × q × H / 1000");
+            sb.AppendLine($"           = 0.34 × {airflow:F4} × {ventSeasonHours:F2} / 1000 = {r.BaseFactor:F6}");
+            if (tRoomDesign.HasValue)
+                sb.AppendLine($"  ScenarioDesign = {r.BaseFactor:F6} × ({tRoomDesign.Value:F2} - {supplyTemp:F2}) = {r.ScenarioDesign_kWhm2:F3}");
+            if (tRoomRaised.HasValue)
+                sb.AppendLine($"  ScenarioRaised = {r.BaseFactor:F6} × ({tRoomRaised.Value:F2} - {supplyTemp:F2}) = {r.ScenarioRaised_kWhm2:F3}");
+            sb.AppendLine();
+            sb.AppendLine($"  ScenarioDesign      = {r.ScenarioDesign_kWhm2,10:F3}  kWh/m²");
+            sb.AppendLine($"  ScenarioRaised      = {r.ScenarioRaised_kWhm2,10:F3}  kWh/m²");
+            sb.AppendLine($"  Min / Max           = {r.Min_kWhm2,10:F3} / {r.Max_kWhm2:F3}  kWh/m²");
+            sb.AppendLine($"  f_on                = {r.F_on,10:F4}");
+            sb.AppendLine($"  Net = {r.F_on:F4}×{r.ScenarioDesign_kWhm2:F3} + {(1-r.F_on):F4}×{r.ScenarioRaised_kWhm2:F3}");
+            sb.AppendLine($"  Net (нетен принос)  = {r.Net_kWhm2,10:F3}  kWh/m²");
+            sb.AppendLine($"  Net (абсолютно)     = {r.Net_kWh,10:F2}  kWh");
+
+            if (r.Warnings.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("  Предупреждения:");
+                foreach (var w in r.Warnings)
+                    sb.AppendLine($"    ⚠ {w}");
+            }
+
+            sb.AppendLine("════════════════════════════════════════════════════════");
         }
 
         private static void AppendV2Debug(StringBuilder sb, VentCoolingOutputV2 v2)
@@ -1200,7 +1343,7 @@ namespace EE.Doklad.ViewModels
                 {
                     _data.CoolingSupplyAirflow = clamped;
                     OnPropertyChanged(nameof(CoolingSupplyAirflow));
-                    // TODO: Recalculate
+                    Recalculate();
                 }
             }
         }
@@ -1218,7 +1361,7 @@ namespace EE.Doklad.ViewModels
                 {
                     _data.CoolingExhaustAirflow = clamped;
                     OnPropertyChanged(nameof(CoolingExhaustAirflow));
-                    // TODO: Recalculate
+                    // exhaust airflow не влияе пряко на contrib формулата
                 }
             }
         }
@@ -1235,7 +1378,7 @@ namespace EE.Doklad.ViewModels
                 {
                     _data.CoolingSupplyTemperature = value;
                     OnPropertyChanged(nameof(CoolingSupplyTemperature));
-                    // TODO: Recalculate
+                    Recalculate();
                 }
             }
         }
@@ -1324,7 +1467,7 @@ namespace EE.Doklad.ViewModels
 
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
             int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
-            int year = DateTime.Now.Year;
+            int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
 
             double totalDays = 0.0;
 
@@ -1362,7 +1505,7 @@ namespace EE.Doklad.ViewModels
 
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
             int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
-            int year = DateTime.Now.Year;
+            int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
 
             double totalHours = 0.0;
 

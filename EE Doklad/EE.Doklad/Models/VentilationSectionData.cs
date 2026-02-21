@@ -101,6 +101,15 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private double _coolingRelativeHumidity = 0.0;
 
+    /// <summary>
+    /// Общ брой работни часове за сезона [h] – UI поле „Основни параметри" (Секция 14).
+    /// Използва се директно като VentSeasonHours при изчислението на
+    /// „Принос към охлаждането от вентилация (нетен)".
+    /// Трябва да е ≥ 0.
+    /// </summary>
+    [ObservableProperty]
+    private double _totalWorkHoursSeason = 0.0;
+
     // ========== END OF NEW METHODOLOGY PARAMETERS ==========
 
     /// <summary>
