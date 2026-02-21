@@ -477,4 +477,89 @@ namespace EE.Doklad.Tests
                 "Рекуперацията трябва да намалява охлаждащото натоварване.");
         }
     }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // BgAvgClimateProvider – проверка, че зарежда РЕАЛЕН почасов профил
+    // ════════════════════════════════════════════════════════════════════════════
+
+    public class BgAvgClimateProviderHourlyProfileTests
+    {
+        private static ClimateZoneData MakeZoneData(int id, double[] avgTemps12, double[] avgRh5)
+        {
+            return new ClimateZoneData
+            {
+                Id   = id,
+                Name = $"Test Zone {id}",
+                Monthly = new EE.Doklad.Models.MonthlyClimateData
+                {
+                    AvgMonthlyTempC                    = avgTemps12,
+                    AvgMonthlyRelHumidityPercentMayToSep = avgRh5,
+                }
+            };
+        }
+
+        /// <summary>
+        /// BgAvgClimateProvider трябва да върне 24 РАЗЛИЧНИ температури за юни, зона 7.
+        /// Преди fix-а всички 24 реда бяха с месечната средна (18.7°C), което е ГРЕШНО.
+        /// </summary>
+        [Fact]
+        public void GetHourlyData_Zone7_June_ReturnsVaryingTemperatures()
+        {
+            // Zone 7 – средна за юни ≈ 18.7 (legacy fallback стойност).
+            // Реалният почасов профил има стойности от ~13.7 до ~23.7.
+            var avgTemps = new double[] { 0, 2, 5, 10, 15, 18.7, 21, 20, 15, 10, 5, 1 };
+            var avgRh    = new double[] { 65, 63, 60, 61, 60 }; // May..Sep
+            var zoneData = MakeZoneData(7, avgTemps, avgRh);
+
+            var provider = new BgAvgClimateProvider(zoneData);
+            var points   = provider.GetHourlyData(6); // юни = месец 6
+
+            Assert.Equal(24, points.Count);
+
+            // Ако е заредил реалния профил: температурите трябва да се различават
+            double minT = points.Min(p => p.T_out_C);
+            double maxT = points.Max(p => p.T_out_C);
+            double range = maxT - minT;
+
+            // Реалният диапазон за зона 7, юни е ~10°C (13.7..23.7)
+            // Ако range < 1 → все още ползва месечна средна → бъгът е жив
+            Assert.True(range > 5.0,
+                $"Очакван диапазон на T > 5°C, но имаме min={minT:F1}, max={maxT:F1}, range={range:F1}. " +
+                "BgAvgClimateProvider вероятно не е заредил почасовия JSON (EmbeddedResource липсва).");
+        }
+
+        /// <summary>
+        /// Час 10 за зона 7, юни трябва да е 20.7°C (данните от JSON), не 18.7 (месечна средна).
+        /// </summary>
+        [Fact]
+        public void GetHourlyData_Zone7_June_Hour10_Is_20_7C()
+        {
+            var avgTemps = new double[] { 0, 2, 5, 10, 15, 18.7, 21, 20, 15, 10, 5, 1 };
+            var avgRh    = new double[] { 65, 63, 60, 61, 60 };
+            var zoneData = MakeZoneData(7, avgTemps, avgRh);
+
+            var provider = new BgAvgClimateProvider(zoneData);
+            var points   = provider.GetHourlyData(6);
+
+            var hour10 = points.First(p => p.Hour == 10);
+            Assert.InRange(hour10.T_out_C, 20.0, 21.5); // JSON: 20.7°C
+        }
+
+        /// <summary>
+        /// Час 5 за зона 7, юни трябва да е 13.7°C (нощен минимум), не 18.7.
+        /// </summary>
+        [Fact]
+        public void GetHourlyData_Zone7_June_Hour5_Is_13_7C()
+        {
+            var avgTemps = new double[] { 0, 2, 5, 10, 15, 18.7, 21, 20, 15, 10, 5, 1 };
+            var avgRh    = new double[] { 65, 63, 60, 61, 60 };
+            var zoneData = MakeZoneData(7, avgTemps, avgRh);
+
+            var provider = new BgAvgClimateProvider(zoneData);
+            var points   = provider.GetHourlyData(6);
+
+            var hour5 = points.First(p => p.Hour == 5);
+            Assert.InRange(hour5.T_out_C, 13.0, 14.5); // JSON: 13.7°C
+        }
+    }
 }

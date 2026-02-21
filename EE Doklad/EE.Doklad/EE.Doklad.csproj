@@ -20,6 +20,7 @@
     <EmbeddedResource Include="Data\materials.seed.json" />
     <EmbeddedResource Include="Data\lighting.seed.json" />
     <EmbeddedResource Include="Data\appliances.seed.json" />
+    <EmbeddedResource Include="Data\DefaultParams_climateZones_hourly_flat_1to9.json" />
   </ItemGroup>
 
 

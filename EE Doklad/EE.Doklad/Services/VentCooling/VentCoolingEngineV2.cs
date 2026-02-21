@@ -156,21 +156,36 @@ namespace EE.Doklad.Services.VentCooling
                 double day_cool = 0, day_heat = 0, day_dry = 0, day_contrib = 0;
                 double sum_h_out = 0, sum_h_sup = 0, sum_x_out = 0, sum_x_sup = 0, sum_rho_out = 0;
                 int activeHourCount = 0;
+                int workDaysInt = (int)Math.Round(sched.WorkingDays);
+
+                var hourlyDebugRows = new List<VentCoolingHourlyDebugRow>(hourlyData.Count);
 
                 foreach (var pt in hourlyData)
                 {
-                    if (pt.Hour < schedStart || pt.Hour > schedEnd) continue;  // outside schedule
+                    // Run flag: 1 if the hour is within the ventilation schedule, 0 otherwise
+                    bool isActive = (pt.Hour >= schedStart && pt.Hour <= schedEnd);
+                    int run = isActive ? 1 : 0;
 
                     // Use point B if it has one, else use zone default
                     double b = pt.B_Pa > 0 ? pt.B_Pa : input.BarometricPressure_Pa;
 
                     AirState outState;
                     try { outState = _psych.Compute(pt.T_out_C, pt.RH_out_Pct, b); }
-                    catch { output.Warnings.Add($"Месец {m} час {pt.Hour}: невалидни psychrometric данни."); continue; }
+                    catch
+                    {
+                        output.Warnings.Add($"Месец {m} час {pt.Hour}: невалидни psychrometric данни.");
+                        // Emit a zero-row in debug so the hour is still visible
+                        hourlyDebugRows.Add(new VentCoolingHourlyDebugRow
+                        {
+                            Hour = pt.Hour, Run = 0,
+                            T_out_C = pt.T_out_C, RH_out_Pct = pt.RH_out_Pct, B_Pa = b,
+                            x_sup = supState.x_kgkg, h_sup = supState.h_kJkg,
+                            Workdays = workDaysInt,
+                        });
+                        continue;
+                    }
 
                     // Apply recuperation: shift outdoor air state toward extract-air state.
-                    // η=0 → no effect; η=1 → outdoor state becomes extract state.
-                    // This REDUCES the load in both directions (cooling AND heating).
                     double h_out_eff = outState.h_kJkg;
                     double x_out_eff = outState.x_kgkg;
                     if (hasRecuperation)
@@ -180,45 +195,80 @@ namespace EE.Doklad.Services.VentCooling
                         x_out_eff = outState.x_kgkg + eta * (extractState.x_kgkg - outState.x_kgkg);
                     }
 
-                    // Mass flow of dry air for this hour [kg_da/h]
-                    // m_da_h = rho_da_out × q_total   (using outdoor dry-air density)
-                    double m_da_h = outState.rho_da_kgm3 * q_total; // kg_da/h
+                    // ── rhoh = ρ · h (kJ/m³) за външния въздух ───────────────────
+                    double rhoh_out_eff = outState.rho_kgm3 * h_out_eff;   // kJ/m³
+                    double rhoh_sup     = supState.rho_kgm3 * supState.h_kJkg; // kJ/m³ (константа)
 
-                    double delta_h = h_out_eff - supState.h_kJkg;  // kJ/kg_da (positive = cooling load)
+                    // ── Формула за енергия per m² per час (kWh/m²) ───────────────
+                    //   E = (qv_spec / 3600) · Δrhoh
+                    //   qv_spec = q_total / area [m³/h/m²]
+                    double qv_spec = q_total / area; // m³/h/m²
+                    double factor  = qv_spec / 3600.0; // kWh·m³ / (m²·kJ)  →  при умножение по kJ/m³ дава kWh/m²
 
-                    // ── Latent (drying) component ──────────────────────────────────
-                    // E_dry: latent part when x_out_eff > x_sup (dehumidification load)
-                    // Formula: E_dry_h = m_da_h × (x_out_eff – x_sup) × h_we / 3600
+                    double delta_rhoh = rhoh_out_eff - rhoh_sup; // kJ/m³ (положително = охлаждане)
+
+                    // E_cool (явна охлаждаща): само ако delta_rhoh > 0 (kWh — за зоната, за 1 час)
+                    double e_cool_h = (delta_rhoh > 0.0) ? factor * delta_rhoh * area : 0.0;
+
+                    // E_heat (явна отоплителна): само ако delta_rhoh < 0 (kWh — за зоната, за 1 час)
+                    double e_heat_h = (delta_rhoh < 0.0) ? factor * Math.Abs(delta_rhoh) * area : 0.0;
+
+                    // ── E_dry (латентна / изсушаване): (x_out − x_sup) · 2501 · qv_spec / 3600
+                    //   може да е отрицателно (овлажняване) или положително (изсушаване)
                     double delta_x = x_out_eff - supState.x_kgkg;
-                    double e_dry_h = 0.0;
-                    if (delta_x > 0.0)
-                        e_dry_h = m_da_h * delta_x * PsychrometricsService.H_WE_kJkg / 3600.0; // kWh
+                    double e_dry_h = factor * delta_x * PsychrometricsService.H_WE_kJkg * area; // kWh (зона)
 
-                    // ── Total enthalpy-based hour energy [kWh] ────────────────────
-                    double e_h = m_da_h * delta_h / 3600.0; // kWh for whole zone
+                    // ── Build debug row BEFORE the Run=0 skip, so every hour appears ──
+                    double e_cool_dbg = isActive ? e_cool_h : 0.0;
+                    double e_heat_dbg = isActive ? e_heat_h : 0.0;
+                    double e_dry_dbg  = isActive ? e_dry_h  : 0.0;
 
-                    if (e_h >= 0.0)
+                    hourlyDebugRows.Add(new VentCoolingHourlyDebugRow
                     {
-                        day_cool += e_h;
-                        day_dry  += e_dry_h;
-                    }
-                    else
-                    {
-                        day_heat += Math.Abs(e_h); // heating load (outdoor cooler than supply)
-                    }
+                        Hour        = pt.Hour,
+                        Run         = run,
+                        T_out_C     = pt.T_out_C,
+                        RH_out_Pct  = pt.RH_out_Pct,
+                        B_Pa        = b,
+                        p_ws_out    = outState.p_ws_Pa,
+                        p_w_out     = outState.p_w_Pa,
+                        x_out       = x_out_eff,
+                        rho_da_out  = outState.rho_da_kgm3,
+                        rho_out     = outState.rho_kgm3,
+                        h_out       = h_out_eff,
+                        rhoh_out    = rhoh_out_eff,
+                        x_sup       = supState.x_kgkg,
+                        h_sup       = supState.h_kJkg,
+                        rhoh_sup    = rhoh_sup,
+                        delta_h     = isActive ? delta_rhoh : 0.0,
+                        E_cool_hour = e_cool_dbg / area,   // per m² for debug display
+                        E_heat_hour = e_heat_dbg / area,
+                        E_dry_hour  = e_dry_dbg  / area,
+                        E_cool_month_kWhm2 = (e_cool_dbg / area) * workDaysInt,
+                        E_heat_month_kWhm2 = (e_heat_dbg / area) * workDaysInt,
+                        E_dry_month_kWhm2  = (e_dry_dbg  / area) * workDaysInt,
+                        Workdays    = workDaysInt,
+                    });
+
+                    // ── Skip inactive hours from energy integration ────────────────
+                    if (!isActive) continue;
+
+                    day_cool += e_cool_h;
+                    day_heat += e_heat_h;
+                    day_dry  += e_dry_h;
 
                     // Contribution to cooling (only hours in overlap with cool schedule)
                     bool inCoolOverlap = input.CoolSchedule == null
                         || (pt.Hour >= input.CoolSchedule.TimeRange.StartHour
                             && pt.Hour <= input.CoolSchedule.TimeRange.EndHour);
-                    if (e_h >= 0.0 && inCoolOverlap)
-                        day_contrib += e_h;
+                    if (e_cool_h > 0.0 && inCoolOverlap)
+                        day_contrib += e_cool_h;
 
                     // Debug accumulators
-                    sum_h_out  += h_out_eff;
-                    sum_h_sup  += supState.h_kJkg;
-                    sum_x_out  += x_out_eff;
-                    sum_x_sup  += supState.x_kgkg;
+                    sum_h_out   += h_out_eff;
+                    sum_h_sup   += supState.h_kJkg;
+                    sum_x_out   += x_out_eff;
+                    sum_x_sup   += supState.x_kgkg;
                     sum_rho_out += outState.rho_kgm3;
                     activeHourCount++;
                 }
@@ -265,6 +315,7 @@ namespace EE.Doklad.Services.VentCooling
                     Avg_x_out_kgkg          = sum_x_out  / avg_n,
                     Avg_x_sup_kgkg          = sum_x_sup  / avg_n,
                     Avg_rho_out_kgm3        = sum_rho_out / avg_n,
+                    HourlyDebugRows         = hourlyDebugRows,
                 });
 
                 totalCool    += month_cool;

@@ -66,9 +66,9 @@ namespace EE.Doklad.Services.Psychrometrics
             double h = C_PA_kJkgK * tempC + x * (C_PW_kJkgK * tempC + H_WE_kJkg);
 
             // (3.105) Плътност на сухия въздух
-            //   ρ_da = (B – p_w) / (R_a · (T+273.15))
+            //   ρ_da = B / (R_a · T)   — пълното барометрично налягане в числителя (не B – p_w)
             double T_K = tempC + 273.15;
-            double rho_da = (bPa - p_w) / (R_A_JkgK * T_K);   // kg_da/m³
+            double rho_da = bPa / (R_A_JkgK * T_K);   // kg_da/m³
 
             // (3.106) Плътност на влажния въздух
             //   ρ = ρ_da · (1 + x) / (1 + 1.609·x)

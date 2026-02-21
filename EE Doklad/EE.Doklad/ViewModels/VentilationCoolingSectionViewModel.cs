@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Windows.Input;
 using Microsoft.Win32;
@@ -125,6 +126,38 @@ namespace EE.Doklad.ViewModels
                 }
             }
         }
+
+        /// <summary>
+        /// CSV съдържание с всички почасови debug стойности (всички месеци × 24 часа).
+        /// Предназначено за copy-paste в Excel или за "Save as CSV" бутон.
+        /// </summary>
+        public string HourlyDebugCsv => _outputV2.IsValid ? _outputV2.BuildHourlyDebugCsv() : string.Empty;
+
+        /// <summary>
+        /// Команда: запис на <see cref="HourlyDebugCsv"/> в CSV файл (SaveFileDialog).
+        /// </summary>
+        public ICommand ExportHourlyDebugCsvCommand => new RelayCommand(_ =>
+        {
+            try
+            {
+                var dlg = new SaveFileDialog
+                {
+                    Title            = "Запис на почасов debug CSV",
+                    Filter           = "CSV файлове (*.csv)|*.csv|Всички файлове (*.*)|*.*",
+                    DefaultExt       = "csv",
+                    FileName         = "Section14_HourlyDebug.csv",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                };
+                if (dlg.ShowDialog() == true)
+                {
+                    System.IO.File.WriteAllText(dlg.FileName, HourlyDebugCsv, System.Text.Encoding.UTF8);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Грешка при запис: {ex.Message}", "Грешка", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        });
 
         // Build or refresh the DebugText override which prefixes the engine's debug
         // output with the Cooling section (Section 12) design temperature, the
@@ -735,6 +768,7 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(V2_WorkingHours));
             OnPropertyChanged(nameof(V2_ErrorMessage));
             OnPropertyChanged(nameof(V2_IsValid));
+            OnPropertyChanged(nameof(HourlyDebugCsv));
         }
 
         /// <summary>
@@ -755,7 +789,7 @@ namespace EE.Doklad.ViewModels
                 !_objectData.CoolingSeasonEndMonth.HasValue   || !_objectData.CoolingSeasonEndDay.HasValue)
                 return Fail("Не са въведени дати на охладителния сезон.");
 
-            int yearRef = DateTime.Now.Year;
+            int yearRef = 2024; // use 2024 for calendar calculations to match legacy behavior
             int sm = _objectData.CoolingSeasonStartMonth.Value, sd = _objectData.CoolingSeasonStartDay.Value;
             int em = _objectData.CoolingSeasonEndMonth.Value,   ed = _objectData.CoolingSeasonEndDay.Value;
             var seasonStart = new DateTime(yearRef, sm, Math.Min(sd, DateTime.DaysInMonth(yearRef, sm)));
@@ -1177,6 +1211,24 @@ namespace EE.Doklad.ViewModels
                                   $" {mr.E_cool_net_kWhm2,8:F3} {mr.E_heat_net_kWhm2,8:F3}" +
                                   $" {mr.E_dry_net_kWhm2,8:F3} {mr.E_vent_contrib_net_kWhm2,8:F3}");
                 }
+
+                // ── Hourly debug table (first month that has rows) ─────────────────
+                var firstWithRows = v2.MonthlyResults.FirstOrDefault(mr => mr.HourlyDebugRows.Count > 0);
+                if (firstWithRows != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"  Debug таблица – {firstWithRows.MonthName} (типичен ден):");
+                    sb.AppendLine($"  {"Час",4} {"Run",4} {"T_out",7} {"RH_out",7} {"x_out",8} {"rho_da",8} {"h_out",7} {"x_sup",8} {"h_sup",7} {"rhoh_out",10} {"rhoh_sup",10} {"Δrhoh",8} {"Охл.",10} {"Заг.",10} {"Изс.",10} {"Охл.мес",10} {"Заг.мес",10} {"Изс.мес",10} {"Дни",5}");
+                    foreach (var r in firstWithRows.HourlyDebugRows)
+                    {
+                        sb.AppendLine($"  {r.Hour,4} {r.Run,4} {r.T_out_C,7:F1} {r.RH_out_Pct,7:F1}" +
+                                      $" {r.x_out,8:F5} {r.rho_da_out,8:F5} {r.h_out,7:F2}" +
+                                      $" {r.x_sup,8:F5} {r.h_sup,7:F2}" +
+                                      $" {r.rhoh_out,10:F5} {r.rhoh_sup,10:F5} {r.delta_h,8:F3}" +
+                                      $" {r.E_cool_hour,10:F6} {r.E_heat_hour,10:F6} {r.E_dry_hour,10:F6}" +
+                                      $" {r.E_cool_month_kWhm2,10:F6} {r.E_heat_month_kWhm2,10:F6} {r.E_dry_month_kWhm2,10:F6} {r.Workdays,5}");
+                    }
+                }
             }
 
             if (v2.Warnings.Count > 0)
@@ -1467,7 +1519,7 @@ namespace EE.Doklad.ViewModels
 
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
             int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
-            int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
+                int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
 
             double totalDays = 0.0;
 
@@ -1505,7 +1557,7 @@ namespace EE.Doklad.ViewModels
 
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
             int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
-            int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
+                int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
 
             double totalHours = 0.0;
 
