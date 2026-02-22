@@ -185,15 +185,10 @@ namespace EE.Doklad.Services.VentCooling
                         continue;
                     }
 
-                    // Apply recuperation: shift outdoor air state toward extract-air state.
+                    // Use gross outdoor state for hourly calculations (recuperation will be
+                    // applied later as a multiplier on the monthly sums per regulation).
                     double h_out_eff = outState.h_kJkg;
                     double x_out_eff = outState.x_kgkg;
-                    if (hasRecuperation)
-                    {
-                        double eta = input.RecuperationEfficiency;
-                        h_out_eff = outState.h_kJkg + eta * (extractState.h_kJkg - outState.h_kJkg);
-                        x_out_eff = outState.x_kgkg + eta * (extractState.x_kgkg - outState.x_kgkg);
-                    }
 
                     // ── rhoh = ρ · h (kJ/m³) за външния въздух ───────────────────
                     double rhoh_out_eff = outState.rho_kgm3 * h_out_eff;   // kJ/m³
@@ -216,7 +211,10 @@ namespace EE.Doklad.Services.VentCooling
                     // ── E_dry (латентна / изсушаване): (x_out − x_sup) · 2501 · qv_spec / 3600
                     //   може да е отрицателно (овлажняване) или положително (изсушаване)
                     double delta_x = x_out_eff - supState.x_kgkg;
-                    double e_dry_h = factor * delta_x * PsychrometricsService.H_WE_kJkg * area; // kWh (зона)
+                    // Latent energy must include mass (dry-air density) to convert
+                    // from specific humidity (kg_vap/kg_da) to energy per volume (kJ/m³).
+                    // Previously the code missed multiplying by rho_da (bug).
+                    double e_dry_h = outState.rho_da_kgm3 * factor * delta_x * PsychrometricsService.H_WE_kJkg * area; // kWh (зона)
 
                     // ── Build debug row BEFORE the Run=0 skip, so every hour appears ──
                     double e_cool_dbg = isActive ? e_cool_h : 0.0;
@@ -293,6 +291,26 @@ namespace EE.Doklad.Services.VentCooling
                     month_heat    = day_heat;
                     month_dry     = day_dry;
                     month_contrib = day_contrib;
+                }
+
+                // Apply recuperation efficiency as an external multiplier on monthly totals
+                // per regulatory formula: Net = (1 - eta_r) * Gross. This is applied after
+                // summing hourly gross contributions (we ignore system denominators here as requested).
+                if (hasRecuperation)
+                {
+                    double etaFactor = 1.0 - input.RecuperationEfficiency;
+                    // Apply recuperation to gross sensible and latent monthly sums.
+                    month_cool    *= etaFactor;
+                    month_heat    *= etaFactor;
+                    month_dry     *= etaFactor;
+                    // NOTE: do NOT apply recuperation to month_contrib here.
+                    // month_contrib represents the contribution to the cooling system
+                    // (overlap hours) and per your instruction should remain unscaled
+                    // at this point. If you want a different behavior (e.g. apply eta
+                    // only to sensible part of the contribution), we can change it.
+
+                    // Note: hourly debug rows keep gross monthly contributions per hour.
+                    // The monthly net values are updated below and stored in the monthly result.
                 }
 
                 // Normalize per m²
