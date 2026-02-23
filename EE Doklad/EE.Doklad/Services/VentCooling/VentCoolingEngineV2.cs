@@ -354,8 +354,10 @@ namespace EE.Doklad.Services.VentCooling
             output.TotalDryNet_kWhm2   = totalDry   / area;
             output.TotalVentContrib_kWhm2 = totalContrib / area;
 
-            // Net total: охлаждане + изсушаване (heating contribution ≠ load – it reduces net demand)
-            double netTotal = totalCool + totalDry;
+            // Basis for required (delivered) energy: use only sensible cooling (gross)
+            // Latent (drying) and heating values are kept for information only and
+            // do not affect the calculation of delivered energy (EI1/EI2).
+            double netTotal = totalCool;
             output.TotalNetEnergy_kWhm2 = netTotal / area;
 
             output.TotalWorkingDays  = totalWorkDays;
@@ -396,24 +398,42 @@ namespace EE.Doklad.Services.VentCooling
             double area,
             VentCoolingOutputV2 output)
         {
-            if (netTotal_kWh <= 0.0) return;
+            // Always populate the output fields. If net energy <= 0, the required
+            // delivered energies are zero.
+            if (netTotal_kWh <= 0.0)
+            {
+                output.FinalEnergyEI1_kWhm2 = 0.0;
+                output.FinalEnergyEI2_kWhm2 = 0.0;
+                output.FinalEnergyEI1_kWh = 0.0;
+                output.FinalEnergyEI2_kWh = 0.0;
+                output.TotalFinalEnergy_kWh = 0.0;
+                output.TotalFinalEnergy_kWhm2 = 0.0;
+                return;
+            }
 
             double share1 = Math.Clamp(input.EnergySource1.Share_Pct / 100.0, 0.0, 1.0);
-            double eff1   = input.EnergySource1.TotalEfficiency;
-            double need1  = eff1 > 0 ? netTotal_kWh * share1 / eff1 : 0.0;
-            output.FinalEnergyEI1_kWhm2 = need1 / area;
+            double eff1 = input.EnergySource1.TotalEfficiency;
+            double need1 = eff1 > 0.0 ? (netTotal_kWh * share1) / eff1 : 0.0; // absolute kWh
+
+            // Store absolute kWh and per-m2
+            output.FinalEnergyEI1_kWh = need1;
+            output.FinalEnergyEI1_kWhm2 = area > 0.0 ? need1 / area : 0.0;
 
             double need2 = 0.0;
+            output.FinalEnergyEI2_kWhm2 = 0.0;
             if (input.EnergySource2 != null)
             {
                 double share2 = Math.Clamp(input.EnergySource2.Share_Pct / 100.0, 0.0, 1.0);
-                double eff2   = input.EnergySource2.TotalEfficiency;
-                need2 = eff2 > 0 ? netTotal_kWh * share2 / eff2 : 0.0;
-                output.FinalEnergyEI2_kWhm2 = need2 / area;
+                double eff2 = input.EnergySource2.TotalEfficiency;
+                need2 = eff2 > 0.0 ? (netTotal_kWh * share2) / eff2 : 0.0;
+                output.FinalEnergyEI2_kWh = need2;
+                output.FinalEnergyEI2_kWhm2 = area > 0.0 ? need2 / area : 0.0;
             }
 
-            output.TotalFinalEnergy_kWh    = need1 + need2;
-            output.TotalFinalEnergy_kWhm2  = (need1 + need2) / area;
+            output.TotalFinalEnergy_kWh = need1 + need2;
+            // ensure EI2 absolute field exists when second source absent
+            if (input.EnergySource2 == null) output.FinalEnergyEI2_kWh = 0.0;
+            output.TotalFinalEnergy_kWhm2 = area > 0.0 ? (need1 + need2) / area : 0.0;
         }
     }
 }

@@ -644,6 +644,9 @@ namespace EE.Doklad.ViewModels
     public double FinalEnergySource2_kWh => _outputV2.FinalEnergyEI2_kWhm2 * CooledArea_m2;
     public double FinalEnergySource1_kWh_m2 => _outputV2.FinalEnergyEI1_kWhm2;
     public double FinalEnergySource2_kWh_m2 => _outputV2.FinalEnergyEI2_kWhm2;
+    // Backwards-compatible bindings used by the shared view XAML
+    public double FinalEnergySource1_kWh_per_m2 => FinalEnergySource1_kWh_m2;
+    public double FinalEnergySource2_kWh_per_m2 => FinalEnergySource2_kWh_m2;
     public double TotalFinalEnergy_kWh => _outputV2.TotalFinalEnergy_kWh;
     public double SpecificFinalEnergy_kWh_m2 => _outputV2.TotalFinalEnergy_kWhm2;
 
@@ -677,6 +680,10 @@ namespace EE.Doklad.ViewModels
         public double V2_FinalEI2_kWhm2    => _outputV2.FinalEnergyEI2_kWhm2;
         public double V2_TotalFinal_kWhm2  => _outputV2.TotalFinalEnergy_kWhm2;
 
+        // Потребна доставена енергия [kWh] = kWh/m² × охлаждаема площ
+        public double V2_FinalEI1_kWh      => V2_FinalEI1_kWhm2 * CooledArea_m2;
+        public double V2_FinalEI2_kWh      => V2_FinalEI2_kWhm2 * CooledArea_m2;
+
         // Абсолютни стойности [kWh]
         public double V2_CoolNet_kWh       => _outputV2.TotalCoolNet_kWh;
         public double V2_HeatNet_kWh       => _outputV2.TotalHeatNet_kWh;
@@ -693,10 +700,12 @@ namespace EE.Doklad.ViewModels
         {
             get
             {
-                if (_objectData?.CooledArea != null &&
-                    double.TryParse(_objectData.CooledArea, NumberStyles.Float, CultureInfo.InvariantCulture, out double area))
+                if (!string.IsNullOrWhiteSpace(_objectData?.CooledArea))
                 {
-                    return area;
+                    // Accept both comma and dot as decimal separators (user input may use either).
+                    var normalized = _objectData.CooledArea.Replace(',', '.').Trim();
+                    if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out double area))
+                        return area;
                 }
 
                 return 0.0;
@@ -759,6 +768,8 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(V2_TotalNet_kWhm2));
             OnPropertyChanged(nameof(V2_FinalEI1_kWhm2));
             OnPropertyChanged(nameof(V2_FinalEI2_kWhm2));
+            OnPropertyChanged(nameof(V2_FinalEI1_kWh));
+            OnPropertyChanged(nameof(V2_FinalEI2_kWh));
             OnPropertyChanged(nameof(V2_TotalFinal_kWhm2));
             OnPropertyChanged(nameof(V2_CoolNet_kWh));
             OnPropertyChanged(nameof(V2_HeatNet_kWh));
@@ -1001,20 +1012,22 @@ namespace EE.Doklad.ViewModels
         private void SubscribeToCoolingSchedules(CoolingSchedulesModel schedules)
         {
             schedules.PropertyChanged += OnCoolingSchedulesChanged;
-            
-            // Subscribe to nested WeeklySchedule changes
-            if (schedules.VentilationCoolingSchedule != null)
+
+            // Helper: subscribe to all three time-range objects inside a WeeklySchedule
+            static void SubscribeWeekly(WeeklySchedule? ws, PropertyChangedEventHandler schedHandler, PropertyChangedEventHandler rangeHandler)
             {
-                schedules.VentilationCoolingSchedule.PropertyChanged += OnScheduleChanged;
-                
-                // Subscribe to nested WeeklyTimeRange changes
-                if (schedules.VentilationCoolingSchedule.Workdays != null)
-                    schedules.VentilationCoolingSchedule.Workdays.PropertyChanged += OnTimeRangeChanged;
-                if (schedules.VentilationCoolingSchedule.Saturday != null)
-                    schedules.VentilationCoolingSchedule.Saturday.PropertyChanged += OnTimeRangeChanged;
-                if (schedules.VentilationCoolingSchedule.Sunday != null)
-                    schedules.VentilationCoolingSchedule.Sunday.PropertyChanged += OnTimeRangeChanged;
+                if (ws == null) return;
+                ws.PropertyChanged += schedHandler;
+                if (ws.Workdays  != null) ws.Workdays.PropertyChanged  += rangeHandler;
+                if (ws.Saturday  != null) ws.Saturday.PropertyChanged  += rangeHandler;
+                if (ws.Sunday    != null) ws.Sunday.PropertyChanged    += rangeHandler;
             }
+
+            // C) График за вентилация охлаждане  (VentSchedule for engine)
+            SubscribeWeekly(schedules.VentilationCoolingSchedule, OnScheduleChanged, OnTimeRangeChanged);
+
+            // B) График за охлаждане  (CoolSchedule for engine – overlap fraction)
+            SubscribeWeekly(schedules.CoolingSchedule, OnScheduleChanged, OnTimeRangeChanged);
         }
 
         private void OnCoolingSchedulesChanged(object? sender, PropertyChangedEventArgs e)
@@ -1022,6 +1035,7 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(HoursPerWeek));
             OnPropertyChanged(nameof(WorkDaysSeason));
             OnPropertyChanged(nameof(WorkHoursSeason));
+            Recalculate();
         }
 
         private void OnScheduleChanged(object? sender, PropertyChangedEventArgs e)
@@ -1029,6 +1043,7 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(HoursPerWeek));
             OnPropertyChanged(nameof(WorkDaysSeason));
             OnPropertyChanged(nameof(WorkHoursSeason));
+            Recalculate();
         }
 
         private void OnTimeRangeChanged(object? sender, PropertyChangedEventArgs e)
@@ -1036,6 +1051,7 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(HoursPerWeek));
             OnPropertyChanged(nameof(WorkDaysSeason));
             OnPropertyChanged(nameof(WorkHoursSeason));
+            Recalculate();
         }
 
         private void OnObjectDataPropertyChanged(object? sender, PropertyChangedEventArgs e)

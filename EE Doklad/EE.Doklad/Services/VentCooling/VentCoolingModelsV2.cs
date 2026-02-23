@@ -218,6 +218,12 @@ namespace EE.Doklad.Services.VentCooling
         /// <summary>Обща потребна доставена енергия [kWh/m²]</summary>
         public double TotalFinalEnergy_kWhm2 { get; set; }
 
+    /// <summary>Потребна доставена ЕИ1 [kWh] (абсолютна за зоната)</summary>
+    public double FinalEnergyEI1_kWh { get; set; }
+
+    /// <summary>Потребна доставена ЕИ2 [kWh] (абсолютна за зоната)</summary>
+    public double FinalEnergyEI2_kWh { get; set; }
+
         // ── Абсолютни стойности [kWh] ─────────────────────────────────────────────
         public double TotalCoolNet_kWh { get; set; }
         public double TotalHeatNet_kWh { get; set; }

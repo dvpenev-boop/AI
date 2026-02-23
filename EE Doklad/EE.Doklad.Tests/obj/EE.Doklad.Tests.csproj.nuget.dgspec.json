@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj": {}
+    "e:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj": {}
   },
   "projects": {
-    "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj": {
+    "e:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
+        "projectUniqueName": "e:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
         "projectName": "EE.Doklad.Tests",
-        "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
+        "projectPath": "e:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
         "packagesPath": "C:\\Users\\dimit\\.nuget\\packages\\",
-        "outputPath": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\obj\\",
+        "outputPath": "e:\\AI\\EE Doklad\\EE.Doklad.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\dimit\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -26,8 +26,8 @@
           "net8.0-windows7.0": {
             "targetAlias": "net8.0-windows",
             "projectReferences": {
-              "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
-                "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj"
+              "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
+                "projectPath": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj"
               }
             }
           }
@@ -95,14 +95,14 @@
         }
       }
     },
-    "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
+    "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
+        "projectUniqueName": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
         "projectName": "EE.Doklad",
-        "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
+        "projectPath": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
         "packagesPath": "C:\\Users\\dimit\\.nuget\\packages\\",
-        "outputPath": "E:\\AI\\EE Doklad\\EE.Doklad\\obj\\",
+        "outputPath": "e:\\AI\\EE Doklad\\EE.Doklad\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\dimit\\AppData\\Roaming\\NuGet\\NuGet.Config"
