@@ -371,6 +371,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="300"/>
@@ -449,20 +450,34 @@
                                 <TextBlock Text="%" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
-                            <!-- Row 6: Climate zone (readonly from section 5) -->
+                            <!-- Row 6: Night ventilation specific airflow (editable) -->
                             <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                                <TextBlock Text="Дебит въздух за нощна вентилация" Padding="10,5" FontSize="11"
+                                           ToolTip="Специфичен дебит за нощно вентилиране (free cooling) с НЕобработен външен въздух. Формула: VdotNight = VdotSpec × A [m³/h]. Единица: m³/h·m²."/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                                <TextBox Text="{Binding NightVentSpecAirflow, StringFormat=F2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
+                                         Style="{StaticResource EditableTextBoxStyle}" Padding="5" FontSize="11"
+                                         ToolTip="m³/h·m² (мин. 0, по подразбиране 0)"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                                <TextBlock Text="m³/h·m²" Padding="5" FontSize="11" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 7: Climate zone (readonly from section 5) -->
+                            <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
                                 <TextBlock Text="Климатична зона" Padding="10,5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding ClimateZoneDisplay, Mode=OneWay}" 
                                          Style="{StaticResource ReadOnlyTextBoxStyle}" Padding="5" FontSize="11"/>
                             </Border>
 
-                            <!-- Row 7: Cooling season (readonly from section 5) -->
-                            <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                            <!-- Row 8: Cooling season (readonly from section 5) -->
+                            <Border Grid.Row="8" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
                                 <TextBlock Text="Охладителен период" Padding="10,5" FontSize="11"/>
                             </Border>
-                            <Border Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                            <Border Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding CoolingSeasonDisplay, Mode=OneWay}" 
                                          Style="{StaticResource ReadOnlyTextBoxStyle}" Padding="5" FontSize="11"/>
                             </Border>
@@ -939,6 +954,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="320"/>
@@ -996,7 +1012,7 @@
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
 
-                    <!-- Принос към охлаждането от вентилация (нетен) -->
+                    <!-- Принос от вентилация с необработен въздух (нощна вентилация) -->
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
                         <TextBlock Text="Принос към охлаждането от вентилация (нетен)" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap"/>
                     </Border>
@@ -1009,41 +1025,56 @@
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
 
+                    <!-- Принос от вентилация с необработен въздух (нощна вентилация, sensible-only) -->
+                    <Border Grid.Row="5" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1" Background="#F0F8FF">
+                        <TextBlock Text="Принос от вентилация с необработен въздух" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="#1565C0"/>
+                    </Border>
+                    <Border Grid.Row="5" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1" Background="#F0F8FF">
+                        <TextBox Text="{Binding NightVentContribution_kWh_m2, Mode=OneWay, StringFormat=0.00}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"
+                                 Foreground="#1565C0"/>
+                    </Border>
+                    <Border Grid.Row="5" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,1" Background="#F0F8FF">
+                        <TextBox Text="{Binding NightVentContribution_kWh, Mode=OneWay, StringFormat=N2}" 
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"
+                                 Foreground="#1565C0"/>
+                    </Border>
+
                     <!-- Потребна енергия ЕИ1 -->
-                    <Border Grid.Row="5" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
+                    <Border Grid.Row="6" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
                         <TextBlock Text="Потребна енергия (ЕИ1)" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
-                    <Border Grid.Row="5" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
+                    <Border Grid.Row="6" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding V2_FinalEI1_kWhm2, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
-                    <Border Grid.Row="5" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,1">
+                    <Border Grid.Row="6" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding V2_FinalEI1_kWh, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
 
                     <!-- Потребна енергия ЕИ2 -->
-                    <Border Grid.Row="6" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
+                    <Border Grid.Row="7" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
                         <TextBlock Text="Потребна енергия (ЕИ2)" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
-                    <Border Grid.Row="6" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
+                    <Border Grid.Row="7" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding V2_FinalEI2_kWhm2, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
-                    <Border Grid.Row="6" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,1">
+                    <Border Grid.Row="7" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding V2_FinalEI2_kWh, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
 
                     <!-- Обща потребна енергия -->
-                    <Border Grid.Row="7" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,0">
+                    <Border Grid.Row="8" Grid.Column="0" BorderBrush="#BBDEFB" BorderThickness="0,0,1,0">
                         <TextBlock Text="Обща потребна енергия" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </Border>
-                    <Border Grid.Row="7" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,0">
+                    <Border Grid.Row="8" Grid.Column="1" BorderBrush="#BBDEFB" BorderThickness="0,0,1,0">
                         <TextBox Text="{Binding V2_TotalFinal_kWhm2, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
-                    <Border Grid.Row="7" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,0">
+                    <Border Grid.Row="8" Grid.Column="2" BorderBrush="#BBDEFB" BorderThickness="0,0,0,0">
                         <TextBox Text="{Binding V2_TotalFinal_kWh, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
                     </Border>
@@ -1059,6 +1090,23 @@
             <Border BorderBrush="#BDBDBD" BorderThickness="1" Padding="8" Margin="0,0,0,20" Visibility="{Binding ShowDebug, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBox Text="{Binding DebugText, Mode=OneWay}" Style="{StaticResource ReadOnlyTextBoxStyle}" FontFamily="Consolas" FontSize="12" 
                          TextWrapping="NoWrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" Height="300"/>
+            </Border>
+
+            <!-- Debug секция: Нощна вентилация с НЕобработен въздух (sensible-only free cooling) -->
+            <Border BorderBrush="#90CAF9" BorderThickness="1" Padding="8" Margin="0,0,0,20"
+                    Visibility="{Binding ShowDebug, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Debug: Нощна вентилация с НЕобработен въздух (sensible-only)"
+                               FontWeight="Bold" Foreground="#1565C0" FontSize="12" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding NightVentDebugText, Mode=OneWay}"
+                             Style="{StaticResource ReadOnlyTextBoxStyle}"
+                             FontFamily="Consolas" FontSize="11"
+                             TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto"
+                             AcceptsReturn="True"
+                             Height="300"/>
+                </StackPanel>
             </Border>
 
             </StackPanel> <!-- End of IsEnabled wrapper -->

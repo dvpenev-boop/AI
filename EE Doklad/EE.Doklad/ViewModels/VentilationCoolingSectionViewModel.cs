@@ -30,6 +30,8 @@ namespace EE.Doklad.ViewModels
         private VentCoolingOutputV2 _outputV2 = new VentCoolingOutputV2 { IsValid = false, ErrorMessage = "Не е изчислено." };
         // Нетен принос към охлаждането – изчислен по новата формула (BaseFactor × ΔT, f_on от графиците).
         private VentCoolingContributionResult _contribResult = new VentCoolingContributionResult { IsValid = false, ErrorMessage = "Не е изчислено." };
+        // Принос от нощна вентилация с НЕобработен въздух (sensible-only free cooling).
+        private NightVentResult _nightVentResult = NightVentResult.Fail("Не е изчислено.");
         private bool _showDebug;
     private string _debugText = string.Empty;
     // Optional override prefix that replaces the displayed DebugText when non-null.
@@ -640,6 +642,39 @@ namespace EE.Doklad.ViewModels
         }
     }
 
+    // ── Нощна вентилация (free cooling, sensible-only) ────────────────────────
+
+    /// <summary>
+    /// Специфичен дебит за нощна вентилация [m³/h·m²].
+    /// VdotNight = NightVentSpecAirflow × CooledArea_m2.
+    /// </summary>
+    public double NightVentSpecAirflow
+    {
+        get => _data.NightVentSpecAirflow;
+        set
+        {
+            var clamped = Math.Max(0.0, value);
+            if (Math.Abs(_data.NightVentSpecAirflow - clamped) > 0.0001)
+            {
+                _data.NightVentSpecAirflow = clamped;
+                OnPropertyChanged(nameof(NightVentSpecAirflow));
+                Recalculate();
+            }
+        }
+    }
+
+    /// <summary>Принос от нощна вентилация с НЕобработен въздух [kWh/m²].</summary>
+    public double NightVentContribution_kWh_m2 => _nightVentResult.SpecificKWhPerM2;
+
+    /// <summary>Принос от нощна вентилация с НЕобработен въздух [kWh].</summary>
+    public double NightVentContribution_kWh => _nightVentResult.TotalKWh;
+
+    /// <summary>true ако изчислението на нощната вентилация е успешно.</summary>
+    public bool NightVentIsValid => _nightVentResult.IsValid;
+
+    /// <summary>Debug текст специфично за нощна вентилация.</summary>
+    public string NightVentDebugText => BuildNightVentDebugText(_nightVentResult);
+
     public double FinalEnergySource1_kWh => _outputV2.FinalEnergyEI1_kWhm2 * CooledArea_m2;
     public double FinalEnergySource2_kWh => _outputV2.FinalEnergyEI2_kWhm2 * CooledArea_m2;
     public double FinalEnergySource1_kWh_m2 => _outputV2.FinalEnergyEI1_kWhm2;
@@ -724,6 +759,9 @@ namespace EE.Doklad.ViewModels
             // Нетен принос към охлаждането (нова формула – замества старата психрометрична)
             _contribResult = RunContribCalculator();
 
+            // Принос от нощна вентилация с НЕобработен въздух (sensible-only)
+            _nightVentResult = RunNightVentCalculator();
+
             DebugText = BuildDebugText(_outputV2);
 
             OnPropertyChanged(nameof(OperatingHoursPerWeek));
@@ -780,6 +818,12 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(V2_ErrorMessage));
             OnPropertyChanged(nameof(V2_IsValid));
             OnPropertyChanged(nameof(HourlyDebugCsv));
+
+            // Нощна вентилация
+            OnPropertyChanged(nameof(NightVentContribution_kWh));
+            OnPropertyChanged(nameof(NightVentContribution_kWh_m2));
+            OnPropertyChanged(nameof(NightVentIsValid));
+            OnPropertyChanged(nameof(NightVentDebugText));
         }
 
         /// <summary>
@@ -913,6 +957,185 @@ namespace EE.Doklad.ViewModels
             {
                 return Fail($"Грешка при изчислението: {ex.Message}");
             }
+        }
+
+        // ── Нощна вентилация (sensible-only free cooling) ─────────────────────────
+
+        /// <summary>
+        /// Изгражда <see cref="NightVentInput"/> и изпълнява
+        /// <see cref="NightVentilationCalculator.Calculate"/> за текущата секция.
+        ///
+        /// Входни данни:
+        ///   • CooledArea_m2           – от ObjectData.CooledArea
+        ///   • NightVentSpecAirflow    – _data.NightVentSpecAirflow  [m³/h·m²]
+        ///   • IndoorCoolingSetpoint   – _coolingData.DesignTemperature (Ti от Секция 12)
+        ///   • CoolingSeasonMonths     – от ObjectData.CoolingSeasonStart/End
+        ///   • ClimateProfiles         – от _climateData (BgAvgClimateProvider)
+        ///   • Schedule (Graph D)      – OutdoorAirVentSchedule от CoolingSchedules
+        /// </summary>
+        private NightVentResult RunNightVentCalculator()
+        {
+            if (_objectData == null)   return NightVentResult.Fail("Липсват данни за обекта (секция 5).");
+            if (_climateData == null)  return NightVentResult.Fail("Липсват климатични данни. Изберете климатична зона.");
+            if (!_objectData.CoolingSeasonEnabled) return NightVentResult.Fail("Охладителният сезон не е активиран.");
+
+            // ── Площ ────────────────────────────────────────────────────────────
+            if (!double.TryParse(_objectData.CooledArea, NumberStyles.Float, CultureInfo.InvariantCulture, out double area) || area <= 0)
+                return NightVentResult.Fail($"Невалидна охлаждаема площ: '{_objectData.CooledArea}'.");
+
+            // ── Ti: вътрешен setpoint (от Секция 12, ако е налична) ──────────────
+            double ti = _coolingData != null ? _coolingData.DesignTemperature : 25.0;
+
+            // ── Охладителен сезон: месеци ────────────────────────────────────────
+            int startMonth = _objectData.CoolingSeasonStartMonth ?? 0;
+            int endMonth   = _objectData.CoolingSeasonEndMonth   ?? 0;
+            if (startMonth == 0 || endMonth == 0)
+                return NightVentResult.Fail("Не са въведени дати на охладителния сезон.");
+
+            var seasonMonths = new List<int>();
+            if (startMonth <= endMonth)
+            {
+                for (int m = startMonth; m <= endMonth; m++) seasonMonths.Add(m);
+            }
+            else
+            {
+                // Wrap-around (e.g. Oct–Mar)
+                for (int m = startMonth; m <= 12; m++) seasonMonths.Add(m);
+                for (int m = 1; m <= endMonth; m++)   seasonMonths.Add(m);
+            }
+
+            if (seasonMonths.Count == 0)
+                return NightVentResult.Fail("Охладителният сезон не съдържа нито един месец.");
+
+            // ── Климатични профили (само температура, без RH) ────────────────────
+            var provider  = new BgAvgClimateProvider(_climateData);
+            var profiles  = new Dictionary<int, ClimateHourlyProfile>();
+
+            foreach (int m in seasonMonths)
+            {
+                try
+                {
+                    var pts = provider.GetHourlyData(m);
+                    var temps = new double[24];
+                    foreach (var pt in pts)
+                    {
+                        if (pt.Hour >= 0 && pt.Hour < 24)
+                            temps[pt.Hour] = pt.T_out_C;
+                    }
+                    profiles[m] = new ClimateHourlyProfile(temps);
+                }
+                catch
+                {
+                    return NightVentResult.Fail($"Грешка при зареждане на климатичен профил за месец {m}.");
+                }
+            }
+
+            // ── График D – „График за вентилиране с външен въздух" ──────────────
+            var schedD = _objectData.CoolingSchedules?.OutdoorAirVentSchedule;
+            bool[] wdActive, satActive, sunActive;
+
+            if (schedD != null)
+            {
+                wdActive  = NightVentilationCalculator.BuildActiveHoursFromTimeRange(
+                    schedD.Workdays.StartTime, schedD.Workdays.EndTime);
+                satActive = NightVentilationCalculator.BuildActiveHoursFromTimeRange(
+                    schedD.Saturday.StartTime, schedD.Saturday.EndTime);
+                sunActive = NightVentilationCalculator.BuildActiveHoursFromTimeRange(
+                    schedD.Sunday.StartTime,   schedD.Sunday.EndTime);
+            }
+            else
+            {
+                // График D не е попълнен → нощна вентилация = 0
+                wdActive  = new bool[24];
+                satActive = new bool[24];
+                sunActive = new bool[24];
+            }
+
+            var nightSched = new NightVentSchedule(wdActive, satActive, sunActive);
+
+            // ── Входен DTO ──────────────────────────────────────────────────────
+            var nightInput = new NightVentInput(
+                AreaM2:                 area,
+                SpecAirflowM3phM2:      _data.NightVentSpecAirflow,
+                IndoorCoolingSetpointC: ti,
+                CoolingSeasonMonths:    seasonMonths,
+                ClimateProfiles:        profiles,
+                Schedule:               nightSched
+            );
+
+            try
+            {
+                return NightVentilationCalculator.Calculate(nightInput, collectDebug: true);
+            }
+            catch (Exception ex)
+            {
+                return NightVentResult.Fail($"Грешка при изчислението: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Изгражда debug текст за нощната вентилация.
+        /// </summary>
+        private string BuildNightVentDebugText(NightVentResult r)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine();
+            sb.AppendLine("════════════════════════════════════════════════════════");
+            sb.AppendLine("  ПРИНОС ОТ НОЩНА ВЕНТИЛАЦИЯ С НЕобработен въздух");
+            sb.AppendLine("  (sensible-only free cooling, ρ·ca = 0.34 Wh/m³K)");
+            sb.AppendLine("════════════════════════════════════════════════════════");
+
+            // Входни параметри
+            sb.AppendLine($"  Климатична база : DefaultParams_climateZones_hourly_flat_1to9.json");
+            sb.AppendLine($"  Климатична зона : {ClimateZoneDisplay}");
+            double ti = _coolingData?.DesignTemperature ?? 25.0;
+            sb.AppendLine($"  Ti (вътр. setpoint, Сек.12)  = {ti:F2} °C");
+            sb.AppendLine($"  VdotSpecNight                = {_data.NightVentSpecAirflow:F4} m³/h·m²");
+
+            if (!r.IsValid)
+            {
+                sb.AppendLine($"  ГРЕШКА: {r.ErrorMessage}");
+                sb.AppendLine("════════════════════════════════════════════════════════");
+                return sb.ToString();
+            }
+
+            double vdotNight = r.DebugDetails?.VdotNight_m3ph ?? (_data.NightVentSpecAirflow * CooledArea_m2);
+            sb.AppendLine($"  VdotNight (A×spec)           = {vdotNight:F2} m³/h  (A={CooledArea_m2:F1} m²)");
+            sb.AppendLine();
+
+            if (r.DebugDetails?.PerMonth != null)
+            {
+                foreach (var md in r.DebugDetails.PerMonth)
+                {
+                    string monthName = System.Globalization.CultureInfo.InvariantCulture
+                        .DateTimeFormat.GetMonthName(md.Month);
+
+                    sb.AppendLine($"  ── Месец {md.Month,2} ({monthName}) ──────────────────────────");
+                    sb.AppendLine($"  Дни: Weekdays={md.Weekdays} Saturdays={md.Saturdays} Sundays={md.Sundays}");
+                    sb.AppendLine();
+                    sb.AppendLine($"  {"Час",4} {"Te°C",7} {"ΔT",6} {"ActWd",5} {"ActSat",6} {"ActSun",6} {"E_Wd kWh",10} {"E_Sat kWh",10} {"E_Sun kWh",10}");
+
+                    foreach (var h in md.Hours)
+                    {
+                        if (h.DT > 0 || h.ActiveWeekday || h.ActiveSaturday || h.ActiveSunday)
+                        {
+                            sb.AppendLine($"  {h.Hour,4} {h.Te,7:F1} {h.DT,6:F2} {(h.ActiveWeekday  ? "Y" : "-"),5} {(h.ActiveSaturday ? "Y" : "-"),6} {(h.ActiveSunday   ? "Y" : "-"),6}" +
+                                          $" {h.EHourWeekday_kWh,10:F6} {h.EHourSaturday_kWh,10:F6} {h.EHourSunday_kWh,10:F6}");
+                        }
+                    }
+
+                    sb.AppendLine();
+                    sb.AppendLine($"  ΣWd={md.SumWeekday_kWh:F4}  ΣSat={md.SumSaturday_kWh:F4}  ΣSun={md.SumSunday_kWh:F4}");
+                    sb.AppendLine($"  monthEnergy = {md.SumWeekday_kWh:F4}×{md.Weekdays} + {md.SumSaturday_kWh:F4}×{md.Saturdays} + {md.SumSunday_kWh:F4}×{md.Sundays}");
+                    sb.AppendLine($"             = {md.MonthEnergy_kWh:F3} kWh");
+                    sb.AppendLine();
+                }
+            }
+
+            sb.AppendLine($"  seasonEnergy              = {r.TotalKWh:F3} kWh");
+            sb.AppendLine($"  seasonSpecific            = {r.SpecificKWhPerM2:F4} kWh/m²");
+            sb.AppendLine("════════════════════════════════════════════════════════");
+            return sb.ToString();
         }
 
         /// <summary>
@@ -1125,6 +1348,9 @@ namespace EE.Doklad.ViewModels
             // Append new contribution calculation debug
             AppendContribDebug(sb, _contribResult, WorkHoursSeason, _data.CoolingSupplyAirflow, _data.CoolingSupplyTemperature,
                 _coolingData?.DesignTemperature, _coolingData?.ReductionTemperature);
+
+            // Append night ventilation debug
+            sb.Append(BuildNightVentDebugText(_nightVentResult));
 
             return sb.ToString();
         }

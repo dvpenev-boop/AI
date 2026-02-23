@@ -110,6 +110,14 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private double _totalWorkHoursSeason = 0.0;
 
+    /// <summary>
+    /// Специфичен дебит на въздуха за нощна вентилация (free cooling) [m³/h·m²].
+    /// VdotNight = NightVentSpecAirflow × HeatedArea_m2.
+    /// Трябва да е ≥ 0. Default = 0 (деактивиран).
+    /// </summary>
+    [ObservableProperty]
+    private double _nightVentSpecAirflow = 0.0;
+
     // ========== END OF NEW METHODOLOGY PARAMETERS ==========
 
     /// <summary>
