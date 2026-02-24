@@ -167,15 +167,27 @@ namespace EE.Doklad.Services.VentCooling
                 int schedStart = input.VentSchedule.TimeRange.StartHour;
                 int schedEnd   = input.VentSchedule.TimeRange.EndHour;
 
-                // ── EPW mode: build set of excluded dates from DaysOffPerMonth ────
-                // When we don't have explicit holiday dates, we exclude the LAST N
-                // active workdays (Mon-Fri) of the month. This is deterministic.
-                HashSet<DateTime>? epwExcludedDates = null;
+                // ── EPW mode: k_m coefficient for days-off ────────────────────────
+                // EPW integrates ALL schedule-active hours for the month and then
+                // multiplies the monthly total by k_m = (workdays - daysOff) / workdays.
+                // This is equivalent to scaling the full-month energy by the fraction
+                // of days that are actually working (after subtracting vacation/holidays).
+                // workdays comes from WorkdayScheduleCalculator (season + DOW filtered).
+                // daysOff comes from DaysOffPerMonth[m-1] (Section 5 input).
+                double epwKm = 1.0;
+                int    epwDaysOffM = 0;
                 if (!isBgAvgMode)
                 {
-                    epwExcludedDates = BuildEpwExcludedDates(
-                        m, yearRef, input.VentSchedule, input.DaysOffPerMonth,
-                        input.OfficialHolidays, input.SeasonStart, input.SeasonEnd);
+                    // Denominator = ALL active-DOW days in season for this month (BEFORE any
+                    // days-off / holiday subtraction).  This is sched.DaysInSeason.
+                    double epwWorkDaysMax = sched.DaysInSeason;
+                    epwDaysOffM = (input.DaysOffPerMonth != null && input.DaysOffPerMonth.Length >= m)
+                                   ? input.DaysOffPerMonth[m - 1]
+                                   : 0;
+                    if (epwWorkDaysMax > 0.0)
+                        epwKm = Math.Max(0.0, epwWorkDaysMax - epwDaysOffM) / epwWorkDaysMax;
+                    else
+                        epwKm = 0.0;
                 }
 
                 // Integrators for this month (BG: "typical day"; EPW: all real hours)
@@ -199,10 +211,11 @@ namespace EE.Doklad.Services.VentCooling
                     }
                     else
                     {
-                        // EPW: full filtering by season + day-of-week + schedule + holidays
+                        // EPW: full filtering by season + day-of-week + schedule.
+                        // Days-off are handled via k_m coefficient, NOT by excluding dates.
                         isActive = IsEpwHourActive(
                             pt, input.VentSchedule, input.SeasonStart, input.SeasonEnd,
-                            epwExcludedDates);
+                            null);
                     }
 
                     int run = isActive ? 1 : 0;
@@ -334,14 +347,16 @@ namespace EE.Doklad.Services.VentCooling
                 }
                 else
                 {
-                    // EPW: real hours already summed directly — no multiplication.
-                    // WorkingDays = count of unique active dates; WorkingHours = count of active hours.
-                    workDays  = epwActiveDates!.Count;
-                    workHours = activeHourCount;
-                    month_cool    = day_cool;
-                    month_heat    = day_heat;
-                    month_dry     = day_dry;
-                    month_contrib = day_contrib;
+                    // EPW: real hours already summed directly.
+                    // Apply k_m coefficient to scale full-month sums down by the fraction
+                    // of working days (after days-off/vacation) vs. all active-DOW days.
+                    // k_m = max(0, DaysInSeason - daysOff) / DaysInSeason
+                    workDays  = epwActiveDates!.Count * epwKm;
+                    workHours = activeHourCount * epwKm;
+                    month_cool    = day_cool    * epwKm;
+                    month_heat    = day_heat    * epwKm;
+                    month_dry     = day_dry     * epwKm;
+                    month_contrib = day_contrib * epwKm;
                 }
 
                 // Apply recuperation efficiency as an external multiplier on monthly totals
@@ -374,7 +389,7 @@ namespace EE.Doklad.Services.VentCooling
                     MonthName               = _monthNames[m - 1],
                     WorkingDays             = workDays,
                     WorkingHours            = workHours,
-                    HolidaysSubtracted      = isBgAvgMode ? sched.HolidaysSubtracted : 0,
+                    HolidaysSubtracted      = isBgAvgMode ? sched.HolidaysSubtracted : epwDaysOffM,
                     E_cool_net_kWhm2        = month_cool    * inv,
                     E_heat_net_kWhm2        = month_heat    * inv,
                     E_dry_net_kWhm2         = month_dry     * inv,

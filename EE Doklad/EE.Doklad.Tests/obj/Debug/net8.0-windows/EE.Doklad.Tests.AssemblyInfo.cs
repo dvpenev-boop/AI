@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EE.Doklad.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3de80c9ac762d7d936b77c248ed8b3394ee11874")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b724ccf4a1c8cb8f87ecc520a566a941f375c7ec")]
 [assembly: System.Reflection.AssemblyProductAttribute("EE.Doklad.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EE.Doklad.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
