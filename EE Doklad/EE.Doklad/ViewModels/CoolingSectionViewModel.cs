@@ -706,6 +706,7 @@ namespace EE.Doklad.ViewModels
             _designTemperatureText = _data.DesignTemperature.ToString("F2", CultureInfo.InvariantCulture);
             _reductionTemperatureText = _data.ReductionTemperature.ToString("F2", CultureInfo.InvariantCulture);
             _relativeHumidityText = _data.RelativeHumidity.ToString("F2", CultureInfo.InvariantCulture);
+            _specificHeatCapacityText = _data.SpecificHeatCapacityWhPerM2K.ToString("F2", CultureInfo.InvariantCulture);
 
             // Subscribe към промени в ObjectData за брой обитатели
             if (_objectData != null)
@@ -872,6 +873,87 @@ namespace EE.Doklad.ViewModels
             else
             {
                 RelativeHumidityError = "Невалидно число";
+            }
+        }
+
+        // ========== ТЕРМИЧНА МАСА ==========
+
+        private string _specificHeatCapacityText;
+        public string SpecificHeatCapacityText
+        {
+            get => _specificHeatCapacityText;
+            set
+            {
+                if (_specificHeatCapacityText != value)
+                {
+                    _specificHeatCapacityText = value;
+                    OnPropertyChanged(nameof(SpecificHeatCapacityText));
+                    ValidateAndSetSpecificHeatCapacity(value);
+                }
+            }
+        }
+
+        private string? _specificHeatCapacityError;
+        public string? SpecificHeatCapacityError
+        {
+            get => _specificHeatCapacityError;
+            private set
+            {
+                if (_specificHeatCapacityError != value)
+                {
+                    _specificHeatCapacityError = value;
+                    OnPropertyChanged(nameof(SpecificHeatCapacityError));
+                    OnPropertyChanged(nameof(HasSpecificHeatCapacityError));
+                }
+            }
+        }
+        public bool HasSpecificHeatCapacityError => !string.IsNullOrEmpty(SpecificHeatCapacityError);
+
+        /// <summary>
+        /// Специфичен топлинен капацитет [Wh/m²K] — директен достъп за binding.
+        /// </summary>
+        public double SpecificHeatCapacityWhPerM2K
+        {
+            get => _data.SpecificHeatCapacityWhPerM2K;
+            set
+            {
+                var clamped = Math.Max(0.0, value);
+                if (Math.Abs(_data.SpecificHeatCapacityWhPerM2K - clamped) > 0.0001)
+                {
+                    _data.SpecificHeatCapacityWhPerM2K = clamped;
+                    OnPropertyChanged(nameof(SpecificHeatCapacityWhPerM2K));
+                }
+            }
+        }
+
+        private void ValidateAndSetSpecificHeatCapacity(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                SpecificHeatCapacityError = "Полето е задължително";
+                return;
+            }
+            var normalized = text.Replace(',', '.');
+            if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
+            {
+                if (value < 0)
+                {
+                    SpecificHeatCapacityError = "Стойността трябва да е >= 0";
+                    return;
+                }
+                value = Math.Round(value, 2);
+                _data.SpecificHeatCapacityWhPerM2K = value;
+                SpecificHeatCapacityError = null;
+                OnPropertyChanged(nameof(SpecificHeatCapacityWhPerM2K));
+                if (_specificHeatCapacityText != value.ToString("F2", CultureInfo.InvariantCulture))
+                {
+                    _specificHeatCapacityText = value.ToString("F2", CultureInfo.InvariantCulture);
+                    OnPropertyChanged(nameof(SpecificHeatCapacityText));
+                }
+            }
+            else
+            {
+                SpecificHeatCapacityError = "Невалидно число";
             }
         }
 

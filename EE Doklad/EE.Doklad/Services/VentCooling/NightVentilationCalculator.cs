@@ -107,7 +107,14 @@ namespace EE.Doklad.Services.VentCooling
         /// (поддържа частични месеци: напр. 15.08–15.09).
         /// Ключ = месец (1..12).
         /// </summary>
-        IReadOnlyDictionary<int, (int Weekdays, int Saturdays, int Sundays)>? DayTypeCountsPerMonth = null
+        IReadOnlyDictionary<int, (int Weekdays, int Saturdays, int Sundays)>? DayTypeCountsPerMonth = null,
+        /// <summary>
+        /// Специфичен топлинен капацитет [Wh/m²K] за режима с термична маса.
+        /// Используется само когато се извика <see cref="NightVentilationCalculator.CalculateThermalMass"/>.
+        /// ≤ 0 → fallback към sensible-only.
+        /// Default: 0 (неизползван в стандартния режим).
+        /// </summary>
+        double SpecificHeatCapacityWhPerM2K = 0.0
     );
 
     // ── Debug structures ─────────────────────────────────────────────────────────
@@ -124,7 +131,14 @@ namespace EE.Doklad.Services.VentCooling
         bool   ActiveSunday,
         double EHourWeekday_kWh,
         double EHourSaturday_kWh,
-        double EHourSunday_kWh
+        double EHourSunday_kWh,
+        // Thermal-mass fields (populated only in ThermalMass mode; 0 in Sensible mode)
+        double TiStartWeekday  = 0,
+        double TiEndWeekday    = 0,
+        double TiStartSaturday = 0,
+        double TiEndSaturday   = 0,
+        double TiStartSunday   = 0,
+        double TiEndSunday     = 0
     );
 
     /// <summary>
@@ -149,7 +163,11 @@ namespace EE.Doklad.Services.VentCooling
         double                             VdotNight_m3ph,
         double                             SeasonEnergy_kWh,
         double                             SeasonSpecific_kWhPerM2,
-        IReadOnlyList<NightVentMonthDebug> PerMonth
+        IReadOnlyList<NightVentMonthDebug> PerMonth,
+        /// <summary>Режим: "Sensible" или "ThermalMass".</summary>
+        string                             Mode = "Sensible",
+        double                             Hnv_WPerK = 0,
+        double                             CeffWhPerK = 0
     );
 
     // ── Result DTO ───────────────────────────────────────────────────────────────
@@ -329,6 +347,238 @@ namespace EE.Doklad.Services.VentCooling
             {
                 debugDetails = new NightVentDebugDetails(
                     vdotNight, seasonEnergy_kWh, specificKWhM2, debugMonths!);
+            }
+
+            return new NightVentResult(seasonEnergy_kWh, specificKWhM2, perMonthKWh, debugDetails);
+        }
+
+        /// <summary>
+        /// Изчислява приноса от нощното вентилиране по 1R1C динамичен модел с термична маса.
+        ///
+        /// Алгоритъм (PHPP-подобен):
+        ///   Ceff_WhPerK  = SpecificHeatCapacityWhPerM2K × A
+        ///   Ceff_JPerK   = Ceff_WhPerK × 3600
+        ///   Hnv_WPerK    = 0.34 × VdotNight_m3ph           (W/K)
+        ///   a            = Hnv × dt / Ceff_J               (безразмерен)
+        ///   Ti_next      = Te + (Ti − Te) × exp(−a)        (°C)
+        ///   E_J          = Hnv × (Ti − Te) × dt × (1−exp(−a)) / a
+        ///   E_kWh        = E_J / 3.6e6
+        ///
+        /// При нощен график, пресичащ полунощ (напр. 22→06), часовете се обхождат
+        /// циклично от първия активен час.  При неактивен час Ti се нулира до Ti_set.
+        /// Ако <see cref="NightVentInput.SpecificHeatCapacityWhPerM2K"/> ≤ 0 или AreaM2 ≤ 0,
+        /// методът извиква <see cref="Calculate"/> като fallback.
+        /// </summary>
+        public static NightVentResult CalculateThermalMass(NightVentInput input, bool collectDebug = false)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+
+            // ── Валидация (identична с Calculate) ─────────────────────────────
+            if (input.AreaM2 <= 0)
+                return NightVentResult.Fail($"AreaM2 трябва да е > 0 (получено {input.AreaM2}).");
+
+            if (input.SpecAirflowM3phM2 < 0)
+                return NightVentResult.Fail($"SpecAirflowM3phM2 трябва да е ≥ 0 (получено {input.SpecAirflowM3phM2}).");
+
+            if (input.CoolingSeasonMonths == null || input.CoolingSeasonMonths.Count == 0)
+                return NightVentResult.Fail("CoolingSeasonMonths не може да е празен.");
+
+            if (input.ClimateProfiles == null)
+                return NightVentResult.Fail("ClimateProfiles не може да е null.");
+
+            if (input.Schedule == null)
+                return NightVentResult.Fail("Schedule не може да е null.");
+
+            foreach (int m in input.CoolingSeasonMonths)
+            {
+                if (m < 1 || m > 12)
+                    return NightVentResult.Fail($"Невалиден месец в CoolingSeasonMonths: {m}.");
+                if (!input.ClimateProfiles.ContainsKey(m))
+                    return NightVentResult.Fail($"Липсва климатичен профил за месец {m}.");
+            }
+
+            // ── Fallback: нулев дебит ──────────────────────────────────────────
+            if (input.SpecAirflowM3phM2 == 0.0)
+            {
+                var zeroMonths = new Dictionary<int, double>();
+                foreach (int m in input.CoolingSeasonMonths) zeroMonths[m] = 0.0;
+                NightVentDebugDetails? zeroDbg = null;
+                if (collectDebug)
+                {
+                    var zeroPerMonth = new List<NightVentMonthDebug>();
+                    foreach (int m in input.CoolingSeasonMonths)
+                        zeroPerMonth.Add(BuildMonthDebug(m, 0.0, input, GetDays(input.DaysInMonth, m)));
+                    zeroDbg = new NightVentDebugDetails(0, 0, 0, zeroPerMonth, "ThermalMass", 0, 0);
+                }
+                return new NightVentResult(0.0, 0.0, zeroMonths, zeroDbg);
+            }
+
+            // ── Fallback: c_eff = 0 → sensible-only ───────────────────────────
+            double cEff = input.SpecificHeatCapacityWhPerM2K;
+            if (cEff <= 0.0)
+                return Calculate(input, collectDebug);
+
+            // ── Параметри ─────────────────────────────────────────────────────
+            double vdotNight   = input.SpecAirflowM3phM2 * input.AreaM2;   // m³/h
+            double hnv         = RhoTimesCA_Wh_m3K * vdotNight;             // W/K  (0.34 × m³/h = Wh/h·K → W/K)
+            double ceffWhPerK  = cEff * input.AreaM2;                       // Wh/K
+            double ceffJPerK   = ceffWhPerK * 3600.0;                       // J/K
+            const double dt    = 3600.0;                                    // seconds per hour
+            double ti_set      = input.IndoorCoolingSetpointC;
+
+            // a = Hnv_WPerK × dt / Ceff_JPerK
+            double a = (hnv * dt) / ceffJPerK;
+
+            double seasonEnergy_kWh = 0.0;
+            var perMonthKWh  = new Dictionary<int, double>();
+            var debugMonths  = collectDebug ? new List<NightVentMonthDebug>() : null;
+
+            foreach (int month in input.CoolingSeasonMonths)
+            {
+                var profile = input.ClimateProfiles[month];
+                var days = (input.DayTypeCountsPerMonth != null &&
+                            input.DayTypeCountsPerMonth.TryGetValue(month, out var exactCounts))
+                           ? exactCounts
+                           : ComputeDayTypeCounts(input.DaysInMonth, month);
+
+                // Simulate one "average day" per day-type using the 1R1C model.
+                // The night schedule may be overnight (e.g. 22:00–06:00), so we iterate
+                // all 24 hours cyclically starting from the first active hour.
+
+                static double SimulateDay(
+                    NightVentSchedule sched, NightVentDayType dayType,
+                    ClimateHourlyProfile prof, double tiSet,
+                    double hnvWK, double ceffJ, double _a, double _dt,
+                    double[] tiStarts, double[] tiEnds)
+                {
+                    // Find first active hour
+                    int firstActive = -1;
+                    for (int h = 0; h < 24; h++)
+                        if (sched.IsActive(dayType, h)) { firstActive = h; break; }
+
+                    if (firstActive < 0)
+                    {
+                        // No active hours
+                        for (int h = 0; h < 24; h++) { tiStarts[h] = tiSet; tiEnds[h] = tiSet; }
+                        return 0.0;
+                    }
+
+                    double ti = tiSet;          // initial state at start of first active hour
+                    double totalE = 0.0;
+
+                    // Walk all 24 hours cyclically starting from firstActive
+                    for (int offset = 0; offset < 24; offset++)
+                    {
+                        int h = (firstActive + offset) % 24;
+                        double te = prof.TempAt(h);
+
+                        if (!sched.IsActive(dayType, h))
+                        {
+                            // Inactive hour → reset state
+                            tiStarts[h] = tiSet;
+                            tiEnds[h]   = tiSet;
+                            ti = tiSet;
+                            continue;
+                        }
+
+                        tiStarts[h] = ti;
+
+                        if (ti <= te)
+                        {
+                            // No cooling effect this hour
+                            tiEnds[h] = ti;
+                            // state unchanged
+                        }
+                        else
+                        {
+                            double expA    = Math.Exp(-_a);
+                            double tiNext  = te + (ti - te) * expA;
+                            // Energy integral: Hnv × (Ti−Te) × dt × (1−exp(−a)) / a
+                            double eJ      = hnvWK * (ti - te) * _dt * (1.0 - expA) / _a;
+                            totalE        += eJ / 3.6e6;  // → kWh
+                            ti             = tiNext;
+                            tiEnds[h]      = tiNext;
+                        }
+                    }
+
+                    return totalE;
+                }
+
+                var tiStartsWd  = new double[24];
+                var tiEndsWd    = new double[24];
+                var tiStartsSat = new double[24];
+                var tiEndsSat   = new double[24];
+                var tiStartsSun = new double[24];
+                var tiEndsSun   = new double[24];
+
+                double sumWd  = SimulateDay(input.Schedule, NightVentDayType.Weekday,  profile, ti_set, hnv, ceffJPerK, a, dt, tiStartsWd,  tiEndsWd);
+                double sumSat = SimulateDay(input.Schedule, NightVentDayType.Saturday, profile, ti_set, hnv, ceffJPerK, a, dt, tiStartsSat, tiEndsSat);
+                double sumSun = SimulateDay(input.Schedule, NightVentDayType.Sunday,   profile, ti_set, hnv, ceffJPerK, a, dt, tiStartsSun, tiEndsSun);
+
+                double monthEnergy = sumWd * days.Weekdays + sumSat * days.Saturdays + sumSun * days.Sundays;
+                perMonthKWh[month] = monthEnergy;
+                seasonEnergy_kWh  += monthEnergy;
+
+                if (collectDebug)
+                {
+                    var hourDebugList = new List<NightVentHourDebug>(24);
+                    for (int h = 0; h < 24; h++)
+                    {
+                        double te  = profile.TempAt(h);
+                        double dt2 = Math.Max(0.0, ti_set - te);
+
+                        bool activeWd  = input.Schedule.IsActive(NightVentDayType.Weekday,  h);
+                        bool activeSat = input.Schedule.IsActive(NightVentDayType.Saturday, h);
+                        bool activeSun = input.Schedule.IsActive(NightVentDayType.Sunday,   h);
+
+                        // Per-hour energy for debug: reconstruct from Ti states
+                        double eWd  = 0, eSat = 0, eSun = 0;
+                        if (activeWd  && tiStartsWd[h]  > te)
+                        {
+                            double expA = Math.Exp(-a);
+                            eWd  = hnv * (tiStartsWd[h]  - te) * dt * (1.0 - expA) / a / 3.6e6;
+                        }
+                        if (activeSat && tiStartsSat[h] > te)
+                        {
+                            double expA = Math.Exp(-a);
+                            eSat = hnv * (tiStartsSat[h] - te) * dt * (1.0 - expA) / a / 3.6e6;
+                        }
+                        if (activeSun && tiStartsSun[h] > te)
+                        {
+                            double expA = Math.Exp(-a);
+                            eSun = hnv * (tiStartsSun[h] - te) * dt * (1.0 - expA) / a / 3.6e6;
+                        }
+
+                        hourDebugList.Add(new NightVentHourDebug(
+                            h, te, dt2,
+                            activeWd, activeSat, activeSun,
+                            eWd, eSat, eSun,
+                            TiStartWeekday:  tiStartsWd[h],
+                            TiEndWeekday:    tiEndsWd[h],
+                            TiStartSaturday: tiStartsSat[h],
+                            TiEndSaturday:   tiEndsSat[h],
+                            TiStartSunday:   tiStartsSun[h],
+                            TiEndSunday:     tiEndsSun[h]
+                        ));
+                    }
+
+                    debugMonths!.Add(new NightVentMonthDebug(
+                        month,
+                        days.Weekdays, days.Saturdays, days.Sundays,
+                        sumWd, sumSat, sumSun,
+                        monthEnergy,
+                        hourDebugList
+                    ));
+                }
+            }
+
+            double specificKWhM2 = seasonEnergy_kWh / input.AreaM2;
+            NightVentDebugDetails? debugDetails = null;
+            if (collectDebug)
+            {
+                debugDetails = new NightVentDebugDetails(
+                    vdotNight, seasonEnergy_kWh, specificKWhM2, debugMonths!,
+                    "ThermalMass", hnv, ceffWhPerK);
             }
 
             return new NightVentResult(seasonEnergy_kWh, specificKWhM2, perMonthKWh, debugDetails);

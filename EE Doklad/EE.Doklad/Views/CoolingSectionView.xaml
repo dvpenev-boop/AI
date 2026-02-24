@@ -368,6 +368,29 @@
                             </StackPanel>
                         </Grid>
                     </Border>
+
+                    <!-- Специфичен топлинен капацитет -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="320"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                       ToolTip="Специфичен топлинен капацитет на сградата. Използва се само при режим &quot;С топлинен капацитет&quot; за нощна вентилация (Секция 14). Типично: 15 Wh/m²K (лека конструкция) / 30 (средна) / 60+ (тежка).">
+                                <Run Text="Специфичен топлинен капацитет [Wh/m²K]"/>
+                            </TextBlock>
+                            <StackPanel Grid.Column="1">
+                                <TextBox Text="{Binding SpecificHeatCapacityText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource EditableTextBoxStyle}" Width="120" TextAlignment="Center" HorizontalAlignment="Center"
+                                         ToolTip="Wh/m²K — препоръчани стойности: 15 (лека), 30 (средна, default), 60 (тежка конструкция)"/>
+                                <TextBlock Text="{Binding SpecificHeatCapacityError}"
+                                           Style="{StaticResource ErrorTextStyle}"
+                                           Visibility="{Binding HasSpecificHeatCapacityError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </Border>
 

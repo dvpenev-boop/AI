@@ -96,5 +96,16 @@ namespace EE.Doklad.Models
     /// </summary>
     [ObservableProperty]
     private double _relativeHumidity = 50.0;
+
+    // ========== ТЕРМИЧНА МАСА ==========
+
+    /// <summary>
+    /// Специфичен топлинен капацитет на сградата за нощна вентилация [Wh/m²K].
+    /// Използва се само когато е активиран режим "С топлинен капацитет" (NightVentUseThermalMass).
+    /// Типична стойност: 30 Wh/m²K (средно); 15 = леко; 60 = тежко.
+    /// Default: 30.0
+    /// </summary>
+    [ObservableProperty]
+    private double _specificHeatCapacityWhPerM2K = 30.0;
     }
 }

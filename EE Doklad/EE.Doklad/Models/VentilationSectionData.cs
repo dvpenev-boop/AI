@@ -118,6 +118,14 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private double _nightVentSpecAirflow = 0.0;
 
+    /// <summary>
+    /// Режим на изчисление на нощната вентилация.
+    /// false (default) → sensible-only (ρ·ca·VdotNight·ΔT) — backward-compatible.
+    /// true            → 1R1C термична маса (PHPP-подобен модел, c_eff от Секция 12).
+    /// </summary>
+    [ObservableProperty]
+    private bool _nightVentUseThermalMass = false;
+
     // ========== END OF NEW METHODOLOGY PARAMETERS ==========
 
     /// <summary>
