@@ -100,7 +100,14 @@ namespace EE.Doklad.Services.VentCooling
         /// Брой дни в месеца (ключ = месец 1..12).
         /// Ако null, се използват стандартните стойности за 2024.
         /// </summary>
-        IReadOnlyDictionary<int, int>? DaysInMonth = null
+        IReadOnlyDictionary<int, int>? DaysInMonth = null,
+        /// <summary>
+        /// Опционална разбивка по тип на ден (Weekdays/Saturdays/Sundays) за всеки месец.
+        /// Ако присъства, се използва предвид броя дни в месеца при агрегацията
+        /// (поддържа частични месеци: напр. 15.08–15.09).
+        /// Ключ = месец (1..12).
+        /// </summary>
+        IReadOnlyDictionary<int, (int Weekdays, int Saturdays, int Sundays)>? DayTypeCountsPerMonth = null
     );
 
     // ── Debug structures ─────────────────────────────────────────────────────────
@@ -258,7 +265,12 @@ namespace EE.Doklad.Services.VentCooling
             foreach (int month in input.CoolingSeasonMonths)
             {
                 var profile  = input.ClimateProfiles[month];
-                var days     = ComputeDayTypeCounts(input.DaysInMonth, month);
+                // Prefer exact day-type counts when provided (supports partial-month seasons).
+                // Fall back to the approximation only when no precise counts are supplied.
+                var days = (input.DayTypeCountsPerMonth != null &&
+                            input.DayTypeCountsPerMonth.TryGetValue(month, out var exactCounts))
+                           ? exactCounts
+                           : ComputeDayTypeCounts(input.DaysInMonth, month);
 
                 // Суми на E_hour_kWh по тип ден за осреднения ден
                 double sumWd = 0, sumSat = 0, sumSun = 0;

@@ -986,7 +986,10 @@ namespace EE.Doklad.ViewModels
             // ── Ti: вътрешен setpoint (от Секция 12, ако е налична) ──────────────
             double ti = _coolingData != null ? _coolingData.DesignTemperature : 25.0;
 
-            // ── Охладителен сезон: месеци ────────────────────────────────────────
+            // ── Охладителен сезон: използваме както месеците, така и (ако са налични)
+            //     конкретните дни за по-прецизна разбивка (поддържа частични месеци
+            //     като напр. 15.08–15.09). Ако Days не са въведени, падаме обратно
+            //     на агрегация по цели месеци (legacy поведение).
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 0;
             int endMonth   = _objectData.CoolingSeasonEndMonth   ?? 0;
             if (startMonth == 0 || endMonth == 0)
@@ -1006,6 +1009,57 @@ namespace EE.Doklad.ViewModels
 
             if (seasonMonths.Count == 0)
                 return NightVentResult.Fail("Охладителният сезон не съдържа нито един месец.");
+
+            // Start/end DAYS are mandatory — if missing, refuse to calculate (avoid whole-month fallback).
+            if (!_objectData.CoolingSeasonStartDay.HasValue || !_objectData.CoolingSeasonEndDay.HasValue)
+                return NightVentResult.Fail("Не са въведени начален/краен ден на охладителния сезон (Секция 5).");
+
+            // Compute exact counts of weekdays/saturdays/sundays per month inside the
+            // exact season interval [StartDay.StartMonth … EndDay.EndMonth].
+            IReadOnlyDictionary<int, (int Weekdays, int Saturdays, int Sundays)>? dayTypeCountsPerMonth = null;
+            int yearRef = 2024; // match other calendar calculations
+            {
+                int sd = _objectData.CoolingSeasonStartDay.Value;
+                int ed = _objectData.CoolingSeasonEndDay.Value;
+                // Clamp days to valid range for their month
+                sd = Math.Max(1, Math.Min(sd, DateTime.DaysInMonth(yearRef, startMonth)));
+                ed = Math.Max(1, Math.Min(ed, DateTime.DaysInMonth(yearRef, endMonth)));
+
+                var seasonStart = new DateTime(yearRef, startMonth, sd);
+                var seasonEnd = new DateTime(yearRef, endMonth, ed);
+                if (seasonEnd < seasonStart) seasonEnd = seasonEnd.AddYears(1);
+
+                var counts = new Dictionary<int, (int Weekdays, int Saturdays, int Sundays)>();
+                // initialize months in season with zero
+                foreach (var m in seasonMonths) counts[m] = (0, 0, 0);
+
+                for (var d = seasonStart.Date; d <= seasonEnd.Date; d = d.AddDays(1))
+                {
+                    int m = d.Month; // month in 1..12
+                    if (!counts.ContainsKey(m))
+                    {
+                        // In case season spans into next year and includes months not in seasonMonths
+                        counts[m] = (0, 0, 0);
+                    }
+
+                    var tuple = counts[m];
+                    switch (d.DayOfWeek)
+                    {
+                        case DayOfWeek.Saturday:
+                            tuple.Saturdays++;
+                            break;
+                        case DayOfWeek.Sunday:
+                            tuple.Sundays++;
+                            break;
+                        default:
+                            tuple.Weekdays++;
+                            break;
+                    }
+                    counts[m] = tuple;
+                }
+
+                dayTypeCountsPerMonth = counts;
+            }
 
             // ── Климатични профили (само температура, без RH) ────────────────────
             var provider  = new BgAvgClimateProvider(_climateData);
@@ -1060,7 +1114,8 @@ namespace EE.Doklad.ViewModels
                 IndoorCoolingSetpointC: ti,
                 CoolingSeasonMonths:    seasonMonths,
                 ClimateProfiles:        profiles,
-                Schedule:               nightSched
+                Schedule:               nightSched,
+                DayTypeCountsPerMonth:  dayTypeCountsPerMonth
             );
 
             try
@@ -1088,6 +1143,15 @@ namespace EE.Doklad.ViewModels
             // Входни параметри
             sb.AppendLine($"  Климатична база : DefaultParams_climateZones_hourly_flat_1to9.json");
             sb.AppendLine($"  Климатична зона : {ClimateZoneDisplay}");
+            // Show exact cooling season dates from Section 5
+            if (_objectData != null &&
+                _objectData.CoolingSeasonStartDay.HasValue && _objectData.CoolingSeasonStartMonth.HasValue &&
+                _objectData.CoolingSeasonEndDay.HasValue   && _objectData.CoolingSeasonEndMonth.HasValue)
+            {
+                sb.AppendLine($"  Охладителен сезон (Сек.5)   = " +
+                              $"{_objectData.CoolingSeasonStartDay:00}.{_objectData.CoolingSeasonStartMonth:00}" +
+                              $" – {_objectData.CoolingSeasonEndDay:00}.{_objectData.CoolingSeasonEndMonth:00}");
+            }
             double ti = _coolingData?.DesignTemperature ?? 25.0;
             sb.AppendLine($"  Ti (вътр. setpoint, Сек.12)  = {ti:F2} °C");
             sb.AppendLine($"  VdotSpecNight                = {_data.NightVentSpecAirflow:F4} m³/h·m²");
