@@ -14,7 +14,7 @@ namespace EE.Doklad.Models.Climate
     {
         private readonly int _zoneNumber;
         private readonly ClimatePoint[,] _typicalDays; // [month 1-12, hour 0-23]
-        private readonly int _fixedYear = 2021; // Non-leap year за консистентност
+        private readonly int _fixedYear = 2024; // Референтна година за целия софтуер
 
         public ClimateDataSource Source => ClimateDataSource.BG;
 

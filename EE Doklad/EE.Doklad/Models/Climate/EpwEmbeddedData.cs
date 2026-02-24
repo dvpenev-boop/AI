@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using EE.Doklad.Services.Climate;
 
 namespace EE.Doklad.Models.Climate
 {
@@ -50,9 +51,9 @@ namespace EE.Doklad.Models.Climate
         public double? Elevation { get; set; }
 
         /// <summary>
-        /// Фиксирана година използвана за DateTime (non-leap, напр. 2021).
+        /// Фиксирана година използвана за DateTime (референтна, напр. 2024).
         /// </summary>
-        public int FixedYearUsed { get; set; } = 2021;
+        public int FixedYearUsed { get; set; } = 2024;
 
         /// <summary>
         /// 8760 часови записа (365 дни × 24 часа).
@@ -84,7 +85,7 @@ namespace EE.Doklad.Models.Climate
         }
 
         /// <summary>
-        /// Конвертира към EpwHourlyClimateProvider за използване в изчисления.
+        /// Конвертира към EpwHourlyClimateProvider за използване в изчисления (стар IClimateDataProvider).
         /// </summary>
         public EpwHourlyClimateProvider ToClimateProvider()
         {
@@ -98,6 +99,16 @@ namespace EE.Doklad.Models.Climate
                 Longitude,
                 FixedYearUsed
             );
+        }
+
+        /// <summary>
+        /// Конвертира към <see cref="EpwClimateProvider"/> за Engine V2 (IClimateProvider).
+        /// Връща provider с IsBgAvgMode=false и 8760 точки с B_Pa per час.
+        /// </summary>
+        public EpwClimateProvider ToEngineClimateProvider()
+        {
+            var points = HourlyData.Select(dto => dto.ToClimatePoint(FixedYearUsed)).ToArray();
+            return new EpwClimateProvider(points, FixedYearUsed);
         }
     }
 }

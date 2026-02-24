@@ -795,6 +795,8 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(CoolingSeasonDisplay));
             OnPropertyChanged(nameof(WorkingDaysInSeason));
             OnPropertyChanged(nameof(WorkingHoursInSeason));
+            OnPropertyChanged(nameof(WorkDaysSeason));
+            OnPropertyChanged(nameof(WorkHoursSeason));
             OnPropertyChanged(nameof(CoolingSeasonWarning));
 
             OnPropertyChanged(nameof(SensibleCooling_kWh));
@@ -944,6 +946,7 @@ namespace EE.Doklad.ViewModels
             }
 
             // ── Barometric pressure ───────────────────────────────────────────────
+            // BG: from climate zone defaults. ASHRAE: per-hour from EPW (provider carries it).
             double bPa = _climateData.GetEffectiveBarometricPressure();
 
             // ── Recuperation ──────────────────────────────────────────────────────
@@ -972,12 +975,46 @@ namespace EE.Doklad.ViewModels
                 EnergySource2           = ei2,
             };
 
-            // ── Climate provider ──────────────────────────────────────────────────
-            var provider = new BgAvgClimateProvider(_climateData);
+            // ── Climate provider + engine dispatch ────────────────────────────────
+            // BG: BgAvgClimateProvider (24 typical-day points), isBgAvgMode=true.
+            // ASHRAE: EpwClimateProvider (8760 real hours), isBgAvgMode=false.
+            bool isAshrae = _data.CoolingClimateDatabase == ClimateDatabase.ASHRAE
+                         && _report?.EmbeddedEpwData != null;
 
             try
             {
-                return _engineV2.Calculate(input, provider.GetHourlyData, isBgAvgMode: true, yearRef: yearRef);
+                if (isAshrae)
+                {
+                    var epwProvider = _report!.EmbeddedEpwData!.ToEngineClimateProvider();
+                    // For EPW, use provider's average barometric pressure as fallback
+                    // (individual hourly values are in each ClimateHourPoint.B_Pa).
+                    // Re-create input with EPW average pressure.
+                    var epwInput = new VentCoolingInputV2
+                    {
+                        AirflowSpec_m3hm2       = input.AirflowSpec_m3hm2,
+                        CooledArea_m2           = input.CooledArea_m2,
+                        SupplyTemperature_C     = input.SupplyTemperature_C,
+                        SupplyRH_Pct            = input.SupplyRH_Pct,
+                        BarometricPressure_Pa   = epwProvider.BarometricPressure_Pa,
+                        RecuperationEfficiency  = input.RecuperationEfficiency,
+                        ExtractAirTemperature_C = input.ExtractAirTemperature_C,
+                        ExtractAirRH_Pct        = input.ExtractAirRH_Pct,
+                        VentSchedule            = input.VentSchedule,
+                        CoolSchedule            = input.CoolSchedule,
+                        SeasonStart             = input.SeasonStart,
+                        SeasonEnd               = input.SeasonEnd,
+                        DaysOffPerMonth         = input.DaysOffPerMonth,
+                        OfficialHolidays        = input.OfficialHolidays,
+                        EnergySource1           = input.EnergySource1,
+                        EnergySource2           = input.EnergySource2,
+                    };
+                    return _engineV2.Calculate(epwInput, epwProvider.GetHourlyData, isBgAvgMode: false, yearRef: yearRef);
+                }
+                else
+                {
+                    var bgProvider = new BgAvgClimateProvider(_climateData);
+                    return _engineV2.Calculate(input, bgProvider.GetHourlyData, isBgAvgMode: true, yearRef: yearRef);
+                }
             }
             catch (Exception ex)
             {
@@ -1660,7 +1697,8 @@ namespace EE.Doklad.ViewModels
                     OnPropertyChanged(nameof(EpwFileDisplayName));
                     OnPropertyChanged(nameof(EpwFileDisplayColor));
                     OnPropertyChanged(nameof(EpwLocationInfo));
-                    // TODO: Recalculate if needed for new methodology
+                    // Re-calculate when switching between BG and ASHRAE
+                    Recalculate();
                 }
             }
         }
@@ -1758,7 +1796,8 @@ namespace EE.Doklad.ViewModels
                         System.Windows.MessageBoxButton.OK,
                         System.Windows.MessageBoxImage.Information);
 
-                    // TODO: Recalculate if cooling calculations are active
+                    // Re-calculate with new EPW data
+                    Recalculate();
                 }
                 catch (Exception ex)
                 {
@@ -1872,42 +1911,36 @@ namespace EE.Doklad.ViewModels
         }
 
         /// <summary>
-        /// Изчислени работни дни за сезона (readonly) - базирано на графици и k_m корекция.
+        /// Работни дни за сезона — взима се директно от engine output (TotalWorkingDays),
+        /// защото engine-ът брои точно дните в [SeasonStart..SeasonEnd] с правилните дати,
+        /// докато старото CalculateSeasonalWorkDays() броеше цели месеци (без начален/краен ден).
         /// </summary>
         public double WorkDaysSeason
         {
             get
             {
                 if (_objectData == null || !_objectData.CoolingSeasonEnabled) return 0.0;
-
-                var schedule = _objectData.CoolingSchedules?.VentilationCoolingSchedule;
-                if (schedule == null) return 0.0;
-
-                double hoursWorkday = schedule.Workdays?.GetHours() ?? 0.0;
-                double hoursSaturday = schedule.Saturday?.GetHours() ?? 0.0;
-                double hoursSunday = schedule.Sunday?.GetHours() ?? 0.0;
-
-                return CalculateSeasonalWorkDays(hoursWorkday, hoursSaturday, hoursSunday);
+                // Engine output-ът вече е изчислен с точните дати — ползваме го директно.
+                if (_outputV2 != null && _outputV2.TotalWorkingDays > 0)
+                    return _outputV2.TotalWorkingDays;
+                return 0.0;
             }
         }
 
         /// <summary>
-        /// Изчислени работни часове за сезона (readonly) - базирано на графици и k_m корекция.
+        /// Работни часове за сезона — взима се директно от engine output (TotalWorkingHours),
+        /// защото engine-ът брои точно активните часове в [SeasonStart..SeasonEnd],
+        /// докато старото CalculateSeasonalWorkHours() броеше цели месеци (без начален/краен ден).
         /// </summary>
         public double WorkHoursSeason
         {
             get
             {
                 if (_objectData == null || !_objectData.CoolingSeasonEnabled) return 0.0;
-
-                var schedule = _objectData.CoolingSchedules?.VentilationCoolingSchedule;
-                if (schedule == null) return 0.0;
-
-                double hoursWorkday = schedule.Workdays?.GetHours() ?? 0.0;
-                double hoursSaturday = schedule.Saturday?.GetHours() ?? 0.0;
-                double hoursSunday = schedule.Sunday?.GetHours() ?? 0.0;
-
-                return CalculateSeasonalWorkHours(hoursWorkday, hoursSaturday, hoursSunday);
+                // Engine output-ът вече е изчислен с точните дати — ползваме го директно.
+                if (_outputV2 != null && _outputV2.TotalWorkingHours > 0)
+                    return _outputV2.TotalWorkingHours;
+                return 0.0;
             }
         }
 

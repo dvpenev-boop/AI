@@ -12,6 +12,8 @@ namespace EE.Doklad.Models.Climate
         public int Hour { get; set; }
         public double DryBulbC { get; set; }
         public double RH { get; set; }
+        /// <summary>Барометрично налягане [Pa]. 0 = неизползвано (BG).</summary>
+        public double BarometricPressurePa { get; set; }
 
         public ClimatePointDto() { }
 
@@ -22,12 +24,13 @@ namespace EE.Doklad.Models.Climate
             Hour = point.Hour;
             DryBulbC = point.DryBulbC;
             RH = point.RH;
+            BarometricPressurePa = point.BarometricPressurePa;
         }
 
         public ClimatePoint ToClimatePoint(int fixedYear)
         {
             var dateTime = new DateTime(fixedYear, Month, Day, Hour, 0, 0, DateTimeKind.Unspecified);
-            return new ClimatePoint(dateTime, DryBulbC, RH);
+            return new ClimatePoint(dateTime, DryBulbC, RH, BarometricPressurePa);
         }
     }
 }

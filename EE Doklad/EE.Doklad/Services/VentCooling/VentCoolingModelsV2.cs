@@ -113,6 +113,11 @@ namespace EE.Doklad.Services.VentCooling
     public sealed class ClimateHourPoint
     {
         public int Hour { get; init; }        // 0..23
+        /// <summary>
+        /// Пълно локално време (за EPW – реална дата/час; за BG – фиксирана дата + час).
+        /// Използва се от Engine при EPW за определяне на DayOfWeek, Season и пр.
+        /// </summary>
+        public DateTime? LocalTime { get; init; }
         public double T_out_C { get; init; }
         public double RH_out_Pct { get; init; }
         public double B_Pa { get; init; }

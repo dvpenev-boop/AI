@@ -29,24 +29,20 @@ namespace EE.Doklad.Models.Climate
         /// <param name="city">Град (от EPW header)</param>
         /// <param name="latitude">Географска ширина</param>
         /// <param name="longitude">Географска дължина</param>
-        /// <param name="fixedYearUsed">Фиксирана година използвана за DateTime (трябва да е non-leap, напр. 2021)</param>
+        /// <param name="fixedYearUsed">Фиксирана година използвана за DateTime (референтна, напр. 2024)</param>
         public EpwHourlyClimateProvider(
             ClimatePoint[] hourlyData,
             string originalFileName,
             string? city = null,
             double? latitude = null,
             double? longitude = null,
-            int fixedYearUsed = 2021)
+            int fixedYearUsed = 2024)
         {
             if (hourlyData == null || hourlyData.Length != 8760)
                 throw new ArgumentException("EPW данни трябва да съдържат точно 8760 часови записа (365 дни × 24 часа).", nameof(hourlyData));
 
             if (string.IsNullOrWhiteSpace(originalFileName))
                 throw new ArgumentNullException(nameof(originalFileName));
-
-            // Проверка: годината трябва да е non-leap (365 дни)
-            if (DateTime.IsLeapYear(fixedYearUsed))
-                throw new ArgumentException($"Година {fixedYearUsed} е високосна. Използвайте non-leap година (напр. 2021).", nameof(fixedYearUsed));
 
             _hourlyData = hourlyData;
             OriginalFileName = originalFileName;

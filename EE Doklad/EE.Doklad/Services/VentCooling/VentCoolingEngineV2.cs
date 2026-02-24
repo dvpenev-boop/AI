@@ -140,7 +140,22 @@ namespace EE.Doklad.Services.VentCooling
             for (int m = 1; m <= 12; m++)
             {
                 var sched = scheduleResults[m - 1];
-                if (sched.WorkingDays <= 0.0) continue;
+
+                // BG mode: skip months with 0 working days.
+                // EPW mode: skip months entirely outside cooling season (no sched intersection).
+                if (isBgAvgMode && sched.WorkingDays <= 0.0) continue;
+
+                // EPW mode: check if this month has any day inside [SeasonStart, SeasonEnd].
+                // If the entire month is outside the season, skip.
+                if (!isBgAvgMode)
+                {
+                    int yearRef2 = yearRef;
+                    var monthStart = new DateTime(yearRef2, m, 1);
+                    var monthEnd   = new DateTime(yearRef2, m, DateTime.DaysInMonth(yearRef2, m));
+                    // Season may wrap around year boundary (seasonEnd was already adjusted above).
+                    if (monthEnd < input.SeasonStart || monthStart > input.SeasonEnd)
+                        continue;
+                }
 
                 IReadOnlyList<ClimateHourPoint> hourlyData;
                 try { hourlyData = getHourlyData(m); }
@@ -152,18 +167,44 @@ namespace EE.Doklad.Services.VentCooling
                 int schedStart = input.VentSchedule.TimeRange.StartHour;
                 int schedEnd   = input.VentSchedule.TimeRange.EndHour;
 
-                // Integrators for this month's "typical day"
+                // ── EPW mode: build set of excluded dates from DaysOffPerMonth ────
+                // When we don't have explicit holiday dates, we exclude the LAST N
+                // active workdays (Mon-Fri) of the month. This is deterministic.
+                HashSet<DateTime>? epwExcludedDates = null;
+                if (!isBgAvgMode)
+                {
+                    epwExcludedDates = BuildEpwExcludedDates(
+                        m, yearRef, input.VentSchedule, input.DaysOffPerMonth,
+                        input.OfficialHolidays, input.SeasonStart, input.SeasonEnd);
+                }
+
+                // Integrators for this month (BG: "typical day"; EPW: all real hours)
                 double day_cool = 0, day_heat = 0, day_dry = 0, day_contrib = 0;
                 double sum_h_out = 0, sum_h_sup = 0, sum_x_out = 0, sum_x_sup = 0, sum_rho_out = 0;
                 int activeHourCount = 0;
-                int workDaysInt = (int)Math.Round(sched.WorkingDays);
+                int workDaysInt = isBgAvgMode ? (int)Math.Round(sched.WorkingDays) : 0; // EPW: will count unique dates
 
                 var hourlyDebugRows = new List<VentCoolingHourlyDebugRow>(hourlyData.Count);
+                var epwActiveDates = isBgAvgMode ? null : new HashSet<DateTime>();
 
                 foreach (var pt in hourlyData)
                 {
-                    // Run flag: 1 if the hour is within the ventilation schedule, 0 otherwise
-                    bool isActive = (pt.Hour >= schedStart && pt.Hour <= schedEnd);
+                    // ── Determine if this hour is active ──────────────────────────
+                    bool isActive;
+
+                    if (isBgAvgMode)
+                    {
+                        // BG: simple hour-range check (typical day, 24 points)
+                        isActive = (pt.Hour >= schedStart && pt.Hour <= schedEnd);
+                    }
+                    else
+                    {
+                        // EPW: full filtering by season + day-of-week + schedule + holidays
+                        isActive = IsEpwHourActive(
+                            pt, input.VentSchedule, input.SeasonStart, input.SeasonEnd,
+                            epwExcludedDates);
+                    }
+
                     int run = isActive ? 1 : 0;
 
                     // Use point B if it has one, else use zone default
@@ -242,9 +283,10 @@ namespace EE.Doklad.Services.VentCooling
                         E_cool_hour = e_cool_dbg / area,   // per m² for debug display
                         E_heat_hour = e_heat_dbg / area,
                         E_dry_hour  = e_dry_dbg  / area,
-                        E_cool_month_kWhm2 = (e_cool_dbg / area) * workDaysInt,
-                        E_heat_month_kWhm2 = (e_heat_dbg / area) * workDaysInt,
-                        E_dry_month_kWhm2  = (e_dry_dbg  / area) * workDaysInt,
+                        // BG: hourly × workDays = monthly; EPW: hourly IS monthly (already summed directly)
+                        E_cool_month_kWhm2 = isBgAvgMode ? (e_cool_dbg / area) * workDaysInt : (e_cool_dbg / area),
+                        E_heat_month_kWhm2 = isBgAvgMode ? (e_heat_dbg / area) * workDaysInt : (e_heat_dbg / area),
+                        E_dry_month_kWhm2  = isBgAvgMode ? (e_dry_dbg  / area) * workDaysInt : (e_dry_dbg  / area),
                         Workdays    = workDaysInt,
                     });
 
@@ -262,6 +304,10 @@ namespace EE.Doklad.Services.VentCooling
                     if (e_cool_h > 0.0 && inCoolOverlap)
                         day_contrib += e_cool_h;
 
+                    // EPW: track unique active dates for WorkingDays count
+                    if (!isBgAvgMode && pt.LocalTime.HasValue)
+                        epwActiveDates!.Add(pt.LocalTime.Value.Date);
+
                     // Debug accumulators
                     sum_h_out   += h_out_eff;
                     sum_h_sup   += supState.h_kJkg;
@@ -272,12 +318,15 @@ namespace EE.Doklad.Services.VentCooling
                 }
 
                 // ── Scale from "typical day" to "monthly total" ────────────────────
-                double workDays = sched.WorkingDays;
+                double workDays;
+                double workHours;
                 double month_cool, month_heat, month_dry, month_contrib;
 
                 if (isBgAvgMode)
                 {
                     // BG_avg: 24-hour typical day → multiply by work days
+                    workDays = sched.WorkingDays;
+                    workHours = sched.WorkingHours;
                     month_cool    = day_cool    * workDays;
                     month_heat    = day_heat    * workDays;
                     month_dry     = day_dry     * workDays;
@@ -285,8 +334,10 @@ namespace EE.Doklad.Services.VentCooling
                 }
                 else
                 {
-                    // EPW: hourlyData already contains all hours of the month filtered by schedule
-                    // → sum is already the monthly total (no multiplication)
+                    // EPW: real hours already summed directly — no multiplication.
+                    // WorkingDays = count of unique active dates; WorkingHours = count of active hours.
+                    workDays  = epwActiveDates!.Count;
+                    workHours = activeHourCount;
                     month_cool    = day_cool;
                     month_heat    = day_heat;
                     month_dry     = day_dry;
@@ -322,8 +373,8 @@ namespace EE.Doklad.Services.VentCooling
                     MonthNumber             = m,
                     MonthName               = _monthNames[m - 1],
                     WorkingDays             = workDays,
-                    WorkingHours            = sched.WorkingHours,
-                    HolidaysSubtracted      = sched.HolidaysSubtracted,
+                    WorkingHours            = workHours,
+                    HolidaysSubtracted      = isBgAvgMode ? sched.HolidaysSubtracted : 0,
                     E_cool_net_kWhm2        = month_cool    * inv,
                     E_heat_net_kWhm2        = month_heat    * inv,
                     E_dry_net_kWhm2         = month_dry     * inv,
@@ -341,7 +392,7 @@ namespace EE.Doklad.Services.VentCooling
                 totalDry     += month_dry;
                 totalContrib += month_contrib;
                 totalWorkDays  += workDays;
-                totalWorkHours += sched.WorkingHours;
+                totalWorkHours += workHours;
             }
 
             // ── Seasonal totals ───────────────────────────────────────────────────
@@ -434,6 +485,136 @@ namespace EE.Doklad.Services.VentCooling
             // ensure EI2 absolute field exists when second source absent
             if (input.EnergySource2 == null) output.FinalEnergyEI2_kWh = 0.0;
             output.TotalFinalEnergy_kWhm2 = area > 0.0 ? (need1 + need2) / area : 0.0;
+        }
+
+        // ── EPW-mode helpers ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Determines whether a single EPW hourly point is "active" by checking:
+        ///   1. Season dates: LocalTime in [SeasonStart, SeasonEnd]
+        ///   2. Day of week: Mon-Fri / Sat / Sun matches schedule
+        ///   3. Hour range: Hour in [StartHour, EndHour]
+        ///   4. Excluded dates (holidays/days-off)
+        /// </summary>
+        private static bool IsEpwHourActive(
+            ClimateHourPoint pt,
+            WeeklyScheduleConfig ventSchedule,
+            DateTime seasonStart,
+            DateTime seasonEnd,
+            HashSet<DateTime>? excludedDates)
+        {
+            if (pt.LocalTime == null) return false;
+            var dt = pt.LocalTime.Value;
+            var dateOnly = dt.Date;
+
+            // 1. Season: is this date within [SeasonStart, SeasonEnd]?
+            //    Compare by (Month, Day) only — ignore year differences.
+            int mmdd  = dt.Month * 100 + dt.Day;           // e.g. 615 for Jun 15
+            int ssStart = seasonStart.Month * 100 + seasonStart.Day;
+            int ssEnd   = seasonEnd.Month   * 100 + seasonEnd.Day;
+
+            if (ssStart <= ssEnd)
+            {
+                // Normal range (e.g. May..Sep)
+                if (mmdd < ssStart || mmdd > ssEnd) return false;
+            }
+            else
+            {
+                // Wrapped range (e.g. Oct..Mar) — unlikely for cooling, but safe
+                if (mmdd < ssStart && mmdd > ssEnd) return false;
+            }
+
+            // 2. Day of week (use EPW's real day-of-week, not normalized)
+            if (!ventSchedule.IsActiveDayOfWeek(dt.DayOfWeek))
+                return false;
+
+            // 3. Hour range
+            int h = pt.Hour;
+            if (h < ventSchedule.TimeRange.StartHour || h > ventSchedule.TimeRange.EndHour)
+                return false;
+
+            // 4. Excluded dates (holidays + days-off).
+            //    excludedDates are built with yearRef. Normalize EPW date to yearRef for lookup.
+            if (excludedDates != null && excludedDates.Count > 0)
+            {
+                int yearRef = seasonStart.Year;
+                DateTime dateForLookup;
+                try { dateForLookup = new DateTime(yearRef, dt.Month, dt.Day); }
+                catch { return false; }
+                if (excludedDates.Contains(dateForLookup))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Builds the set of dates to exclude from EPW integration for a given month.
+        /// Combines:
+        ///   a) OfficialHolidays that fall on active day-of-week types
+        ///   b) DaysOffPerMonth: the last N active workdays (Mon-Fri) of the month are excluded
+        ///      (deterministic rule: when no explicit holiday dates are given).
+        /// </summary>
+        private static HashSet<DateTime> BuildEpwExcludedDates(
+            int month,
+            int yearRef,
+            WeeklyScheduleConfig schedule,
+            int[] daysOffPerMonth,
+            IReadOnlyList<DateTime>? officialHolidays,
+            DateTime seasonStart,
+            DateTime seasonEnd)
+        {
+            var excluded = new HashSet<DateTime>();
+
+            // a) Official holidays in this month that are on active day-of-week types
+            if (officialHolidays != null)
+            {
+                foreach (var hol in officialHolidays)
+                {
+                    // Normalize to yearRef
+                    DateTime holDate;
+                    try { holDate = new DateTime(yearRef, hol.Month, hol.Day); }
+                    catch { continue; }
+
+                    if (holDate.Month != month) continue;
+                    if (holDate < seasonStart.Date || holDate > seasonEnd.Date) continue;
+                    if (schedule.IsActiveDayOfWeek(holDate.DayOfWeek))
+                        excluded.Add(holDate);
+                }
+            }
+
+            // b) DaysOffPerMonth: exclude the last N active workdays (Mon-Fri) of the month.
+            //    "When no explicit holiday date list is available, exclude the last N
+            //     active workdays from the month." — deterministic rule.
+            int daysOff = (daysOffPerMonth != null && daysOffPerMonth.Length >= month)
+                ? daysOffPerMonth[month - 1]
+                : 0;
+
+            if (daysOff > 0 && schedule.WorkdaysActive)
+            {
+                int daysInMonth = DateTime.DaysInMonth(yearRef, month);
+                int remaining = daysOff;
+
+                // Iterate backwards from last day of month
+                for (int d = daysInMonth; d >= 1 && remaining > 0; d--)
+                {
+                    var date = new DateTime(yearRef, month, d);
+                    // Only Mon-Fri
+                    if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                        continue;
+                    // Only within season
+                    if (date < seasonStart.Date || date > seasonEnd.Date)
+                        continue;
+                    // Already excluded (official holiday)?
+                    if (excluded.Contains(date))
+                        continue;
+
+                    excluded.Add(date);
+                    remaining--;
+                }
+            }
+
+            return excluded;
         }
     }
 }

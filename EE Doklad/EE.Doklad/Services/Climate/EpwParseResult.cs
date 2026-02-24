@@ -40,6 +40,11 @@ namespace EE.Doklad.Services.Climate
         public string? Country { get; set; }
 
         /// <summary>
+        /// COMMENTS 1 ред от EPW header (типични месеци и пр.). Само текст, НЕ влияе на логиката.
+        /// </summary>
+        public string? Comments1 { get; set; }
+
+        /// <summary>
         /// Географска ширина (degrees).
         /// </summary>
         public double? Latitude { get; set; }
@@ -60,7 +65,7 @@ namespace EE.Doklad.Services.Climate
         public double? Elevation { get; set; }
 
         /// <summary>
-        /// Фиксирана година използвана за DateTime (non-leap, напр. 2021).
+        /// Фиксирана година използвана за DateTime (референтна, напр. 2024).
         /// </summary>
         public int FixedYearUsed { get; set; }
 
