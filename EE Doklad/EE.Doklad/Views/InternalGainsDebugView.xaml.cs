@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,99 +8,74 @@ using EE.Doklad.Services;
 
 namespace EE.Doklad.Views
 {
-    /// <summary>
-    /// РЎРµРєС†РёСЏ 23 вЂ“ Р”РµР±СЉРі РІСЉС‚СЂРµС€РЅРё С‚РѕРїР»РёРЅРЅРё РїРµС‡Р°Р»Р±Рё (С„РѕСЂРјСѓР»Рё 3.30вЂ“3.33).
-    /// Р’СЃРёС‡РєРё РІС…РѕРґРЅРё РґР°РЅРЅРё РѕСЃРІРµРЅ "РњРµСЃРµС†" Рё "Р РµР¶РёРј" СЃРµ РІР·РёРјР°С‚ РѕС‚ ObjectDataSectionData (РЎРµРєС†РёСЏ 5).
-    /// </summary>
     public partial class InternalGainsDebugView : UserControl
     {
-        // в”Ђв”Ђ РџРѕР»РµС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+        private readonly Report? _report;
         private readonly InternalGainsDebugInput _input;
         private readonly ObjectDataSectionData? _objData;
-        private readonly InternalGainsDebugService _service;
-        private readonly ObservableCollection<InternalGainsSourceInput> _sources;
+
+        private static readonly (int sm, int sd, int em, int ed)[] HeatingSeason =
+        {
+            (10, 21, 4, 20),
+            (10, 21, 4, 25),
+            (10, 23, 4, 15),
+            (10, 16, 4, 23),
+            (10, 25, 4, 19),
+            (10, 24, 4,  6),
+            (10, 15, 4, 23),
+            (10, 28, 4,  6),
+            (10, 28, 4,  5),
+        };
 
         private static readonly string[] MonthNames =
         {
-            "01 – Януари", "02 – Февруари", "03 – Март",
-            "04 – Април",  "05 – Май",      "06 – Юни",
-            "07 – Юли",    "08 – Август",   "09 – Септември",
-            "10 – Октомври", "11 – Ноември", "12 – Декември"
+            "01 Яну", "02 Фев", "03 Мар",
+            "04 Апр", "05 Май", "06 Юни",
+            "07 Юли", "08 Авг", "09 Сеп",
+            "10 Окт", "11 Ное", "12 Дек"
         };
 
-        // РўР°Р±Р»РёС†Р°: РєР»РёРјР°С‚РёС‡РЅР° Р·РѕРЅР° в†’ (startMonth, startDay, endMonth, endDay)
-        private static readonly (int sm, int sd, int em, int ed)[] HeatingSeason =
-        {
-            (10, 21, 4, 20), // Р·РѕРЅР° 1 вЂ“ РЎРµРІРµСЂРЅРѕ Р§РµСЂРЅРѕРјРѕСЂРёРµ
-            (10, 21, 4, 25), // Р·РѕРЅР° 2
-            (10, 23, 4, 15), // Р·РѕРЅР° 3
-            (10, 16, 4, 23), // Р·РѕРЅР° 4
-            (10, 25, 4, 19), // Р·РѕРЅР° 5
-            (10, 24, 4,  6), // Р·РѕРЅР° 6
-            (10, 15, 4, 23), // Р·РѕРЅР° 7
-            (10, 28, 4,  6), // Р·РѕРЅР° 8
-            (10, 28, 4,  5), // Р·РѕРЅР° 9
-        };
-
-        // в”Ђв”Ђ РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
         public InternalGainsDebugView()
         {
             InitializeComponent();
-            _input   = new InternalGainsDebugInput { ZoneId = 1 };
-            _service = new InternalGainsDebugService();
-            _sources = new ObservableCollection<InternalGainsSourceInput>(_input.Sources);
+            _input = new InternalGainsDebugInput { ZoneId = 1 };
             Initialize();
         }
 
-        public InternalGainsDebugView(InternalGainsDebugInput input, ObjectDataSectionData? objectData = null)
+        public InternalGainsDebugView(InternalGainsDebugInput input,
+                                      ObjectDataSectionData? objectData = null,
+                                      Report? report = null)
         {
             InitializeComponent();
-            _input   = input ?? throw new ArgumentNullException(nameof(input));
+            _input   = input ?? new InternalGainsDebugInput { ZoneId = 1 };
             _objData = objectData;
-            _service = new InternalGainsDebugService();
-            _sources = new ObservableCollection<InternalGainsSourceInput>(_input.Sources);
+            _report  = report;
             Initialize();
         }
 
-        // в”Ђв”Ђ РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
         private void Initialize()
         {
-            // Enum ItemsSource Р·Р° DataGrid
-            ColCategory.ItemsSource = Enum.GetValues(typeof(InternalGainsCategory));
-            ColKind.ItemsSource     = Enum.GetValues(typeof(InternalGainsSourceKind));
-
-            // DataGrid РёР·С‚РѕС‡РЅРёС†Рё
-            DgSources.ItemsSource = _sources;
-
-            // РњРµСЃРµС† ComboBox
-            for (int i = 0; i < 12; i++)
-                CmbMonth.Items.Add(MonthNames[i]);
-            CmbMonth.SelectedIndex = _input.Month > 0 ? _input.Month - 1 : 0;
-
-            // РџРѕРїСЉР»РЅРё read-only РґР°РЅРЅРё РѕС‚ РЎРµРєС†РёСЏ 5
             PopulateFromObjectData();
-
-            // Р РµР¶РёРј ComboBox / read-only
-            SetupModeControl();
+            TxtProcessHeat.Text  = _input.ProcessHeat_W.ToString("F1");
+            TxtProcessHours.Text = _input.ProcessAnnualHours.ToString("F1");
         }
 
-        // в”Ђв”Ђ РџРѕРїСЉР»РІР°РЅРµ РѕС‚ ObjectDataSectionData в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
         private void PopulateFromObjectData()
         {
             if (_objData == null)
             {
                 TxtNoObjectData.Visibility = Visibility.Visible;
-                TxtAreaHeatRO.Text  = "–";
-                TxtAreaCoolRO.Text  = "–";
-                TxtHeatSeasonRO.Text = "–";
-                TxtCoolSeasonRO.Text = "–";
-                TxtHeatSchedRO.Text = "–";
-                TxtCoolSchedRO.Text = "–";
-                TxtActiveModesRO.Text = "–";
+                TxtAreaHeatRO.Text    = "--";
+                TxtAreaCoolRO.Text    = "--";
+                TxtHeatSeasonRO.Text  = "--";
+                TxtCoolSeasonRO.Text  = "--";
+                TxtHeatSchedRO.Text   = "--";
+                TxtCoolSchedRO.Text   = "--";
+                TxtActiveModesRO.Text = "--";
+                TxtAuse.Text          = "--";
                 return;
             }
 
-            // РђРєС‚РёРІРЅРё СЂРµР¶РёРјРё
             bool heatOn = _objData.HeatingSeasonEnabled;
             bool coolOn = _objData.CoolingSeasonEnabled;
             TxtActiveModesRO.Text = heatOn && coolOn ? "Отопление + Охлаждане"
@@ -109,22 +83,20 @@ namespace EE.Doklad.Views
                                   : coolOn           ? "Само охлаждане"
                                   : "Нито един";
 
-            // РџР»РѕС‰Рё
             TxtAreaHeatRO.Text = ParseAreaDisplay(_objData.HeatedArea);
             TxtAreaCoolRO.Text = ParseAreaDisplay(_objData.CooledArea);
+            TxtAuse.Text       = ParseAreaDisplay(_objData.HeatedArea);
 
-            // РћС‚РѕРїР»РёС‚РµР»РµРЅ СЃРµР·РѕРЅ РѕС‚ РєР»РёРјР°С‚РёС‡РЅР° Р·РѕРЅР°
             int zone = Math.Clamp(_objData.ClimateZone, 1, 9);
             var hs = HeatingSeason[zone - 1];
             TxtHeatSeasonRO.Text = heatOn
-                ? $"{hs.sd:D2}.{hs.sm:D2} – {hs.ed:D2}.{hs.em:D2}"
+                ? $"{hs.sd:D2}.{hs.sm:D2} - {hs.ed:D2}.{hs.em:D2}"
                 : "Неактивен";
 
-            // РћС…Р»Р°РґРёС‚РµР»РµРЅ СЃРµР·РѕРЅ
             if (coolOn && _objData.CoolingSeasonStartMonth.HasValue && _objData.CoolingSeasonEndMonth.HasValue)
             {
                 TxtCoolSeasonRO.Text =
-                    $"{_objData.CoolingSeasonStartDay:D2}.{_objData.CoolingSeasonStartMonth:D2} – " +
+                    $"{_objData.CoolingSeasonStartDay:D2}.{_objData.CoolingSeasonStartMonth:D2} - " +
                     $"{_objData.CoolingSeasonEndDay:D2}.{_objData.CoolingSeasonEndMonth:D2}";
             }
             else
@@ -132,17 +104,15 @@ namespace EE.Doklad.Views
                 TxtCoolSeasonRO.Text = coolOn ? "Дати не са въведени" : "Неактивен";
             }
 
-            // РћС‚РѕРїР»РёС‚РµР»РµРЅ РіСЂР°С„РёРє (С‡Р°СЃРѕРІРµ/РґРµРЅ)
             TxtHeatSchedRO.Text = heatOn
                 ? FormatSchedule(_objData.HeatingWorkdaysHours,
                                  _objData.HeatingSaturdayHours,
-                                 _objData.HeatingSundayHours, " h/ден")
-                : "–";
+                                 _objData.HeatingSundayHours)
+                : "--";
 
-            // РћС…Р»Р°РґРёС‚РµР»РµРЅ РіСЂР°С„РёРє вЂ” РѕС‚ CoolingSchedules (TimeSpan РЅР°С‡Р°Р»Рѕ/РєСЂР°Р№ в†’ GetHours())
             if (coolOn)
             {
-            var cs = _objData.CoolingSchedules?.CoolingSchedule;
+                var cs = _objData.CoolingSchedules?.CoolingSchedule;
                 if (cs != null)
                 {
                     double wdH  = cs.Workdays.GetHours();
@@ -151,7 +121,7 @@ namespace EE.Doklad.Views
                     TxtCoolSchedRO.Text = FormatSchedule(
                         wdH  > 0 ? wdH.ToString("F1")  : null,
                         satH > 0 ? satH.ToString("F1") : null,
-                        sunH > 0 ? sunH.ToString("F1") : null, " h/ден");
+                        sunH > 0 ? sunH.ToString("F1") : null);
                 }
                 else
                 {
@@ -160,209 +130,251 @@ namespace EE.Doklad.Views
             }
             else
             {
-                TxtCoolSchedRO.Text = "–";
+                TxtCoolSchedRO.Text = "--";
             }
         }
 
-        private static string ParseAreaDisplay(string? val)
-        {
-            if (string.IsNullOrWhiteSpace(val)) return "–";
-            return double.TryParse(val.Replace(",", "."),
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out double d)
-                ? $"{d:F1} m²" : val;
-        }
-
-        private static string FormatSchedule(string? wd, string? sat, string? sun, string suffix)
-        {
-            string F(string? v) => string.IsNullOrWhiteSpace(v) || v == "0" ? "0" : v!.Trim();
-            return $"{F(wd)} / {F(sat)} / {F(sun)}{suffix}";
-        }
-
-        // в”Ђв”Ђ Р РµР¶РёРј вЂ“ РµРґРёРЅРёС‡РµРЅ РёР»Рё ComboBox в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-        private void SetupModeControl()
-        {
-            bool heatOn = _objData?.HeatingSeasonEnabled ?? true;
-            bool coolOn = _objData?.CoolingSeasonEnabled ?? false;
-
-            if (heatOn && coolOn)
-            {
-                // Р РґРІР°С‚Р° СЃР° Р°РєС‚РёРІРЅРё в†’ ComboBox
-                CmbMode.Items.Add("Отопление (Heating)");
-                CmbMode.Items.Add("Охлаждане (Cooling)");
-                CmbMode.SelectedIndex = _input.Mode == EpbMode.Cooling ? 1 : 0;
-                CmbMode.Visibility    = Visibility.Visible;
-                TxtModeSingle.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                // РЎР°РјРѕ РµРґРёРЅ СЂРµР¶РёРј вЂ” РїРѕРєР°Р·РІР°РјРµ read-only С‚РµРєСЃС‚
-                TxtModeSingle.Text = heatOn ? "Отопление (автоматично)" : "Охлаждане (автоматично)";
-                CmbMode.Visibility    = Visibility.Collapsed;
-                TxtModeSingle.Visibility = Visibility.Visible;
-                _input.Mode = heatOn ? EpbMode.Heating : EpbMode.Cooling;
-            }
-        }
-
-        // в”Ђв”Ђ Р”РѕР±Р°РІСЏРЅРµ / РёР·С‚СЂРёРІР°РЅРµ РЅР° СЂРµРґ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-        private void BtnAddSource_Click(object sender, RoutedEventArgs e)
-        {
-            int idx = _sources.Count + 1;
-            _sources.Add(new InternalGainsSourceInput
-            {
-                SourceId    = $"src-{idx}",
-                Description = $"Нов източник {idx}",
-                Category    = InternalGainsCategory.Appliances,
-                Kind        = InternalGainsSourceKind.PowerWatts,
-                Power_W     = 100
-            });
-        }
-
-        private void BtnDeleteSource_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is InternalGainsSourceInput src)
-                _sources.Remove(src);
-        }
-
-        // в”Ђв”Ђ РР·С‡РёСЃР»СЏРІР°РЅРµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
         private void BtnCalculate_Click(object sender, RoutedEventArgs e)
         {
             PanelErrors.Visibility    = Visibility.Collapsed;
             PanelResults.Visibility   = Visibility.Collapsed;
             PanelFallbacks.Visibility = Visibility.Collapsed;
 
-            SyncInputFromObjectData();
+            _input.ProcessHeat_W      = ParseDoubleUI(TxtProcessHeat.Text);
+            _input.ProcessAnnualHours = ParseDoubleUI(TxtProcessHours.Text);
 
-            _input.Month   = CmbMonth.SelectedIndex + 1;
-            _input.Sources = _sources.ToList();
+            var inp = BuildAggregatorInput();
 
-            if (CmbMode.Visibility == Visibility.Visible)
-                _input.Mode = CmbMode.SelectedIndex == 1 ? EpbMode.Cooling : EpbMode.Heating;
-
-            var result = _service.Calculate(_input);
-
-            if (!result.InputValid)
+            if (inp.A_use_m2 <= 0)
             {
-                ShowErrors(result.ValidationErrors, isError: true);
+                ShowWarning("A_use (отопляема площ) = 0. Моля попълнете Секция 5.");
                 return;
             }
-            if (result.ValidationWarnings.Count > 0)
-                ShowErrors(result.ValidationWarnings, isError: false);
 
-            PopulateResults(result);
+            var result = InternalGainsAggregator.Compute(inp);
+            PopulateResults(result, inp);
             PanelResults.Visibility = Visibility.Visible;
         }
 
-        // в”Ђв”Ђ РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ _input РѕС‚ ObjectData в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-        private void SyncInputFromObjectData()
+        private InternalGainsAggregatorInput BuildAggregatorInput()
         {
-            if (_objData == null) return;
+            var inp = new InternalGainsAggregatorInput();
 
-            // РџР»РѕС‰Рё
-            _input.AreaHeat_m2 = ParseDouble(_objData.HeatedArea);
-            _input.AreaCool_m2 = ParseDouble(_objData.CooledArea);
+            inp.A_use_m2 = _objData != null ? ParseDouble(_objData.HeatedArea) : 0;
 
-            // РћС‚РѕРїР»РёС‚РµР»РµРЅ СЃРµР·РѕРЅ РѕС‚ РєР»РёРјР°С‚РёС‡РЅР° Р·РѕРЅР°
-            int zone = Math.Clamp(_objData.ClimateZone, 1, 9);
-            var hs = HeatingSeason[zone - 1];
-            _input.HeatingSeasonStartMonth = hs.sm;
-            _input.HeatingSeasonStartDay   = hs.sd;
-            _input.HeatingSeasonEndMonth   = hs.em;
-            _input.HeatingSeasonEndDay     = hs.ed;
-
-            // РћС…Р»Р°РґРёС‚РµР»РµРЅ СЃРµР·РѕРЅ
-            _input.CoolingSeasonStartMonth = _objData.CoolingSeasonStartMonth;
-            _input.CoolingSeasonStartDay   = _objData.CoolingSeasonStartDay;
-            _input.CoolingSeasonEndMonth   = _objData.CoolingSeasonEndMonth;
-            _input.CoolingSeasonEndDay     = _objData.CoolingSeasonEndDay;
-
-            // РћС‚РѕРїР»РёС‚РµР»РµРЅ РіСЂР°С„РёРє (С‡Р°СЃРѕРІРµ/РґРµРЅ, СЃС‚СЂРёРЅРі)
-            _input.HeatingWorkdaysHours  = ParseDoubleNull(_objData.HeatingWorkdaysHours);
-            _input.HeatingSaturdayHours  = ParseDoubleNull(_objData.HeatingSaturdayHours);
-            _input.HeatingSundayHours    = ParseDoubleNull(_objData.HeatingSundayHours);
-
-            // РћС…Р»Р°РґРёС‚РµР»РµРЅ РіСЂР°С„РёРє в†’ GetHours() РѕС‚ TimeSpan РЅР°С‡Р°Р»Рѕ/РєСЂР°Р№
-            var cs = _objData.CoolingSchedules?.CoolingSchedule;
-            if (cs != null)
+            if (_objData != null)
             {
-                double wdH  = cs.Workdays.GetHours();
-                double satH = cs.Saturday.GetHours();
-                double sunH = cs.Sunday.GetHours();
-                _input.CoolingWorkdaysHours  = wdH  > 0 ? wdH  : (double?)null;
-                _input.CoolingSaturdayHours  = satH > 0 ? satH : (double?)null;
-                _input.CoolingSundayHours    = sunH > 0 ? sunH : (double?)null;
-            }
-            else
-            {
-                // РЎС‚Р°СЂ fallback РєСЉРј string РїРѕР»РµС‚Р°
-                _input.CoolingWorkdaysHours  = ParseDoubleNull(_objData.CoolingWorkdaysHours);
-                _input.CoolingSaturdayHours  = ParseDoubleNull(_objData.CoolingSaturdayHours);
-                _input.CoolingSundayHours    = ParseDoubleNull(_objData.CoolingSundayHours);
+                int zone = Math.Clamp(_objData.ClimateZone, 1, 9);
+                var hs = HeatingSeason[zone - 1];
+                inp.HeatingStartMonth  = hs.sm;
+                inp.HeatingStartDay    = hs.sd;
+                inp.HeatingEndMonth    = hs.em;
+                inp.HeatingEndDay      = hs.ed;
+                inp.HeatingHoursPerDay = 24.0;
+
+                if (_objData.CoolingSeasonEnabled &&
+                    _objData.CoolingSeasonStartMonth.HasValue &&
+                    _objData.CoolingSeasonEndMonth.HasValue)
+                {
+                    inp.CoolingStartMonth  = _objData.CoolingSeasonStartMonth;
+                    inp.CoolingStartDay    = _objData.CoolingSeasonStartDay ?? 1;
+                    inp.CoolingEndMonth    = _objData.CoolingSeasonEndMonth;
+                    inp.CoolingEndDay      = _objData.CoolingSeasonEndDay
+                        ?? DateTime.DaysInMonth(inp.YearRef, _objData.CoolingSeasonEndMonth.Value);
+                    inp.CoolingHoursPerDay = 24.0;
+                }
             }
 
-            // DaysOff РѕС‚ РЎРµРєС†РёСЏ 5
-            _input.DaysOff = new[]
+            inp.NumberOfOccupants = ParseInt(_objData?.NumberOfOccupants);
+            var (phiH, phiC) = GetSensibleHeatValues();
+            inp.OccupantsSensibleHeat_H_W = phiH;
+            inp.OccupantsSensibleHeat_C_W = phiC;
+
+            var appData = GetSection(SectionType.AppliancesAffecting)?.AppliancesAffectingSectionData;
+            if (appData != null)
             {
-                ParseInt(_objData.DaysOffJanuary),
-                ParseInt(_objData.DaysOffFebruary),
-                ParseInt(_objData.DaysOffMarch),
-                ParseInt(_objData.DaysOffApril),
-                ParseInt(_objData.DaysOffMay),
-                ParseInt(_objData.DaysOffJune),
-                ParseInt(_objData.DaysOffJuly),
-                ParseInt(_objData.DaysOffAugust),
-                ParseInt(_objData.DaysOffSeptember),
-                ParseInt(_objData.DaysOffOctober),
-                ParseInt(_objData.DaysOffNovember),
-                ParseInt(_objData.DaysOffDecember),
-            };
+                inp.Appliances_TotalPower_W          = appData.SimultaneousPower_W;
+                inp.Appliances_TotalAnnualEnergy_kWh = appData.TotalAnnualEnergy_kWh;
+                double appPw = appData.SimultaneousPower_W;
+                inp.Appliances_AnnualOperatingHours  = appPw > 1e-9 && appData.TotalAnnualEnergy_kWh > 1e-9
+                    ? appData.TotalAnnualEnergy_kWh / (appPw / 1000.0)
+                    : 0;
+            }
+
+            var lightData = GetSection(SectionType.Lighting)?.LightingSectionData;
+            if (lightData != null)
+            {
+                inp.Lighting_TotalPower_W          = lightData.SimultaneousPower_W;
+                inp.Lighting_TotalAnnualEnergy_kWh = lightData.TotalAnnualEnergy_kWh;
+                double lightPw = lightData.SimultaneousPower_W;
+                inp.Lighting_AnnualOperatingHours  = lightPw > 1e-9 && lightData.TotalAnnualEnergy_kWh > 1e-9
+                    ? lightData.TotalAnnualEnergy_kWh / (lightPw / 1000.0)
+                    : 0;
+            }
+
+            var hwData = GetSection(SectionType.HotWater)?.HotWaterSectionData;
+            if (hwData != null)
+                inp.WaterSystem_RecoverableHeat_kWh_Annual = hwData.EffectiveRecoverableHeat_kWh;
+
+            var pfData = GetSection(SectionType.PumpsAndFans)?.PumpsAndFansSectionData;
+            if (pfData != null)
+            {
+                inp.HVAC_HeatingTotalPower_W          = SumPower(pfData.HeatingRows);
+                inp.HVAC_HeatingAnnualHours           = pfData.HeatingAnnualHours;
+                inp.HVAC_HeatingAnnualConsumption_kWh = pfData.HeatingTotalAnnualConsumption;
+
+                inp.HVAC_CoolingTotalPower_W          = SumPower(pfData.CoolingRows);
+                inp.HVAC_CoolingAnnualHours           = pfData.CoolingAnnualHours;
+                inp.HVAC_CoolingAnnualConsumption_kWh = pfData.CoolingTotalAnnualConsumption;
+            }
+
+            inp.ProcessHeat_W      = _input.ProcessHeat_W;
+            inp.ProcessAnnualHours = _input.ProcessAnnualHours;
+
+            return inp;
         }
 
-        // в”Ђв”Ђ РџРѕРїСЉР»РІР°РЅРµ РЅР° СЂРµР·СѓР»С‚Р°С‚РёС‚Рµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-        private void PopulateResults(InternalGainsDebugResult r)
+        private void PopulateResults(InternalGainsAggregatorResult result, InternalGainsAggregatorInput inp)
         {
-            var ti = r.TimeInfo;
+            int zone = _objData != null ? Math.Clamp(_objData.ClimateZone, 1, 9) : 1;
+            var hs = HeatingSeason[zone - 1];
+            TxtHeatSeasonInfo.Text = $"Период: {hs.sd:D2}.{hs.sm:D2} - {hs.ed:D2}.{hs.em:D2}   A_use = {result.A_use_m2:F1} m2";
+            TxtCoolSeasonInfo.Text = inp.CoolingStartMonth.HasValue
+                ? $"Период: {inp.CoolingStartDay:D2}.{inp.CoolingStartMonth:D2} - {inp.CoolingEndDay:D2}.{inp.CoolingEndMonth:D2}   A_use = {result.A_use_m2:F1} m2"
+                : "Охладителен сезон не е зададен - таблицата е нула.";
 
-            TxtIsPartial.Text       = ti.IsPartialMonth ? "Да" : "Не";
-            TxtDaysOffApplied.Text  = ti.DaysOffApplied.ToString();
-            TxtActiveDays.Text      = $"{ti.ActiveWeekdays:F1} / {ti.ActiveSaturdays:F1} / {ti.ActiveSundays:F1}";
-            TxtTotalActiveDays.Text = ti.TotalActiveDays.ToString("F2");
-            TxtHoursPerDay.Text     = $"{ti.WorkdaysHoursPerDay:F1} / {ti.SaturdayHoursPerDay:F1} / {ti.SundayHoursPerDay:F1}";
-            TxtFallbackHours.Text   = ti.HoursFallbackUsed ? (ti.HoursFallbackReason ?? "Fallback") : "–";
-            TxtTotalHours.Text      = $"{ti.TotalActiveHours_t_m:F4} h";
+            var heatRows = result.HeatingTable
+                .Select((r, i) => new MonthlyGainsRowDisplay(r, MonthNames[i]))
+                .ToList();
+            DgHeating.ItemsSource = heatRows;
 
-            DgResults.ItemsSource      = r.SourceRows;
-            DgCategorySums.ItemsSource = r.CategorySums;
+            double hTotal    = result.HeatingTable.Sum(r => r.Total);
+            double hSpecific = result.A_use_m2 > 1e-9 ? hTotal / result.A_use_m2 : 0;
+            TxtHeatTotal.Text      = $"{hTotal:F2} kWh";
+            TxtHeatTotalPerM2.Text = $"{hSpecific:F4} kWh/m2";
 
-            TxtQDir.Text     = $"{r.Q_HC_int_dir_z_m_kWh:F4} kWh";
-            TxtQDirSpec.Text = $"{r.Q_HC_int_dir_z_m_specific_kWhM2:F6} kWh/m²";
-            TxtQUncond.Text  = $"{r.Q_HC_int_uncond_contribution_kWh:F4} kWh";
-            TxtQZtc.Text     = $"{r.Q_HC_int_ztc_m_kWh:F4} kWh";
-            TxtAreaUsed.Text = $"{r.AreaUsed_m2:F2} m²";
+            var coolRows = result.CoolingTable
+                .Select((r, i) => new MonthlyGainsRowDisplay(r, MonthNames[i]))
+                .ToList();
+            DgCooling.ItemsSource = coolRows;
 
-            TxtTrace333.Text = r.Formula333Summary;
-            TxtTrace332.Text = r.Formula332Trace;
-            TxtTrace330.Text = r.Formula330Trace;
+            double cTotal    = result.CoolingTable.Sum(r => r.Total);
+            double cSpecific = result.A_use_m2 > 1e-9 ? cTotal / result.A_use_m2 : 0;
+            TxtCoolTotal.Text      = $"{cTotal:F2} kWh";
+            TxtCoolTotalPerM2.Text = $"{cSpecific:F4} kWh/m2";
 
-            if (r.FallbacksUsed.Count > 0)
+            var notes = BuildNotes(inp);
+            if (notes.Count > 0)
             {
-                TxtFallbacks.Text         = string.Join("\n", r.FallbacksUsed);
+                TxtFallbacks.Text = string.Join("\n", notes.Select((n, i) => $"  {i + 1}. {n}"));
                 PanelFallbacks.Visibility = Visibility.Visible;
             }
         }
 
-        // в”Ђв”Ђ Р“СЂРµС€РєРё / РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-        private void ShowErrors(IEnumerable<string> msgs, bool isError)
+        private (double phiH, double phiC) GetSensibleHeatValues()
         {
-            TxtErrorsTitle.Text = isError ? "✖ Грешки при валидация:" : "⚠ Предупреждения:";
-            TxtErrors.Text = string.Join("\n", msgs.Select((m, i) => $"  {i + 1}. {m}"));
-            PanelErrors.Background = isError
-                ? System.Windows.Media.Brushes.MistyRose
-                : System.Windows.Media.Brushes.LightYellow;
+            double phiH = 70.0;
+
+            if (_report != null)
+            {
+                var heatSection = GetSection(SectionType.Heating);
+                if (heatSection?.HeatingSectionData != null)
+                {
+                    phiH = GetSensibleHeatFromActivity(
+                        heatSection.HeatingSectionData.SelectedActivityLevel,
+                        isHeating: true);
+                }
+            }
+
+            double phiC = Math.Max(phiH * 0.85, 55.0);
+            return (phiH, phiC);
+        }
+
+        private static double GetSensibleHeatFromActivity(ActivityLevel level, bool isHeating)
+        {
+            return level switch
+            {
+                ActivityLevel.Cinema               => isHeating ? 75  : 60,
+                ActivityLevel.Office               => isHeating ? 75  : 65,
+                ActivityLevel.HotelReceptionKasier => isHeating ? 80  : 70,
+                ActivityLevel.StandingLightWork    => isHeating ? 90  : 75,
+                ActivityLevel.WalkingSeated        => isHeating ? 100 : 85,
+                ActivityLevel.ModerateWork         => isHeating ? 110 : 95,
+                ActivityLevel.LightWorkSeated      => isHeating ? 105 : 90,
+                ActivityLevel.Dancing              => isHeating ? 140 : 120,
+                ActivityLevel.FastWalking          => isHeating ? 165 : 150,
+                ActivityLevel.HeavyWork            => isHeating ? 210 : 185,
+                _                                  => 70
+            };
+        }
+
+        private Section? GetSection(SectionType type)
+            => _report?.Sections?.FirstOrDefault(s => s.Type == type);
+
+        private static double SumPower(System.Collections.IEnumerable rows)
+        {
+            double total = 0;
+            if (rows == null) return total;
+            foreach (var r in rows)
+            {
+                if (r == null) continue;
+                double pw  = GetDoubleProperty(r, "NominalPower");
+                double qty = GetDoubleProperty(r, "Quantity");
+                if (qty < 1e-9) qty = 1.0;
+                total += pw * qty;
+            }
+            return total;
+        }
+
+        private static double GetDoubleProperty(object obj, string propName)
+        {
+            var prop = obj.GetType().GetProperty(propName);
+            if (prop == null) return 0;
+            var raw = prop.GetValue(obj)?.ToString()?.Replace(",", ".");
+            return double.TryParse(raw,
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out double v) ? v : 0;
+        }
+
+        private static List<string> BuildNotes(InternalGainsAggregatorInput inp)
+        {
+            var notes = new List<string>();
+            if (inp.OccupantsSensibleHeat_H_W <= 0)
+                notes.Add("Phi_sens,H = 0 - обитателите не допринасят. Проверете Секция Отопление.");
+            if (inp.Appliances_TotalPower_W <= 0 && inp.Appliances_TotalAnnualEnergy_kWh <= 0)
+                notes.Add("Уреди: нулева мощност/енергия - добавете данни в Секция 18.");
+            if (inp.Lighting_TotalPower_W <= 0 && inp.Lighting_TotalAnnualEnergy_kWh <= 0)
+                notes.Add("Осветление: нулева мощност/енергия - добавете данни в Секция 17.");
+            if (inp.HVAC_HeatingAnnualConsumption_kWh <= 0 && inp.HVAC_HeatingTotalPower_W <= 0)
+                notes.Add("HVAC отопление: няма данни в Секция 15 или Q_HVAC_H = 0.");
+            if (inp.WaterSystem_RecoverableHeat_kWh_Annual <= 0)
+                notes.Add("WA: регенерируеми загуби = 0 - попълнете полето в Секция 16 ако е приложимо.");
+            return notes;
+        }
+
+        private void ShowWarning(string msg)
+        {
+            TxtErrorsTitle.Text    = "Предупреждение:";
+            TxtErrors.Text         = msg;
+            PanelErrors.Background = System.Windows.Media.Brushes.LightYellow;
             PanelErrors.Visibility = Visibility.Visible;
         }
 
-        // в”Ђв”Ђ РџРѕРјРѕС‰РЅРё РјРµС‚РѕРґРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+        private static string ParseAreaDisplay(string? val)
+        {
+            if (string.IsNullOrWhiteSpace(val)) return "--";
+            return double.TryParse(val.Replace(",", "."),
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out double d)
+                ? $"{d:F1} m2" : val;
+        }
+
+        private static string FormatSchedule(string? wd, string? sat, string? sun)
+        {
+            string F(string? v) => string.IsNullOrWhiteSpace(v) || v.Trim() == "0" ? "0" : v!.Trim();
+            return $"{F(wd)} / {F(sat)} / {F(sun)} h/den";
+        }
+
         private static double ParseDouble(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return 0;
@@ -371,16 +383,35 @@ namespace EE.Doklad.Views
                 System.Globalization.CultureInfo.InvariantCulture, out double v) ? v : 0;
         }
 
-        private static double? ParseDoubleNull(string? text)
+        private static double ParseDoubleUI(string? text)
         {
-            if (string.IsNullOrWhiteSpace(text)) return null;
-            return double.TryParse(text.Replace(",", "."),
+            var t = text?.Trim().Replace(",", ".") ?? "0";
+            return double.TryParse(t,
                 System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out double v) ? v : null;
+                System.Globalization.CultureInfo.InvariantCulture, out double v) ? v : 0;
         }
 
         private static int ParseInt(string? text)
             => int.TryParse(text?.Trim(), out int v) ? v : 0;
     }
-}
 
+    internal sealed class MonthlyGainsRowDisplay
+    {
+        private readonly MonthlyGainsRow _row;
+        public string MonthName  { get; }
+        public double Oc         => _row.Oc;
+        public double A          => _row.A;
+        public double L          => _row.L;
+        public double WA         => _row.WA;
+        public double HVAC       => _row.HVAC;
+        public double Proc       => _row.Proc;
+        public double Total      => _row.Total;
+        public double TotalPerM2 => _row.TotalPerM2;
+
+        public MonthlyGainsRowDisplay(MonthlyGainsRow row, string monthName)
+        {
+            _row      = row;
+            MonthName = monthName;
+        }
+    }
+}

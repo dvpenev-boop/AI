@@ -54,6 +54,57 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double _heatSupplyEfficiency = 100.0;
 
+        // ── Регенерируеми загуби към зоната (Секция 23 → Q_spec;int;WA) ─────
+
+        /// <summary>
+        /// Годишни регенерируеми загуби от ВиК системата към отопляваната зона [kWh/год].
+        /// Директна стойност (ако е зададена).
+        /// Използва се в Секция 23 като компонент Q_spec;int;WA.
+        /// </summary>
+        [ObservableProperty]
+        private double _recoverableHeatToZone_kWh = 0.0;
+
+        /// <summary>
+        /// Дял на регенерируемите загуби [%] от общите системни загуби.
+        /// Алтернативен начин за задаване. Ако RecoverableHeatToZone_kWh == 0
+        /// и RecoverableFraction_pct > 0, стойността се изчислява като:
+        ///   RecoverableHeatToZone_kWh = TotalSystemLosses_kWh * RecoverableFraction_pct / 100
+        /// </summary>
+        [ObservableProperty]
+        private double _recoverableFraction_pct = 0.0;
+
+        /// <summary>
+        /// Ефективна стойност на регенерируемите загуби [kWh/год] –
+        /// използва директната стойност или изчисляването от %.
+        /// </summary>
+        public double EffectiveRecoverableHeat_kWh
+        {
+            get
+            {
+                if (RecoverableHeatToZone_kWh > 0.0)
+                    return RecoverableHeatToZone_kWh;
+
+                if (RecoverableFraction_pct > 0.0)
+                {
+                    // Приближение на системните загуби от Energy_kWh_per_y
+                    double systemLosses = Energy_kWh_per_y * (1.0 - HeatSupplyEfficiency / 100.0);
+                    return systemLosses * RecoverableFraction_pct / 100.0;
+                }
+
+                return 0.0;
+            }
+        }
+
+        partial void OnRecoverableHeatToZone_kWhChanged(double value)
+        {
+            OnPropertyChanged(nameof(EffectiveRecoverableHeat_kWh));
+        }
+
+        partial void OnRecoverableFraction_pctChanged(double value)
+        {
+            OnPropertyChanged(nameof(EffectiveRecoverableHeat_kWh));
+        }
+
         // ========== READ-ONLY FIELDS (от Section 5) ==========
 
         private int _numberOfPeople;

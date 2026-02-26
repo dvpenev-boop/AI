@@ -60,6 +60,12 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Row 12–14: WA за Секция 23 -->
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="350"/>
@@ -212,6 +218,55 @@
                     </Border>
                     <Border Grid.Row="11" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,0" Background="#C8E6C9">
                         <TextBlock Text="kWh/y" Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold"/>
+                    </Border>
+
+                    <!-- ══ Секция 23 – Регенерируеми загуби към зоната (WA) ══ -->
+
+                    <!-- Row 12: Регенерируеми загуби – директна стойност (editable) -->
+                    <Border Grid.Row="12" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,1,1,1" Background="#FFF3E0">
+                        <StackPanel Margin="10,4">
+                            <TextBlock Text="Регенерируеми загуби към зоната [kWh/год]"
+                                       FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E65100"/>
+                            <TextBlock Text="Използва се в Секция 23 като Q_spec;int;WA (остава 0 ако не е попълнено)"
+                                       FontSize="10" Foreground="#BF360C" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="12" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,1,1,1" Background="#FFF3E0">
+                        <TextBox Text="{Binding RecoverableHeatToZone_kWh, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
+                                 Style="{StaticResource EditableTextBoxStyle}" Background="#FFF8F0"/>
+                    </Border>
+                    <Border Grid.Row="12" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,1,0,1" Background="#FFF3E0">
+                        <TextBlock Text="kWh/год" Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#E65100"/>
+                    </Border>
+
+                    <!-- Row 13: Дял на регенерируемите загуби (editable) -->
+                    <Border Grid.Row="13" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FFF3E0">
+                        <StackPanel Margin="10,4">
+                            <TextBlock Text="Дял на регенерируемите загуби [%]"
+                                       FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E65100"/>
+                            <TextBlock Text="Алтернативен начин – % от системните загуби (активен само ако горното поле е 0)"
+                                       FontSize="10" Foreground="#BF360C" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="13" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FFF3E0">
+                        <TextBox Text="{Binding RecoverableFraction_pct, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
+                                 Style="{StaticResource EditableTextBoxStyle}" Background="#FFF8F0"/>
+                    </Border>
+                    <Border Grid.Row="13" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Background="#FFF3E0">
+                        <TextBlock Text="%" Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#E65100"/>
+                    </Border>
+
+                    <!-- Row 14: Ефективни регенерируеми загуби (computed, read-only) -->
+                    <Border Grid.Row="14" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FCE4EC">
+                        <TextBlock Text="Ефективни регенерируеми загуби (→ Секция 23)"
+                                   Padding="10" VerticalAlignment="Center" FontWeight="Bold" Foreground="#880E4F"/>
+                    </Border>
+                    <Border Grid.Row="14" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FCE4EC">
+                        <TextBox Text="{Binding EffectiveRecoverableHeat_kWh, Mode=OneWay, StringFormat=0.00}"
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" Background="#FCE4EC" FontWeight="Bold" Foreground="#880E4F"/>
+                    </Border>
+                    <Border Grid.Row="14" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Background="#FCE4EC">
+                        <TextBlock Text="kWh/год" Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="#880E4F"/>
                     </Border>
                 </Grid>
             </Border>

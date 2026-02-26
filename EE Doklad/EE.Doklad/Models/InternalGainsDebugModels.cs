@@ -108,7 +108,7 @@ namespace EE.Doklad.Models
         public int? CoolingSeasonEndMonth   { get; set; }
         public int? CoolingSeasonEndDay     { get; set; }
 
-        // ── DaysOff от Секция 5 (масив 12 елемента) ──────────────────────────
+        // ── DaysOff от Секция 5 (масив 12 елемента) ──────────────────────
         /// <summary>Дни почивни по месеци, индекс 0 = януари.</summary>
         public int[] DaysOff { get; set; } = new int[12];
 
@@ -117,6 +117,21 @@ namespace EE.Doklad.Models
 
         // ── Вътрешни топлинни източници ───────────────────────────────────────
         public List<InternalGainsSourceInput> Sources { get; set; } = new();
+
+        // ── Процесна топлина (Секция 23 входове) ──────────────────────────────
+
+        /// <summary>
+        /// Процесна мощност [W].
+        /// Положителна стойност = топлинен процес (загрева).
+        /// Отрицателна стойност = охладителен процес (охлажда).
+        /// 0 → компонентът не участва.
+        /// </summary>
+        public double ProcessHeat_W { get; set; } = 0.0;
+
+        /// <summary>
+        /// Годишни работни часове на процесното оборудване [h/год].
+        /// </summary>
+        public double ProcessAnnualHours { get; set; } = 0.0;
     }
 
     /// <summary>

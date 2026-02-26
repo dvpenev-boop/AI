@@ -1,10 +1,10 @@
-<UserControl x:Class="EE.Doklad.Views.InternalGainsDebugView"
+﻿<UserControl x:Class="EE.Doklad.Views.InternalGainsDebugView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="900" d:DesignWidth="1100">
+             d:DesignHeight="1000" d:DesignWidth="1200">
     <UserControl.Resources>
         <Style x:Key="SectionHeader" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
@@ -17,12 +17,6 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="#555"/>
         </Style>
-        <Style x:Key="ValueText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="#222"/>
-        </Style>
         <Style x:Key="ReadOnlyValue" TargetType="TextBox">
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="Background" Value="#F3F4F6"/>
@@ -32,6 +26,14 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="#374151"/>
+        </Style>
+        <Style x:Key="EditableValue" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2563EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5,3"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         <Style x:Key="CardBorder" TargetType="Border">
             <Setter Property="Background" Value="#F9FAFB"/>
@@ -62,48 +64,29 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="DangerBtn" TargetType="Button">
-            <Setter Property="Background" Value="#DC2626"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Padding" Value="7,4"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
     </UserControl.Resources>
-
     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
         <StackPanel Margin="24,16,24,32">
-
-            <!-- Заглавие -->
-            <TextBlock Text="23. Дебъг – Вътрешни топлинни печалби"
+            <TextBlock Text="23. Vatreshni toplinni pechalbi - avtomatichno izchislenie"
                        FontSize="21" FontWeight="Bold" Foreground="#1a1a2e"/>
-            <TextBlock Text="Формули 3.30 – 3.33  •  EN ISO 52016-1"
+            <TextBlock Text="Formulи 3.32 i 3.33  |  EN ISO 52016-1  |  Otoплenie + Ohlazdane po meseci"
                        FontSize="11" Foreground="#6B7280" Margin="0,2,0,12"/>
             <Separator/>
-
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
-            <!-- ДАННИ ОТ СЕКЦИЯ 5 (read-only)             -->
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
             <TextBlock Style="{StaticResource SectionHeader}" Text="Данни от Секция 5 (само за четене)"/>
-
             <Border Style="{StaticResource InfoCard}">
                 <TextBlock x:Name="TxtNoObjectData"
-                           Text="⚠  Секция 5 не е намерена или не е попълнена. Моля, попълнете 'Данни за обекта' първо."
+                           Text="Секция 5 не е намерена или не е попълнена."
                            Foreground="#92400E" FontSize="12" TextWrapping="Wrap"
                            Visibility="Collapsed"/>
             </Border>
-
             <Border Style="{StaticResource CardBorder}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="190"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition Width="160"/>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="190"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition Width="160"/>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="190"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -115,281 +98,144 @@
                         <RowDefinition Height="6"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
-                    <!-- Row 0: Режими -->
                     <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelText}" Text="Активни режими:"/>
-                    <TextBox  Grid.Row="0" Grid.Column="1" x:Name="TxtActiveModesRO" Style="{StaticResource ReadOnlyValue}" Width="150"/>
-
-                    <!-- Row 2: Площи -->
-                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelText}" Text="Отопляема площ A [m²]:"/>
-                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="TxtAreaHeatRO"    Style="{StaticResource ReadOnlyValue}" Width="120"/>
-
-                    <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource LabelText}" Text="Охлаждаема площ A [m²]:"/>
-                    <TextBox   Grid.Row="2" Grid.Column="4" x:Name="TxtAreaCoolRO"    Style="{StaticResource ReadOnlyValue}" Width="120"/>
-
-                    <!-- Row 4: Сезони -->
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="TxtActiveModesRO" Style="{StaticResource ReadOnlyValue}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelText}" Text="Отопляема площ A_use [m2]:"/>
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="TxtAreaHeatRO" Style="{StaticResource ReadOnlyValue}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource LabelText}" Text="Охлаждаема площ A_use [m2]:"/>
+                    <TextBox   Grid.Row="2" Grid.Column="4" x:Name="TxtAreaCoolRO" Style="{StaticResource ReadOnlyValue}"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LabelText}" Text="Отоплителен сезон:"/>
-                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="TxtHeatSeasonRO"  Style="{StaticResource ReadOnlyValue}" Width="200" Grid.ColumnSpan="2"/>
-
+                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="TxtHeatSeasonRO" Style="{StaticResource ReadOnlyValue}" Grid.ColumnSpan="2"/>
                     <TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource LabelText}" Text="Охладителен сезон:"/>
-                    <TextBox   Grid.Row="4" Grid.Column="4" x:Name="TxtCoolSeasonRO"  Style="{StaticResource ReadOnlyValue}" Width="200" Grid.ColumnSpan="2"/>
-
-                    <!-- Row 6: График часове -->
-                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelText}" Text="График отопление (Пн-Пт / Сб / Нд):"/>
-                    <TextBox   Grid.Row="6" Grid.Column="1" x:Name="TxtHeatSchedRO"   Style="{StaticResource ReadOnlyValue}" Width="200" Grid.ColumnSpan="2"/>
-
-                    <TextBlock Grid.Row="6" Grid.Column="3" Style="{StaticResource LabelText}" Text="График охлаждане (Пн-Пт / Сб / Нд):"/>
-                    <TextBox   Grid.Row="6" Grid.Column="4" x:Name="TxtCoolSchedRO"   Style="{StaticResource ReadOnlyValue}" Width="200" Grid.ColumnSpan="2"/>
+                    <TextBox   Grid.Row="4" Grid.Column="4" x:Name="TxtCoolSeasonRO" Style="{StaticResource ReadOnlyValue}" Grid.ColumnSpan="2"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelText}" Text="График отопл. (Пн/Сб/Нд h):"/>
+                    <TextBox   Grid.Row="6" Grid.Column="1" x:Name="TxtHeatSchedRO" Style="{StaticResource ReadOnlyValue}" Grid.ColumnSpan="2"/>
+                    <TextBlock Grid.Row="6" Grid.Column="3" Style="{StaticResource LabelText}" Text="График охл. (Пн/Сб/Нд h):"/>
+                    <TextBox   Grid.Row="6" Grid.Column="4" x:Name="TxtCoolSchedRO" Style="{StaticResource ReadOnlyValue}" Grid.ColumnSpan="2"/>
                 </Grid>
             </Border>
-
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
-            <!-- ИЗБОР НА МЕСЕЦ И РЕЖИМ                    -->
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
             <TextBlock Style="{StaticResource SectionHeader}" Text="Параметри на изчислението"/>
-
             <Border Style="{StaticResource CardBorder}">
-                <StackPanel Orientation="Horizontal">
-
-                    <TextBlock Style="{StaticResource LabelText}" Text="Месец:" Margin="0,0,8,0"/>
-                    <ComboBox x:Name="CmbMonth" Width="145" Padding="6,3" VerticalContentAlignment="Center"/>
-
-                    <TextBlock Style="{StaticResource LabelText}" Text="Режим:" Margin="20,0,8,0"/>
-                    <!-- РџРѕРєР°Р·РІР° СЃРµ СЃР°РјРѕ Р°РєРѕ СЃР° Р°РєС‚РёРІРёСЂР°РЅРё Рё РґРІР°С‚Р° СЂРµР¶РёРјР° -->
-                    <ComboBox x:Name="CmbMode" Width="170" Padding="6,3" VerticalContentAlignment="Center"
-                              Visibility="Collapsed"/>
-                    <!-- РџРѕРєР°Р·РІР° СЃРµ РєРѕРіР°С‚Рѕ СЃР°РјРѕ РµРґРёРЅ СЂРµР¶РёРј Рµ Р°РєС‚РёРІРµРЅ -->
-                    <TextBox  x:Name="TxtModeSingle" Style="{StaticResource ReadOnlyValue}" Width="170"
-                              Visibility="Collapsed"/>
-
-                    <TextBlock x:Name="TxtYearRefLabel" Style="{StaticResource LabelText}"
-                               Text="Год. референция: 2024" Margin="20,0,0,0" FontSize="11" Foreground="#9CA3AF"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="230"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="230"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelText}" Text="Използваема площ A_use [m2]:"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="TxtAuse" Style="{StaticResource ReadOnlyValue}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelText}" Text="Процесна топлина Phi_proc [W]:"/>
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="TxtProcessHeat" Style="{StaticResource EditableValue}"
+                               ToolTip="+ = топлинен процес, - = охладителен процес. 0 = не участва."/>
+                    <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource LabelText}" Text="Работни часове на процеса [h/год]:"/>
+                    <TextBox   Grid.Row="2" Grid.Column="4" x:Name="TxtProcessHours" Style="{StaticResource EditableValue}"/>
+                </Grid>
             </Border>
-
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
-            <!-- ТОПЛИННИ ИЗТОЧНИЦИ                        -->
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
-            <StackPanel Orientation="Horizontal" Margin="0,14,0,5">
-                <TextBlock Text="Вътрешни топлинни източници"
-                           FontSize="14" FontWeight="SemiBold" Foreground="#1a1a2e"
-                           VerticalAlignment="Center" Margin="0,0,12,0"/>
-                <Button Content="+ Добави ред" Style="{StaticResource PrimaryBtn}"
-                        Click="BtnAddSource_Click" VerticalAlignment="Center"/>
-            </StackPanel>
-
-            <TextBlock Text="Добавете топлинните източници за сградата (хора, уреди, осветление и др.). Данните тук се запазват."
-                       FontSize="11" Foreground="#6B7280" Margin="0,0,0,6"/>
-
-            <DataGrid x:Name="DgSources"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column"
-                      BorderBrush="#E5E7EB" BorderThickness="1"
-                      RowBackground="White" AlternatingRowBackground="#F9FAFB"
-                      MinHeight="80">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID / Код" Binding="{Binding SourceId, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
-                    <DataGridTextColumn Header="Описание" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                    <DataGridComboBoxColumn Header="Категория" Width="120"
-                                           SelectedValueBinding="{Binding Category, UpdateSourceTrigger=PropertyChanged}"
-                                           x:Name="ColCategory"/>
-                    <DataGridComboBoxColumn Header="Тип вход" Width="135"
-                                           SelectedValueBinding="{Binding Kind, UpdateSourceTrigger=PropertyChanged}"
-                                           x:Name="ColKind"/>
-                    <DataGridTextColumn Header="Мощност [W]" Binding="{Binding Power_W, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
-                    <DataGridTextColumn Header="Специф. [kWh/m²·год]" Binding="{Binding SpecificAnnual_kWhM2Year, UpdateSourceTrigger=PropertyChanged}" Width="130"/>
-                    <DataGridCheckBoxColumn Header="Студ?" Binding="{Binding IsColdSource, UpdateSourceTrigger=PropertyChanged}" Width="55"/>
-                    <DataGridTemplateColumn Header="" Width="50">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="вњ•" Style="{StaticResource DangerBtn}"
-                                        Click="BtnDeleteSource_Click" Tag="{Binding}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-
-            <!-- Бутон изчисли -->
             <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                <Button Content="▶  Изчисли (формули 3.30–3.33)" Style="{StaticResource PrimaryBtn}"
+                <Button Content="Изчисли - всички месеци (Отопление + Охлаждане)"
+                        Style="{StaticResource PrimaryBtn}"
                         Click="BtnCalculate_Click" Padding="20,9"/>
             </StackPanel>
-
-            <!-- Грешки / предупреждения -->
             <Border x:Name="PanelErrors" Background="#FEF3C7" BorderBrush="#FDE68A"
                     BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,8,0,0"
                     Visibility="Collapsed">
                 <StackPanel>
-                    <TextBlock x:Name="TxtErrorsTitle" Text="⚠ Предупреждения:" FontWeight="SemiBold" Foreground="#92400E" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="TxtErrorsTitle" Text="Предупреждения:"
+                               FontWeight="SemiBold" Foreground="#92400E" Margin="0,0,0,4"/>
                     <TextBlock x:Name="TxtErrors" Foreground="#92400E" TextWrapping="Wrap" FontSize="12"/>
                 </StackPanel>
             </Border>
-
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
-            <!-- РЕЗУЛТАТИ                                  -->
-            <!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
             <StackPanel x:Name="PanelResults" Visibility="Collapsed">
-
                 <Separator Margin="0,16,0,10"/>
-                <TextBlock Text="Резултати от изчислението"
+                <TextBlock Text="Резултати - месечни вътрешни топлинни печалби"
                            FontSize="17" FontWeight="Bold" Foreground="#1a1a2e"/>
-
-                <!-- Стъпка 2: Времева информация -->
-                <TextBlock Style="{StaticResource SectionHeader}" Text="Стъпка 2 – Времева информация (t_m)"/>
-                <Border Style="{StaticResource CardBorder}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="230"/>
-                            <ColumnDefinition Width="130"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="230"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelText}" Text="Частичен месец в сезона:"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtIsPartial" Style="{StaticResource ValueText}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource LabelText}" Text="DaysOff приложени:"/>
-                        <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtDaysOffApplied" Style="{StaticResource ValueText}"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelText}" Text="Активни раб. дни / Сб / Нд:"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtActiveDays" Style="{StaticResource ValueText}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource LabelText}" Text="Общо активни дни:"/>
-                        <TextBlock Grid.Row="2" Grid.Column="4" x:Name="TxtTotalActiveDays" Style="{StaticResource ValueText}"/>
-
-                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LabelText}" Text="h/ден (Пн-Пт / Сб / Нд):"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtHoursPerDay" Style="{StaticResource ValueText}"/>
-                        <TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource LabelText}" Text="Fallback за часовете:"/>
-                        <TextBlock Grid.Row="4" Grid.Column="4" x:Name="TxtFallbackHours" Style="{StaticResource ValueText}" Foreground="#DC2626"/>
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelText}"
-                                   Text="t_m – общо активни часове:"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" x:Name="TxtTotalHours"
-                                   FontSize="15" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
-
-                <!-- Стъпка 3: Ред по ред -->
-                <TextBlock Style="{StaticResource SectionHeader}" Text="Стъпка 3 – Q_int,k,m по ред (формула 3.33)"/>
-                <DataGrid x:Name="DgResults"
+                <TextBlock Style="{StaticResource SectionHeader}" Text="Отоплителен сезон - Q_H;int;dir;m по компоненти [kWh]"/>
+                <TextBlock x:Name="TxtHeatSeasonInfo" FontSize="11" Foreground="#6B7280" Margin="0,0,0,4"/>
+                <DataGrid x:Name="DgHeating"
                           AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
-                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                          GridLinesVisibility="All" HeadersVisibility="Column"
                           BorderBrush="#E5E7EB" BorderThickness="1"
-                          RowBackground="White" AlternatingRowBackground="#EFF6FF">
+                          RowBackground="White" AlternatingRowBackground="#FFF8F0"
+                          FontSize="12">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding SourceId}" Width="75"/>
-                        <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
-                        <DataGridTextColumn Header="Катег." Binding="{Binding Category}" Width="80"/>
-                        <DataGridTextColumn Header="Φ [W]" Binding="{Binding Phi_W, StringFormat=F1}" Width="65"/>
-                        <DataGridTextColumn Header="t_m [h]" Binding="{Binding ActiveHours_t_m, StringFormat=F2}" Width="68"/>
-                        <DataGridTextColumn Header="Q_int,k [kWh]" Binding="{Binding Q_int_k_m_kWh, StringFormat=F4}" Width="100"/>
-                        <DataGridTextColumn Header="Q_spec [kWh/m²]" Binding="{Binding Q_int_k_m_specific_kWhM2, StringFormat=F5}" Width="115"/>
-                        <DataGridCheckBoxColumn Header="Студ?" Binding="{Binding IsColdSource}" Width="50"/>
-                        <DataGridTextColumn Header="Формула" Binding="{Binding FormulaTrace}" Width="230"/>
+                        <DataGridTextColumn Header="Месец"      Binding="{Binding MonthName}"             Width="80"/>
+                        <DataGridTextColumn Header="Oc [kWh]"   Binding="{Binding Oc,   StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="A [kWh]"    Binding="{Binding A,    StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="L [kWh]"    Binding="{Binding L,    StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="WA [kWh]"   Binding="{Binding WA,   StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="HVAC [kWh]" Binding="{Binding HVAC, StringFormat=F2}" Width="90"/>
+                        <DataGridTextColumn Header="Proc [kWh]" Binding="{Binding Proc, StringFormat=F2}" Width="90"/>
+                        <DataGridTextColumn Header="Total [kWh]" Binding="{Binding Total, StringFormat=F2}" Width="95"/>
+                        <DataGridTextColumn Header="kWh/m2"     Binding="{Binding TotalPerM2, StringFormat=F3}" Width="80"/>
                     </DataGrid.Columns>
                 </DataGrid>
-
-                <!-- Стъпка 4: Суми по категория -->
-                <TextBlock Style="{StaticResource SectionHeader}" Text="Стъпка 4 – Суми по категория (формула 3.32)"/>
-                <DataGrid x:Name="DgCategorySums"
-                          AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
-                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                          BorderBrush="#E5E7EB" BorderThickness="1"
-                          RowBackground="White" AlternatingRowBackground="#F0FDF4">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="130"/>
-                        <DataGridTextColumn Header="Q [kWh/m²]" Binding="{Binding Q_spec_kWhM2, StringFormat=F5}" Width="120"/>
-                        <DataGridTextColumn Header="Q зона [kWh]" Binding="{Binding Q_zone_kWh, StringFormat=F4}" Width="120"/>
-                        <DataGridTextColumn Header="Брой" Binding="{Binding SourceCount}" Width="60"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <!-- Стъпка 5: Финален резултат -->
-                <TextBlock Style="{StaticResource SectionHeader}" Text="Стъпка 5 – Финален резултат (формула 3.30)"/>
-                <Border Style="{StaticResource CardBorder}" Background="#EFF6FF">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="320"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="24"/>
-                            <ColumnDefinition Width="220"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="6"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="6"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="6"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelText}" Text="Q_H/C;int;dir;z;m (директни вътрешни печалби) [kWh]:"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtQDir" FontSize="15" FontWeight="Bold" Foreground="#16A34A" VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource LabelText}" Text="Специфично [kWh/m²]:"/>
-                        <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtQDirSpec" FontSize="13" FontWeight="SemiBold" Foreground="#16A34A" VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelText}" Text="Принос некондиц. зони (3.31) [kWh]:"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtQUncond" Style="{StaticResource ValueText}"/>
-
-                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LabelText}" Text="Q_H/C;int;ztc;m  →  Резултат по 3.30 [kWh]:"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtQZtc"
-                                   FontSize="18" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelText}" Text="Площ използвана [m²]:"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" x:Name="TxtAreaUsed" Style="{StaticResource ValueText}"/>
-                    </Grid>
-                </Border>
-
-                <!-- Стъпка 6: Формула трейс -->
-                <TextBlock Style="{StaticResource SectionHeader}" Text="Стъпка 6 – Формулни пътеки (одит)"/>
-                <Border Style="{StaticResource CardBorder}">
-                    <StackPanel>
-                        <TextBlock Text="3.33 резюме:" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,3"/>
-                        <TextBox x:Name="TxtTrace333" IsReadOnly="True" TextWrapping="Wrap"
-                                 Background="#F8F8F8" Padding="6" FontFamily="Consolas" FontSize="11"
-                                 MaxHeight="100" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8"/>
-
-                        <TextBlock Text="3.32 → Q_H/C;int;dir:" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,3"/>
-                        <TextBox x:Name="TxtTrace332" IsReadOnly="True" TextWrapping="Wrap"
-                                 Background="#F8F8F8" Padding="6" FontFamily="Consolas" FontSize="11"
-                                 MaxHeight="60" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8"/>
-
-                        <TextBlock Text="3.30 → Q_H/C;int;ztc;m:" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,3"/>
-                        <TextBox x:Name="TxtTrace330" IsReadOnly="True" TextWrapping="Wrap"
-                                 Background="#F8F8F8" Padding="6" FontFamily="Consolas" FontSize="11"
-                                 MaxHeight="50" VerticalScrollBarVisibility="Auto"/>
+                <Border Style="{StaticResource CardBorder}" Background="#FFF8F0" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource LabelText}" Text="Sigma Отопление [kWh]: " Margin="0,0,4,0"/>
+                        <TextBlock x:Name="TxtHeatTotal" FontSize="14" FontWeight="Bold"
+                                   Foreground="#B45309" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource LabelText}" Text="   Специфично [kWh/m2/год]: "
+                                   Margin="16,0,4,0"/>
+                        <TextBlock x:Name="TxtHeatTotalPerM2" FontSize="14" FontWeight="Bold"
+                                   Foreground="#92400E" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
-
-                <!-- Fallbacks -->
-                <Border x:Name="PanelFallbacks" Background="#FFF7ED" BorderBrush="#FED7AA"
+                <TextBlock Style="{StaticResource SectionHeader}" Text="Охладителен сезон - Q_C;int;dir;m по компоненти [kWh]"/>
+                <TextBlock x:Name="TxtCoolSeasonInfo" FontSize="11" Foreground="#6B7280" Margin="0,0,0,4"/>
+                <DataGrid x:Name="DgCooling"
+                          AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                          GridLinesVisibility="All" HeadersVisibility="Column"
+                          BorderBrush="#E5E7EB" BorderThickness="1"
+                          RowBackground="White" AlternatingRowBackground="#EFF6FF"
+                          FontSize="12">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Месец"      Binding="{Binding MonthName}"             Width="80"/>
+                        <DataGridTextColumn Header="Oc [kWh]"   Binding="{Binding Oc,   StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="A [kWh]"    Binding="{Binding A,    StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="L [kWh]"    Binding="{Binding L,    StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="WA [kWh]"   Binding="{Binding WA,   StringFormat=F2}" Width="85"/>
+                        <DataGridTextColumn Header="HVAC [kWh]" Binding="{Binding HVAC, StringFormat=F2}" Width="90"/>
+                        <DataGridTextColumn Header="Proc [kWh]" Binding="{Binding Proc, StringFormat=F2}" Width="90"/>
+                        <DataGridTextColumn Header="Total [kWh]" Binding="{Binding Total, StringFormat=F2}" Width="95"/>
+                        <DataGridTextColumn Header="kWh/m2"     Binding="{Binding TotalPerM2, StringFormat=F3}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Border Style="{StaticResource CardBorder}" Background="#EFF6FF" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource LabelText}" Text="Sigma Охлаждане [kWh]: " Margin="0,0,4,0"/>
+                        <TextBlock x:Name="TxtCoolTotal" FontSize="14" FontWeight="Bold"
+                                   Foreground="#1D4ED8" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource LabelText}" Text="   Специфично [kWh/m2/год]: "
+                                   Margin="16,0,4,0"/>
+                        <TextBlock x:Name="TxtCoolTotalPerM2" FontSize="14" FontWeight="Bold"
+                                   Foreground="#1E40AF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="PanelFallbacks" Background="#FFFBEB" BorderBrush="#FDE68A"
                         BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,8,0,0"
                         Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="№ Използвани fallback-и:" FontWeight="SemiBold" Foreground="#7C2D12" Margin="0,0,0,4"/>
-                        <TextBlock x:Name="TxtFallbacks" Foreground="#7C2D12" TextWrapping="Wrap" FontSize="12"/>
+                        <TextBlock Text="Бележки / препоръки:"
+                                   FontWeight="SemiBold" Foreground="#92400E" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="TxtFallbacks" Foreground="#78350F" TextWrapping="Wrap" FontSize="11"/>
                     </StackPanel>
                 </Border>
-
+                <Border Style="{StaticResource InfoCard}" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Легенда на компонентите" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
+                                   Text="Oc - Обитатели | A - Уреди (Сек.18) | L - Осветление (Сек.17) | WA - ВиК рег.загуби (Сек.16) | HVAC - Помпи/вентил. (Сек.15) | Proc - Процесна топлина"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
-            <!-- /PanelResults -->
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>
