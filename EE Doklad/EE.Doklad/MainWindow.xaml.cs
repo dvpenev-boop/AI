@@ -784,6 +784,22 @@ public partial class MainWindow : Window
             var conclusionEditor = new Views.ConclusionSectionEditor(conclusionViewModel);
             ContentScrollViewer.Content = conclusionEditor;
         }
+        else if (section.Type == ModelSectionType.InternalGainsDebug ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Дебъг вътрешни")))
+        {
+            if (section.InternalGainsDebugInput == null)
+                section.InternalGainsDebugInput = new Models.InternalGainsDebugInput { ZoneId = 1 };
+
+            section.Type = ModelSectionType.InternalGainsDebug;
+
+            // Взимаме ObjectDataSectionData от Секция 5
+            var objectDataSection = viewModel.CurrentReport?.Sections
+                ?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
+            var objectData = objectDataSection?.ObjectDataSectionData;
+
+            var debugView = new Views.InternalGainsDebugView(section.InternalGainsDebugInput, objectData);
+            ContentScrollViewer.Content = debugView;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

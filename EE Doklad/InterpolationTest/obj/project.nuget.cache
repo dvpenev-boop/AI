@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "R2yuM/q5GM8=",
+  "dgSpecHash": "Zy9GbqfKbdA=",
   "success": true,
-  "projectFilePath": "e:\\AI\\EE Doklad\\InterpolationTest\\InterpolationTest.csproj",
+  "projectFilePath": "E:\\AI\\EE Doklad\\InterpolationTest\\InterpolationTest.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\dimit\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\dimit\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",

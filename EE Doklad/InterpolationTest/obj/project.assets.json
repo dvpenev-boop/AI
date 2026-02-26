@@ -794,11 +794,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "e:\\AI\\EE Doklad\\InterpolationTest\\InterpolationTest.csproj",
+      "projectUniqueName": "E:\\AI\\EE Doklad\\InterpolationTest\\InterpolationTest.csproj",
       "projectName": "InterpolationTest",
-      "projectPath": "e:\\AI\\EE Doklad\\InterpolationTest\\InterpolationTest.csproj",
+      "projectPath": "E:\\AI\\EE Doklad\\InterpolationTest\\InterpolationTest.csproj",
       "packagesPath": "C:\\Users\\dimit\\.nuget\\packages\\",
-      "outputPath": "e:\\AI\\EE Doklad\\InterpolationTest\\obj\\",
+      "outputPath": "E:\\AI\\EE Doklad\\InterpolationTest\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\dimit\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -813,8 +813,8 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "projectReferences": {
-            "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
-              "projectPath": "e:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj"
+            "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj": {
+              "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj"
             }
           }
         }

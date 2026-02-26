@@ -635,7 +635,8 @@ namespace EE.Doklad.ViewModels
                 "19. Други разходи не влияещи",
                 "20. Резултати сграда",
                 "21. Клас на енергопотребление",
-                "22. Заключение"
+                "22. Заключение",
+                "23. Дебъг вътрешни печалби"
             };
 
             for (int i = 0; i < laterTitles.Length; i++)
@@ -802,6 +803,24 @@ namespace EE.Doklad.ViewModels
                     {
                         Title = "Заключение",
                         Description = "Заключителна част на доклада с предварително попълнен текст, който може да се редактира."
+                    };
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("23. Дебъг вътрешни"))
+                {
+                    section.Type = SectionType.InternalGainsDebug;
+                    section.InternalGainsDebugInput = new InternalGainsDebugInput
+                    {
+                        ZoneId  = 1,
+                        Month   = 1,
+                        Mode    = EpbMode.Heating,
+                        AreaHeat_m2 = 0,
+                        AreaCool_m2 = 0,
+                        HeatingSeasonStartMonth = 10,
+                        HeatingSeasonStartDay   = 21,
+                        HeatingSeasonEndMonth   = 4,
+                        HeatingSeasonEndDay     = 20,
+                        YearRef = 2024
                     };
                     section.StaticText = string.Empty;
                 }

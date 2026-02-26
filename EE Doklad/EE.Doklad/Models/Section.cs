@@ -26,8 +26,9 @@ namespace EE.Doklad.Models
         AppliancesAffecting,        // Други разходи влияещи (секция №17 след добавяне на UnconditionedZones)
         AppliancesNotAffecting,     // Други разходи невлияещи (секция №18 след добавяне на UnconditionedZones)
         Results,                    // Резултати (секция за изчисления)
-        EnergyClass,                // Клас на енергопотребление (секция №20 след добавяне на UnconditionedZones)
-        Conclusion                  // Заключение (секция №21 след добавяне на UnconditionedZones)
+        EnergyClass,                // Клас на енергопотребление (секция №21)
+        Conclusion,                 // Заключение (секция №22)
+        InternalGainsDebug          // Дебъг вътрешни топлинни печалби (секция №23)
     }
 
     /// <summary>
@@ -150,6 +151,11 @@ namespace EE.Doklad.Models
         /// Данни за раздел "Заключение" (само за Conclusion секции)
         /// </summary>
         public ConclusionSectionData? ConclusionSectionData { get; set; }
+
+        /// <summary>
+        /// Входни данни за "Дебъг вътрешни топлинни печалби" (само за InternalGainsDebug секции)
+        /// </summary>
+        public InternalGainsDebugInput? InternalGainsDebugInput { get; set; }
 
         public int Order { get; set; }
 
