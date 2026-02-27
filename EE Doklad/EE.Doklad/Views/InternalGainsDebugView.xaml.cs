@@ -193,22 +193,25 @@ namespace EE.Doklad.Views
             var appData = GetSection(SectionType.AppliancesAffecting)?.AppliancesAffectingSectionData;
             if (appData != null)
             {
-                inp.Appliances_TotalPower_W          = appData.SimultaneousPower_W;
+                // TotalPower_kW is computed from LineItems (no area dependency)
+                // Do NOT use SimultaneousPower_W – it requires SetHeatedArea() to have been called
+                double appPower_W = appData.TotalPower_kW * 1000.0;
+                inp.Appliances_TotalPower_W          = appPower_W;
                 inp.Appliances_TotalAnnualEnergy_kWh = appData.TotalAnnualEnergy_kWh;
-                double appPw = appData.SimultaneousPower_W;
-                inp.Appliances_AnnualOperatingHours  = appPw > 1e-9 && appData.TotalAnnualEnergy_kWh > 1e-9
-                    ? appData.TotalAnnualEnergy_kWh / (appPw / 1000.0)
+                inp.Appliances_AnnualOperatingHours  = appPower_W > 1e-9 && appData.TotalAnnualEnergy_kWh > 1e-9
+                    ? appData.TotalAnnualEnergy_kWh / (appPower_W / 1000.0)
                     : 0;
             }
 
             var lightData = GetSection(SectionType.Lighting)?.LightingSectionData;
             if (lightData != null)
             {
-                inp.Lighting_TotalPower_W          = lightData.SimultaneousPower_W;
+                // TotalPower_kW is computed from LineItems (no area dependency)
+                double lightPower_W = lightData.TotalPower_kW * 1000.0;
+                inp.Lighting_TotalPower_W          = lightPower_W;
                 inp.Lighting_TotalAnnualEnergy_kWh = lightData.TotalAnnualEnergy_kWh;
-                double lightPw = lightData.SimultaneousPower_W;
-                inp.Lighting_AnnualOperatingHours  = lightPw > 1e-9 && lightData.TotalAnnualEnergy_kWh > 1e-9
-                    ? lightData.TotalAnnualEnergy_kWh / (lightPw / 1000.0)
+                inp.Lighting_AnnualOperatingHours  = lightPower_W > 1e-9 && lightData.TotalAnnualEnergy_kWh > 1e-9
+                    ? lightData.TotalAnnualEnergy_kWh / (lightPower_W / 1000.0)
                     : 0;
             }
 

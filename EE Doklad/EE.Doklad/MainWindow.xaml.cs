@@ -797,7 +797,10 @@ public partial class MainWindow : Window
                 ?.FirstOrDefault(s => s.Type == ModelSectionType.ObjectData);
             var objectData = objectDataSection?.ObjectDataSectionData;
 
-            var debugView = new Views.InternalGainsDebugView(section.InternalGainsDebugInput, objectData);
+            var debugView = new Views.InternalGainsDebugView(
+                section.InternalGainsDebugInput,
+                objectData,
+                viewModel.CurrentReport);
             ContentScrollViewer.Content = debugView;
         }
         else
