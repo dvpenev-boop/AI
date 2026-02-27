@@ -46,6 +46,22 @@ namespace EE.Doklad.Services
         /// <summary>Брой хора</summary>
         public int    NumberOfOccupants          { get; set; }
 
+        // График на обитаване – отопление (от "График на обитаване" в таблица Отопление, Секция 5)
+        /// <summary>Работни часове обитатели (Пн-Пт) – отопление [h/ден]</summary>
+        public double Occupancy_HeatingWorkdaysH  { get; set; } = 24.0;
+        /// <summary>Работни часове обитатели (Събота) – отопление [h/ден]</summary>
+        public double Occupancy_HeatingSaturdayH  { get; set; } = 24.0;
+        /// <summary>Работни часове обитатели (Неделя) – отопление [h/ден]</summary>
+        public double Occupancy_HeatingSundayH    { get; set; } = 24.0;
+
+        // График на обитаване – охлаждане (от "График на обитаване" в таблица Охлаждане, Секция 5)
+        /// <summary>Работни часове обитатели (Пн-Пт) – охлаждане [h/ден]</summary>
+        public double Occupancy_CoolingWorkdaysH  { get; set; } = 24.0;
+        /// <summary>Работни часове обитатели (Събота) – охлаждане [h/ден]</summary>
+        public double Occupancy_CoolingSaturdayH  { get; set; } = 24.0;
+        /// <summary>Работни часове обитатели (Неделя) – охлаждане [h/ден]</summary>
+        public double Occupancy_CoolingSundayH    { get; set; } = 24.0;
+
         // ── Компонент 2: Уреди (Секция 18 – агрегирано) ──────────────────────
         /// <summary>Едновременна инсталирана мощност [W] (TotalSimultaneousPower_W)</summary>
         public double Appliances_TotalPower_W          { get; set; }
@@ -215,8 +231,13 @@ namespace EE.Doklad.Services
 
         // ──────────────────────────────────────────────────────────────────────
         // 1. Обитатели
-        // Q_oc,H[m] = Φ_sens,H * N * t_H[m] / 1000
-        // Q_oc,C[m] = Φ_sens,C * N * t_C[m] / 1000
+        // Q_oc,H[m] = Φ_sens,H * N * t_oc,H[m] / 1000
+        // Q_oc,C[m] = Φ_sens,C * N * t_oc,C[m] / 1000
+        //
+        // t_oc[m] се изчислява от реалния график на обитаване (Секция 5):
+        //   t_oc[m] = weekdays[m] × hWd  +  saturdays[m] × hSat  +  sundays[m] × hSun
+        // Дните (weekdays, saturdays, sundays) се взимат от сезонната маска.
+        // При нулев режим (0/0/0) — fallback 24 h/ден.
         // ──────────────────────────────────────────────────────────────────────
 
         private static void ComputeOccupants(
@@ -228,23 +249,75 @@ namespace EE.Doklad.Services
             double phi_H = inp.OccupantsSensibleHeat_H_W * inp.NumberOfOccupants;
             double phi_C = inp.OccupantsSensibleHeat_C_W * inp.NumberOfOccupants;
 
+            double hWd_H  = inp.Occupancy_HeatingWorkdaysH;
+            double hSat_H = inp.Occupancy_HeatingSaturdayH;
+            double hSun_H = inp.Occupancy_HeatingSundayH;
+
+            double hWd_C  = inp.Occupancy_CoolingWorkdaysH;
+            double hSat_C = inp.Occupancy_CoolingSaturdayH;
+            double hSun_C = inp.Occupancy_CoolingSundayH;
+
             for (int m = 0; m < 12; m++)
             {
-                result.HeatingTable[m].Oc = phi_H * heatMask.Hours[m] / 1000.0;
-                result.CoolingTable[m].Oc = coolMask != null
-                    ? phi_C * coolMask.Hours[m] / 1000.0
-                    : 0.0;
+                // t_m = брой работни дни × h/ден + събота × h/ден + неделя × h/ден
+                // SeasonMaskResult.Days[m] са общите дни. Делим приблизително по
+                // стандартното разпределение на седмицата (5/1/1 при 7 дни/седмица).
+                double totalDays_H = heatMask.Days[m];
+                double t_H = OccupancyHoursForMonth(totalDays_H, hWd_H, hSat_H, hSun_H);
+                result.HeatingTable[m].Oc = phi_H * t_H / 1000.0;
+
+                if (coolMask != null)
+                {
+                    double totalDays_C = coolMask.Days[m];
+                    double t_C = OccupancyHoursForMonth(totalDays_C, hWd_C, hSat_C, hSun_C);
+                    result.CoolingTable[m].Oc = phi_C * t_C / 1000.0;
+                }
+                else
+                {
+                    result.CoolingTable[m].Oc = 0.0;
+                }
             }
+        }
+
+        /// <summary>
+        /// Изчислява общите часове на обитаване за месец от брой дни и режим Пн-Пт/Съб/Нед.
+        /// Разпределя totalDays пропорционално: 5/7 работни, 1/7 събота, 1/7 неделя.
+        /// При нулев режим (0/0/0) прилага fallback 24 h/ден за всички дни.
+        /// </summary>
+        private static double OccupancyHoursForMonth(
+            double totalDays,
+            double hWd, double hSat, double hSun)
+        {
+            if (totalDays < Eps) return 0.0;
+
+            // Fallback: ако всички стойности са 0 → 24 h/ден
+            bool allZero = hWd < Eps && hSat < Eps && hSun < Eps;
+            if (allZero)
+                return totalDays * 24.0;
+
+            // Разпределяме дните по стандартно разпределение на седмицата: 5 Пн-Пт + 1 Съб + 1 Нед
+            double wdDays  = totalDays * (5.0 / 7.0);
+            double satDays = totalDays * (1.0 / 7.0);
+            double sunDays = totalDays * (1.0 / 7.0);
+
+            return wdDays * hWd + satDays * hSat + sunDays * hSun;
         }
 
         // ──────────────────────────────────────────────────────────────────────
         // 2. Уреди
-        // Ако TotalAnnualEnergy_kWh > 0:
-        //   Q_A[m] = TotalAnnualEnergy * (operatingHoursInMonth / totalAnnualHours)
-        // Иначе:
-        //   Q_A[m] = TotalPower_W * operatingHoursInMonth / 1000
+        // Уредите работят ЦЕЛОГОДИШНО независимо от сезона.
         //
-        // operatingHoursInMonth за сезона = mask.Hours[m]
+        // За всеки месец изчисляваме дела от годишната консумация пропорционално
+        // на РЕАЛНИТЕ дни в сезона за месеца (от маската), НЕ на пълния календарен месец.
+        // Причина: при частичен месец (напр. Апр само до 23-ти) трябва да се вземат
+        // само 23 дни, не 30.
+        //
+        // Ако TotalAnnualEnergy_kWh > 0:
+        //   Q_A[m] = TotalAnnualEnergy * (seasonDays[m] / 365)
+        // Иначе:
+        //   Q_A[m] = TotalPower_W * AnnualOperatingHours * (seasonDays[m] / 365) / 1000
+        //
+        // Месеци извън сезона (seasonDays[m] == 0) → 0 (не участват).
         // ──────────────────────────────────────────────────────────────────────
 
         private static void ComputeAppliances(
@@ -260,16 +333,18 @@ namespace EE.Doklad.Services
 
             for (int m = 0; m < 12; m++)
             {
-                result.HeatingTable[m].A = DistributeByHours(
-                    useAnnual, annualEnergy, annualHours, power_W, heatMask.Hours[m]);
-                result.CoolingTable[m].A = coolMask != null
-                    ? DistributeByHours(useAnnual, annualEnergy, annualHours, power_W, coolMask.Hours[m])
+                // Ползваме реалните дни в сезона (частичен месец → по-малко от пълния)
+                result.HeatingTable[m].A = heatMask.Days[m] > Eps
+                    ? DistributeByDays(useAnnual, annualEnergy, annualHours, power_W, heatMask.Days[m])
+                    : 0.0;
+                result.CoolingTable[m].A = (coolMask != null && coolMask.Days[m] > Eps)
+                    ? DistributeByDays(useAnnual, annualEnergy, annualHours, power_W, coolMask.Days[m])
                     : 0.0;
             }
         }
 
         // ──────────────────────────────────────────────────────────────────────
-        // 3. Осветление – същата логика като Уреди
+        // 3. Осветление – същата логика като Уреди (целогодишно, по сезонни дни)
         // ──────────────────────────────────────────────────────────────────────
 
         private static void ComputeLighting(
@@ -285,10 +360,11 @@ namespace EE.Doklad.Services
 
             for (int m = 0; m < 12; m++)
             {
-                result.HeatingTable[m].L = DistributeByHours(
-                    useAnnual, annualEnergy, annualHours, power_W, heatMask.Hours[m]);
-                result.CoolingTable[m].L = coolMask != null
-                    ? DistributeByHours(useAnnual, annualEnergy, annualHours, power_W, coolMask.Hours[m])
+                result.HeatingTable[m].L = heatMask.Days[m] > Eps
+                    ? DistributeByDays(useAnnual, annualEnergy, annualHours, power_W, heatMask.Days[m])
+                    : 0.0;
+                result.CoolingTable[m].L = (coolMask != null && coolMask.Days[m] > Eps)
+                    ? DistributeByDays(useAnnual, annualEnergy, annualHours, power_W, coolMask.Days[m])
                     : 0.0;
             }
         }
@@ -417,7 +493,34 @@ namespace EE.Doklad.Services
         // ──────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Разпределя енергия за даден месец.
+        /// Разпределя годишната енергия за даден месец по брой дни (365 дни в годината).
+        /// Използва се за Appliances и Lighting (целогодишни консуматори).
+        ///
+        /// Ако useAnnual = true:
+        ///     E_month = annualEnergy * daysInMonth / 365
+        /// Иначе (само мощност + годишни работни часове):
+        ///     E_month = power_W * annualHours * daysInMonth / 365 / 1000
+        /// </summary>
+        private static double DistributeByDays(
+            bool useAnnual,
+            double annualEnergy,
+            double annualHours,
+            double power_W,
+            double daysInMonth)
+        {
+            if (daysInMonth < Eps) return 0.0;
+
+            if (useAnnual)
+                return annualEnergy * daysInMonth / 365.0;
+
+            // Fallback: мощност × годишни часове, разпределени по дни
+            if (power_W < Eps || annualHours < Eps) return 0.0;
+            return power_W * annualHours / 1000.0 * daysInMonth / 365.0;
+        }
+
+        /// <summary>
+        /// Разпределя енергия за даден месец по часове от сезонната маска.
+        /// Ползва се за WA, Proc и Occupants (сезонно зависими консуматори).
         /// Ако useAnnual = true и annualHours > 0:
         ///     E_month = annualEnergy * monthHours / annualHours
         /// Иначе:

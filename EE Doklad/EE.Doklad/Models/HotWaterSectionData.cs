@@ -57,6 +57,15 @@ namespace EE.Doklad.Models
         // ── Регенерируеми загуби към зоната (Секция 23 → Q_spec;int;WA) ─────
 
         /// <summary>
+        /// Режим за изчисляване на регенерируемите загуби:
+        ///   Manual      – ръчно въведена kWh/год стойност
+        ///   Automatic   – автоматично по методиката (тръбни сегменти)
+        ///   PercentShare – % дял от общите загуби
+        /// </summary>
+        [ObservableProperty]
+        private DhwLossMode _recoverableLossMode = DhwLossMode.Manual;
+
+        /// <summary>
         /// Годишни регенерируеми загуби от ВиК системата към отопляваната зона [kWh/год].
         /// Директна стойност (ако е зададена).
         /// Използва се в Секция 23 като компонент Q_spec;int;WA.

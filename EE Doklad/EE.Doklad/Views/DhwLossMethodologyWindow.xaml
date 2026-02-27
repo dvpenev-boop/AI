@@ -1,0 +1,653 @@
+<Window x:Class="EE.Doklad.Views.DhwLossMethodologyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:EE.Doklad.ViewModels"
+        xmlns:models="clr-namespace:EE.Doklad.Models"
+        xmlns:converters="clr-namespace:EE.Doklad.Converters"
+        mc:Ignorable="d"
+        Title="Методика (БГВ) – Регенерируеми загуби от разпределение"
+        Width="1060" Height="780"
+        MinWidth="860" MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        d:DataContext="{d:DesignInstance vm:DhwLossCalculatorViewModel}">
+
+    <Window.Resources>
+        <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+        <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
+
+        <!-- Стилове -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1565C0"/>
+            <Setter Property="Margin" Value="0,12,0,6"/>
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,2,8,2"/>
+        </Style>
+        <Style x:Key="InputBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="4,3"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#2196F3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,2,8,2"/>
+        </Style>
+        <Style x:Key="ResultBox" TargetType="TextBox" BasedOn="{StaticResource InputBox}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="#E8F5E9"/>
+            <Setter Property="BorderBrush" Value="#4CAF50"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Background" Value="#1976D2"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1565C0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SuccessButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#388E3C"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2E7D32"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#D32F2F"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#B71C1C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RadioStyle" TargetType="RadioButton">
+            <Setter Property="Margin" Value="0,2,16,2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Заглавна лента -->
+            <RowDefinition Height="*"/>     <!-- Основно съдържание -->
+            <RowDefinition Height="Auto"/>  <!-- Резултат + бутони -->
+        </Grid.RowDefinitions>
+
+        <!-- ═══ Заглавна лента ═══════════════════════════════════════════════ -->
+        <Border Grid.Row="0" Background="#1565C0" Padding="16,10">
+            <StackPanel>
+                <TextBlock Text="Методика (БГВ) – Регенерируеми загуби от разпределителна система"
+                           FontSize="15" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="EN 15316-3 / ISO 52003  |  Формули (1.3)–(1.18)"
+                           FontSize="11" Foreground="#90CAF9" Margin="0,2,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ═══ Основно съдържание (TabControl) ══════════════════════════════ -->
+        <TabControl Grid.Row="1" Margin="8">
+
+            <!-- ── Таб 1: Режим и настройки ──────────────────────────────── -->
+            <TabItem Header="⚙ Режим и настройки">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="16">
+
+                        <!-- Режим -->
+                        <TextBlock Text="Режим на изчисление" Style="{StaticResource SectionHeader}"/>
+                        <Border Background="#E3F2FD" BorderBrush="#90CAF9" BorderThickness="1" Padding="12,8">
+                            <StackPanel>
+                                <RadioButton Style="{StaticResource RadioStyle}"
+                                             IsChecked="{Binding IsManualMode, Mode=TwoWay}"
+                                             Content="▣  Режим A – Ръчно въвеждане [kWh/год]  (стойността се пази без изчисление)"/>
+                                <RadioButton Style="{StaticResource RadioStyle}"
+                                             IsChecked="{Binding IsAutomaticMode, Mode=TwoWay}"
+                                             Content="▣  Режим B – Автоматично по методиката  (тръбни сегменти + формули)"/>
+                                <RadioButton Style="{StaticResource RadioStyle}"
+                                             IsChecked="{Binding IsPercentMode, Mode=TwoWay}"
+                                             Content="▣  Режим C – % дял от общите загуби  (активен само ако kWh/год е 0)"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Общи параметри -->
+                        <TextBlock Text="Общи параметри" Style="{StaticResource SectionHeader}"/>
+                        <Border Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="1" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="240"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="240"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- θ_w,set -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Температура на БГВ θ_w,set [°C]:"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource InputBox}"
+                                         Text="{Binding Inputs.HotWaterTemperature_degC, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource LabelStyle}" Text="°C"/>
+
+                                <!-- θ_amb_cond -->
+                                <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="θ_amb кондиционирана зона [°C]:"/>
+                                <TextBox Grid.Row="0" Grid.Column="4" Style="{StaticResource InputBox}"
+                                         Text="{Binding Inputs.AmbientTempConditioned_degC, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="5" Style="{StaticResource LabelStyle}" Text="°C"/>
+
+                                <!-- θ_amb_uncond -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="θ_amb некондиционирана зона [°C]:"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource InputBox}"
+                                         Text="{Binding Inputs.AmbientTempUnconditioned_degC, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource LabelStyle}" Text="°C"/>
+
+                                <!-- h/ден (ПРИОРИТЕТ над h/год) -->
+                                <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="Часове работа на ДЕН [h/д] (0=24h):"/>
+                                <TextBox Grid.Row="1" Grid.Column="4" Style="{StaticResource InputBox}"
+                                         ToolTip="Пример: 16 h/д = помпата работи 16 ч./денонощие (нощем спира). 0 = 24/7."
+                                         Text="{Binding Inputs.OperatingHoursPerDay_hPerDay, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="5" Style="{StaticResource LabelStyle}" Text="h/д"/>
+
+                                <!-- Работни дни -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Работни дни в годината [d/y]:"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource InputBox}"
+                                         Text="{Binding Inputs.WorkingDaysPerYear, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource LabelStyle}" Text="d/y"/>
+
+                                <!-- t_op в h/год (ако не ползваш h/д) -->
+                                <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="t_op – часове работа [h/год] (0=t_year):"/>
+                                <TextBox Grid.Row="2" Grid.Column="4" Style="{StaticResource InputBox}"
+                                         ToolTip="Общо часове за годината. Ползва се само ако 'h/д' полето е 0."
+                                         Text="{Binding Inputs.OperatingHours_hPerYear, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="5" Style="{StaticResource LabelStyle}" Text="h"/>
+
+                                <!-- Опростена θ_mean -->
+                                <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                          VerticalAlignment="Center" Margin="0,2,0,2"
+                                          IsChecked="{Binding Inputs.UseSimplifiedMeanTemp}"
+                                          Content="Опростена θ_w,mean за извънработни загуби (1.15): θ_mean = 25·Ψ^(−0.2)"/>
+
+                                <!-- % дял (Режим C) -->
+                                <TextBlock Grid.Row="4" Grid.Column="0"
+                                           Text="% дял (Режим C):"
+                                           VerticalAlignment="Center" FontSize="12" Margin="0,2,8,2">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPercentMode}" Value="False">
+                                                    <Setter Property="Foreground" Value="#BDBDBD"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource InputBox}"
+                                         IsEnabled="{Binding IsPercentMode}"
+                                         Text="{Binding Inputs.PercentShare, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource LabelStyle}" Text="%"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="3"
+                                           Text="Общи загуби (Режим C) [kWh/год]:"
+                                           VerticalAlignment="Center" FontSize="12" Margin="0,2,8,2">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPercentMode}" Value="False">
+                                                    <Setter Property="Foreground" Value="#BDBDBD"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBox Grid.Row="4" Grid.Column="4" Style="{StaticResource InputBox}"
+                                         IsEnabled="{Binding IsPercentMode}"
+                                         Text="{Binding Inputs.TotalSystemLosses_kWh, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="5" Style="{StaticResource LabelStyle}" Text="kWh"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Режим A: Ръчно -->
+                        <TextBlock Text="Режим A – Ръчна стойност" Style="{StaticResource SectionHeader}"/>
+                        <Border Background="#FFF8E1" BorderBrush="#FFE082" BorderThickness="1" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="300"/>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Регенерируеми загуби (ръчно) [kWh/год]:"/>
+                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}"
+                                         IsEnabled="{Binding IsManualMode}"
+                                         Text="{Binding Inputs.ManualRecoverableLoss_kWh, Converter={StaticResource FlexibleDoubleConverter}}"/>
+                                <TextBlock Grid.Column="2" Style="{StaticResource LabelStyle}"
+                                           Text="kWh/год  (активно само при Режим A)"/>
+                            </Grid>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── Таб 2: Тръбни сегменти ─────────────────────────────────── -->
+            <TabItem Header="🔧 Тръбни сегменти (Режим B)">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Style="{StaticResource SectionHeader}"
+                               Text="Тръбни сегменти – дефинирайте геометрия и тип изолация"/>
+
+                    <!-- DataGrid за сегменти -->
+                    <DataGrid x:Name="SegmentsDataGrid" Grid.Row="1"
+                              ItemsSource="{Binding PipeSegments}"
+                              SelectedItem="{Binding SelectedSegment}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserResizeRows="False"
+                              RowHeaderWidth="0"
+                              BorderBrush="#BDBDBD"
+                              BorderThickness="1"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="#E0E0E0"
+                              VerticalGridLinesBrush="#E0E0E0"
+                              FontSize="12"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Наименование" Binding="{Binding Name}" Width="130"/>
+                            <DataGridTemplateColumn Header="Зона" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ZoneType}" VerticalAlignment="Center" Margin="4,0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.ZoneTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  SelectedItem="{Binding ZoneType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="L [m]"
+                                Binding="{Binding Length_m, StringFormat=0.00}" Width="70"/>
+                            <DataGridTextColumn Header="L_equi [m]"
+                                Binding="{Binding EquivalentLength_m, StringFormat=0.00}" Width="80">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTip"
+                                                Value="Еквивалентна дължина [m] – от фитинги (колена, тройници, вентили). При AutoLequi=✓ се изчислява автоматично."/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AutoLequi}" Value="True">
+                                                <Setter Property="Background" Value="#E8F5E9"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridCheckBoxColumn Header="Auto L_eq"
+                                Binding="{Binding AutoLequi, UpdateSourceTrigger=PropertyChanged}" Width="65">
+                                <DataGridCheckBoxColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTip"
+                                                Value="✓ = L_equi се изчислява от фитингите. ✗ = ръчно."/>
+                                    </Style>
+                                </DataGridCheckBoxColumn.HeaderStyle>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Header="Колена 90°"
+                                Binding="{Binding Elbow90Count, UpdateSourceTrigger=PropertyChanged}" Width="75">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTip" Value="Брой колена 90°"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Тройници"
+                                Binding="{Binding TeeBranchCount, UpdateSourceTrigger=PropertyChanged}" Width="75">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTip" Value="Брой тройници (разклонения)"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Вентили"
+                                Binding="{Binding BallValveCount, UpdateSourceTrigger=PropertyChanged}" Width="70">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTip" Value="Брой сферични вентили"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="DN" IsReadOnly="True"
+                                Binding="{Binding SelectedDnDisplay}" Width="55">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#555"/>
+                                        <Setter Property="ToolTip" Value="{Binding DnWarning}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DnWarning}" Value="">
+                                                <Setter Property="Foreground" Value="#555"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="Тип изолация" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding InsulationType}" VerticalAlignment="Center" Margin="4,0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.InsulationTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  SelectedItem="{Binding InsulationType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Ψ [W/mK] (DirectPsi)"
+                                Binding="{Binding Psi_WmK, StringFormat=0.000}" Width="120"/>
+                            <DataGridTextColumn Header="d_i [m]"
+                                Binding="{Binding InnerDiameter_m, StringFormat=0.000}" Width="75"/>
+                            <DataGridTextColumn Header="d_a [m]"
+                                Binding="{Binding OuterDiameterWithInsulation_m, StringFormat=0.000}" Width="75"/>
+                            <DataGridTextColumn Header="λ_D [W/mK]"
+                                Binding="{Binding InsulationLambda_WmK, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="h_a [W/m²K]"
+                                Binding="{Binding SurfaceHeatTransfer_WmK, StringFormat=0.0}" Width="90"/>
+                            <DataGridTextColumn Header="λ_em [W/mK]"
+                                Binding="{Binding EmbeddingMaterialLambda_WmK, StringFormat=0.000}" Width="90"/>
+                            <DataGridTextColumn Header="z [m]"
+                                Binding="{Binding DepthFromSurface_m, StringFormat=0.000}" Width="65"/>
+                            <DataGridCheckBoxColumn Header="Stub"
+                                Binding="{Binding IsStub}" Width="50"/>
+                            <DataGridTextColumn Header="Ψ изчислено"
+                                Binding="{Binding ComputedPsi_WmK, StringFormat=0.000}"
+                                IsReadOnly="True" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#1B5E20"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Бутони за сегменти -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="+ Добави сегмент" Command="{Binding AddSegmentCommand}"
+                                Style="{StaticResource PrimaryButton}"/>
+                        <Button Content="✕ Премахни избрания" Command="{Binding RemoveSegmentCommand}"
+                                Style="{StaticResource DangerButton}"/>
+                        <TextBlock VerticalAlignment="Center" Margin="12,0,0,0" Foreground="#757575" FontSize="11"
+                                   Text="Двоен клик на клетка за редактиране. Колона 'Ψ изчислено' се попълва след 'Изчисли'."/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ── Таб 3: Stub отклонения ─────────────────────────────────── -->
+            <TabItem Header="🔩 Stub отклонения">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Style="{StaticResource SectionHeader}"
+                               Text="Stub отклонения (отворена циркулация) – формули (1.8)/(1.9)"/>
+
+                    <Border Grid.Row="1" Background="#FFF3E0" BorderBrush="#FFCC80" BorderThickness="1"
+                            Padding="10,6" Margin="0,0,0,8">
+                        <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#E65100">
+                            <Run Text="ṁ_stub = V_stub · ρ_w · n_tap  [kg/h]    →    Q_stub = ṁ_stub · c_w · (θ_w – θ_amb) · t_op  [kWh]"/>
+                            <LineBreak/>
+                            <Run Text="Stub данните са незадължителни. Ако нямате – оставете таблицата празна."/>
+                        </TextBlock>
+                    </Border>
+
+                    <DataGrid x:Name="StubZonesDataGrid" Grid.Row="2"
+                              ItemsSource="{Binding StubZones}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              BorderBrush="#BDBDBD" BorderThickness="1"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="#E0E0E0"
+                              FontSize="12">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Зона" Width="160">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ZoneType}" VerticalAlignment="Center" Margin="4,0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.ZoneTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  SelectedItem="{Binding ZoneType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="V_stub [m³]"
+                                Binding="{Binding StubVolume_m3, StringFormat=0.000}" Width="120"/>
+                            <DataGridTextColumn Header="n_tap [1/h]"
+                                Binding="{Binding TappingFrequency_perHour, StringFormat=0.00}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="+ Добави stub зона" Command="{Binding AddStubZoneCommand}"
+                                Style="{StaticResource PrimaryButton}"/>
+                        <Button Content="✕ Премахни последна" Command="{Binding RemoveStubZoneCommand}"
+                                Style="{StaticResource DangerButton}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ── Таб 4: Резултати ───────────────────────────────────────── -->
+            <TabItem Header="📊 Резултати">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="16">
+
+                        <TextBlock Style="{StaticResource SectionHeader}" Text="Резултати от изчислението"/>
+
+                        <!-- Главен резултат -->
+                        <Border Background="#E8F5E9" BorderBrush="#4CAF50" BorderThickness="2"
+                                Padding="14,10" Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="{Binding ResultSummary}" FontSize="14"
+                                           FontWeight="Bold" Foreground="#1B5E20"/>
+                                <TextBlock Text="{Binding DiagnosticText}" FontSize="11"
+                                           Foreground="#388E3C" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Детайлни резултати -->
+                        <Border Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="1" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="280"/>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="280"/>
+                                    <ColumnDefinition Width="130"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Хоризонтален разделител -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Q_w,dis,ls (загуби по тръби/работа):" Foreground="#555"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultQls, Mode=OneWay, StringFormat=0.00}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Q_w,dis,nom (загуби извън работа):" Foreground="#555"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultQnom, Mode=OneWay, StringFormat=0.00}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Q_w,dis,stub (stub загуби):" Foreground="#555"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultQstub, Mode=OneWay, StringFormat=0.00}"/>
+
+                                <Separator Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,4,0,4"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Q_w,dis,total – общо загуби [kWh]:" FontWeight="SemiBold"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultQTotal, Mode=OneWay, StringFormat=0.00}"/>
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="Q_cond – загуби в кондиц. зона [kWh]:" FontWeight="SemiBold"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultQCond, Mode=OneWay, StringFormat=0.00}"/>
+
+                                <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Text="f_rbl – дял кондиционирани [%]:" FontWeight="Bold"/>
+                                <TextBox Grid.Row="6" Grid.Column="1" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultFrblPct, Mode=OneWay, StringFormat=0.00}"/>
+
+                                <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource LabelStyle}"
+                                           Foreground="#1B5E20" FontWeight="Bold"
+                                           Text="Q_w,dis,rbl,year – РЕГЕНЕРИРУЕМИ [kWh/год]:"/>
+                                <TextBox Grid.Row="7" Grid.Column="1"
+                                         Text="{Binding ResultQrblYear, Mode=OneWay, StringFormat=0.00}"
+                                         IsReadOnly="True" Background="#C8E6C9"
+                                         BorderBrush="#388E3C" BorderThickness="2"
+                                         FontSize="13" FontWeight="Bold" Foreground="#1B5E20"
+                                         Padding="4,3" Margin="0,2,8,2"/>
+
+                                <!-- Часово разпределение -->
+                                <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="t_year [h]:" Foreground="#555"/>
+                                <TextBox Grid.Row="0" Grid.Column="4" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultTYear, Mode=OneWay, StringFormat=0}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="t_op [h]:" Foreground="#555"/>
+                                <TextBox Grid.Row="1" Grid.Column="4" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultTOp, Mode=OneWay, StringFormat=0}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="t_nom [h]:" Foreground="#555"/>
+                                <TextBox Grid.Row="2" Grid.Column="4" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultTNom, Mode=OneWay, StringFormat=0}"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource LabelStyle}"
+                                           Text="t_op [h/ден] (ефективно):" Foreground="#1565C0" FontWeight="SemiBold"/>
+                                <TextBox Grid.Row="3" Grid.Column="4" Style="{StaticResource ResultBox}"
+                                         Text="{Binding ResultTOpPerDay, Mode=OneWay, StringFormat=0.00}"
+                                         Background="#E3F2FD" BorderBrush="#1565C0" BorderThickness="1.5"
+                                         Foreground="#1565C0" FontWeight="SemiBold"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── Таб 5: Формули и алгоритъм ────────────────────────────── -->
+            <TabItem Header="📐 Формули и алгоритъм">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Border Padding="16" Background="White">
+                        <TextBox Text="{Binding Source={x:Static vm:DhwLossCalculatorViewModel.MethodologyText}, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 Background="#FAFAFA"
+                                 BorderThickness="0"
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Disabled"/>
+                    </Border>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- ═══ Долна лента: изчисляване + потвърждаване ═════════════════════ -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Мини-резултат -->
+                <Border Grid.Column="0" Background="#E8F5E9" BorderBrush="#81C784" BorderThickness="1"
+                        Padding="10,6" Margin="0,0,12,0" CornerRadius="3">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" FontWeight="Bold" Foreground="#2E7D32"
+                                   Text="Q_rbl = "/>
+                        <TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="Bold" Foreground="#1B5E20"
+                                   Text="{Binding ResultQrblYear, StringFormat=0.00}"/>
+                        <TextBlock VerticalAlignment="Center" FontWeight="Bold" Foreground="#2E7D32"
+                                   Text=" kWh/год   |   f_rbl = "/>
+                        <TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="Bold" Foreground="#1B5E20"
+                                   Text="{Binding ResultFrblPct, StringFormat=0.00}"/>
+                        <TextBlock VerticalAlignment="Center" FontWeight="Bold" Foreground="#2E7D32"
+                                   Text=" %"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Бутони -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <Button Content="⚡ Изчисли" Click="CalculateButton_Click"
+                Style="{StaticResource PrimaryButton}" Padding="18,8" FontSize="13"/>
+                    <Button Content="✓ Приложи резултата" Command="{Binding ConfirmCommand}"
+                            Style="{StaticResource SuccessButton}" Padding="18,8" FontSize="13"
+                            Name="ConfirmButton"/>
+                    <Button Content="✕ Затвори" Click="CloseButton_Click"
+                            Padding="14,8" FontSize="13" Background="#757575" Foreground="White"
+                            BorderThickness="0" Cursor="Hand" Margin="4,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

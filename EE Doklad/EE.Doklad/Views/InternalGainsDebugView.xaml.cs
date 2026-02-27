@@ -170,7 +170,15 @@ namespace EE.Doklad.Views
                 inp.HeatingStartDay    = hs.sd;
                 inp.HeatingEndMonth    = hs.em;
                 inp.HeatingEndDay      = hs.ed;
-                inp.HeatingHoursPerDay = 24.0;
+                inp.HeatingHoursPerDay = 24.0;  // за SeasonMask (дни) – реалните часове се задават по-долу
+
+                // График на обитаване – отопление (от Секция 5, ред "График на обитаване")
+                double occWd_H  = ParseDouble(_objData.OccupancyWorkdaysHours);
+                double occSat_H = ParseDouble(_objData.OccupancySaturdayHours);
+                double occSun_H = ParseDouble(_objData.OccupancySundayHours);
+                inp.Occupancy_HeatingWorkdaysH  = occWd_H;
+                inp.Occupancy_HeatingSaturdayH  = occSat_H;
+                inp.Occupancy_HeatingSundayH    = occSun_H;
 
                 if (_objData.CoolingSeasonEnabled &&
                     _objData.CoolingSeasonStartMonth.HasValue &&
@@ -181,7 +189,23 @@ namespace EE.Doklad.Views
                     inp.CoolingEndMonth    = _objData.CoolingSeasonEndMonth;
                     inp.CoolingEndDay      = _objData.CoolingSeasonEndDay
                         ?? DateTime.DaysInMonth(inp.YearRef, _objData.CoolingSeasonEndMonth.Value);
-                    inp.CoolingHoursPerDay = 24.0;
+                    inp.CoolingHoursPerDay = 24.0;  // за SeasonMask
+
+                    // График на обитаване – охлаждане (от Секция 5, "График на обитаване" охладителен период)
+                    var occCoolSched = _objData.CoolingSchedules?.OccupancyCoolingSchedule;
+                    if (occCoolSched != null)
+                    {
+                        inp.Occupancy_CoolingWorkdaysH  = occCoolSched.Workdays.GetHours();
+                        inp.Occupancy_CoolingSaturdayH  = occCoolSched.Saturday.GetHours();
+                        inp.Occupancy_CoolingSundayH    = occCoolSched.Sunday.GetHours();
+                    }
+                    else
+                    {
+                        // Ако няма cooling occupancy график – ползваме heating стойностите
+                        inp.Occupancy_CoolingWorkdaysH  = occWd_H;
+                        inp.Occupancy_CoolingSaturdayH  = occSat_H;
+                        inp.Occupancy_CoolingSundayH    = occSun_H;
+                    }
                 }
             }
 

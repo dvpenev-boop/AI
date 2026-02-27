@@ -9,6 +9,7 @@
 
     <UserControl.Resources>
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
+        <converters:EnumEqualityConverter x:Key="EqualityConverter"/>
         
         <!-- Style за editable редове -->
         <Style x:Key="EditableTextBoxStyle" TargetType="TextBox">
@@ -222,13 +223,34 @@
 
                     <!-- ══ Секция 23 – Регенерируеми загуби към зоната (WA) ══ -->
 
-                    <!-- Row 12: Регенерируеми загуби – директна стойност (editable) -->
+                    <!-- Row 12: Регенерируеми загуби – с избор на режим и бутон Методика -->
                     <Border Grid.Row="12" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,1,1,1" Background="#FFF3E0">
                         <StackPanel Margin="10,4">
                             <TextBlock Text="Регенерируеми загуби към зоната [kWh/год]"
                                        FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E65100"/>
                             <TextBlock Text="Използва се в Секция 23 като Q_spec;int;WA (остава 0 ако не е попълнено)"
                                        FontSize="10" Foreground="#BF360C" TextWrapping="Wrap"/>
+                            <!-- Режим: радио бутони -->
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <RadioButton Content="Ръчно"
+                                             GroupName="DhwLossMode"
+                                             FontSize="11" Margin="0,0,10,0"
+                                             IsChecked="{Binding RecoverableLossMode,
+                                                 Converter={StaticResource EqualityConverter},
+                                                 ConverterParameter=Manual}"/>
+                                <RadioButton Content="Авт. (методика)"
+                                             GroupName="DhwLossMode"
+                                             FontSize="11" Margin="0,0,10,0"
+                                             IsChecked="{Binding RecoverableLossMode,
+                                                 Converter={StaticResource EqualityConverter},
+                                                 ConverterParameter=Automatic}"/>
+                                <RadioButton Content="% дял"
+                                             GroupName="DhwLossMode"
+                                             FontSize="11"
+                                             IsChecked="{Binding RecoverableLossMode,
+                                                 Converter={StaticResource EqualityConverter},
+                                                 ConverterParameter=PercentShare}"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                     <Border Grid.Row="12" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,1,1,1" Background="#FFF3E0">
@@ -239,7 +261,7 @@
                         <TextBlock Text="kWh/год" Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#E65100"/>
                     </Border>
 
-                    <!-- Row 13: Дял на регенерируемите загуби (editable) -->
+                    <!-- Row 13: Дял на регенерируемите загуби (editable, активен само при % режим) -->
                     <Border Grid.Row="13" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FFF3E0">
                         <StackPanel Margin="10,4">
                             <TextBlock Text="Дял на регенерируемите загуби [%]"
@@ -258,7 +280,7 @@
 
                     <!-- Row 14: Ефективни регенерируеми загуби (computed, read-only) -->
                     <Border Grid.Row="14" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FCE4EC">
-                        <TextBlock Text="Ефективни регенерируеми загуби (→ Секция 23)"
+                        <TextBlock Text="Ефективни регенерируеми загуби (&#x2192; Секция 23)"
                                    Padding="10" VerticalAlignment="Center" FontWeight="Bold" Foreground="#880E4F"/>
                     </Border>
                     <Border Grid.Row="14" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Background="#FCE4EC">
@@ -271,18 +293,49 @@
                 </Grid>
             </Border>
 
+            <!-- Бутон „Методика (БГВ)" -->
+            <Button x:Name="BtnMethodology"
+                    Content="📐 Методика (БГВ) – Регенерируеми загуби"
+                    Click="BtnMethodology_Click"
+                    Margin="0,10,0,0"
+                    Padding="14,8"
+                    FontSize="12"
+                    Background="#E65100"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    HorizontalAlignment="Left">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#E65100"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#BF360C"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
             <!-- Информационна бележка -->
             <Border Background="#E3F2FD" BorderBrush="#2196F3" BorderThickness="1" Padding="15" Margin="0,10,0,0">
                 <StackPanel>
-                    <TextBlock Text="ℹ Забележки:" FontWeight="Bold" Foreground="#1976D2" Margin="0,0,0,10"/>
+                    <TextBlock Text="&#x2139; Забележки:" FontWeight="Bold" Foreground="#1976D2" Margin="0,0,0,10"/>
                     <TextBlock TextWrapping="Wrap" Foreground="#0D47A1" FontSize="11">
-                        <Run Text="• Брой хора и отопляема площ се взимат автоматично от секция 5 (Данни за обекта)."/>
+                        <Run Text="&#x2022; Брой хора и отопляема площ се взимат автоматично от секция 5 (Данни за обекта)."/>
                         <LineBreak/>
-                        <Run Text="• Брой дни се изчислява автоматично по формулата: (365 / 7) × 7 - почивни дни."/>
+                        <Run Text="&#x2022; Брой дни се изчислява автоматично по формулата: (365 / 7) &#xD7; 7 - почивни дни."/>
                         <LineBreak/>
-                        <Run Text="• За БГВ винаги се използват 7 дни в седмицата (денонощна консумация)."/>
+                        <Run Text="&#x2022; За БГВ винаги се използват 7 дни в седмицата (денонощна консумация)."/>
                         <LineBreak/>
-                        <Run Text="• Обща консумация и Енергия се изчисляват автоматично според зададените формули."/>
+                        <Run Text="&#x2022; Обща консумация и Енергия се изчисляват автоматично според зададените формули."/>
+                        <LineBreak/>
+                        <Run Text="&#x2022; Режим A (Ръчно): въведете kWh/год директно. Режим B (Авт.): натиснете &quot;Методика (БГВ)&quot;."/>
+                        <LineBreak/>
+                        <Run Text="&#x2022; Режим C (% дял): задайте % – изчислява се от системните загуби. Режим активен само ако kWh/год = 0."/>
                     </TextBlock>
                 </StackPanel>
             </Border>
