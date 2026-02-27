@@ -10,9 +10,7 @@ namespace EE.Doklad.Models
     {
         public PumpsAndFansSectionData()
         {
-            // Добавяме по един начален ред за да се вижда структурата на таблиците
-            HeatingRows.Add(new PumpFanHeatingRow());
-            CoolingRows.Add(new PumpFanCoolingRow());
+            // Таблиците стартират празни - потребителят добавя редове с бутона
         }
 
         [ObservableProperty]
@@ -23,8 +21,42 @@ namespace EE.Doklad.Models
 
         // ========== 15.1 ОТОПЛЕНИЕ ==========
 
+        // Разделени колекции: помпи и вентилатори поотделно
         [ObservableProperty]
-        private ObservableCollection<PumpFanHeatingRow> _heatingRows = new();
+        private ObservableCollection<PumpFanHeatingRow> _heatingPumpRows = new();
+
+        [ObservableProperty]
+        private ObservableCollection<PumpFanHeatingRow> _heatingFanRows = new();
+
+        /// <summary>
+        /// Обединена колекция за JSON сериализация и изчисления (обратна съвместимост)
+        /// </summary>
+        public ObservableCollection<PumpFanHeatingRow> HeatingRows
+        {
+            get
+            {
+                var all = new ObservableCollection<PumpFanHeatingRow>();
+                foreach (var r in HeatingPumpRows) all.Add(r);
+                foreach (var r in HeatingFanRows) all.Add(r);
+                return all;
+            }
+            set
+            {
+                // При десериализация: разпределяме редовете по тип
+                HeatingPumpRows.Clear();
+                HeatingFanRows.Clear();
+                if (value != null)
+                {
+                    foreach (var r in value)
+                    {
+                        if ((r.DeviceType ?? string.Empty).IndexOf("Вентил", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                            HeatingFanRows.Add(r);
+                        else
+                            HeatingPumpRows.Add(r);
+                    }
+                }
+            }
+        }
 
         [ObservableProperty]
         private string? _heatingEM = "0.96"; // Енергиен мениджмънт и поддръжка
@@ -54,8 +86,42 @@ namespace EE.Doklad.Models
 
         // ========== 15.2 ОХЛАЖДАНЕ ==========
 
+        // Разделени колекции: помпи и вентилатори поотделно
         [ObservableProperty]
-        private ObservableCollection<PumpFanCoolingRow> _coolingRows = new();
+        private ObservableCollection<PumpFanCoolingRow> _coolingPumpRows = new();
+
+        [ObservableProperty]
+        private ObservableCollection<PumpFanCoolingRow> _coolingFanRows = new();
+
+        /// <summary>
+        /// Обединена колекция за JSON сериализация и изчисления (обратна съвместимост)
+        /// </summary>
+        public ObservableCollection<PumpFanCoolingRow> CoolingRows
+        {
+            get
+            {
+                var all = new ObservableCollection<PumpFanCoolingRow>();
+                foreach (var r in CoolingPumpRows) all.Add(r);
+                foreach (var r in CoolingFanRows) all.Add(r);
+                return all;
+            }
+            set
+            {
+                // При десериализация: разпределяме редовете по тип
+                CoolingPumpRows.Clear();
+                CoolingFanRows.Clear();
+                if (value != null)
+                {
+                    foreach (var r in value)
+                    {
+                        if ((r.DeviceType ?? string.Empty).IndexOf("Вентил", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                            CoolingFanRows.Add(r);
+                        else
+                            CoolingPumpRows.Add(r);
+                    }
+                }
+            }
+        }
 
         [ObservableProperty]
         private string? _coolingEM = "0.96"; // Енергиен мениджмънт и поддръжка

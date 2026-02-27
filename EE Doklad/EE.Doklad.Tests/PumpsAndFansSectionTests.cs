@@ -23,10 +23,9 @@ namespace EE.Doklad.Tests
                 VentilationSundayHours = "0"
             };
 
-            // Clear default rows and add deterministic ones
-            data.HeatingRows.Clear();
-            data.HeatingRows.Add(new PumpFanHeatingRow { DeviceType = "Помпи отопление", NominalPower = "100", Quantity = "1" });
-            data.HeatingRows.Add(new PumpFanHeatingRow { DeviceType = "Вентилатори", NominalPower = "50", Quantity = "1" });
+            // Add deterministic rows directly to split collections
+            data.HeatingPumpRows.Add(new PumpFanHeatingRow { DeviceType = "Помпи отопление", NominalPower = "100", Quantity = "1" });
+            data.HeatingFanRows.Add(new PumpFanHeatingRow { DeviceType = "Вентилатори", NominalPower = "50", Quantity = "1" });
 
             var vm = new PumpsAndFansSectionViewModel(data, obj);
 
@@ -34,8 +33,8 @@ namespace EE.Doklad.Tests
             Assert.Equal(vm.HeatingTotalAnnualConsumption, vm.HeatingPumpsTotalAnnualConsumption + vm.HeatingFansTotalAnnualConsumption, 6);
 
             // Each subgroup equals sum of matching rows
-            var pumpRow = data.HeatingRows.First(r => !(r.DeviceType ?? string.Empty).Contains("Вентил"));
-            var fanRow = data.HeatingRows.First(r => (r.DeviceType ?? string.Empty).Contains("Вентил"));
+            var pumpRow = data.HeatingPumpRows.First();
+            var fanRow = data.HeatingFanRows.First();
 
             Assert.Equal(vm.HeatingPumpsTotalAnnualConsumption, pumpRow.AnnualConsumption, 6);
             Assert.Equal(vm.HeatingFansTotalAnnualConsumption, fanRow.AnnualConsumption, 6);
@@ -57,16 +56,15 @@ namespace EE.Doklad.Tests
                 VentilationSundayHours = "0"
             };
 
-            data.CoolingRows.Clear();
-            data.CoolingRows.Add(new PumpFanCoolingRow { DeviceType = "Помпи охлаждане", NominalPower = "200", Quantity = "1" });
-            data.CoolingRows.Add(new PumpFanCoolingRow { DeviceType = "Вентилатори (вентилация)", NominalPower = "80", Quantity = "1" });
+            data.CoolingPumpRows.Add(new PumpFanCoolingRow { DeviceType = "Помпи охлаждане", NominalPower = "200", Quantity = "1" });
+            data.CoolingFanRows.Add(new PumpFanCoolingRow { DeviceType = "Вентилатори (вентилация)", NominalPower = "80", Quantity = "1" });
 
             var vm = new PumpsAndFansSectionViewModel(data, obj);
 
             Assert.Equal(vm.CoolingTotalAnnualConsumption, vm.CoolingPumpsTotalAnnualConsumption + vm.CoolingFansTotalAnnualConsumption, 6);
 
-            var pumpRow = data.CoolingRows.First(r => !(r.DeviceType ?? string.Empty).Contains("Вентил"));
-            var fanRow = data.CoolingRows.First(r => (r.DeviceType ?? string.Empty).Contains("Вентил"));
+            var pumpRow = data.CoolingPumpRows.First();
+            var fanRow = data.CoolingFanRows.First();
 
             Assert.Equal(vm.CoolingPumpsTotalAnnualConsumption, pumpRow.AnnualConsumption, 6);
             Assert.Equal(vm.CoolingFansTotalAnnualConsumption, fanRow.AnnualConsumption, 6);

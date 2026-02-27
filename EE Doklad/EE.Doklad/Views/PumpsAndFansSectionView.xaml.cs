@@ -14,30 +14,11 @@ namespace EE.Doklad.Views
             InitializeComponent();
         }
 
-        private void AddHeatingRow_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (DataContext is PumpsAndFansSectionViewModel viewModel)
-            {
-                viewModel.Data.HeatingRows.Add(new PumpFanHeatingRow());
-            }
-        }
-
-        private void RemoveHeatingRow_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (DataContext is PumpsAndFansSectionViewModel viewModel)
-            {
-                if (viewModel.Data.HeatingRows.Count > 0)
-                {
-                    viewModel.Data.HeatingRows.RemoveAt(viewModel.Data.HeatingRows.Count - 1);
-                }
-            }
-        }
-
         private void AddHeatingPump_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                viewModel.Data.HeatingRows.Add(new PumpFanHeatingRow { DeviceType = "Помпи отопление" });
+                viewModel.Data.HeatingPumpRows.Add(new PumpFanHeatingRow { DeviceType = "Помпи отопление" });
             }
         }
 
@@ -45,16 +26,9 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                var list = viewModel.Data.HeatingRows;
-                for (int i = list.Count - 1; i >= 0; i--)
-                {
-                    var item = list[i];
-                    if (!(item.DeviceType ?? string.Empty).Contains("Вентил"))
-                    {
-                        list.RemoveAt(i);
-                        break;
-                    }
-                }
+                var list = viewModel.Data.HeatingPumpRows;
+                if (list.Count > 0)
+                    list.RemoveAt(list.Count - 1);
             }
         }
 
@@ -62,7 +36,7 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                viewModel.Data.HeatingRows.Add(new PumpFanHeatingRow { DeviceType = "Вентилатори" });
+                viewModel.Data.HeatingFanRows.Add(new PumpFanHeatingRow { DeviceType = "Вентилатори" });
             }
         }
 
@@ -70,35 +44,9 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                var list = viewModel.Data.HeatingRows;
-                for (int i = list.Count - 1; i >= 0; i--)
-                {
-                    var item = list[i];
-                    if ((item.DeviceType ?? string.Empty).Contains("Вентил"))
-                    {
-                        list.RemoveAt(i);
-                        break;
-                    }
-                }
-            }
-        }
-
-        private void AddCoolingRow_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (DataContext is PumpsAndFansSectionViewModel viewModel)
-            {
-                viewModel.Data.CoolingRows.Add(new PumpFanCoolingRow());
-            }
-        }
-
-        private void RemoveCoolingRow_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (DataContext is PumpsAndFansSectionViewModel viewModel)
-            {
-                if (viewModel.Data.CoolingRows.Count > 0)
-                {
-                    viewModel.Data.CoolingRows.RemoveAt(viewModel.Data.CoolingRows.Count - 1);
-                }
+                var list = viewModel.Data.HeatingFanRows;
+                if (list.Count > 0)
+                    list.RemoveAt(list.Count - 1);
             }
         }
 
@@ -106,7 +54,7 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                viewModel.Data.CoolingRows.Add(new PumpFanCoolingRow { DeviceType = "Помпи охлаждане" });
+                viewModel.Data.CoolingPumpRows.Add(new PumpFanCoolingRow { DeviceType = "Помпи охлаждане" });
             }
         }
 
@@ -114,16 +62,9 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                var list = viewModel.Data.CoolingRows;
-                for (int i = list.Count - 1; i >= 0; i--)
-                {
-                    var item = list[i];
-                    if (!(item.DeviceType ?? string.Empty).Contains("Вентил"))
-                    {
-                        list.RemoveAt(i);
-                        break;
-                    }
-                }
+                var list = viewModel.Data.CoolingPumpRows;
+                if (list.Count > 0)
+                    list.RemoveAt(list.Count - 1);
             }
         }
 
@@ -131,7 +72,7 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                viewModel.Data.CoolingRows.Add(new PumpFanCoolingRow { DeviceType = "Вентилатори (вентилация)" });
+                viewModel.Data.CoolingFanRows.Add(new PumpFanCoolingRow { DeviceType = "Вентилатори (вентилация)" });
             }
         }
 
@@ -139,16 +80,9 @@ namespace EE.Doklad.Views
         {
             if (DataContext is PumpsAndFansSectionViewModel viewModel)
             {
-                var list = viewModel.Data.CoolingRows;
-                for (int i = list.Count - 1; i >= 0; i--)
-                {
-                    var item = list[i];
-                    if ((item.DeviceType ?? string.Empty).Contains("Вентил"))
-                    {
-                        list.RemoveAt(i);
-                        break;
-                    }
-                }
+                var list = viewModel.Data.CoolingFanRows;
+                if (list.Count > 0)
+                    list.RemoveAt(list.Count - 1);
             }
         }
     }

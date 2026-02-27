@@ -127,7 +127,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
 
                         <!-- Data Rows (pumps) -->
-                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingPumpsView}">
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingPumpRows}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="#888">
@@ -188,7 +188,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
 
                         <!-- Data Rows (fans) -->
-                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingFansView}">
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding HeatingFanRows}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="#888">
@@ -300,7 +300,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
 
                         <!-- Data Rows (pumps) -->
-                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingPumpsView}">
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingPumpRows}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="#888">
@@ -361,7 +361,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="5" Text="Консумация [kWh/год]" Style="{StaticResource HeaderLabelStyle}"/>
 
                         <!-- Data Rows (fans) -->
-                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingFansView}">
+                        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding CoolingFanRows}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="#888">
