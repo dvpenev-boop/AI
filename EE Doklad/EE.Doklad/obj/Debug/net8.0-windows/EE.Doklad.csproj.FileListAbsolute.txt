@@ -72,6 +72,7 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ClimateDataView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorTypeSelectionDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ImportOptionsWindow.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InternalGainsDebugView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\MatrixSummaryView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\RoofTypeSelectionDialog.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ShadingEditorDialog.baml
@@ -85,7 +86,9 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CertificatesSectionEdit
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ClimateDataView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ColdRoofDetailControl.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ConclusionSectionEditor.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoolingSectionView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoverPageEditor.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\DhwLossMethodologyWindow.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\EnergyClassSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ExternalWallsSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorExternalAirPanel.g.cs
@@ -99,6 +102,7 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\HeatingSectionView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\HotWaterSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ImportOptionsWindow.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InsertSectionDialog.g.cs
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InternalGainsDebugView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\IntroSectionEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\LightingCatalogView.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\LightingSectionEditor.g.cs
@@ -128,7 +132,9 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AppliancesCatalogView.b
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\AppliancesSectionEditor.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ColdRoofDetailControl.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ConclusionSectionEditor.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoolingSectionView.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoverPageEditor.baml
+E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\DhwLossMethodologyWindow.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\EnergyClassSectionEditor.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\ExternalWallsSectionEditor.baml
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\FloorPanels\FloorExternalAirPanel.baml
@@ -167,9 +173,3 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\refint\EE.Doklad.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.pdb
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.genruntimeconfig.cache
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\ref\EE.Doklad.dll
-e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoolingSectionView.g.cs
-e:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\CoolingSectionView.baml
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InternalGainsDebugView.baml
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\InternalGainsDebugView.g.cs
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\DhwLossMethodologyWindow.g.cs
-E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\DhwLossMethodologyWindow.baml
