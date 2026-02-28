@@ -14,13 +14,20 @@ namespace EE.Doklad.Views
     {
         private WindowSummaryRow _summaryRow;
         private ObservableCollection<WindowBatch> _batchesCollection;
+        private int? _climateZone;
+        private bool _heatingEnabled;
+        private bool _coolingEnabled;
 
-        public WindowBatchDetailsDialog(WindowSummaryRow summaryRow, ObservableCollection<WindowBatch> allBatches)
+        public WindowBatchDetailsDialog(WindowSummaryRow summaryRow, ObservableCollection<WindowBatch> allBatches,
+                                        int? climateZone = null, bool heatingEnabled = true, bool coolingEnabled = true)
         {
             InitializeComponent();
 
             _summaryRow = summaryRow;
             _batchesCollection = allBatches;
+            _climateZone = climateZone;
+            _heatingEnabled = heatingEnabled;
+            _coolingEnabled = coolingEnabled;
 
             // Set title
             Title = $"Детайли за група: {summaryRow.TypeName} / {WindowCalculator.GetOrientationLabel(summaryRow.Orientation)}";
@@ -57,7 +64,7 @@ namespace EE.Doklad.Views
                 TypeName = _summaryRow.TypeName
             };
 
-            var dialog = new AddWindowFullDialog(newBatch);
+            var dialog = new AddWindowFullDialog(newBatch, _climateZone, _heatingEnabled, _coolingEnabled);
             if (dialog.ShowDialog() == true)
             {
                 _batchesCollection.Add(dialog.Result);
@@ -71,7 +78,7 @@ namespace EE.Doklad.Views
         {
             if (sender is System.Windows.Controls.Button button && button.DataContext is WindowBatch batch)
             {
-                var dialog = new AddWindowFullDialog(batch);
+                var dialog = new AddWindowFullDialog(batch, _climateZone, _heatingEnabled, _coolingEnabled);
                 if (dialog.ShowDialog() == true)
                 {
                     // Update batch in place

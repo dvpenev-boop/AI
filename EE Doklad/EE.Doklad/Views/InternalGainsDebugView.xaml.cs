@@ -180,6 +180,23 @@ namespace EE.Doklad.Views
                 inp.Occupancy_HeatingSaturdayH  = occSat_H;
                 inp.Occupancy_HeatingSundayH    = occSun_H;
 
+                // Почивни дни по месеци (от Секция 5 – таблицата "Дни почивни по месеци")
+                inp.DaysOffPerMonth = new double[12]
+                {
+                    ParseDouble(_objData.DaysOffJanuary),
+                    ParseDouble(_objData.DaysOffFebruary),
+                    ParseDouble(_objData.DaysOffMarch),
+                    ParseDouble(_objData.DaysOffApril),
+                    ParseDouble(_objData.DaysOffMay),
+                    ParseDouble(_objData.DaysOffJune),
+                    ParseDouble(_objData.DaysOffJuly),
+                    ParseDouble(_objData.DaysOffAugust),
+                    ParseDouble(_objData.DaysOffSeptember),
+                    ParseDouble(_objData.DaysOffOctober),
+                    ParseDouble(_objData.DaysOffNovember),
+                    ParseDouble(_objData.DaysOffDecember),
+                };
+
                 if (_objData.CoolingSeasonEnabled &&
                     _objData.CoolingSeasonStartMonth.HasValue &&
                     _objData.CoolingSeasonEndMonth.HasValue)

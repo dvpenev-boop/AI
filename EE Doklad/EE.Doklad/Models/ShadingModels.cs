@@ -69,12 +69,6 @@ namespace EE.Doklad.Models
         private double[] fshDirMonthly = new double[12] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
         /// <summary>
-        /// Режим на редакция (Simple/Custom)
-        /// </summary>
-        [ObservableProperty]
-        private ShadingEditMode editMode = ShadingEditMode.Simple;
-
-        /// <summary>
         /// Географска ширина (за изчисления)
         /// </summary>
         [ObservableProperty]
@@ -85,15 +79,6 @@ namespace EE.Doklad.Models
         /// </summary>
         [ObservableProperty]
         private bool northHemisphere = true;
-    }
-
-    /// <summary>
-    /// Режим на редакция на засенчването
-    /// </summary>
-    public enum ShadingEditMode
-    {
-        Simple,  // Прост режим (checkbox за overhang, left fin, right fin)
-        Custom   // Custom режим (DataGrid със списък от обекти)
     }
 
     /// <summary>

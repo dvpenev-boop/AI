@@ -17,12 +17,36 @@ namespace EE.Doklad.Views
         private List<ObstacleProfile> _obstacleProfiles = new();
         // shading
         private ShadingConfig? _shadingConfigLocal;
+        // Climate zone for seasonal calculations (1-9), null = use defaults
+        private int? _climateZone;
+        // Season enabled flags
+        private bool _heatingSeasonEnabled = true;
+        private bool _coolingSeasonEnabled = true;
+
         public WindowBatch Result => _batch;
 
-        public AddWindowFullDialog(WindowBatch? existingBatch = null)
+        // Heating seasons per climate zone (sm, sd, em, ed)
+        private static readonly (int sm, int sd, int em, int ed)[] HeatingSeason =
+        {
+            (10, 21, 4, 20),  // Zone 1
+            (10, 21, 4, 25),  // Zone 2
+            (10, 23, 4, 15),  // Zone 3
+            (10, 16, 4, 23),  // Zone 4
+            (10, 25, 4, 19),  // Zone 5
+            (10, 24, 4,  6),  // Zone 6
+            (10, 15, 4, 23),  // Zone 7
+            (10, 28, 4,  6),  // Zone 8
+            (10, 28, 4,  5),  // Zone 9
+        };
+
+        public AddWindowFullDialog(WindowBatch? existingBatch = null, int? climateZone = null, 
+                                    bool heatingEnabled = true, bool coolingEnabled = true)
         {
             InitializeComponent();
             _batch = existingBatch ?? new WindowBatch();
+            _climateZone = climateZone;
+            _heatingSeasonEnabled = heatingEnabled;
+            _coolingSeasonEnabled = coolingEnabled;
             LoadShadingOptions();
             LoadObstacleProfiles();
             InitializeAllSections();
@@ -99,7 +123,18 @@ namespace EE.Doklad.Views
             FrameFractionTextBox.TextChanged += AnyInputChanged;
 
             // Shading - use ComboBox for mode (0=None,1=Internal,2=External)
-            ShadingModeComboBox.SelectionChanged += (s, e) => AnyInputChanged(s, e);
+            ShadingModeComboBox.SelectionChanged += (s, e) =>
+            {
+                bool hasShading = ShadingModeComboBox.SelectedIndex > 0;
+                // Enable/disable category combobox and datagrid
+                ShadingCategoryComboBox.IsEnabled = hasShading;
+                ShadingOptionsDataGrid.IsEnabled = hasShading;
+                
+                // Auto-select first shading option when switching to shaded mode
+                if (hasShading && ShadingOptionsDataGrid.SelectedItem == null && ShadingOptionsDataGrid.Items.Count > 0)
+                    ShadingOptionsDataGrid.SelectedIndex = 0;
+                AnyInputChanged(s, e);
+            };
             // Default shading mode: none if no shading type saved, otherwise internal
             ShadingModeComboBox.SelectedIndex = string.IsNullOrEmpty(_batch.ShadingTypeId) ? 0 : 1;
             ShadingCategoryComboBox.ItemsSource = _shadingByCategory.Keys.ToList();
@@ -108,26 +143,41 @@ namespace EE.Doklad.Views
                 ShadingCategoryComboBox.SelectedIndex = 0;
                 var first = ShadingCategoryComboBox.SelectedItem as string;
                 if (first != null && _shadingByCategory.ContainsKey(first))
+                {
                     ShadingOptionsDataGrid.ItemsSource = _shadingByCategory[first];
+                    // Pre-select first row so preview is immediate
+                    if (ShadingOptionsDataGrid.Items.Count > 0)
+                        ShadingOptionsDataGrid.SelectedIndex = 0;
+                }
             }
             ShadingCategoryComboBox.SelectionChanged += ShadingCategoryComboBox_SelectionChanged;
             ShadingOptionsDataGrid.SelectionChanged += AnyInputChanged;
 
-            // Obstacle
-            // Replace old obstacle dropdown with simplified shading controls
-            // Wiring for edit/clear buttons and initial summary
+            // Obstacle (section 6) - ComboBox replaces radio buttons
+            ObstacleModeComboBox.SelectionChanged += (s, e) =>
+            {
+                bool hasShading = ObstacleModeComboBox.SelectedIndex == 1;
+                EditShadingButton.IsEnabled = hasShading;
+                ClearShadingButton.IsEnabled = hasShading;
+                UpdateShadingSummaryUI();
+                UpdatePreview();
+            };
             EditShadingButton.Click += EditShadingButton_Click;
             ClearShadingButton.Click += (s, e) => { ClearShading(); UpdatePreview(); };
             // initialize from existing batch shading config (if present)
             if (_batch.ShadingConfig != null)
             {
                 _shadingConfigLocal = _batch.ShadingConfig;
-                WithShadingRadio.IsChecked = true;
+                ObstacleModeComboBox.SelectedIndex = 1;
+                EditShadingButton.IsEnabled = true;
+                ClearShadingButton.IsEnabled = true;
             }
             else
             {
                 _shadingConfigLocal = null;
-                NoShadingRadio.IsChecked = true;
+                ObstacleModeComboBox.SelectedIndex = 0;
+                EditShadingButton.IsEnabled = false;
+                ClearShadingButton.IsEnabled = false;
             }
             UpdateShadingSummaryUI();
 
@@ -177,8 +227,9 @@ namespace EE.Doklad.Views
                     _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
 
                 // Set UI to show shading
-                // (radio buttons and summary updated)
-                if (WithShadingRadio != null) WithShadingRadio.IsChecked = true;
+                if (ObstacleModeComboBox != null) ObstacleModeComboBox.SelectedIndex = 1;
+                EditShadingButton.IsEnabled = true;
+                ClearShadingButton.IsEnabled = true;
                 UpdateShadingSummaryUI();
                 UpdatePreview();
             }
@@ -189,7 +240,9 @@ namespace EE.Doklad.Views
             _shadingConfigLocal = null;
             _batch.ShadingConfig = null;
             _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
-            NoShadingRadio.IsChecked = true;
+            if (ObstacleModeComboBox != null) ObstacleModeComboBox.SelectedIndex = 0;
+            EditShadingButton.IsEnabled = false;
+            ClearShadingButton.IsEnabled = false;
             UpdateShadingSummaryUI();
         }
 
@@ -222,7 +275,12 @@ namespace EE.Doklad.Views
         private void ShadingCategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ShadingCategoryComboBox.SelectedItem is string cat && _shadingByCategory.ContainsKey(cat))
+            {
                 ShadingOptionsDataGrid.ItemsSource = _shadingByCategory[cat];
+                // Auto-select first row in new category
+                if (ShadingOptionsDataGrid.Items.Count > 0)
+                    ShadingOptionsDataGrid.SelectedIndex = 0;
+            }
         }
 
         private void UpdatePreview()
@@ -245,18 +303,27 @@ namespace EE.Doklad.Views
             const double Fw = 0.90; // correction factor from table 3
 
             double g_no_shade_base = a_gl * gAlt + (1 - a_gl) * gDif; // formula 3.42 base
-            double g_n_computed = Fw * g_no_shade_base; // apply correction 3.41
+            double g_n_computed = Fw * g_no_shade_base; // 3.41: g_n = 0.90 * base
 
-            // shading (use τ from selected shading option if any)
-            double tau = 1.0;
-            if (ShadingModeComboBox.SelectedIndex > 0 && ShadingOptionsDataGrid.SelectedItem is ShadingOption sop)
+            // shading factor - използваме FShadeInt или FShadeExt в зависимост от режима
+            double shadingFactor = 1.0;
+            if (ShadingModeComboBox.SelectedIndex > 0)
             {
-                tau = sop.TransmittanceTau > 0 ? sop.TransmittanceTau : 1.0;
+                ShadingOption? sop = ShadingOptionsDataGrid.SelectedItem as ShadingOption
+                    ?? ShadingOptionsDataGrid.Items.OfType<ShadingOption>().FirstOrDefault();
+                if (sop != null)
+                {
+                    // Index 1 = Вътрешна щора → FShadeInt, Index 2 = Външна щора → FShadeExt
+                    shadingFactor = ShadingModeComboBox.SelectedIndex == 1
+                        ? sop.FShadeInt
+                        : sop.FShadeExt;
+                }
             }
 
-            double g_with_shade_base = a_gl * (gAlt * tau) + (1 - a_gl) * (gDif * tau);
-            double g_eff = Fw * g_with_shade_base;
-            double shadingFactor = g_no_shade_base > 1e-9 ? (g_with_shade_base / g_no_shade_base) : 1.0;
+            // g_eff:
+            //   Без щора (shadingFactor=1.0): g_eff = 0.90 * g_n = Fw * g_n_computed  → приравнено на 3.41
+            //   С щора:                       g_eff = g_n * FShadeInt/Ext              → 3.42 + shading
+            double g_eff = g_n_computed * shadingFactor;
 
             // set computed GN (read-only textbox)
             GNTextBox.Text = g_n_computed.ToString("F3");
@@ -277,6 +344,108 @@ namespace EE.Doklad.Views
             PreviewTotalGlassArea.Text = totalGlass.ToString("F3");
             PreviewTotalUA.Text = totalUA.ToString("F3");
             PreviewTotalGA.Text = totalGA.ToString("F3");
+
+            // Изчисляване на g_eff по сезони — подаваме g_n (с Fw) и shadingFactor
+            UpdateSeasonalResults(g_n_computed, shadingFactor);
+        }
+
+        private void UpdateSeasonalResults(double gBase, double shadingFactor)
+        {
+            // Ако нито един режим не е активен, скриваме целия GroupBox
+            if (!_heatingSeasonEnabled && !_coolingSeasonEnabled)
+            {
+                SeasonalResultsGroupBox.Visibility = Visibility.Collapsed;
+                return;
+            }
+            
+            SeasonalResultsGroupBox.Visibility = Visibility.Visible;
+
+            // Изчисляваме месечни g_eff стойности
+            double[] gEffMonthly = new double[12];
+            for (int m = 0; m < 12; m++)
+            {
+                double F_sh_dir_m = _batch.FshDirMonthly[m];
+                gEffMonthly[m] = gBase * shadingFactor * F_sh_dir_m;
+            }
+
+            // Ако имаме климатична зона (1-9), използваме нейните сезонни данни
+            // Иначе използваме default Зона 1
+            int zone = _climateZone ?? 1;
+            zone = Math.Clamp(zone, 1, 9);
+            var season = HeatingSeason[zone - 1];
+
+            // Определяме кои месеци принадлежат към отоплителния сезон
+            List<int> heatingMonths = GetSeasonMonths(season.sm, season.sd, season.em, season.ed);
+
+            // Охладителен сезон - всички останали месеци
+            List<int> coolingMonths = Enumerable.Range(0, 12).Except(heatingMonths).ToList();
+
+            // Обновяваме HEATING ред
+            if (_heatingSeasonEnabled && heatingMonths.Count > 0)
+            {
+                double heatingAvg = heatingMonths.Average(m => gEffMonthly[m]);
+                HeatingSeasonRow.Visibility = Visibility.Visible;
+                HeatingMonthsText.Text = $"{GetMonthName(season.sm)}-{GetMonthName(season.em)} ({heatingMonths.Count} месеца)";
+                HeatingGEffAvg.Text = heatingAvg.ToString("F3");
+                HeatingNote.Text = $"Средно за отоплителен период (Климатична зона {zone})";
+            }
+            else
+            {
+                HeatingSeasonRow.Visibility = Visibility.Collapsed;
+            }
+
+            // Обновяваме COOLING ред
+            if (_coolingSeasonEnabled && coolingMonths.Count > 0)
+            {
+                double coolingAvg = coolingMonths.Average(m => gEffMonthly[m]);
+                CoolingSeasonRow.Visibility = Visibility.Visible;
+                CoolingMonthsText.Text = $"{GetMonthName(coolingMonths[0])}-{GetMonthName(coolingMonths[^1])} ({coolingMonths.Count} месеца)";
+                CoolingGEffAvg.Text = coolingAvg.ToString("F3");
+                CoolingNote.Text = "Средно за охладителен период";
+            }
+            else
+            {
+                CoolingSeasonRow.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Returns list of months (0-11) that belong to the heating season.
+        /// Season is defined by (startMonth, startDay) to (endMonth, endDay).
+        /// Assumes year wraparound (e.g. Oct 21 - Apr 20 crosses year boundary).
+        /// </summary>
+        private List<int> GetSeasonMonths(int startMonth, int startDay, int endMonth, int endDay)
+        {
+            List<int> months = new();
+            
+            // Convert to 0-based months for array indexing
+            int sm = startMonth - 1;  // e.g. 10 → 9 (October index)
+            int em = endMonth - 1;    // e.g. 4 → 3 (April index)
+
+            // If season wraps around year (e.g. Oct-Apr)
+            if (sm > em)
+            {
+                // Add months from start to December
+                for (int m = sm; m < 12; m++)
+                    months.Add(m);
+                // Add months from January to end
+                for (int m = 0; m <= em; m++)
+                    months.Add(m);
+            }
+            else
+            {
+                // Season within same year (e.g. May-Sep)
+                for (int m = sm; m <= em; m++)
+                    months.Add(m);
+            }
+
+            return months;
+        }
+
+        private string GetMonthName(int monthIndex)
+        {
+            string[] names = { "Яну", "Фев", "Мар", "Апр", "Май", "Юни", "Юли", "Авг", "Сеп", "Окт", "Ное", "Дек" };
+            return names[Math.Clamp(monthIndex, 0, 11)];
         }
 
         private void ValidateAll()
@@ -335,19 +504,31 @@ namespace EE.Doklad.Views
             _batch.FrameFraction = ffr / 100.0;
 
             // 5. Слънцезащита (ComboBox mode)
-            // Compute shading reduction factor based on τ
+            // Compute shading reduction factor based on mode (Internal/External)
             if (ShadingModeComboBox.SelectedIndex == 0)
             {
                 _batch.ShadingTypeId = null;
                 _batch.ShadingReductionFactor = 1.0;
             }
-            else if (ShadingOptionsDataGrid.SelectedItem is ShadingOption option)
+            else
             {
-                _batch.ShadingTypeId = option.Id;
-                double tau_save = option.TransmittanceTau > 0 ? option.TransmittanceTau : 1.0;
-                double g_with_shade_base_save = a_gl * (gAlt_save * tau_save) + (1 - a_gl) * (gDif_save * tau_save);
-                double shadingFactor_save = g_no_shade_base_save > 1e-9 ? (g_with_shade_base_save / g_no_shade_base_save) : 1.0;
-                _batch.ShadingReductionFactor = shadingFactor_save;
+                // Use selected row, or fall back to first available option
+                ShadingOption? option = ShadingOptionsDataGrid.SelectedItem as ShadingOption
+                    ?? ShadingOptionsDataGrid.Items.OfType<ShadingOption>().FirstOrDefault();
+                if (option != null)
+                {
+                    _batch.ShadingTypeId = option.Id;
+                    // Избираме между FShadeInt (вътрешна) и FShadeExt (външна)
+                    double shadingFactor_save = ShadingModeComboBox.SelectedIndex == 1 
+                        ? option.FShadeInt 
+                        : option.FShadeExt;
+                    _batch.ShadingReductionFactor = shadingFactor_save;
+                }
+                else
+                {
+                    _batch.ShadingTypeId = null;
+                    _batch.ShadingReductionFactor = 1.0;
+                }
             }
 
             // 6. Препятствия (засенчване) - използваме ShadingConfig и месечни F_sh,dir
@@ -365,6 +546,16 @@ namespace EE.Doklad.Views
                 // No shading: default 1.0 for all months
                 _batch.ShadingConfig = null;
                 _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+            }
+
+            // 7. Изчисляваме месечни g_eff стойности
+            // Формула: g_eff[m] = g_n * F_sh,gl * F_sh,dir[m]
+            _batch.GEffMonthly = new double[12];
+            for (int m = 0; m < 12; m++)
+            {
+                double F_sh_dir_m = _batch.FshDirMonthly[m];          // от точка 6 (засенчване/препятствия)
+                double F_sh_gl = _batch.ShadingReductionFactor;       // от точка 5 (щора) - FShadeInt или FShadeExt
+                _batch.GEffMonthly[m] = g_n_save * F_sh_gl * F_sh_dir_m;
             }
 
             // Генериране на TypeName (SaveAllData)

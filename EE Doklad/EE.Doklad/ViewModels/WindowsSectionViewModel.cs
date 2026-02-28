@@ -12,6 +12,7 @@ namespace EE.Doklad.ViewModels
     public partial class WindowsSectionViewModel : ObservableObject
     {
         private readonly WindowsSectionData _data;
+        private readonly Report? _report;
 
         [ObservableProperty]
         private string description = string.Empty;
@@ -22,9 +23,10 @@ namespace EE.Doklad.ViewModels
         [ObservableProperty]
         private WindowSummaryRow? selectedSummaryRow;
 
-        public WindowsSectionViewModel(WindowsSectionData data)
+        public WindowsSectionViewModel(WindowsSectionData data, Report? report = null)
         {
             _data = data;
+            _report = report;
             Description = data.Description;
 
             // Слушаме за промени в партидите
@@ -52,7 +54,20 @@ namespace EE.Doklad.ViewModels
         [RelayCommand]
         private void AddWindow()
         {
-            var dialog = new Views.AddWindowFullDialog();
+            // Опитваме се да намерим ObjectDataSectionData от Report
+            var objectData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            
+            int? climateZone = objectData?.ClimateZone;
+            bool heatingEnabled = objectData?.HeatingSeasonEnabled ?? true;
+            bool coolingEnabled = objectData?.CoolingSeasonEnabled ?? true;
+
+            var dialog = new Views.AddWindowFullDialog(
+                existingBatch: null,
+                climateZone: climateZone,
+                heatingEnabled: heatingEnabled,
+                coolingEnabled: coolingEnabled
+            );
+            
             if (dialog.ShowDialog() == true)
             {
                 _data.WindowBatches.Add(dialog.Result);
@@ -84,7 +99,15 @@ namespace EE.Doklad.ViewModels
         {
             if (SelectedSummaryRow == null) return;
 
-            var dialog = new Views.WindowBatchDetailsDialog(SelectedSummaryRow, _data.WindowBatches);
+            // Взимаме ObjectDataSectionData за да предадем климатичната зона
+            var objectData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            
+            int? climateZone = objectData?.ClimateZone;
+            bool heatingEnabled = objectData?.HeatingSeasonEnabled ?? true;
+            bool coolingEnabled = objectData?.CoolingSeasonEnabled ?? true;
+
+            var dialog = new Views.WindowBatchDetailsDialog(SelectedSummaryRow, _data.WindowBatches, 
+                                                             climateZone, heatingEnabled, coolingEnabled);
             dialog.ShowDialog();
 
             // Refresh summary after dialog closes

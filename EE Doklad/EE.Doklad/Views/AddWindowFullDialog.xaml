@@ -116,51 +116,64 @@
             </GroupBox>
             <!-- Секция 5: Слънцезащита -->
             <GroupBox Header="5. Слънцезащита" Margin="0,6">
-                <StackPanel Margin="8">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Режим на щора:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <ComboBox x:Name="ShadingModeComboBox" Width="160" Margin="0,0,12,0" HorizontalAlignment="Left">
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <!-- 1. Режим на щора -->
+                    <StackPanel Orientation="Vertical" Margin="0,0,20,0">
+                        <TextBlock Text="Режим на щора:" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="ShadingModeComboBox" Width="140">
                             <ComboBoxItem>Без щора</ComboBoxItem>
                             <ComboBoxItem>Вътрешна щора</ComboBoxItem>
                             <ComboBoxItem>Външна щора</ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
-                    <ComboBox x:Name="ShadingCategoryComboBox" Width="300" Margin="0,8,0,0" HorizontalAlignment="Left" HorizontalContentAlignment="Left"/>
-                    <DataGrid x:Name="ShadingOptionsDataGrid" AutoGenerateColumns="False" Height="120" Margin="0,8,0,0">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
-                            <DataGridTextColumn Header="α" Binding="{Binding Alpha}" Width="60"/>
-                            <DataGridTextColumn Header="τ" Binding="{Binding Tau}" Width="60"/>
-                            <DataGridTextColumn Header="F_sh_int" Binding="{Binding FShadeInt}" Width="80"/>
-                            <DataGridTextColumn Header="F_sh_ext" Binding="{Binding FShadeExt}" Width="80"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <TextBlock x:Name="ShadingPreviewTextBlock" FontWeight="Bold" Margin="0,8,0,0"/>
+                    
+                    <!-- 2. Тип щора -->
+                    <StackPanel Orientation="Vertical" Margin="0,0,20,0">
+                        <TextBlock Text="Тип щора:" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="ShadingCategoryComboBox" Width="200" IsEnabled="False"/>
+                    </StackPanel>
+                    
+                    <!-- 3. Таблица с параметри -->
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Параметри:" Margin="0,0,0,4"/>
+                        <DataGrid x:Name="ShadingOptionsDataGrid"
+                                  AutoGenerateColumns="False"
+                                  Height="115"
+                                  Width="320"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeColumns="False"
+                                  CanUserSortColumns="False"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="All"
+                                  HeadersVisibility="Column"
+                                  RowHeaderWidth="0"
+                                  IsEnabled="False"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  HorizontalScrollBarVisibility="Disabled">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="α"        Binding="{Binding AbsorptionAlpha,  StringFormat=F2}" Width="65"  IsReadOnly="True"/>
+                                <DataGridTextColumn Header="τ"        Binding="{Binding TransmittanceTau, StringFormat=F2}" Width="65"  IsReadOnly="True"/>
+                                <DataGridTextColumn Header="F_sh,int" Binding="{Binding FShadeInt,        StringFormat=F2}" Width="90"  IsReadOnly="True"/>
+                                <DataGridTextColumn Header="F_sh,ext" Binding="{Binding FShadeExt,        StringFormat=F2}" Width="90"  IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
                 </StackPanel>
             </GroupBox>
-            <!-- Секция 6: Препятствия (засенчване) - опростен UI, отваря модален редактор -->
+            <!-- Секция 6: Препятствия (засенчване) -->
             <GroupBox Header="6. Препятствия (засенчване)" Margin="0,6">
-                <Grid Margin="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="180"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Vertical">
-                        <TextBlock Text="Засенчване:" VerticalAlignment="Center"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                            <RadioButton x:Name="NoShadingRadio" Content="Без засенчване" GroupName="ShadingMode" IsChecked="True" Margin="0,0,8,0"/>
-                            <RadioButton x:Name="WithShadingRadio" Content="Засенчване…" GroupName="ShadingMode"/>
-                        </StackPanel>
+                <StackPanel Margin="8" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Засенчване:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox x:Name="ObstacleModeComboBox" Width="160" Margin="0,0,16,0" HorizontalAlignment="Left">
+                            <ComboBoxItem>Няма засенчване</ComboBoxItem>
+                            <ComboBoxItem>Засенчване</ComboBoxItem>
+                        </ComboBox>
+                        <Button x:Name="EditShadingButton" Content="Добави/Редактирай елемент" Width="190" Margin="0,0,8,0" IsEnabled="False"/>
+                        <Button x:Name="ClearShadingButton" Content="Изчисти" Width="80" IsEnabled="False"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Vertical">
-                        <TextBlock Text="Кратко резюме:" FontWeight="Bold"/>
-                        <TextBlock x:Name="ShadingSummaryTextBlock" Text="Няма засенчване" Margin="0,6,0,8"/>
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="EditShadingButton" Content="Редактирай засенчване…" Width="180" Margin="0,0,8,0"/>
-                            <Button x:Name="ClearShadingButton" Content="Изчисти" Width="80"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
+                    <TextBlock x:Name="ShadingSummaryTextBlock" Text="" Margin="0,6,0,0" Foreground="Gray" FontStyle="Italic"/>
+                </StackPanel>
             </GroupBox>
             <!-- Preview панел -->
             <GroupBox Header="Преглед на изчисленията" Margin="0,0,0,15">
@@ -185,6 +198,52 @@
                     <TextBlock x:Name="PreviewTotalUA" FontWeight="Bold"/>
                     <TextBlock Text="gA (Count*g_eff*AreaGlass):"/>
                     <TextBlock x:Name="PreviewTotalGA" FontWeight="Bold"/>
+                </StackPanel>
+            </GroupBox>
+            <!-- Резултати по режим -->
+            <GroupBox x:Name="SeasonalResultsGroupBox" Header="Резултати по режим (g_eff средно)" Margin="0,0,0,15">
+                <StackPanel Margin="10">
+                    <!-- Header -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Период" Grid.Column="0" FontWeight="Bold"/>
+                        <TextBlock Text="Месеци" Grid.Column="1" FontWeight="Bold"/>
+                        <TextBlock Text="g_eff средно" Grid.Column="2" FontWeight="Bold"/>
+                        <TextBlock Text="Забележки" Grid.Column="3" FontWeight="Bold"/>
+                    </Grid>
+                    
+                    <!-- Отоплителен ред -->
+                    <Grid x:Name="HeatingSeasonRow" Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Отоплителен" Grid.Column="0"/>
+                        <TextBlock x:Name="HeatingMonthsText" Text="—" Grid.Column="1" Foreground="Gray"/>
+                        <TextBlock x:Name="HeatingGEffAvg" Text="—" Grid.Column="2" FontWeight="Bold"/>
+                        <TextBlock x:Name="HeatingNote" Text="" Grid.Column="3" Foreground="Gray" FontSize="11"/>
+                    </Grid>
+                    
+                    <!-- Охладителен ред -->
+                    <Grid x:Name="CoolingSeasonRow" Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Охладителен" Grid.Column="0"/>
+                        <TextBlock x:Name="CoolingMonthsText" Text="—" Grid.Column="1" Foreground="Gray"/>
+                        <TextBlock x:Name="CoolingGEffAvg" Text="—" Grid.Column="2" FontWeight="Bold"/>
+                        <TextBlock x:Name="CoolingNote" Text="" Grid.Column="3" Foreground="Gray" FontSize="11"/>
+                    </Grid>
                 </StackPanel>
             </GroupBox>
             <!-- Долни бутони -->

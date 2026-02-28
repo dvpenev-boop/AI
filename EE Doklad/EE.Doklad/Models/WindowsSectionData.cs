@@ -89,6 +89,13 @@ namespace EE.Doklad.Models
         private double[] fshDirMonthly = new double[12] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
         /// <summary>
+        /// Месечни стойности на ефективната пропускливост g_eff[m] (Jan..Dec)
+        /// Изчислява се като: g_eff[m] = g_base * F_sh,gl * F_sh,dir[m]
+        /// </summary>
+        [ObservableProperty]
+        private double[] gEffMonthly = new double[12];
+
+        /// <summary>
         /// Дали има активно засенчване
         /// </summary>
         public bool HasShading => ShadingConfig != null && ShadingConfig.Shadings.Count > 0;
@@ -115,22 +122,22 @@ namespace EE.Doklad.Models
             {
                 if (OpticalType == OpticalType.Clear && string.IsNullOrEmpty(ShadingTypeId))
                 {
-                    // 3.41: g_eff = 0.90 * g_n
+                    // 3.41: g_eff = 0.90 * g_n  (без щора, Clear стъкло)
                     return 0.90 * GN;
                 }
                 else
                 {
-                    // 3.42: g_eff = 0.75*g_alt + 0.25*g_dif
-                    // TODO: В първа версия използваме placeholder g_alt = g_dif = g_n
-                    double gAlt = GN;
-                    double gDif = GN;
-                    return 0.75 * gAlt + 0.25 * gDif;
+                    // 3.42: g_eff_base = g_n  (с щора или не-Clear стъкло)
+                    // ShadingReductionFactor (FShadeInt/FShadeExt) се прилага отделно
+                    return GN;
                 }
             }
         }
 
         /// <summary>
         /// Ефективна пропускливост след shading: g_eff = g_eff_base * ShadingReductionFactor
+        /// Без щора: g_eff = 0.90 * g_n * 1.0
+        /// С щора:   g_eff = g_n * FShadeInt/FShadeExt
         /// </summary>
         public double GEff => GEffBase * ShadingReductionFactor;
 

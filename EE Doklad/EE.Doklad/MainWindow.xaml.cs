@@ -238,7 +238,7 @@ public partial class MainWindow : Window
 
             var windowsSectionView = new WindowsSectionView
             {
-                DataContext = new ViewModels.WindowsSectionViewModel(section.WindowsSectionData)
+                DataContext = new ViewModels.WindowsSectionViewModel(section.WindowsSectionData, viewModel.CurrentReport)
             };
             ContentScrollViewer.Content = windowsSectionView;
         }

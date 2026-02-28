@@ -41,18 +41,6 @@ namespace EE.Doklad.Views
         {
             // Header info
             WindowInfoTextBlock.Text = $"Прозорец: W={_wk:F2} m, H={_hk:F2} m, Фасада={GetOrientationDescription(_orientation)}";
-
-            // Режим
-            if (_config.EditMode == ShadingEditMode.Custom)
-            {
-                CustomModeRadio.IsChecked = true;
-            }
-            else
-            {
-                SimpleModeRadio.IsChecked = true;
-            }
-
-            UpdateModeVisibility();
         }
 
         private void LoadExistingConfig()
@@ -60,7 +48,7 @@ namespace EE.Doklad.Views
             if (_config.Shadings.Count == 0)
                 return;
 
-            // Прост режим: зареди checkbox-ове и полета
+            // Зареди checkbox-ове и полета
             var overhang = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.Overhang);
             if (overhang != null)
             {
@@ -84,33 +72,9 @@ namespace EE.Doklad.Views
                 RightFinDepthTextBox.Text = rightFin.Depth.ToString("F2", CultureInfo.InvariantCulture);
                 RightFinDistanceTextBox.Text = rightFin.Distance.ToString("F2", CultureInfo.InvariantCulture);
             }
-
-            // Custom режим: зареди DataGrid
-            CustomShadingsDataGrid.ItemsSource = _config.Shadings;
         }
 
-        #region Режим (Simple/Custom)
-
-        private void EditModeRadio_Checked(object sender, RoutedEventArgs e)
-        {
-            UpdateModeVisibility();
-        }
-
-        private void UpdateModeVisibility()
-        {
-            if (SimpleModeRadio == null || CustomModeRadio == null)
-                return;
-
-            bool isSimple = SimpleModeRadio.IsChecked == true;
-            SimpleModeBorder.Visibility = isSimple ? Visibility.Visible : Visibility.Collapsed;
-            CustomModeBorder.Visibility = isSimple ? Visibility.Collapsed : Visibility.Visible;
-
-            _config.EditMode = isSimple ? ShadingEditMode.Simple : ShadingEditMode.Custom;
-        }
-
-        #endregion
-
-        #region Прост режим
+        #region Управление на елементи
 
         private void SimpleModeCheckBox_Changed(object sender, RoutedEventArgs e)
         {
@@ -206,46 +170,6 @@ namespace EE.Doklad.Views
 
         #endregion
 
-        #region Custom режим
-
-        private void AddShadingButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new AddShadingObjectDialog();
-            if (dialog.ShowDialog() == true)
-            {
-                _config.Shadings.Add(dialog.Result);
-                CustomShadingsDataGrid.Items.Refresh();
-                RecalculateResults();
-            }
-        }
-
-        private void EditShadingButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (CustomShadingsDataGrid.SelectedItem is ShadingObject selected)
-            {
-                var dialog = new AddShadingObjectDialog(selected);
-                if (dialog.ShowDialog() == true)
-                {
-                    int index = _config.Shadings.IndexOf(selected);
-                    _config.Shadings[index] = dialog.Result;
-                    CustomShadingsDataGrid.Items.Refresh();
-                    RecalculateResults();
-                }
-            }
-        }
-
-        private void DeleteShadingButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (CustomShadingsDataGrid.SelectedItem is ShadingObject selected)
-            {
-                _config.Shadings.Remove(selected);
-                CustomShadingsDataGrid.Items.Refresh();
-                RecalculateResults();
-            }
-        }
-
-        #endregion
-
         #region Изчисления и резултати
 
         private void RecalculateResults()
@@ -319,129 +243,5 @@ namespace EE.Doklad.Views
         }
 
         #endregion
-    }
-
-    /// <summary>
-    /// Малък диалог за добавяне/редакция на ShadingObject (за custom режим)
-    /// </summary>
-    public class AddShadingObjectDialog : Window
-    {
-        private ComboBox _typeComboBox;
-        private TextBox _depthTextBox;
-        private TextBox _distanceTextBox;
-        private TextBox _nameTextBox;
-        private ShadingObject? _existing;
-
-        public ShadingObject Result { get; private set; } = null!;
-
-        public AddShadingObjectDialog(ShadingObject? existing = null)
-        {
-            _existing = existing;
-            Title = existing == null ? "Добавяне на обект" : "Редакция на обект";
-            Width = 400;
-            Height = 280;
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            ResizeMode = ResizeMode.NoResize;
-
-            var grid = new Grid { Margin = new Thickness(20) };
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            // Type
-            var typeLbl = new TextBlock { Text = "Тип:", Margin = new Thickness(0, 0, 0, 5) };
-            _typeComboBox = new ComboBox { Margin = new Thickness(0, 0, 0, 15) };
-            _typeComboBox.ItemsSource = Enum.GetValues(typeof(ShadingType));
-            _typeComboBox.SelectedIndex = 0;
-            Grid.SetRow(typeLbl, 0);
-            Grid.SetRow(_typeComboBox, 0);
-            typeLbl.Margin = new Thickness(0, 0, 0, 5);
-            _typeComboBox.Margin = new Thickness(0, 20, 0, 15);
-
-            // Depth
-            var depthLbl = new TextBlock { Text = "D - Дълбочина (m):", Margin = new Thickness(0, 0, 0, 5) };
-            _depthTextBox = new TextBox { Margin = new Thickness(0, 0, 0, 15) };
-            Grid.SetRow(depthLbl, 1);
-            Grid.SetRow(_depthTextBox, 1);
-            depthLbl.Margin = new Thickness(0, 0, 0, 5);
-            _depthTextBox.Margin = new Thickness(0, 20, 0, 15);
-
-            // Distance
-            var distLbl = new TextBlock { Text = "L - Разстояние (m):", Margin = new Thickness(0, 0, 0, 5) };
-            _distanceTextBox = new TextBox { Margin = new Thickness(0, 0, 0, 15) };
-            Grid.SetRow(distLbl, 2);
-            Grid.SetRow(_distanceTextBox, 2);
-            distLbl.Margin = new Thickness(0, 0, 0, 5);
-            _distanceTextBox.Margin = new Thickness(0, 20, 0, 15);
-
-            // Name
-            var nameLbl = new TextBlock { Text = "Име (опционално):", Margin = new Thickness(0, 0, 0, 5) };
-            _nameTextBox = new TextBox { Margin = new Thickness(0, 0, 0, 15) };
-            Grid.SetRow(nameLbl, 3);
-            Grid.SetRow(_nameTextBox, 3);
-            nameLbl.Margin = new Thickness(0, 0, 0, 5);
-            _nameTextBox.Margin = new Thickness(0, 20, 0, 15);
-
-            // Buttons
-            var btnPanel = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-            var okBtn = new Button { Content = "OK", Width = 80, Margin = new Thickness(0, 0, 10, 0) };
-            var cancelBtn = new Button { Content = "Отказ", Width = 80 };
-            okBtn.Click += OkButton_Click;
-            cancelBtn.Click += (s, e) => { DialogResult = false; Close(); };
-            btnPanel.Children.Add(okBtn);
-            btnPanel.Children.Add(cancelBtn);
-            Grid.SetRow(btnPanel, 5);
-
-            grid.Children.Add(typeLbl);
-            grid.Children.Add(_typeComboBox);
-            grid.Children.Add(depthLbl);
-            grid.Children.Add(_depthTextBox);
-            grid.Children.Add(distLbl);
-            grid.Children.Add(_distanceTextBox);
-            grid.Children.Add(nameLbl);
-            grid.Children.Add(_nameTextBox);
-            grid.Children.Add(btnPanel);
-
-            Content = grid;
-
-            // Load existing
-            if (_existing != null)
-            {
-                _typeComboBox.SelectedItem = _existing.Type;
-                _depthTextBox.Text = _existing.Depth.ToString("F2", CultureInfo.InvariantCulture);
-                _distanceTextBox.Text = _existing.Distance.ToString("F2", CultureInfo.InvariantCulture);
-                _nameTextBox.Text = _existing.Name;
-            }
-        }
-
-        private void OkButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!double.TryParse(_depthTextBox.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double d) || d < 0)
-            {
-                MessageBox.Show("Въведете валидна стойност за D (>= 0)", "Грешка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!double.TryParse(_distanceTextBox.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double l) || l < 0)
-            {
-                MessageBox.Show("Въведете валидна стойност за L (>= 0)", "Грешка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            Result = new ShadingObject
-            {
-                Id = _existing?.Id ?? Guid.NewGuid().ToString(),
-                Type = (ShadingType)_typeComboBox.SelectedItem,
-                Depth = d,
-                Distance = l,
-                Name = _nameTextBox.Text
-            };
-
-            DialogResult = true;
-            Close();
-        }
     }
 }

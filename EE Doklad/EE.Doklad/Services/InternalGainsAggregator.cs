@@ -105,6 +105,14 @@ namespace EE.Doklad.Services
         public double ProcessHeat_W           { get; set; }
         /// <summary>Годишни работни часове за процесна топлина</summary>
         public double ProcessAnnualHours      { get; set; }
+
+        // ── Почивни дни по месеци (от Секция 5) ───────────────────────────────
+        /// <summary>
+        /// Брой почивни дни за всеки месец (индекс 0 = Януари .. 11 = Декември).
+        /// При почивен ден хората НЕ са на място → тези дни се изваждат от
+        /// активните дни преди умножение по часовете на обитаване.
+        /// </summary>
+        public double[] DaysOffPerMonth { get; set; } = new double[12];
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -259,17 +267,22 @@ namespace EE.Doklad.Services
 
             for (int m = 0; m < 12; m++)
             {
+                // Извади почивните дни от сезонните дни – хората не са налични в почивни дни
+                double daysOff_H = inp.DaysOffPerMonth.Length > m ? inp.DaysOffPerMonth[m] : 0;
+                double activeDays_H = Math.Max(0.0, heatMask.Days[m] - daysOff_H);
+
                 // t_m = брой работни дни × h/ден + събота × h/ден + неделя × h/ден
                 // SeasonMaskResult.Days[m] са общите дни. Делим приблизително по
                 // стандартното разпределение на седмицата (5/1/1 при 7 дни/седмица).
-                double totalDays_H = heatMask.Days[m];
-                double t_H = OccupancyHoursForMonth(totalDays_H, hWd_H, hSat_H, hSun_H);
+                double t_H = OccupancyHoursForMonth(activeDays_H, hWd_H, hSat_H, hSun_H);
                 result.HeatingTable[m].Oc = phi_H * t_H / 1000.0;
 
                 if (coolMask != null)
                 {
-                    double totalDays_C = coolMask.Days[m];
-                    double t_C = OccupancyHoursForMonth(totalDays_C, hWd_C, hSat_C, hSun_C);
+                    double daysOff_C = inp.DaysOffPerMonth.Length > m ? inp.DaysOffPerMonth[m] : 0;
+                    double activeDays_C = Math.Max(0.0, coolMask.Days[m] - daysOff_C);
+
+                    double t_C = OccupancyHoursForMonth(activeDays_C, hWd_C, hSat_C, hSun_C);
                     result.CoolingTable[m].Oc = phi_C * t_C / 1000.0;
                 }
                 else
@@ -280,9 +293,10 @@ namespace EE.Doklad.Services
         }
 
         /// <summary>
-        /// Изчислява общите часове на обитаване за месец от брой дни и режим Пн-Пт/Съб/Нед.
-        /// Разпределя totalDays пропорционално: 5/7 работни, 1/7 събота, 1/7 неделя.
-        /// При нулев режим (0/0/0) прилага fallback 24 h/ден за всички дни.
+        /// Изчислява общите часове на обитаване за месец от брой активни дни и режим Пн-Пт/Съб/Нед.
+        /// Разпределя activeDays пропорционално: 5/7 работни, 1/7 събота, 1/7 неделя.
+        /// Почивните дни вече са извадени от activeDays преди извикването.
+        /// При нулев режим (0/0/0) → 0 часа (хората не се броят ако графикът не е попълнен).
         /// </summary>
         private static double OccupancyHoursForMonth(
             double totalDays,
@@ -290,10 +304,10 @@ namespace EE.Doklad.Services
         {
             if (totalDays < Eps) return 0.0;
 
-            // Fallback: ако всички стойности са 0 → 24 h/ден
+            // Ако графикът не е попълнен (0/0/0) → 0 часа (хората не се броят)
             bool allZero = hWd < Eps && hSat < Eps && hSun < Eps;
             if (allZero)
-                return totalDays * 24.0;
+                return 0.0;
 
             // Разпределяме дните по стандартно разпределение на седмицата: 5 Пн-Пт + 1 Съб + 1 Нед
             double wdDays  = totalDays * (5.0 / 7.0);

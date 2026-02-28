@@ -28,24 +28,11 @@
         <!-- Main Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <!-- Режим (Прост/Custom) -->
-                <StackPanel Margin="0,0,0,20">
-                    <TextBlock Text="Режим на въвеждане:" FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="SimpleModeRadio" Content="Прост режим" 
-                                     GroupName="EditMode" IsChecked="True" Margin="0,0,20,0"
-                                     Checked="EditModeRadio_Checked"/>
-                        <RadioButton x:Name="CustomModeRadio" Content="Custom режим (напреднал)" 
-                                     GroupName="EditMode"
-                                     Checked="EditModeRadio_Checked"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- Прост режим -->
+                <!-- Елементи за засенчване -->
                 <Border x:Name="SimpleModeBorder" BorderBrush="#BDBDBD" BorderThickness="1" 
                         Padding="15" CornerRadius="5" Margin="0,0,0,20">
                     <StackPanel>
-                        <TextBlock Text="Прост режим: основни елементи за засенчване" 
+                        <TextBlock Text="Основни елементи за засенчване" 
                                    FontSize="13" FontWeight="Bold" Margin="0,0,0,10"/>
                         
                         <!-- Overhang (Навес) -->
@@ -100,34 +87,6 @@
                         <Button x:Name="SetbackPresetButton" Content="🔧 Preset: Отстъп (комбинация от всички)" 
                                 HorizontalAlignment="Left" Padding="10,5" Margin="0,10,0,0"
                                 Click="SetbackPresetButton_Click"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Custom режим -->
-                <Border x:Name="CustomModeBorder" BorderBrush="#BDBDBD" BorderThickness="1" 
-                        Padding="15" CornerRadius="5" Visibility="Collapsed" Margin="0,0,0,20">
-                    <StackPanel>
-                        <TextBlock Text="Custom режим: списък обекти за засенчване" 
-                                   FontSize="13" FontWeight="Bold" Margin="0,0,0,10"/>
-                        
-                        <DataGrid x:Name="CustomShadingsDataGrid" Height="200" AutoGenerateColumns="False" 
-                                  CanUserAddRows="False" SelectionMode="Single" Margin="0,0,0,10">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Тип" Binding="{Binding Type}" Width="120" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="D (m)" Binding="{Binding Depth, StringFormat=F2}" Width="80" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="L (m)" Binding="{Binding Distance, StringFormat=F2}" Width="80" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Име" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="AddShadingButton" Content="+ Добави" Width="100" Margin="0,0,10,0" 
-                                    Click="AddShadingButton_Click"/>
-                            <Button x:Name="EditShadingButton" Content="Редактирай" Width="100" Margin="0,0,10,0" 
-                                    Click="EditShadingButton_Click"/>
-                            <Button x:Name="DeleteShadingButton" Content="Изтрий" Width="100" 
-                                    Click="DeleteShadingButton_Click"/>
-                        </StackPanel>
                     </StackPanel>
                 </Border>
 
