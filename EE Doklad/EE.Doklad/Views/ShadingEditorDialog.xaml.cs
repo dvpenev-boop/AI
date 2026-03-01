@@ -20,6 +20,8 @@ namespace EE.Doklad.Views
         private readonly ModelOrientation _orientation;
         private ShadingConfig _config;
         private List<MonthlyShadingResult> _currentResults = new();
+        // Guard: prevents RecalculateFromSimpleMode from clearing Shadings while we are loading them
+        private bool _loadingConfig = false;
 
         public ShadingConfig Result => _config;
 
@@ -30,11 +32,22 @@ namespace EE.Doklad.Views
             _wk = wk;
             _hk = hk;
             _orientation = orientation;
-            _config = existingConfig ?? new ShadingConfig();
+
+            // Deep-copy the existing config so edits don't mutate the original until Apply
+            if (existingConfig != null)
+            {
+                _config = new ShadingConfig { Latitude = existingConfig.Latitude, NorthHemisphere = existingConfig.NorthHemisphere };
+                foreach (var s in existingConfig.Shadings)
+                    _config.Shadings.Add(new ShadingObject { Type = s.Type, Depth = s.Depth, Distance = s.Distance, Name = s.Name });
+            }
+            else
+            {
+                _config = new ShadingConfig();
+            }
 
             InitializeUI();
-            LoadExistingConfig();
-            RecalculateResults();
+            LoadExistingConfig();   // sets checkboxes and text fields
+            RecalculateResults();   // first calculation using the loaded config
         }
 
         private void InitializeUI()
@@ -48,29 +61,40 @@ namespace EE.Doklad.Views
             if (_config.Shadings.Count == 0)
                 return;
 
-            // Зареди checkbox-ове и полета
-            var overhang = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.Overhang);
-            if (overhang != null)
+            _loadingConfig = true;
+            try
             {
-                OverhangCheckBox.IsChecked = true;
-                OverhangDepthTextBox.Text = overhang.Depth.ToString("F2", CultureInfo.InvariantCulture);
-                OverhangDistanceTextBox.Text = overhang.Distance.ToString("F2", CultureInfo.InvariantCulture);
-            }
+                // Зареди checkbox-ове и полета
+                var overhang = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.Overhang);
+                if (overhang != null)
+                {
+                    OverhangCheckBox.IsChecked = true;
+                    OverhangPanel.Visibility = Visibility.Visible;
+                    OverhangDepthTextBox.Text = overhang.Depth.ToString("F2", CultureInfo.InvariantCulture);
+                    OverhangDistanceTextBox.Text = overhang.Distance.ToString("F2", CultureInfo.InvariantCulture);
+                }
 
-            var leftFin = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.LeftFin);
-            if (leftFin != null)
-            {
-                LeftFinCheckBox.IsChecked = true;
-                LeftFinDepthTextBox.Text = leftFin.Depth.ToString("F2", CultureInfo.InvariantCulture);
-                LeftFinDistanceTextBox.Text = leftFin.Distance.ToString("F2", CultureInfo.InvariantCulture);
-            }
+                var leftFin = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.LeftFin);
+                if (leftFin != null)
+                {
+                    LeftFinCheckBox.IsChecked = true;
+                    LeftFinPanel.Visibility = Visibility.Visible;
+                    LeftFinDepthTextBox.Text = leftFin.Depth.ToString("F2", CultureInfo.InvariantCulture);
+                    LeftFinDistanceTextBox.Text = leftFin.Distance.ToString("F2", CultureInfo.InvariantCulture);
+                }
 
-            var rightFin = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.RightFin);
-            if (rightFin != null)
+                var rightFin = _config.Shadings.FirstOrDefault(s => s.Type == ShadingType.RightFin);
+                if (rightFin != null)
+                {
+                    RightFinCheckBox.IsChecked = true;
+                    RightFinPanel.Visibility = Visibility.Visible;
+                    RightFinDepthTextBox.Text = rightFin.Depth.ToString("F2", CultureInfo.InvariantCulture);
+                    RightFinDistanceTextBox.Text = rightFin.Distance.ToString("F2", CultureInfo.InvariantCulture);
+                }
+            }
+            finally
             {
-                RightFinCheckBox.IsChecked = true;
-                RightFinDepthTextBox.Text = rightFin.Depth.ToString("F2", CultureInfo.InvariantCulture);
-                RightFinDistanceTextBox.Text = rightFin.Distance.ToString("F2", CultureInfo.InvariantCulture);
+                _loadingConfig = false;
             }
         }
 
@@ -82,11 +106,13 @@ namespace EE.Doklad.Views
             LeftFinPanel.Visibility = LeftFinCheckBox.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             RightFinPanel.Visibility = RightFinCheckBox.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
 
+            if (_loadingConfig) return; // don't clear Shadings while we are loading them
             RecalculateFromSimpleMode();
         }
 
         private void SimpleMode_ValueChanged(object sender, TextChangedEventArgs e)
         {
+            if (_loadingConfig) return;
             RecalculateFromSimpleMode();
         }
 

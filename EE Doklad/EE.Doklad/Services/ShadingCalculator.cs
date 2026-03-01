@@ -50,35 +50,26 @@ namespace EE.Doklad.Services
         private static double Rad2Deg(double r) => r * 180.0 / Math.PI;
 
         // Compute sun altitude (alpha) and azimuth (A) for given latitude (deg), declination (deg) and hour angle omega (rad)
-        // Azimuth returned as degrees from North clockwise (0=N,90=E,180=S)
+        // Returns: altitude in radians, azimuth in degrees from North clockwise (0=N, 90=E, 180=S, 270=W)
+        // Hour angle omega: negative = morning (East, before solar noon), positive = afternoon (West)
         private static (double altitudeRad, double azimuthDeg) SunPosition(double latitudeDeg, double declinationDeg, double omegaRad)
         {
-            double phi = Deg2Rad(latitudeDeg);
+            double phi   = Deg2Rad(latitudeDeg);
             double delta = Deg2Rad(declinationDeg);
-            // altitude: sin alpha = sin phi sin delta + cos phi cos delta cos omega
-            double sinAlpha = Math.Sin(phi) * Math.Sin(delta) + Math.Cos(phi) * Math.Cos(delta) * Math.Cos(omegaRad);
+
+            // Solar altitude (elevation above horizon)
+            // sin α = sin φ · sin δ + cos φ · cos δ · cos ω
+            double sinAlpha = Math.Sin(phi) * Math.Sin(delta)
+                            + Math.Cos(phi) * Math.Cos(delta) * Math.Cos(omegaRad);
             double alpha = Math.Asin(Math.Clamp(sinAlpha, -1.0, 1.0));
 
-            // azimuth: compute using sinA and cosA then atan2
-            // sin A = cos delta * sin omega / cos alpha
-            // cos A = (sin delta * cos phi - cos delta * sin phi * cos omega) / cos alpha
-            double cosAlpha = Math.Cos(alpha);
-            double sinA = 0.0;
-            double cosA = 1.0;
-            if (Math.Abs(cosAlpha) > 1e-9)
-            {
-                sinA = (Math.Cos(delta) * Math.Sin(omegaRad)) / cosAlpha;
-                cosA = (Math.Sin(delta) * Math.Cos(phi) - Math.Cos(delta) * Math.Sin(phi) * Math.Cos(omegaRad)) / cosAlpha;
-            }
-
-            double A = Math.Atan2(sinA, cosA); // radians, measured from South? depends on formula
-            // Convert to degrees and normalize to 0..360 measured from North clockwise
-            // The formula here gives azimuth from South; adjust: az_from_north = (A_rad in radians) -> deg
-            double azDeg = Rad2Deg(A);
-            // atan2 result can be negative; convert
-            // We need azimuth from North clockwise; convert by adding 180 (if from South) and normalize
-            azDeg = (azDeg + 180.0) % 360.0;
-            if (azDeg < 0) azDeg += 360.0;
+            // Solar azimuth – formula gives angle from South, positive toward West:
+            //   Az_fromSouth = atan2( sin(ω),  cos(ω)·sin(φ) − tan(δ)·cos(φ) )
+            // Convert to from-North clockwise: Az_fromNorth = (Az_fromSouth + 180) mod 360
+            double az_s = Rad2Deg(Math.Atan2(
+                Math.Sin(omegaRad),
+                Math.Cos(omegaRad) * Math.Sin(phi) - Math.Tan(delta) * Math.Cos(phi)));
+            double azDeg = (az_s + 180.0 + 360.0) % 360.0;
 
             return (alpha, azDeg);
         }
@@ -136,40 +127,97 @@ namespace EE.Doklad.Services
 
                 // facade azimuth (deg from North clockwise)
                 double facadeAz = OrientationToAzimuth(orientation);
-                // azimuth difference (abs minimal angle)
-                double diff = Math.Abs(NormalizeAngleDeg(azimuthDeg - facadeAz));
-                if (diff > 180) diff = 360 - diff;
 
-                // compute overhang shadow height (max across overhangs)
+                // Signed azimuth difference of sun relative to facade normal
+                // gamma_wf > 0  → sun to the right of facade normal
+                // gamma_wf < 0  → sun to the left of facade normal
+                double gamma_wf = NormalizeAngleDeg(azimuthDeg - facadeAz); // –180..+180
+
+                // Sun must be on the lit side of the facade (|gamma_wf| < 90°)
+                bool sunFacesFacade = Math.Abs(gamma_wf) < 90.0;
+
+                // ── Overhang (Навес) ───────────────────────────────────────────────────
+                // Геометрия по Гл. 5 (7257_1): във вертикалния профилен ъгъл
+                // φ_v спрямо нормалата на фасадата:
+                //   tan(φ_v) = tan(α) / |cos(γ_wf)|
+                // Търсената сянка върху фасадата се измерва надолу по височина.
+                // При трасировка от точка на прозореца към слънцето пресичането с
+                // долния ръб на навеса е в рамките на d, когато:
+                //   x = h * cot(α) * cos(γ_wf) ≤ D
+                // оттук максималната засенчена височина е:
+                //   h_shadow,max = D * tan(α) / |cos(γ_wf)|
+                // и реалното засенчване на прозореца: h_ov = max(0, h_shadow,max − L)
+                // → по-високите слънчеви ъгли (лято) дават по-голямо засенчване.
                 double maxHov = 0.0;
-                foreach (var ov in shadings.Where(s => s.Type == ShadingType.Overhang))
+                if (sunFacesFacade)
                 {
-                    double D = ov.Depth;
-                    double L = ov.Distance;
-                    if (D <= 0) continue;
-                    double hov = D * (1.0 / Math.Tan(alphaRad)); // D * cot(alpha)
-                    double hOnWindow = Math.Max(0.0, hov - L);
-                    maxHov = Math.Max(maxHov, Math.Min(hOnWindow, hk));
+                    double cosGamma = Math.Abs(Math.Cos(Deg2Rad(gamma_wf)));
+                    double tanAlpha = Math.Tan(alphaRad);
+                    if (tanAlpha > 1e-9 && cosGamma > 1e-6)
+                    {
+                        foreach (var ov in shadings.Where(s => s.Type == ShadingType.Overhang))
+                        {
+                            double D = ov.Depth;
+                            double L = ov.Distance;
+                            if (D <= 0) continue;
+                            // Максимална сянка върху фасадата по височина
+                            double hShadow = D * tanAlpha / cosGamma;
+                            // L е вертикалният просвет между навеса и горния ръб на прозореца
+                            double hOnWindow = Math.Max(0.0, hShadow - L);
+                            maxHov = Math.Max(maxHov, Math.Min(hOnWindow, hk));
+                        }
+                    }
                 }
 
-                // lateral fins (left/right) — project horizontal effect depending on azimuth diff
+                // ── Lateral fins (Странични ребра) ───────────────────────────────────
+                // The left fin shades from the left side of the window; it is active when the
+                // sun is to the LEFT of the facade normal (gamma_wf < 0).
+                // The right fin shades from the right side; active when gamma_wf > 0.
+                //
+                // Horizontal profile angle β_h (планов ъгъл) ≈ |γ_wf| (Гл. 5)
+                // Трасировка в план: x = D при y_shadow = D · tan|γ_wf|.
+                // Ширина на засенчване върху фасадата:
+                //   w_shadow = D · tan|γ_wf| − L   ≥ 0
+                //
+                // Both fins can be active simultaneously for different halves of the window.
                 double maxWfinL = 0.0;
-                foreach (var fin in shadings.Where(s => s.Type == ShadingType.LeftFin))
-                {
-                    double D = fin.Depth;
-                    double L = fin.Distance; // not used currently
-                    if (D <= 0) continue;
-                    double wfin = D * (1.0 / Math.Tan(alphaRad)) * Math.Abs(Math.Sin(Deg2Rad(diff)));
-                    maxWfinL = Math.Max(maxWfinL, Math.Min(wfin, wk));
-                }
-
                 double maxWfinR = 0.0;
-                foreach (var fin in shadings.Where(s => s.Type == ShadingType.RightFin))
+                if (sunFacesFacade)
                 {
-                    double D = fin.Depth;
-                    if (D <= 0) continue;
-                    double wfin = D * (1.0 / Math.Tan(alphaRad)) * Math.Abs(Math.Sin(Deg2Rad(diff)));
-                    maxWfinR = Math.Max(maxWfinR, Math.Min(wfin, wk));
+                    double absGammaRad = Math.Abs(Deg2Rad(gamma_wf));
+                    // Only project fin shadow when sun is not directly normal (avoid ÷0)
+                    if (absGammaRad > Deg2Rad(1.0))
+                    {
+                        double tanAbsGamma = Math.Tan(absGammaRad);
+
+                        // Left fin → active when sun is to the LEFT (gamma_wf < 0)
+                        if (gamma_wf < 0)
+                        {
+                            foreach (var fin in shadings.Where(s => s.Type == ShadingType.LeftFin))
+                            {
+                                double D = fin.Depth;
+                                double L = fin.Distance;
+                                if (D <= 0) continue;
+                                double wShadow = D * tanAbsGamma;
+                                double wOnWindow = Math.Max(0.0, wShadow - L);
+                                maxWfinL = Math.Max(maxWfinL, Math.Min(wOnWindow, wk));
+                            }
+                        }
+
+                        // Right fin → active when sun is to the RIGHT (gamma_wf > 0)
+                        if (gamma_wf > 0)
+                        {
+                            foreach (var fin in shadings.Where(s => s.Type == ShadingType.RightFin))
+                            {
+                                double D = fin.Depth;
+                                double L = fin.Distance;
+                                if (D <= 0) continue;
+                                double wShadow = D * tanAbsGamma;
+                                double wOnWindow = Math.Max(0.0, wShadow - L);
+                                maxWfinR = Math.Max(maxWfinR, Math.Min(wOnWindow, wk));
+                            }
+                        }
+                    }
                 }
 
                 // obstacles
