@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -17,6 +17,8 @@ namespace EE.Doklad.Views
             InitializeComponent();
         }
 
+        // Dependency properties
+
         public static readonly DependencyProperty BatchesProperty = DependencyProperty.Register(
             "Batches", typeof(ObservableCollection<WindowBatch>), typeof(MatrixSummaryView),
             new PropertyMetadata(null, OnBatchesChanged));
@@ -27,21 +29,46 @@ namespace EE.Doklad.Views
             set => SetValue(BatchesProperty, value);
         }
 
+        public static readonly DependencyProperty HeatingEnabledProperty = DependencyProperty.Register(
+            "HeatingEnabled", typeof(bool), typeof(MatrixSummaryView),
+            new PropertyMetadata(true, OnSeasonChanged));
+
+        public bool HeatingEnabled
+        {
+            get => (bool)GetValue(HeatingEnabledProperty);
+            set => SetValue(HeatingEnabledProperty, value);
+        }
+
+        public static readonly DependencyProperty CoolingEnabledProperty = DependencyProperty.Register(
+            "CoolingEnabled", typeof(bool), typeof(MatrixSummaryView),
+            new PropertyMetadata(true, OnSeasonChanged));
+
+        public bool CoolingEnabled
+        {
+            get => (bool)GetValue(CoolingEnabledProperty);
+            set => SetValue(CoolingEnabledProperty, value);
+        }
+
+        // Change callbacks
+
         private static void OnBatchesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is MatrixSummaryView view)
             {
                 if (e.OldValue is ObservableCollection<WindowBatch> old)
-                {
                     old.CollectionChanged -= (s, ev) => view.RebuildMatrix();
-                }
                 if (e.NewValue is ObservableCollection<WindowBatch> coll)
-                {
                     coll.CollectionChanged += (s, ev) => view.RebuildMatrix();
-                }
                 view.RebuildMatrix();
             }
         }
+
+        private static void OnSeasonChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is MatrixSummaryView view) view.RebuildMatrix();
+        }
+
+        // Orientation order
 
         private readonly EE.Doklad.Models.Orientation[] orientationsOrder = new[]
         {
@@ -55,6 +82,8 @@ namespace EE.Doklad.Views
             EE.Doklad.Models.Orientation.SouthEast
         };
 
+        // Main rebuild
+
         private void RebuildMatrix()
         {
             MatrixGrid.Children.Clear();
@@ -63,271 +92,302 @@ namespace EE.Doklad.Views
 
             if (Batches == null) return;
 
-            var groups = WindowCalculator.GroupBatches(Batches);
-            // group by type signature across orientations
-            var typeGroups = groups.GroupBy(g => g.TypeSignature)
-                                   .Select(g => new
-                                   {
-                                       TypeSignature = g.Key,
-                                       TypeName = g.First().TypeName,
-                                       Groups = g.ToList()
-                                   })
-                                   .OrderByDescending(t => t.Groups.Sum(x => x.ATotalGross))
-                                   .ToList();
+            var outerStack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Vertical };
 
-            // columns: fixed left block (№, L, h, A, U) => 5 cols
-            int fixedCols = 5;
-            int orientationCols = orientationsOrder.Length * 3; // n,g,A per orientation
-            int rightCols = 2; // A_total and Details
+            if (HeatingEnabled)
+                outerStack.Children.Add(BuildSummaryTable(WindowSummarizationMode.Heating));
+
+            if (CoolingEnabled)
+            {
+                if (HeatingEnabled)
+                    outerStack.Children.Add(new FrameworkElement { Height = 12 }); // spacer
+                outerStack.Children.Add(BuildSummaryTable(WindowSummarizationMode.Cooling));
+            }
+
+            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetRow(outerStack, 0);
+            Grid.SetColumn(outerStack, 0);
+            MatrixGrid.Children.Add(outerStack);
+        }
+
+        private FrameworkElement BuildSummaryTable(WindowSummarizationMode mode)
+        {
+            var container = new StackPanel { Orientation = System.Windows.Controls.Orientation.Vertical };
+
+            string title = mode == WindowSummarizationMode.Heating
+                ? "Обобщена таблица Отопление:"
+                : "Обобщена таблица Охлаждане:";
+            container.Children.Add(new TextBlock
+            {
+                Text = title,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 4)
+            });
+
+            var tableGrid = new Grid();
+            container.Children.Add(new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                Content = tableGrid
+            });
+
+            if (Batches == null || Batches.Count == 0)
+            {
+                tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                var empty = new TextBlock { Text = "Няма въведени елементи.", Foreground = Brushes.Gray, Margin = new Thickness(4) };
+                Grid.SetRow(empty, 0); Grid.SetColumn(empty, 0);
+                tableGrid.Children.Add(empty);
+                return container;
+            }
+
+            var groups = WindowCalculator.GroupBatchesForMode(Batches, mode);
+            var typeGroups = groups
+                .GroupBy(g => g.TypeSignature)
+                .Select(g => new
+                {
+                    TypeSignature = g.Key,
+                    TypeName = g.First().TypeName,
+                    FirstBatch = g.First().Batches.FirstOrDefault(),
+                    Groups = g.ToList()
+                })
+                .OrderByDescending(t => t.Groups.Sum(x => x.ATotalGross))
+                .ToList();
+
+            // Columns: #, Вид, L, h, A, U, [n,g,A]*8, A_total, Details
+            int fixedCols = 6;
+            int orientationCols = orientationsOrder.Length * 3;
+            int rightCols = 2;
             int totalCols = fixedCols + orientationCols + rightCols;
 
             for (int i = 0; i < totalCols; i++)
-            {
-                MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            }
+                tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            // Header row
-            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            // Header row 1
+            tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             int col = 0;
-            AddHeaderCell("#", 0, col++);
-            AddHeaderCell("L [m]", 0, col++);
-            AddHeaderCell("h [m]", 0, col++);
-            AddHeaderCell("A [m²]", 0, col++);
-            AddHeaderCell("U [W/m²K]", 0, col++);
+            AddHeaderCell(tableGrid, "#",          0, col++);
+            AddHeaderCell(tableGrid, "Вид",        0, col++);
+            AddHeaderCell(tableGrid, "L [m]",      0, col++);
+            AddHeaderCell(tableGrid, "h [m]",      0, col++);
+            AddHeaderCell(tableGrid, "A [m\u00B2]",     0, col++);
+            AddHeaderCell(tableGrid, "U [W/m\u00B2K]",  0, col++);
 
-            // Orientation group headers - we'll add small 2-row header: top label spans 3 cols
             for (int i = 0; i < orientationsOrder.Length; i++)
             {
                 var label = WindowCalculator.GetOrientationLabel(orientationsOrder[i]);
-                // Top header spanning 3 columns
                 var tb = new TextBlock { Text = label, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center };
-                Border b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(4) };
-                Grid.SetRow(b, 0);
-                Grid.SetColumn(b, col);
-                Grid.SetColumnSpan(b, 3);
-                MatrixGrid.Children.Add(b);
+                var b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(4) };
+                Grid.SetRow(b, 0); Grid.SetColumn(b, col); Grid.SetColumnSpan(b, 3);
+                tableGrid.Children.Add(b);
                 col += 3;
             }
+            AddHeaderCell(tableGrid, "A total [m\u00B2]", 0, col++);
+            AddHeaderCell(tableGrid, "", 0, col++);
 
-            AddHeaderCell("A total [m²]", 0, col++);
-            AddHeaderCell("", 0, col++); // details
-
-            // Second header row: n | g | A for each orientation
-            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            int headerRow2 = 1;
+            // Header row 2: n|g|A
+            tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            int hRow2 = 1;
             col = fixedCols;
             for (int i = 0; i < orientationsOrder.Length; i++)
             {
-                AddHeaderCell("n", headerRow2, col++);
-                AddHeaderCell("g", headerRow2, col++);
-                AddHeaderCell("A", headerRow2, col++);
+                AddHeaderCell(tableGrid, "n", hRow2, col++);
+                AddHeaderCell(tableGrid, "g", hRow2, col++);
+                AddHeaderCell(tableGrid, "A", hRow2, col++);
             }
-            // empty cells under fixed cols
-            // add empty cells for A total and details header row2
-            AddHeaderCell("", headerRow2, col++);
-            AddHeaderCell("", headerRow2, col++);
+            AddHeaderCell(tableGrid, "", hRow2, col++);
+            AddHeaderCell(tableGrid, "", hRow2, col++);
 
             // Data rows
             int rowIndex = 2;
             int index = 1;
             foreach (var tg in typeGroups)
             {
-                MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 col = 0;
-                // index
-                AddTextCell(index.ToString(), rowIndex, col++);
-                // L, h, A (take from first group's first batch)
-                var sampleBatch = tg.Groups.SelectMany(g => g.Batches).FirstOrDefault();
-                string l = sampleBatch != null && sampleBatch.Width > 0 ? sampleBatch.Width.ToString("F2") : "—";
-                string h = sampleBatch != null && sampleBatch.Height > 0 ? sampleBatch.Height.ToString("F2") : "—";
-                string a = sampleBatch != null ? sampleBatch.AreaGross.ToString("F2") : "—";
-                double uVal = tg.Groups.FirstOrDefault()?.UAvg ?? 0.0;
-                string u = uVal.ToString("F3");
-                AddTextCell(l, rowIndex, col++);
-                AddTextCell(h, rowIndex, col++);
-                AddTextCell(a, rowIndex, col++);
-                AddTextCell(u, rowIndex, col++);
 
-                // orientation cells
+                AddTextCell(tableGrid, index.ToString(), rowIndex, col++);
+
+                string kindLabel = tg.FirstBatch != null
+                    ? (tg.FirstBatch.Kind == WindowKind.Door ? "ВР" : "ПР")
+                    : "ПР";
+                AddTextCell(tableGrid, kindLabel, rowIndex, col++, HorizontalAlignment.Center);
+
+                string lv = tg.FirstBatch != null && tg.FirstBatch.Width  > 0 ? tg.FirstBatch.Width.ToString("F2")  : "-";
+                string hv = tg.FirstBatch != null && tg.FirstBatch.Height > 0 ? tg.FirstBatch.Height.ToString("F2") : "-";
+                string av = tg.FirstBatch != null ? tg.FirstBatch.AreaGross.ToString("F2") : "-";
+                double uVal = tg.Groups.FirstOrDefault()?.UAvg ?? 0.0;
+                AddTextCell(tableGrid, lv, rowIndex, col++);
+                AddTextCell(tableGrid, hv, rowIndex, col++);
+                AddTextCell(tableGrid, av, rowIndex, col++);
+                AddTextCell(tableGrid, uVal.ToString("F3"), rowIndex, col++);
+
                 foreach (var orientation in orientationsOrder)
                 {
                     var grow = tg.Groups.FirstOrDefault(g => g.Orientation == orientation);
-                    int n = grow?.TotalCount ?? 0;
+                    int    n     = grow?.TotalCount  ?? 0;
                     double Acell = grow?.ATotalGross ?? 0.0;
-                    double gval = grow?.GAvg ?? 0.0;
-                    AddTextCell(n.ToString(), rowIndex, col++ , HorizontalAlignment.Center);
-                    AddTextCell(gval.ToString("F2"), rowIndex, col++ , HorizontalAlignment.Center);
-                    AddTextCell(Acell.ToString("F2"), rowIndex, col++ , HorizontalAlignment.Right);
+                    double gval  = grow?.GAvg        ?? 0.0;
+                    AddTextCell(tableGrid, n.ToString(),         rowIndex, col++, HorizontalAlignment.Center);
+                    AddTextCell(tableGrid, gval.ToString("F2"),  rowIndex, col++, HorizontalAlignment.Center);
+                    AddTextCell(tableGrid, Acell.ToString("F2"), rowIndex, col++, HorizontalAlignment.Right);
                 }
 
-                // A_total
                 double Atotal = tg.Groups.Sum(g => g.ATotalGross);
-                AddTextCell(Atotal.ToString("F2"), rowIndex, col++ , HorizontalAlignment.Right);
+                AddTextCell(tableGrid, Atotal.ToString("F2"), rowIndex, col++, HorizontalAlignment.Right);
 
-                // Details button
-                var btn = new Button { Content = "Детайли >", Background = new SolidColorBrush(Color.FromRgb(255,152,0)), Foreground = Brushes.White, Padding = new Thickness(6,2,6,2), Tag = tg.TypeSignature };
+                var btn = new Button
+                {
+                    Content = "Детайли >",
+                    Background = new SolidColorBrush(Color.FromRgb(255, 152, 0)),
+                    Foreground = Brushes.White,
+                    Padding = new Thickness(6, 2, 6, 2),
+                    Tag = new { tg.TypeSignature, Mode = mode }
+                };
                 btn.Click += DetailsButton_Click;
-                Border bbtn = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = btn };
-                Grid.SetRow(bbtn, rowIndex);
-                Grid.SetColumn(bbtn, col -1);
-                MatrixGrid.Children.Add(bbtn);
+                var bbtn = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = btn };
+                Grid.SetRow(bbtn, rowIndex); Grid.SetColumn(bbtn, col - 1);
+                tableGrid.Children.Add(bbtn);
 
                 rowIndex++;
                 index++;
             }
 
-            // Summary rows: A total per facade, g avg per facade, U avg per facade
-            // Compute per orientation using raw batches
+            // Summary rows
             var orientationLabels = orientationsOrder.Select(o => WindowCalculator.GetOrientationLabel(o)).ToList();
-            var facadeTotals = new Dictionary<string, double>();
-            var facadeGnum = new Dictionary<string, double>();
-            var facadeGden = new Dictionary<string, double>();
-            var facadeUnum = new Dictionary<string, double>();
-            var facadeUden = new Dictionary<string, double>();
+            var facadeTotals = orientationLabels.ToDictionary(l => l, _ => 0.0);
+            var facadeGnum   = orientationLabels.ToDictionary(l => l, _ => 0.0);
+            var facadeGden   = orientationLabels.ToDictionary(l => l, _ => 0.0);
+            var facadeUnum   = orientationLabels.ToDictionary(l => l, _ => 0.0);
+            var facadeUden   = orientationLabels.ToDictionary(l => l, _ => 0.0);
 
-            foreach (var lbl in orientationLabels)
+            foreach (var bt in Batches ?? Enumerable.Empty<WindowBatch>())
             {
-                facadeTotals[lbl] = 0.0;
-                facadeGnum[lbl] = 0.0;
-                facadeGden[lbl] = 0.0;
-                facadeUnum[lbl] = 0.0;
-                facadeUden[lbl] = 0.0;
-            }
-
-            foreach (var b in Batches ?? System.Linq.Enumerable.Empty<WindowBatch>())
-            {
-                var weight = b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross;
-                var A = b.Count * b.AreaGross;
-                var lbl = WindowCalculator.GetOrientationLabel(b.Orientation);
+                double gEffMode = WindowCalculator.GetGEffForMode(bt, mode);
+                double weight = bt.AreaGlass > 0 ? bt.AreaGlass : bt.AreaGross;
+                double A = bt.Count * bt.AreaGross;
+                var lbl = WindowCalculator.GetOrientationLabel(bt.Orientation);
                 if (!facadeTotals.ContainsKey(lbl)) continue;
                 facadeTotals[lbl] += A;
-                facadeGnum[lbl] += b.Count * weight * b.GEff;
-                facadeGden[lbl] += b.Count * weight;
-                facadeUnum[lbl] += b.Count * b.AreaGross * b.UValue;
-                facadeUden[lbl] += b.Count * b.AreaGross;
+                facadeGnum[lbl]   += bt.Count * weight * gEffMode;
+                facadeGden[lbl]   += bt.Count * weight;
+                facadeUnum[lbl]   += bt.Count * bt.AreaGross * bt.UValue;
+                facadeUden[lbl]   += bt.Count * bt.AreaGross;
             }
 
             // A total row
-            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             int aRow = rowIndex;
             col = 0;
-            AddTextCellBold("A общо", aRow, col++ );
-            AddTextCell("", aRow, col++);
-            AddTextCell("", aRow, col++);
-            AddTextCell("", aRow, col++);
-            AddTextCell("", aRow, col++);
+            AddTextCellBold(tableGrid, "A общо", aRow, col++);
+            for (int i = 1; i < fixedCols; i++) AddTextCell(tableGrid, "", aRow, col++);
             foreach (var o in orientationLabels)
             {
-                AddTextCell(((double)facadeTotals[o]).ToString("F2"), aRow, col++ , HorizontalAlignment.Right);
-                AddTextCell("", aRow, col++);
-                AddTextCell("", aRow, col++);
+                AddTextCell(tableGrid, facadeTotals[o].ToString("F2"), aRow, col++, HorizontalAlignment.Right);
+                AddTextCell(tableGrid, "", aRow, col++);
+                AddTextCell(tableGrid, "", aRow, col++);
             }
-            AddTextCell((Batches?.Sum(b => b.Count * b.AreaGross) ?? 0.0).ToString("F2"), aRow, col++ , HorizontalAlignment.Right);
-            AddTextCell("", aRow, col++);
+            AddTextCell(tableGrid, (Batches?.Sum(bt => bt.Count * bt.AreaGross) ?? 0.0).ToString("F2"), aRow, col++, HorizontalAlignment.Right);
+            AddTextCell(tableGrid, "", aRow, col++);
 
             // g average row
-            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             int gRow = aRow + 1;
             col = 0;
-            AddTextCellBold("g средно", gRow, col++ );
-            AddTextCell("", gRow, col++);
-            AddTextCell("", gRow, col++);
-            AddTextCell("", gRow, col++);
-            AddTextCell("", gRow, col++);
+            AddTextCellBold(tableGrid, "g средно", gRow, col++);
+            for (int i = 1; i < fixedCols; i++) AddTextCell(tableGrid, "", gRow, col++);
             foreach (var o in orientationLabels)
             {
                 double gavg = facadeGden[o] > 0 ? facadeGnum[o] / facadeGden[o] : 0.0;
-                AddTextCell(gavg.ToString("F2"), gRow, col++ , HorizontalAlignment.Center);
-                AddTextCell("", gRow, col++);
-                AddTextCell("", gRow, col++);
+                AddTextCell(tableGrid, gavg.ToString("F2"), gRow, col++, HorizontalAlignment.Center);
+                AddTextCell(tableGrid, "", gRow, col++);
+                AddTextCell(tableGrid, "", gRow, col++);
             }
-            AddTextCell("", gRow, col++);
-            AddTextCell("", gRow, col++);
+            AddTextCell(tableGrid, "", gRow, col++);
+            AddTextCell(tableGrid, "", gRow, col++);
 
             // U average row
-            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             int uRow = gRow + 1;
             col = 0;
-            AddTextCellBold("U средно", uRow, col++ );
-            AddTextCell("", uRow, col++);
-            AddTextCell("", uRow, col++);
-            AddTextCell("", uRow, col++);
-            AddTextCell("", uRow, col++);
+            AddTextCellBold(tableGrid, "U средно", uRow, col++);
+            for (int i = 1; i < fixedCols; i++) AddTextCell(tableGrid, "", uRow, col++);
             foreach (var o in orientationLabels)
             {
                 double uavg = facadeUden[o] > 0 ? facadeUnum[o] / facadeUden[o] : 0.0;
-                AddTextCell(uavg.ToString("F2"), uRow, col++ , HorizontalAlignment.Center);
-                AddTextCell("", uRow, col++);
-                AddTextCell("", uRow, col++);
+                AddTextCell(tableGrid, uavg.ToString("F2"), uRow, col++, HorizontalAlignment.Center);
+                AddTextCell(tableGrid, "", uRow, col++);
+                AddTextCell(tableGrid, "", uRow, col++);
             }
-            AddTextCell("", uRow, col++);
-            AddTextCell("", uRow, col++);
+            AddTextCell(tableGrid, "", uRow, col++);
+            AddTextCell(tableGrid, "", uRow, col++);
+
+            return container;
         }
+
+        // Details button handler
 
         private void DetailsButton_Click(object? sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is string typeSignature)
+            if (sender is Button btn)
             {
-                // find all batches matching typeSignature
-                var groups = WindowCalculator.GroupBatches(Batches);
-                var filtered = groups.Where(g => g.TypeSignature == typeSignature).ToList();
-                var allBatches = Batches;
-                // Build a combined summary row using first group's TypeName and aggregate batches across orientations
+                dynamic? tag = btn.Tag;
+                if (tag == null) return;
+                string typeSignature = (string)tag.TypeSignature;
+
+                var allGroups = WindowCalculator.GroupBatches(Batches);
+                var filtered = allGroups.Where(g => g.TypeSignature == typeSignature).ToList();
                 var combinedBatches = filtered.SelectMany(g => g.Batches).ToList();
                 if (combinedBatches.Count == 0) return;
+
                 var summary = new WindowSummaryRow
                 {
-                    TypeName = filtered.First().TypeName,
+                    TypeName      = filtered.First().TypeName,
                     TypeSignature = typeSignature,
-                    Batches = combinedBatches,
-                    TotalCount = combinedBatches.Sum(b => b.Count),
-                    ATotalGross = combinedBatches.Sum(b => b.Count * b.AreaGross),
-                    ATotalGlass = combinedBatches.Sum(b => b.Count * b.AreaGlass),
-                    UAvg = combinedBatches.Sum(b => b.Count * b.AreaGross * b.UValue) / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * b.AreaGross)),
-                    GAvg = combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross) * b.GEff) / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross)))
+                    Batches       = combinedBatches,
+                    TotalCount    = combinedBatches.Sum(b => b.Count),
+                    ATotalGross   = combinedBatches.Sum(b => b.Count * b.AreaGross),
+                    ATotalGlass   = combinedBatches.Sum(b => b.Count * b.AreaGlass),
+                    UAvg          = combinedBatches.Sum(b => b.Count * b.AreaGross * b.UValue) / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * b.AreaGross)),
+                    GAvg          = combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross) * b.GEff) / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross))),
+                    Orientation   = combinedBatches.First().Orientation
                 };
-
-                // Use orientation of first batch for dialog title
-                summary.Orientation = combinedBatches.First().Orientation;
 
                 var dialog = new WindowBatchDetailsDialog(summary, Batches);
                 dialog.ShowDialog();
-
-                // After dialog closes, rebuild matrix
                 RebuildMatrix();
             }
         }
 
-        private void AddHeaderCell(string text, int row, int col)
-        {
-            AddHeaderCell(text, row, col, HorizontalAlignment.Center);
-        }
+        // Cell helpers
 
-        private void AddHeaderCell(string text, int row, int col, HorizontalAlignment halign)
+        private static void AddHeaderCell(Grid grid, string text, int row, int col)
+            => AddHeaderCell(grid, text, row, col, HorizontalAlignment.Center);
+
+        private static void AddHeaderCell(Grid grid, string text, int row, int col, HorizontalAlignment halign)
         {
             var tb = new TextBlock { Text = text, FontWeight = FontWeights.SemiBold, HorizontalAlignment = halign };
-            Border b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(6) };
-            Grid.SetRow(b, row);
-            Grid.SetColumn(b, col);
-            MatrixGrid.Children.Add(b);
+            var b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(6) };
+            Grid.SetRow(b, row); Grid.SetColumn(b, col);
+            grid.Children.Add(b);
         }
 
-        private void AddTextCell(string text, int row, int col, HorizontalAlignment halign = HorizontalAlignment.Left)
+        private static void AddTextCell(Grid grid, string text, int row, int col, HorizontalAlignment halign = HorizontalAlignment.Left)
         {
-            var tb = new TextBlock { Text = text, HorizontalAlignment = halign, Margin = new Thickness(4,2,4,2) };
-            Border b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(2) };
-            Grid.SetRow(b, row);
-            Grid.SetColumn(b, col);
-            MatrixGrid.Children.Add(b);
+            var tb = new TextBlock { Text = text, HorizontalAlignment = halign, Margin = new Thickness(4, 2, 4, 2) };
+            var b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(2) };
+            Grid.SetRow(b, row); Grid.SetColumn(b, col);
+            grid.Children.Add(b);
         }
 
-        private void AddTextCellBold(string text, int row, int col, HorizontalAlignment halign = HorizontalAlignment.Left)
+        private static void AddTextCellBold(Grid grid, string text, int row, int col, HorizontalAlignment halign = HorizontalAlignment.Left)
         {
-            var tb = new TextBlock { Text = text, HorizontalAlignment = halign, Margin = new Thickness(4,2,4,2), FontWeight = FontWeights.Bold };
-            Border b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(2) };
-            Grid.SetRow(b, row);
-            Grid.SetColumn(b, col);
-            MatrixGrid.Children.Add(b);
+            var tb = new TextBlock { Text = text, HorizontalAlignment = halign, Margin = new Thickness(4, 2, 4, 2), FontWeight = FontWeights.Bold };
+            var b = new Border { BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0.5), Child = tb, Padding = new Thickness(2) };
+            Grid.SetRow(b, row); Grid.SetColumn(b, col);
+            grid.Children.Add(b);
         }
     }
 }

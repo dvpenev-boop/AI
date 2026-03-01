@@ -122,36 +122,21 @@ namespace EE.Doklad.Views
             FrameFractionTextBox.Text = (_batch.FrameFraction * 100).ToString("F1");
             FrameFractionTextBox.TextChanged += AnyInputChanged;
 
-            // Shading - use ComboBox for mode (0=None,1=Internal,2=External)
-            ShadingModeComboBox.SelectionChanged += (s, e) =>
-            {
-                bool hasShading = ShadingModeComboBox.SelectedIndex > 0;
-                // Enable/disable category combobox and datagrid
-                ShadingCategoryComboBox.IsEnabled = hasShading;
-                ShadingOptionsDataGrid.IsEnabled = hasShading;
-                
-                // Auto-select first shading option when switching to shaded mode
-                if (hasShading && ShadingOptionsDataGrid.SelectedItem == null && ShadingOptionsDataGrid.Items.Count > 0)
-                    ShadingOptionsDataGrid.SelectedIndex = 0;
-                AnyInputChanged(s, e);
-            };
-            // Default shading mode: none if no shading type saved, otherwise internal
-            ShadingModeComboBox.SelectedIndex = string.IsNullOrEmpty(_batch.ShadingTypeId) ? 0 : 1;
-            ShadingCategoryComboBox.ItemsSource = _shadingByCategory.Keys.ToList();
-            if (ShadingCategoryComboBox.Items.Count > 0)
-            {
-                ShadingCategoryComboBox.SelectedIndex = 0;
-                var first = ShadingCategoryComboBox.SelectedItem as string;
-                if (first != null && _shadingByCategory.ContainsKey(first))
-                {
-                    ShadingOptionsDataGrid.ItemsSource = _shadingByCategory[first];
-                    // Pre-select first row so preview is immediate
-                    if (ShadingOptionsDataGrid.Items.Count > 0)
-                        ShadingOptionsDataGrid.SelectedIndex = 0;
-                }
-            }
-            ShadingCategoryComboBox.SelectionChanged += ShadingCategoryComboBox_SelectionChanged;
-            ShadingOptionsDataGrid.SelectionChanged += AnyInputChanged;
+            // ── Слънцезащита – Отоплителен сезон ──────────────────────────────
+            InitShadingControls(
+                ShadingModeHeatComboBox,
+                ShadingCategoryHeatComboBox,
+                ShadingOptionsHeatDataGrid,
+                savedMode: _batch.ShadingModeHeat,
+                savedTypeId: _batch.ShadingTypeIdHeat);
+
+            // ── Слънцезащита – Охладителен сезон ──────────────────────────────
+            InitShadingControls(
+                ShadingModeCoolComboBox,
+                ShadingCategoryCoolComboBox,
+                ShadingOptionsCoolDataGrid,
+                savedMode: _batch.ShadingModeCool,
+                savedTypeId: _batch.ShadingTypeIdCool);
 
             // Obstacle (section 6) - ComboBox replaces radio buttons
             ObstacleModeComboBox.SelectionChanged += (s, e) =>
@@ -272,15 +257,74 @@ namespace EE.Doklad.Views
             }
         }
 
+        // ── Helper: initialise one shading row (Heat or Cool) ─────────────────
+        private void InitShadingControls(
+            ComboBox modeCombo, ComboBox categoryCombo, DataGrid optionsGrid,
+            int savedMode, string? savedTypeId)
+        {
+            // Populate category list
+            categoryCombo.ItemsSource = _shadingByCategory.Keys.ToList();
+
+            // Wire category → grid population
+            categoryCombo.SelectionChanged += (s, e) =>
+            {
+                if (categoryCombo.SelectedItem is string cat && _shadingByCategory.ContainsKey(cat))
+                {
+                    optionsGrid.ItemsSource = _shadingByCategory[cat];
+                    if (optionsGrid.Items.Count > 0)
+                        optionsGrid.SelectedIndex = 0;
+                }
+            };
+            optionsGrid.SelectionChanged += AnyInputChanged;
+
+            // Select category and row from saved state
+            if (!string.IsNullOrEmpty(savedTypeId))
+            {
+                foreach (var kv in _shadingByCategory)
+                {
+                    var match = kv.Value.FirstOrDefault(o => o.Id == savedTypeId);
+                    if (match != null)
+                    {
+                        categoryCombo.SelectedItem = kv.Key;
+                        optionsGrid.ItemsSource = kv.Value;
+                        optionsGrid.SelectedItem = match;
+                        break;
+                    }
+                }
+            }
+            else if (categoryCombo.Items.Count > 0)
+            {
+                categoryCombo.SelectedIndex = 0;
+                if (categoryCombo.SelectedItem is string firstCat && _shadingByCategory.ContainsKey(firstCat))
+                {
+                    optionsGrid.ItemsSource = _shadingByCategory[firstCat];
+                    if (optionsGrid.Items.Count > 0)
+                        optionsGrid.SelectedIndex = 0;
+                }
+            }
+
+            // Wire mode ComboBox
+            modeCombo.SelectionChanged += (s, e) =>
+            {
+                bool hasShading = modeCombo.SelectedIndex > 0;
+                categoryCombo.IsEnabled = hasShading;
+                optionsGrid.IsEnabled = hasShading;
+                if (hasShading && optionsGrid.SelectedItem == null && optionsGrid.Items.Count > 0)
+                    optionsGrid.SelectedIndex = 0;
+                AnyInputChanged(s, e);
+            };
+
+            // Restore saved mode (0/1/2); derive mode from savedTypeId if needed
+            int mode = savedMode;
+            if (mode == 0 && !string.IsNullOrEmpty(savedTypeId)) mode = 1; // legacy fallback
+            modeCombo.SelectedIndex = Math.Clamp(mode, 0, 2);
+            categoryCombo.IsEnabled = mode > 0;
+            optionsGrid.IsEnabled = mode > 0;
+        }
+
         private void ShadingCategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ShadingCategoryComboBox.SelectedItem is string cat && _shadingByCategory.ContainsKey(cat))
-            {
-                ShadingOptionsDataGrid.ItemsSource = _shadingByCategory[cat];
-                // Auto-select first row in new category
-                if (ShadingOptionsDataGrid.Items.Count > 0)
-                    ShadingOptionsDataGrid.SelectedIndex = 0;
-            }
+            // Legacy stub – individual wiring is now done inside InitShadingControls
         }
 
         private void UpdatePreview()
@@ -291,6 +335,11 @@ namespace EE.Doklad.Views
             double areaGross = width * height;
             CalculatedAreaTextBlock.Text = areaGross > 0 ? $"Площ: {areaGross:F3} m² (от {w:F0}×{h:F0} см)" : "Площ: —";
             double ffr = TryParseDouble(FrameFractionTextBox.Text, out var f) ? f / 100.0 : 0;
+
+            // Специален случай: Врата + F_fr=100% → плътна врата, без остъкляване
+            bool isDoor = KindComboBox.SelectedValue is WindowKind kv && kv == WindowKind.Door;
+            bool isSolidDoor = isDoor && ffr >= 1.0;
+
             double areaGlass = areaGross * (1 - ffr);
             double u = TryParseDouble(UValueTextBox.Text, out var uval) ? uval : 0;
 
@@ -302,28 +351,32 @@ namespace EE.Doklad.Views
             const double a_gl = 0.75; // table 3 default for vertical
             const double Fw = 0.90; // correction factor from table 3
 
-            double g_no_shade_base = a_gl * gAlt + (1 - a_gl) * gDif; // formula 3.42 base
-            double g_n_computed = Fw * g_no_shade_base; // 3.41: g_n = 0.90 * base
+            double g_no_shade_base;
+            double g_n_computed;
+            double shadingFactorHeat;
+            double shadingFactorCool;
+            double g_eff;
 
-            // shading factor - използваме FShadeInt или FShadeExt в зависимост от режима
-            double shadingFactor = 1.0;
-            if (ShadingModeComboBox.SelectedIndex > 0)
+            if (isSolidDoor)
             {
-                ShadingOption? sop = ShadingOptionsDataGrid.SelectedItem as ShadingOption
-                    ?? ShadingOptionsDataGrid.Items.OfType<ShadingOption>().FirstOrDefault();
-                if (sop != null)
-                {
-                    // Index 1 = Вътрешна щора → FShadeInt, Index 2 = Външна щора → FShadeExt
-                    shadingFactor = ShadingModeComboBox.SelectedIndex == 1
-                        ? sop.FShadeInt
-                        : sop.FShadeExt;
-                }
+                // Плътна врата: няма остъкляване
+                g_no_shade_base = 0.0;
+                g_n_computed = 0.0;
+                shadingFactorHeat = 1.0;
+                shadingFactorCool = 1.0;
+                g_eff = 0.0;
             }
+            else
+            {
+                g_no_shade_base = a_gl * gAlt + (1 - a_gl) * gDif; // formula 3.42 base
+                g_n_computed = Fw * g_no_shade_base; // 3.41: g_n = 0.90 * base
 
-            // g_eff:
-            //   Без щора (shadingFactor=1.0): g_eff = 0.90 * g_n = Fw * g_n_computed  → приравнено на 3.41
-            //   С щора:                       g_eff = g_n * FShadeInt/Ext              → 3.42 + shading
-            double g_eff = g_n_computed * shadingFactor;
+                shadingFactorHeat = GetShadingFactor(ShadingModeHeatComboBox, ShadingOptionsHeatDataGrid);
+                shadingFactorCool = GetShadingFactor(ShadingModeCoolComboBox, ShadingOptionsCoolDataGrid);
+
+                // Preview uses the heating factor for the combined g_eff display row
+                g_eff = g_n_computed * shadingFactorHeat;
+            }
 
             // set computed GN (read-only textbox)
             GNTextBox.Text = g_n_computed.ToString("F3");
@@ -337,7 +390,7 @@ namespace EE.Doklad.Views
             PreviewAreaGross.Text = areaGross.ToString("F3");
             PreviewAreaGlass.Text = areaGlass.ToString("F3");
             PreviewGBase.Text = g_no_shade_base.ToString("F3");
-            PreviewShadingReduction.Text = shadingFactor.ToString("F3");
+            PreviewShadingReduction.Text = shadingFactorHeat.ToString("F3");
             PreviewGEff.Text = g_eff.ToString("F3");
             PreviewUA.Text = ua.ToString("F3");
             PreviewTotalGrossArea.Text = totalGross.ToString("F3");
@@ -345,11 +398,22 @@ namespace EE.Doklad.Views
             PreviewTotalUA.Text = totalUA.ToString("F3");
             PreviewTotalGA.Text = totalGA.ToString("F3");
 
-            // Изчисляване на g_eff по сезони — подаваме g_n (с Fw) и shadingFactor
-            UpdateSeasonalResults(g_n_computed, shadingFactor);
+            // Изчисляване на g_eff по сезони — подаваме g_n (с Fw) и отделни shading factor-и
+            UpdateSeasonalResults(g_n_computed, shadingFactorHeat, shadingFactorCool);
         }
 
-        private void UpdateSeasonalResults(double gBase, double shadingFactor)
+        /// <summary>Reads the shading reduction factor from a mode/grid pair.</summary>
+        private double GetShadingFactor(ComboBox modeCombo, DataGrid optionsGrid)
+        {
+            if (modeCombo.SelectedIndex <= 0) return 1.0;
+            ShadingOption? sop = optionsGrid.SelectedItem as ShadingOption
+                ?? optionsGrid.Items.OfType<ShadingOption>().FirstOrDefault();
+            if (sop == null) return 1.0;
+            // 1 = Вътрешна → FShadeInt, 2 = Външна → FShadeExt
+            return modeCombo.SelectedIndex == 1 ? sop.FShadeInt : sop.FShadeExt;
+        }
+
+        private void UpdateSeasonalResults(double gBase, double shadingFactorHeat, double shadingFactorCool)
         {
             // Ако нито един режим не е активен, скриваме целия GroupBox
             if (!_heatingSeasonEnabled && !_coolingSeasonEnabled)
@@ -360,30 +424,26 @@ namespace EE.Doklad.Views
             
             SeasonalResultsGroupBox.Visibility = Visibility.Visible;
 
-            // Изчисляваме месечни g_eff стойности
-            double[] gEffMonthly = new double[12];
-            for (int m = 0; m < 12; m++)
-            {
-                double F_sh_dir_m = _batch.FshDirMonthly[m];
-                gEffMonthly[m] = gBase * shadingFactor * F_sh_dir_m;
-            }
-
-            // Ако имаме климатична зона (1-9), използваме нейните сезонни данни
-            // Иначе използваме default Зона 1
+            // Изчисляваме месечни g_eff стойности – всеки сезон ползва собствен shading factor
             int zone = _climateZone ?? 1;
             zone = Math.Clamp(zone, 1, 9);
             var season = HeatingSeason[zone - 1];
-
-            // Определяме кои месеци принадлежат към отоплителния сезон
             List<int> heatingMonths = GetSeasonMonths(season.sm, season.sd, season.em, season.ed);
-
-            // Охладителен сезон - всички останали месеци
             List<int> coolingMonths = Enumerable.Range(0, 12).Except(heatingMonths).ToList();
+
+            double[] gEffHeatMonthly = new double[12];
+            double[] gEffCoolMonthly = new double[12];
+            for (int m = 0; m < 12; m++)
+            {
+                double F_sh_dir_m = _batch.FshDirMonthly[m];
+                gEffHeatMonthly[m] = gBase * shadingFactorHeat * F_sh_dir_m;
+                gEffCoolMonthly[m] = gBase * shadingFactorCool * F_sh_dir_m;
+            }
 
             // Обновяваме HEATING ред
             if (_heatingSeasonEnabled && heatingMonths.Count > 0)
             {
-                double heatingAvg = heatingMonths.Average(m => gEffMonthly[m]);
+                double heatingAvg = heatingMonths.Average(m => gEffHeatMonthly[m]);
                 HeatingSeasonRow.Visibility = Visibility.Visible;
                 HeatingMonthsText.Text = $"{GetMonthName(season.sm)}-{GetMonthName(season.em)} ({heatingMonths.Count} месеца)";
                 HeatingGEffAvg.Text = heatingAvg.ToString("F3");
@@ -397,7 +457,7 @@ namespace EE.Doklad.Views
             // Обновяваме COOLING ред
             if (_coolingSeasonEnabled && coolingMonths.Count > 0)
             {
-                double coolingAvg = coolingMonths.Average(m => gEffMonthly[m]);
+                double coolingAvg = coolingMonths.Average(m => gEffCoolMonthly[m]);
                 CoolingSeasonRow.Visibility = Visibility.Visible;
                 CoolingMonthsText.Text = $"{GetMonthName(coolingMonths[0])}-{GetMonthName(coolingMonths[^1])} ({coolingMonths.Count} месеца)";
                 CoolingGEffAvg.Text = coolingAvg.ToString("F3");
@@ -460,8 +520,16 @@ namespace EE.Doklad.Views
             valid &= string.IsNullOrEmpty(UError.Text);
             GNError.Text = (!TryParseDouble(GNTextBox.Text, out var gn) || gn < 0 || gn > 1) ? "g_n трябва да е 0..1" : "";
             valid &= string.IsNullOrEmpty(GNError.Text);
-            FrameFractionError.Text = (!TryParseDouble(FrameFractionTextBox.Text, out var ffr) || ffr < 0 || ffr >= 50) ? "F_fr 0..50%" : "";
+
+            // F_fr: Прозорец → 0..50%, Врата → 0..100%
+            bool isDoor = KindComboBox.SelectedValue is WindowKind k && k == WindowKind.Door;
+            double maxFfr = isDoor ? 100.0 : 50.0;
+            if (!TryParseDouble(FrameFractionTextBox.Text, out var ffr) || ffr < 0 || ffr > maxFfr)
+                FrameFractionError.Text = isDoor ? "F_fr 0..100% (Врата)" : "F_fr 0..50% (Прозорец)";
+            else
+                FrameFractionError.Text = "";
             valid &= string.IsNullOrEmpty(FrameFractionError.Text);
+
             OpticalTypeError.Text = OpticalTypeComboBox.SelectedItem == null ? "Изберете тип" : "";
             valid &= string.IsNullOrEmpty(OpticalTypeError.Text);
             SaveButton.IsEnabled = valid;
@@ -483,82 +551,112 @@ namespace EE.Doklad.Views
 
             // 3. Топлотехнически и оптични данни
             TryParseDouble(UValueTextBox.Text, out double u);
-            // GN is computed from glazing tables (do not read user input)
             _batch.UValue = u;
-            // save glazing selections
             _batch.GlazingType = GlazingTypeComboBox.SelectedValue is GlazingType gtv ? gtv : _batch.GlazingType;
             _batch.GlazingGDif = TryParseDouble(GlazingGDiffTextBox.Text, out var gd) ? gd : _batch.GlazingGDif;
-
-            // compute GN and shading factor again for save
-            double gAlt_save = WindowCalculator.GetGlazingGAlt(_batch.GlazingType);
-            double gDif_save = _batch.GlazingGDif > 0 ? _batch.GlazingGDif : gAlt_save;
-            const double a_gl = 0.75;
-            const double Fw = 0.90;
-            double g_no_shade_base_save = a_gl * gAlt_save + (1 - a_gl) * gDif_save;
-            double g_n_save = Fw * g_no_shade_base_save;
-            _batch.GN = g_n_save;
-            _batch.OpticalType = OpticalTypeComboBox.SelectedItem is OpticalType ot ? ot : OpticalType.Clear;
 
             // 4. Рамка
             TryParseDouble(FrameFractionTextBox.Text, out double ffr);
             _batch.FrameFraction = ffr / 100.0;
 
-            // 5. Слънцезащита (ComboBox mode)
-            // Compute shading reduction factor based on mode (Internal/External)
-            if (ShadingModeComboBox.SelectedIndex == 0)
+            // Специален случай: Врата + F_fr=100% → плътна врата
+            bool isSolidDoor = _batch.Kind == WindowKind.Door && _batch.FrameFraction >= 1.0;
+
+            if (isSolidDoor)
             {
+                // Плътна врата: без остъкляване – g=0 за всички режими
+                _batch.GN = 0.0;
+                _batch.OpticalType = OpticalType.Clear;
                 _batch.ShadingTypeId = null;
                 _batch.ShadingReductionFactor = 1.0;
-            }
-            else
-            {
-                // Use selected row, or fall back to first available option
-                ShadingOption? option = ShadingOptionsDataGrid.SelectedItem as ShadingOption
-                    ?? ShadingOptionsDataGrid.Items.OfType<ShadingOption>().FirstOrDefault();
-                if (option != null)
-                {
-                    _batch.ShadingTypeId = option.Id;
-                    // Избираме между FShadeInt (вътрешна) и FShadeExt (външна)
-                    double shadingFactor_save = ShadingModeComboBox.SelectedIndex == 1 
-                        ? option.FShadeInt 
-                        : option.FShadeExt;
-                    _batch.ShadingReductionFactor = shadingFactor_save;
-                }
-                else
-                {
-                    _batch.ShadingTypeId = null;
-                    _batch.ShadingReductionFactor = 1.0;
-                }
-            }
-
-            // 6. Препятствия (засенчване) - използваме ShadingConfig и месечни F_sh,dir
-            if (_shadingConfigLocal != null)
-            {
-                _batch.ShadingConfig = _shadingConfigLocal;
-                // copy monthly F_sh,dir into batch (ensure length 12)
-                if (_shadingConfigLocal.FshDirMonthly != null && _shadingConfigLocal.FshDirMonthly.Length == 12)
-                    _batch.FshDirMonthly = (double[])_shadingConfigLocal.FshDirMonthly.Clone();
-                else
-                    _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
-            }
-            else
-            {
-                // No shading: default 1.0 for all months
                 _batch.ShadingConfig = null;
                 _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+                _batch.GEffMonthly = new double[12]; // all 0
+                _batch.GEffHeat = 0.0;
+                _batch.GEffCool = 0.0;
             }
-
-            // 7. Изчисляваме месечни g_eff стойности
-            // Формула: g_eff[m] = g_n * F_sh,gl * F_sh,dir[m]
-            _batch.GEffMonthly = new double[12];
-            for (int m = 0; m < 12; m++)
+            else
             {
-                double F_sh_dir_m = _batch.FshDirMonthly[m];          // от точка 6 (засенчване/препятствия)
-                double F_sh_gl = _batch.ShadingReductionFactor;       // от точка 5 (щора) - FShadeInt или FShadeExt
-                _batch.GEffMonthly[m] = g_n_save * F_sh_gl * F_sh_dir_m;
+                // Обичайно изчисление (прозорец или врата с частично остъкляване)
+                double gAlt_save = WindowCalculator.GetGlazingGAlt(_batch.GlazingType);
+                double gDif_save = _batch.GlazingGDif > 0 ? _batch.GlazingGDif : gAlt_save;
+                const double a_gl = 0.75;
+                const double Fw = 0.90;
+                double g_no_shade_base_save = a_gl * gAlt_save + (1 - a_gl) * gDif_save;
+                double g_n_save = Fw * g_no_shade_base_save;
+                _batch.GN = g_n_save;
+                _batch.OpticalType = OpticalTypeComboBox.SelectedItem is OpticalType ot ? ot : OpticalType.Clear;
+
+                // 5. Слънцезащита – запазваме отделно за отопление и охлаждане
+                double shadingFactorHeat_save = GetShadingFactor(ShadingModeHeatComboBox, ShadingOptionsHeatDataGrid);
+                double shadingFactorCool_save = GetShadingFactor(ShadingModeCoolComboBox, ShadingOptionsCoolDataGrid);
+
+                _batch.ShadingModeHeat = ShadingModeHeatComboBox.SelectedIndex;
+                _batch.ShadingModeCool = ShadingModeCoolComboBox.SelectedIndex;
+                _batch.ShadingReductionFactorHeat = shadingFactorHeat_save;
+                _batch.ShadingReductionFactorCool = shadingFactorCool_save;
+
+                // Persist selected shading type IDs
+                if (ShadingModeHeatComboBox.SelectedIndex > 0)
+                {
+                    ShadingOption? optH = ShadingOptionsHeatDataGrid.SelectedItem as ShadingOption
+                        ?? ShadingOptionsHeatDataGrid.Items.OfType<ShadingOption>().FirstOrDefault();
+                    _batch.ShadingTypeIdHeat = optH?.Id;
+                }
+                else _batch.ShadingTypeIdHeat = null;
+
+                if (ShadingModeCoolComboBox.SelectedIndex > 0)
+                {
+                    ShadingOption? optC = ShadingOptionsCoolDataGrid.SelectedItem as ShadingOption
+                        ?? ShadingOptionsCoolDataGrid.Items.OfType<ShadingOption>().FirstOrDefault();
+                    _batch.ShadingTypeIdCool = optC?.Id;
+                }
+                else _batch.ShadingTypeIdCool = null;
+
+                // Keep legacy single-shading field in sync (use heating factor as representative)
+                _batch.ShadingReductionFactor = shadingFactorHeat_save;
+                _batch.ShadingTypeId = _batch.ShadingTypeIdHeat;
+
+                // 6. Препятствия (засенчване)
+                if (_shadingConfigLocal != null)
+                {
+                    _batch.ShadingConfig = _shadingConfigLocal;
+                    if (_shadingConfigLocal.FshDirMonthly != null && _shadingConfigLocal.FshDirMonthly.Length == 12)
+                        _batch.FshDirMonthly = (double[])_shadingConfigLocal.FshDirMonthly.Clone();
+                    else
+                        _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+                }
+                else
+                {
+                    _batch.ShadingConfig = null;
+                    _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+                }
+
+                // 7. Месечни g_eff стойности – използваме heating factor за съвместимост
+                _batch.GEffMonthly = new double[12];
+                for (int m = 0; m < 12; m++)
+                {
+                    double F_sh_dir_m = _batch.FshDirMonthly[m];
+                    _batch.GEffMonthly[m] = g_n_save * shadingFactorHeat_save * F_sh_dir_m;
+                }
+
+                // 8. Сезонни g_eff стойности (Heat / Cool) – всеки с отделен shading factor
+                int zone = _climateZone ?? 1;
+                zone = Math.Clamp(zone, 1, 9);
+                var season = HeatingSeason[zone - 1];
+                List<int> heatingMonths = GetSeasonMonths(season.sm, season.sd, season.em, season.ed);
+                List<int> coolingMonths = Enumerable.Range(0, 12).Except(heatingMonths).ToList();
+
+                _batch.GEffHeat = heatingMonths.Count > 0 && _heatingSeasonEnabled
+                    ? heatingMonths.Average(m => g_n_save * shadingFactorHeat_save * _batch.FshDirMonthly[m])
+                    : g_n_save * shadingFactorHeat_save;
+
+                _batch.GEffCool = coolingMonths.Count > 0 && _coolingSeasonEnabled
+                    ? coolingMonths.Average(m => g_n_save * shadingFactorCool_save * _batch.FshDirMonthly[m])
+                    : g_n_save * shadingFactorCool_save;
             }
 
-            // Генериране на TypeName (SaveAllData)
+            // Генериране на TypeName
             if (string.IsNullOrEmpty(_batch.TypeName))
             {
                 if (_batch.Width > 0 && _batch.Height > 0)

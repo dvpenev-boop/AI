@@ -64,10 +64,30 @@ namespace EE.Doklad.Models
         private double frameFraction = 0.15; // F_fr (0..0.5)
 
         [ObservableProperty]
-        private string? shadingTypeId; // nullable
+        private string? shadingTypeId; // nullable (legacy / общ)
 
         [ObservableProperty]
-        private double shadingReductionFactor = 1.0; // множител за g_eff
+        private double shadingReductionFactor = 1.0; // множител за g_eff (legacy / общ)
+
+        // ─── Щора по режим (Отопление / Охлаждане) ──────────────────────────
+        // 0 = Без щора, 1 = Вътрешна, 2 = Външна
+        [ObservableProperty]
+        private int shadingModeHeat = 0;
+
+        [ObservableProperty]
+        private string? shadingTypeIdHeat;
+
+        [ObservableProperty]
+        private double shadingReductionFactorHeat = 1.0;
+
+        [ObservableProperty]
+        private int shadingModeCool = 0;
+
+        [ObservableProperty]
+        private string? shadingTypeIdCool;
+
+        [ObservableProperty]
+        private double shadingReductionFactorCool = 1.0;
 
         [ObservableProperty]
         private string? obstacleProfileId; // nullable (deprecated - вижте ShadingConfig)
@@ -109,17 +129,42 @@ namespace EE.Doklad.Models
         // Derived properties
 
         /// <summary>
+        /// Ефективна пропускливост за отоплителен сезон (изчислена при Save)
+        /// </summary>
+        [ObservableProperty]
+        private double gEffHeat;
+
+        /// <summary>
+        /// Ефективна пропускливост за охладителен сезон (изчислена при Save)
+        /// </summary>
+        [ObservableProperty]
+        private double gEffCool;
+
+        // ─── Derived properties ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Кратък етикет за вида: "ПР" = Прозорец, "ВР" = Врата
+        /// </summary>
+        public string ShortKindLabel => Kind == WindowKind.Door ? "ВР" : "ПР";
+
+        /// <summary>
         /// Площ на стъклото: A_gl = A_gross * (1 - F_fr)
+        /// При Врата с F_fr = 100% → 0
         /// </summary>
         public double AreaGlass => AreaGross * (1 - FrameFraction);
 
         /// <summary>
-        /// Базова ефективна пропускливост (преди shading)
+        /// Базова ефективна пропускливост (преди shading).
+        /// При Врата с F_fr=100% → 0 (без остъкляване).
         /// </summary>
         public double GEffBase
         {
             get
             {
+                // Плътна врата (100% рамка / без остъкляване)
+                if (Kind == WindowKind.Door && FrameFraction >= 1.0)
+                    return 0.0;
+
                 if (OpticalType == OpticalType.Clear && string.IsNullOrEmpty(ShadingTypeId))
                 {
                     // 3.41: g_eff = 0.90 * g_n  (без щора, Clear стъкло)
@@ -136,6 +181,7 @@ namespace EE.Doklad.Models
 
         /// <summary>
         /// Ефективна пропускливост след shading: g_eff = g_eff_base * ShadingReductionFactor
+        /// При Врата с F_fr=100% → 0
         /// Без щора: g_eff = 0.90 * g_n * 1.0
         /// С щора:   g_eff = g_n * FShadeInt/FShadeExt
         /// </summary>
@@ -148,9 +194,18 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(GEff));
         }
 
+        partial void OnKindChanged(WindowKind value)
+        {
+            OnPropertyChanged(nameof(ShortKindLabel));
+            OnPropertyChanged(nameof(GEffBase));
+            OnPropertyChanged(nameof(GEff));
+        }
+
         partial void OnFrameFractionChanged(double value)
         {
             OnPropertyChanged(nameof(AreaGlass));
+            OnPropertyChanged(nameof(GEffBase));
+            OnPropertyChanged(nameof(GEff));
         }
 
         partial void OnGNChanged(double value)
@@ -189,7 +244,9 @@ namespace EE.Doklad.Models
         public double ATotalGross { get; set; } // m²
         public double ATotalGlass { get; set; } // m²
         public double UAvg { get; set; } // W/m²K
-        public double GAvg { get; set; } // безразмерен
+        public double GAvg { get; set; } // безразмерен (за отопление)
+        public double GAvgHeat { get; set; } // g_eff_heat средно (за отопление)
+        public double GAvgCool { get; set; } // g_eff_cool средно (за охлаждане)
 
         /// <summary>
         /// Партидите, които формират тази група

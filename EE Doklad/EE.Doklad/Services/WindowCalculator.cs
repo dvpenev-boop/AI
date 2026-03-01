@@ -6,6 +6,17 @@ using EE.Doklad.Models;
 namespace EE.Doklad.Services
 {
     /// <summary>
+    /// Режим на агрегиране за обобщените таблици
+    /// </summary>
+    public enum WindowSummarizationMode
+    {
+        /// <summary>Отопление – използва GEffHeat</summary>
+        Heating,
+        /// <summary>Охлаждане – използва GEffCool</summary>
+        Cooling
+    }
+
+    /// <summary>
     /// Service за изчисления свързани с прозорци и врати (секция 9)
     /// </summary>
     public static class WindowCalculator
@@ -38,7 +49,53 @@ namespace EE.Doklad.Services
                         ATotalGross = batchesList.Sum(b => b.Count * b.AreaGross),
                         ATotalGlass = batchesList.Sum(b => b.Count * b.AreaGlass),
                         UAvg = CalculateUAvg(batchesList),
-                        GAvg = CalculateGAvg(batchesList),
+                        GAvg = CalculateGAvgForMode(batchesList, WindowSummarizationMode.Heating),
+                        GAvgHeat = CalculateGAvgForMode(batchesList, WindowSummarizationMode.Heating),
+                        GAvgCool = CalculateGAvgForMode(batchesList, WindowSummarizationMode.Cooling),
+                        Batches = batchesList
+                    };
+                })
+                .OrderBy(r => r.Orientation)
+                .ThenBy(r => r.TypeName)
+                .ToList();
+
+            return groups;
+        }
+
+        /// <summary>
+        /// Групира партиди по фасада и тип прозорец за конкретен режим (Отопление/Охлаждане).
+        /// Единна логика без copy-paste – разликата е само кои g_eff стойности влизат.
+        /// </summary>
+        public static List<WindowSummaryRow> GroupBatchesForMode(
+            IEnumerable<WindowBatch> batches,
+            WindowSummarizationMode mode)
+        {
+            var groups = batches
+                .GroupBy(b => new
+                {
+                    b.Orientation,
+                    TypeSignature = GetTypeSignature(b)
+                })
+                .Select(g =>
+                {
+                    var batchesList = g.ToList();
+                    var firstBatch = batchesList.First();
+                    double gAvg = CalculateGAvgForMode(batchesList, mode);
+
+                    return new WindowSummaryRow
+                    {
+                        Orientation = g.Key.Orientation,
+                        TypeSignature = g.Key.TypeSignature,
+                        TypeName = string.IsNullOrEmpty(firstBatch.TypeName)
+                            ? $"{firstBatch.Width:F2}×{firstBatch.Height:F2} {GetKindLabel(firstBatch.Kind)}"
+                            : firstBatch.TypeName,
+                        TotalCount = batchesList.Sum(b => b.Count),
+                        ATotalGross = batchesList.Sum(b => b.Count * b.AreaGross),
+                        ATotalGlass = batchesList.Sum(b => b.Count * b.AreaGlass),
+                        UAvg = CalculateUAvg(batchesList),
+                        GAvg = gAvg,
+                        GAvgHeat = mode == WindowSummarizationMode.Heating ? gAvg : CalculateGAvgForMode(batchesList, WindowSummarizationMode.Heating),
+                        GAvgCool = mode == WindowSummarizationMode.Cooling ? gAvg : CalculateGAvgForMode(batchesList, WindowSummarizationMode.Cooling),
                         Batches = batchesList
                     };
                 })
@@ -75,14 +132,55 @@ namespace EE.Doklad.Services
         }
 
         /// <summary>
-        /// Изчислява средно претеглен g спрямо площта на стъклото
+        /// Изчислява средно претеглен g спрямо площта на стъклото – за съответния режим.
+        /// Режим Heating → GEffHeat; Режим Cooling → GEffCool.
+        /// Ако g_eff_heat/g_eff_cool не са изрично зададени (0), се използва GEff (обединена стойност).
         /// </summary>
-        private static double CalculateGAvg(List<WindowBatch> batches)
+        private static double CalculateGAvgForMode(List<WindowBatch> batches, WindowSummarizationMode mode)
         {
-            double totalGAgl = batches.Sum(b => b.Count * b.AreaGlass * b.GEff);
+            double totalGAgl = batches.Sum(b =>
+            {
+                double gEff = GetGEffForMode(b, mode);
+                return b.Count * b.AreaGlass * gEff;
+            });
             double totalAgl = batches.Sum(b => b.Count * b.AreaGlass);
 
             return totalAgl > 0 ? totalGAgl / totalAgl : 0;
+        }
+
+        /// <summary>
+        /// Изчислява средно претеглен g спрямо площта на стъклото (обратна съвместимост)
+        /// </summary>
+        private static double CalculateGAvg(List<WindowBatch> batches)
+        {
+            return CalculateGAvgForMode(batches, WindowSummarizationMode.Heating);
+        }
+
+        /// <summary>
+        /// Връща g_eff за партида и режим.
+        /// При Door + F_fr=100% → 0 (независимо от режима).
+        /// Приоритет: 1) GEffHeat/GEffCool (изчислени при Save), 2) per-mode shading factor × GEffBase.
+        /// </summary>
+        public static double GetGEffForMode(WindowBatch batch, WindowSummarizationMode mode)
+        {
+            // Плътна врата – няма остъкляване, g=0 за двата режима
+            if (batch.Kind == WindowKind.Door && batch.FrameFraction >= 1.0)
+                return 0.0;
+
+            if (mode == WindowSummarizationMode.Heating)
+            {
+                // Ако е изрично зададено при Save, ползваме него
+                if (batch.GEffHeat > 0) return batch.GEffHeat;
+                // Иначе – изчисляваме от per-mode shading factor
+                double srf = batch.ShadingModeHeat > 0 ? batch.ShadingReductionFactorHeat : 1.0;
+                return batch.GEffBase * srf;
+            }
+            else
+            {
+                if (batch.GEffCool > 0) return batch.GEffCool;
+                double srf = batch.ShadingModeCool > 0 ? batch.ShadingReductionFactorCool : 1.0;
+                return batch.GEffBase * srf;
+            }
         }
 
         /// <summary>

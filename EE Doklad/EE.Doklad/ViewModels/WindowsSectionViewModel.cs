@@ -23,6 +23,20 @@ namespace EE.Doklad.ViewModels
         [ObservableProperty]
         private WindowSummaryRow? selectedSummaryRow;
 
+        /// <summary>
+        /// Отоплителният сезон е активен (от Секция 5)
+        /// </summary>
+        public bool HeatingEnabled
+            => _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)
+                       ?.ObjectDataSectionData?.HeatingSeasonEnabled ?? true;
+
+        /// <summary>
+        /// Охладителният сезон е активен (от Секция 5)
+        /// </summary>
+        public bool CoolingEnabled
+            => _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)
+                       ?.ObjectDataSectionData?.CoolingSeasonEnabled ?? true;
+
         public WindowsSectionViewModel(WindowsSectionData data, Report? report = null)
         {
             _data = data;
@@ -31,6 +45,21 @@ namespace EE.Doklad.ViewModels
 
             // Слушаме за промени в партидите
             _data.WindowBatches.CollectionChanged += (s, e) => RefreshSummary();
+
+            // Слушаме за промени в ObjectDataSectionData (сезони)
+            var objData = report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            if (objData != null)
+            {
+                objData.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName is nameof(ObjectDataSectionData.HeatingSeasonEnabled)
+                                       or nameof(ObjectDataSectionData.CoolingSeasonEnabled))
+                    {
+                        OnPropertyChanged(nameof(HeatingEnabled));
+                        OnPropertyChanged(nameof(CoolingEnabled));
+                    }
+                };
+            }
 
             RefreshSummary();
         }

@@ -61,9 +61,11 @@
                     ToolTip="Следваща версия"/>
         </WrapPanel>
 
-        <!-- Summary Table (Matrix view) -->
-        <TextBlock Text="Обобщена таблица:" FontWeight="Bold" Margin="0,10,0,5"/>
-        <local:MatrixSummaryView Batches="{Binding WindowBatches}" Margin="0,0,0,20"/>
+        <!-- Summary Tables (Matrix view – Отопление и/или Охлаждане) -->
+        <local:MatrixSummaryView Batches="{Binding WindowBatches}"
+                                 HeatingEnabled="{Binding HeatingEnabled}"
+                                 CoolingEnabled="{Binding CoolingEnabled}"
+                                 Margin="0,5,0,20"/>
 
         <!-- Info panel -->
         <Border Background="#E3F2FD" Padding="10" CornerRadius="4" Margin="0,10,0,0">
