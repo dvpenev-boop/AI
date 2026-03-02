@@ -28,7 +28,8 @@ namespace EE.Doklad.Models
         Results,                    // Резултати (секция за изчисления)
         EnergyClass,                // Клас на енергопотребление (секция №21)
         Conclusion,                 // Заключение (секция №22)
-        InternalGainsDebug          // Дебъг вътрешни топлинни печалби (секция №23)
+        InternalGainsDebug,         // Дебъг вътрешни топлинни печалби (секция №23)
+        SolarGains                  // Топлинни печалби от слънчево греене (секция №24)
     }
 
     /// <summary>
@@ -156,6 +157,11 @@ namespace EE.Doklad.Models
         /// Входни данни за "Дебъг вътрешни топлинни печалби" (само за InternalGainsDebug секции)
         /// </summary>
         public InternalGainsDebugInput? InternalGainsDebugInput { get; set; }
+
+        /// <summary>
+        /// Входни данни за "Топлинни печалби от слънчево греене" (само за SolarGains секции, №24)
+        /// </summary>
+        public EE.Doklad.Sections.Section24SolarGains.Models.Section24SolarGainsData? SolarGainsData { get; set; }
 
         public int Order { get; set; }
 

@@ -44,6 +44,38 @@ namespace EE.Doklad.Views
             UpdateNavigationButtons();
         }
 
+        /// <summary>
+        /// Recalculate monthly shading results for the wizard preview when orientation or geometry changes.
+        /// Updates _batch.ShadingConfig.FshDirMonthly and _batch.FshDirMonthly if shading exists.
+        /// </summary>
+        private void RecalculateShadingForWizard()
+        {
+            if (_batch == null || _batch.ShadingConfig == null || _batch.ShadingConfig.Shadings.Count == 0) return;
+
+            // Determine current width/height (prefer user inputs in cm)
+            double wk = _batch.Width;
+            double hk = _batch.Height;
+            if (TryParseDouble(WidthTextBox?.Text, out double wCm) && wCm > 0) wk = wCm / 100.0;
+            if (TryParseDouble(HeightTextBox?.Text, out double hCm) && hCm > 0) hk = hCm / 100.0;
+            if (wk <= 0 || hk <= 0) return;
+
+            // Determine selected orientation from UI (prefer live selection)
+            var selOrient = _batch.Orientation;
+            if (OrientationComboBox?.SelectedValue is ModelOrientation oSel) selOrient = oSel;
+
+            var detailed = ShadingCalculator.CalculateDetailedMonthly(wk, hk, selOrient, _batch.ShadingConfig.Shadings, _batch.ShadingConfig.Latitude, _batch.ShadingConfig.NorthHemisphere);
+            if (detailed != null && detailed.Count > 0)
+            {
+                _batch.ShadingConfig.FshDirMonthly = detailed.Select(d => d.FshDir).ToArray();
+                _batch.FshDirMonthly = (double[])_batch.ShadingConfig.FshDirMonthly.Clone();
+            }
+            else
+            {
+                _batch.ShadingConfig.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+                _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+            }
+        }
+
         private void LoadObstacleProfiles()
         {
             _obstacleProfiles = WindowCalculator.GetObstacleProfiles();
@@ -72,6 +104,13 @@ namespace EE.Doklad.Views
             OrientationComboBox.DisplayMemberPath = "Label";
             OrientationComboBox.SelectedValuePath = "Value";
             OrientationComboBox.SelectedValue = _batch.Orientation;
+            // When the user changes facade/orientation in step 1, update shading summary (if any)
+            OrientationComboBox.SelectionChanged += (s, e) =>
+            {
+                // Recompute shading preview using live selection
+                RecalculateShadingForWizard();
+                UpdateShadingSummaryUI();
+            };
 
             // Count
             CountTextBox.Text = _batch.Count.ToString();
@@ -340,7 +379,11 @@ namespace EE.Doklad.Views
                 return;
             }
 
-            var dialog = new ShadingEditorDialog(wk, hk, _batch.Orientation, _batch.ShadingConfig)
+            // Use current Orientation selection if available so dialog header matches live UI
+            var selectedOrient = _batch.Orientation;
+            if (OrientationComboBox?.SelectedValue is ModelOrientation oSel)
+                selectedOrient = oSel;
+            var dialog = new ShadingEditorDialog(wk, hk, selectedOrient, _batch.ShadingConfig)
             {
                 Owner = this
             };

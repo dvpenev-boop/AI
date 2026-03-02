@@ -199,7 +199,11 @@ namespace EE.Doklad.Views
                 return;
             }
 
-            var dialog = new ShadingEditorDialog(wk, hk, _batch.Orientation, _shadingConfigLocal);
+            // Use current selection from the OrientationComboBox if available (reflect live UI selection)
+            var selectedOrient = _batch.Orientation;
+            if (OrientationComboBox?.SelectedValue is EE.Doklad.Models.Orientation oSel)
+                selectedOrient = oSel;
+            var dialog = new ShadingEditorDialog(wk, hk, selectedOrient, _shadingConfigLocal);
             dialog.Owner = this;
             if (dialog.ShowDialog() == true)
             {
@@ -397,6 +401,27 @@ namespace EE.Doklad.Views
             PreviewTotalGlassArea.Text = totalGlass.ToString("F3");
             PreviewTotalUA.Text = totalUA.ToString("F3");
             PreviewTotalGA.Text = totalGA.ToString("F3");
+
+            // If we have a shading config loaded, recalculate its monthly F_sh,dir
+            if (_shadingConfigLocal != null && _shadingConfigLocal.Shadings.Count > 0 && width > 0 && height > 0)
+            {
+                // Determine selected orientation from UI (prefer live selection)
+                var selOrient = _batch.Orientation;
+                if (OrientationComboBox?.SelectedValue is EE.Doklad.Models.Orientation oSel)
+                    selOrient = oSel;
+
+                var detailed = ShadingCalculator.CalculateDetailedMonthly(width, height, selOrient, _shadingConfigLocal.Shadings, _shadingConfigLocal.Latitude, _shadingConfigLocal.NorthHemisphere);
+                if (detailed != null && detailed.Count > 0)
+                    _shadingConfigLocal.FshDirMonthly = detailed.Select(d => d.FshDir).ToArray();
+                else
+                    _shadingConfigLocal.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
+
+                // Also update _batch.FshDirMonthly so seasonal results use the recalculated values in preview
+                _batch.FshDirMonthly = (double[])_shadingConfigLocal.FshDirMonthly.Clone();
+
+                // Refresh summary UI (shows min/avg/max)
+                UpdateShadingSummaryUI();
+            }
 
             // Изчисляване на g_eff по сезони — подаваме g_n (с Fw) и отделни shading factor-и
             UpdateSeasonalResults(g_n_computed, shadingFactorHeat, shadingFactorCool);

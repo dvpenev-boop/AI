@@ -803,6 +803,21 @@ public partial class MainWindow : Window
                 viewModel.CurrentReport);
             ContentScrollViewer.Content = debugView;
         }
+        else if (section.Type == ModelSectionType.SolarGains ||
+                 (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("слънчево греене")))
+        {
+            if (section.SolarGainsData == null)
+                section.SolarGainsData = new EE.Doklad.Sections.Section24SolarGains.Models.Section24SolarGainsData();
+
+            section.Type = ModelSectionType.SolarGains;
+
+            var solarGainsVm = new EE.Doklad.Sections.Section24SolarGains.ViewModels.Section24ViewModel(section.SolarGainsData);
+            var solarGainsView = new EE.Doklad.Sections.Section24SolarGains.Views.Section24View
+            {
+                DataContext = solarGainsVm
+            };
+            ContentScrollViewer.Content = solarGainsView;
+        }
         else
         {
             // Ако е секция 4. Въведение, показваме IntroSectionEditor

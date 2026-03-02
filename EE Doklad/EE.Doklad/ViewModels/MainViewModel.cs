@@ -6,6 +6,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EE.Doklad.Models;
+using EE.Doklad.Sections.Section24SolarGains;
 using EE.Doklad.Services;
 using Microsoft.Win32;
 
@@ -636,7 +637,8 @@ namespace EE.Doklad.ViewModels
                 "20. Резултати сграда",
                 "21. Клас на енергопотребление",
                 "22. Заключение",
-                "23. Дебъг вътрешни печалби"
+                "23. Дебъг вътрешни печалби",
+                "24. Топлинни печалби от слънчево греене"
             };
 
             for (int i = 0; i < laterTitles.Length; i++)
@@ -822,6 +824,12 @@ namespace EE.Doklad.ViewModels
                         HeatingSeasonEndDay     = 20,
                         YearRef = 2024
                     };
+                    section.StaticText = string.Empty;
+                }
+                else if (laterTitles[i].Contains("24. Топлинни печалби от слънчево греене"))
+                {
+                    section.Type = SectionType.SolarGains;
+                    section.SolarGainsData = SampleSolarGainsData.Create();
                     section.StaticText = string.Empty;
                 }
 
