@@ -370,11 +370,19 @@ namespace EE.Doklad.Views
                 dynamic? tag = btn.Tag;
                 if (tag == null) return;
                 string typeSignature = (string)tag.TypeSignature;
+                // The tag also contains Mode (set when the button was created). Use it to compute per-mode GEff.
+                WindowSummarizationMode mode = tag.Mode is WindowSummarizationMode mm ? mm : WindowSummarizationMode.Heating;
+
+                // Resolve live cooling months from the view's dependency properties so
+                // GetGEffForMode(..., coolingMonths) uses the current Section-5 period.
+                WindowCalculator.TryGetCoolingMonths(CoolingStartMonth, CoolingEndMonth, CoolingEnabled, out List<int> coolingMonths);
 
                 var allGroups = WindowCalculator.GroupBatches(Batches);
                 var filtered = allGroups.Where(g => g.TypeSignature == typeSignature).ToList();
                 var combinedBatches = filtered.SelectMany(g => g.Batches).ToList();
                 if (combinedBatches.Count == 0) return;
+
+                // (debug output removed)
 
                 var summary = new WindowSummaryRow
                 {
@@ -385,7 +393,12 @@ namespace EE.Doklad.Views
                     ATotalGross   = combinedBatches.Sum(b => b.Count * b.AreaGross),
                     ATotalGlass   = combinedBatches.Sum(b => b.Count * b.AreaGlass),
                     UAvg          = combinedBatches.Sum(b => b.Count * b.AreaGross * b.UValue) / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * b.AreaGross)),
-                    GAvg          = combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross) * b.GEff) / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross))),
+                    // Use per-mode g_eff when building the combined summary row so that
+                    // the details view matches the matrix mode (heating/cooling). Previously
+                    // the code used the generic b.GEff which may differ from per-mode
+                    // seasonal values (especially for cooling where live months apply).
+                    GAvg          = combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross) * WindowCalculator.GetGEffForMode(b, mode, coolingMonths))
+                                    / Math.Max(1e-9, combinedBatches.Sum(b => b.Count * (b.AreaGlass > 0 ? b.AreaGlass : b.AreaGross))),
                     Orientation   = combinedBatches.First().Orientation
                 };
 
