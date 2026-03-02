@@ -17,9 +17,12 @@ namespace EE.Doklad.Views
         private int? _climateZone;
         private bool _heatingEnabled;
         private bool _coolingEnabled;
+        private int? _coolingStartMonth;
+        private int? _coolingEndMonth;
 
         public WindowBatchDetailsDialog(WindowSummaryRow summaryRow, ObservableCollection<WindowBatch> allBatches,
-                                        int? climateZone = null, bool heatingEnabled = true, bool coolingEnabled = true)
+                                        int? climateZone = null, bool heatingEnabled = true, bool coolingEnabled = true,
+                                        int? coolingStartMonth = null, int? coolingEndMonth = null)
         {
             InitializeComponent();
 
@@ -28,6 +31,8 @@ namespace EE.Doklad.Views
             _climateZone = climateZone;
             _heatingEnabled = heatingEnabled;
             _coolingEnabled = coolingEnabled;
+            _coolingStartMonth = coolingStartMonth;
+            _coolingEndMonth = coolingEndMonth;
 
             // Set title
             Title = $"Детайли за група: {summaryRow.TypeName} / {WindowCalculator.GetOrientationLabel(summaryRow.Orientation)}";
@@ -64,7 +69,8 @@ namespace EE.Doklad.Views
                 TypeName = _summaryRow.TypeName
             };
 
-            var dialog = new AddWindowFullDialog(newBatch, _climateZone, _heatingEnabled, _coolingEnabled);
+            var dialog = new AddWindowFullDialog(newBatch, _climateZone, _heatingEnabled, _coolingEnabled,
+                                                 _coolingStartMonth, _coolingEndMonth);
             if (dialog.ShowDialog() == true)
             {
                 _batchesCollection.Add(dialog.Result);
@@ -78,7 +84,8 @@ namespace EE.Doklad.Views
         {
             if (sender is System.Windows.Controls.Button button && button.DataContext is WindowBatch batch)
             {
-                var dialog = new AddWindowFullDialog(batch, _climateZone, _heatingEnabled, _coolingEnabled);
+                var dialog = new AddWindowFullDialog(batch, _climateZone, _heatingEnabled, _coolingEnabled,
+                                                     _coolingStartMonth, _coolingEndMonth);
                 if (dialog.ShowDialog() == true)
                 {
                     // Update batch in place

@@ -23,19 +23,40 @@ namespace EE.Doklad.ViewModels
         [ObservableProperty]
         private WindowSummaryRow? selectedSummaryRow;
 
+        private ObjectDataSectionData? GetObjectData()
+        {
+            if (_report?.Sections == null) return null;
+            var section = _report.Sections.FirstOrDefault(s => s.Type == SectionType.ObjectData)
+                          ?? _report.Sections.FirstOrDefault(s => s.Type == SectionType.Normal
+                                                                 && !string.IsNullOrEmpty(s.Title)
+                                                                 && s.Title.Contains("Данни за обекта"));
+            return section?.ObjectDataSectionData;
+        }
+
         /// <summary>
         /// Отоплителният сезон е активен (от Секция 5)
         /// </summary>
-        public bool HeatingEnabled
-            => _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)
-                       ?.ObjectDataSectionData?.HeatingSeasonEnabled ?? true;
+        public bool HeatingEnabled => GetObjectData()?.HeatingSeasonEnabled ?? true;
 
         /// <summary>
         /// Охладителният сезон е активен (от Секция 5)
         /// </summary>
-        public bool CoolingEnabled
-            => _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)
-                       ?.ObjectDataSectionData?.CoolingSeasonEnabled ?? true;
+        public bool CoolingEnabled => GetObjectData()?.CoolingSeasonEnabled ?? true;
+
+        /// <summary>
+        /// Климатична зона (от Секция 5)
+        /// </summary>
+        public int? ClimateZone => GetObjectData()?.ClimateZone;
+
+        /// <summary>
+        /// Начален месец на охладителния сезон (1-12, от Секция 5)
+        /// </summary>
+        public int? CoolingStartMonth => GetObjectData()?.CoolingSeasonStartMonth;
+
+        /// <summary>
+        /// Краен месец на охладителния сезон (1-12, от Секция 5)
+        /// </summary>
+        public int? CoolingEndMonth => GetObjectData()?.CoolingSeasonEndMonth;
 
         public WindowsSectionViewModel(WindowsSectionData data, Report? report = null)
         {
@@ -47,16 +68,22 @@ namespace EE.Doklad.ViewModels
             _data.WindowBatches.CollectionChanged += (s, e) => RefreshSummary();
 
             // Слушаме за промени в ObjectDataSectionData (сезони)
-            var objData = report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            var objData = GetObjectData();
             if (objData != null)
             {
                 objData.PropertyChanged += (s, e) =>
                 {
                     if (e.PropertyName is nameof(ObjectDataSectionData.HeatingSeasonEnabled)
-                                       or nameof(ObjectDataSectionData.CoolingSeasonEnabled))
+                                       or nameof(ObjectDataSectionData.CoolingSeasonEnabled)
+                                       or nameof(ObjectDataSectionData.ClimateZone)
+                                       or nameof(ObjectDataSectionData.CoolingSeasonStartMonth)
+                                       or nameof(ObjectDataSectionData.CoolingSeasonEndMonth))
                     {
                         OnPropertyChanged(nameof(HeatingEnabled));
                         OnPropertyChanged(nameof(CoolingEnabled));
+                        OnPropertyChanged(nameof(ClimateZone));
+                        OnPropertyChanged(nameof(CoolingStartMonth));
+                        OnPropertyChanged(nameof(CoolingEndMonth));
                     }
                 };
             }
@@ -84,17 +111,21 @@ namespace EE.Doklad.ViewModels
         private void AddWindow()
         {
             // Опитваме се да намерим ObjectDataSectionData от Report
-            var objectData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            var objectData = GetObjectData();
             
             int? climateZone = objectData?.ClimateZone;
             bool heatingEnabled = objectData?.HeatingSeasonEnabled ?? true;
             bool coolingEnabled = objectData?.CoolingSeasonEnabled ?? true;
+            int? coolingStartMonth = objectData?.CoolingSeasonStartMonth;
+            int? coolingEndMonth   = objectData?.CoolingSeasonEndMonth;
 
             var dialog = new Views.AddWindowFullDialog(
                 existingBatch: null,
                 climateZone: climateZone,
                 heatingEnabled: heatingEnabled,
-                coolingEnabled: coolingEnabled
+                coolingEnabled: coolingEnabled,
+                coolingStartMonth: coolingStartMonth,
+                coolingEndMonth: coolingEndMonth
             );
             
             if (dialog.ShowDialog() == true)
@@ -129,14 +160,17 @@ namespace EE.Doklad.ViewModels
             if (SelectedSummaryRow == null) return;
 
             // Взимаме ObjectDataSectionData за да предадем климатичната зона
-            var objectData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            var objectData = GetObjectData();
             
             int? climateZone = objectData?.ClimateZone;
             bool heatingEnabled = objectData?.HeatingSeasonEnabled ?? true;
             bool coolingEnabled = objectData?.CoolingSeasonEnabled ?? true;
+            int? coolingStartMonth = objectData?.CoolingSeasonStartMonth;
+            int? coolingEndMonth   = objectData?.CoolingSeasonEndMonth;
 
             var dialog = new Views.WindowBatchDetailsDialog(SelectedSummaryRow, _data.WindowBatches, 
-                                                             climateZone, heatingEnabled, coolingEnabled);
+                                                             climateZone, heatingEnabled, coolingEnabled,
+                                                             coolingStartMonth, coolingEndMonth);
             dialog.ShowDialog();
 
             // Refresh summary after dialog closes

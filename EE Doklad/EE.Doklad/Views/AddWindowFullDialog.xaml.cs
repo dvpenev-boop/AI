@@ -22,31 +22,23 @@ namespace EE.Doklad.Views
         // Season enabled flags
         private bool _heatingSeasonEnabled = true;
         private bool _coolingSeasonEnabled = true;
+        // Cooling season month range from Section 5 (1-based, null = not configured)
+        private int? _coolingStartMonth;
+        private int? _coolingEndMonth;
 
         public WindowBatch Result => _batch;
 
-        // Heating seasons per climate zone (sm, sd, em, ed)
-        private static readonly (int sm, int sd, int em, int ed)[] HeatingSeason =
-        {
-            (10, 21, 4, 20),  // Zone 1
-            (10, 21, 4, 25),  // Zone 2
-            (10, 23, 4, 15),  // Zone 3
-            (10, 16, 4, 23),  // Zone 4
-            (10, 25, 4, 19),  // Zone 5
-            (10, 24, 4,  6),  // Zone 6
-            (10, 15, 4, 23),  // Zone 7
-            (10, 28, 4,  6),  // Zone 8
-            (10, 28, 4,  5),  // Zone 9
-        };
-
         public AddWindowFullDialog(WindowBatch? existingBatch = null, int? climateZone = null, 
-                                    bool heatingEnabled = true, bool coolingEnabled = true)
+                                    bool heatingEnabled = true, bool coolingEnabled = true,
+                                    int? coolingStartMonth = null, int? coolingEndMonth = null)
         {
             InitializeComponent();
             _batch = existingBatch ?? new WindowBatch();
             _climateZone = climateZone;
             _heatingSeasonEnabled = heatingEnabled;
             _coolingSeasonEnabled = coolingEnabled;
+            _coolingStartMonth = coolingStartMonth;
+            _coolingEndMonth = coolingEndMonth;
             LoadShadingOptions();
             LoadObstacleProfiles();
             InitializeAllSections();
@@ -449,13 +441,7 @@ namespace EE.Doklad.Views
             
             SeasonalResultsGroupBox.Visibility = Visibility.Visible;
 
-            // Изчисляваме месечни g_eff стойности – всеки сезон ползва собствен shading factor
-            int zone = _climateZone ?? 1;
-            zone = Math.Clamp(zone, 1, 9);
-            var season = HeatingSeason[zone - 1];
-            List<int> heatingMonths = GetSeasonMonths(season.sm, season.sd, season.em, season.ed);
-            List<int> coolingMonths = Enumerable.Range(0, 12).Except(heatingMonths).ToList();
-
+            // ── Месечни g_eff (всички 12 месеца, всеки сезон с отделен shading factor) ──
             double[] gEffHeatMonthly = new double[12];
             double[] gEffCoolMonthly = new double[12];
             for (int m = 0; m < 12; m++)
@@ -465,21 +451,38 @@ namespace EE.Doklad.Views
                 gEffCoolMonthly[m] = gBase * shadingFactorCool * F_sh_dir_m;
             }
 
-            // Обновяваме HEATING ред
+            // ── Отоплителен сезон – месеците идват от климатична зона (Секция 5) ──
+            WindowCalculator.TryGetHeatingMonths(_climateZone, _heatingSeasonEnabled, out List<int> heatingMonths);
+
             if (_heatingSeasonEnabled && heatingMonths.Count > 0)
             {
                 double heatingAvg = heatingMonths.Average(m => gEffHeatMonthly[m]);
                 HeatingSeasonRow.Visibility = Visibility.Visible;
-                HeatingMonthsText.Text = $"{GetMonthName(season.sm)}-{GetMonthName(season.em)} ({heatingMonths.Count} месеца)";
+                // Display the first and last month names from the resolved list
+                HeatingMonthsText.Text = $"{GetMonthName(heatingMonths[0])}-{GetMonthName(heatingMonths[^1])} ({heatingMonths.Count} месеца)";
                 HeatingGEffAvg.Text = heatingAvg.ToString("F3");
+                int zone = Math.Clamp(_climateZone ?? 1, 1, 9);
                 HeatingNote.Text = $"Средно за отоплителен период (Климатична зона {zone})";
             }
             else
             {
-                HeatingSeasonRow.Visibility = Visibility.Collapsed;
+                if (_heatingSeasonEnabled)
+                {
+                    // Enabled but no months defined -> show 0
+                    HeatingSeasonRow.Visibility = Visibility.Visible;
+                    HeatingMonthsText.Text = "0 месеца";
+                    HeatingGEffAvg.Text = "0,000";
+                    HeatingNote.Text = "Няма зададен отоплителен период";
+                }
+                else
+                {
+                    HeatingSeasonRow.Visibility = Visibility.Collapsed;
+                }
             }
 
-            // Обновяваме COOLING ред
+            // ── Охладителен сезон – месеците идват САМО от Секция 5 (без complement) ──
+            WindowCalculator.TryGetCoolingMonths(_coolingStartMonth, _coolingEndMonth, _coolingSeasonEnabled, out List<int> coolingMonths);
+
             if (_coolingSeasonEnabled && coolingMonths.Count > 0)
             {
                 double coolingAvg = coolingMonths.Average(m => gEffCoolMonthly[m]);
@@ -490,41 +493,19 @@ namespace EE.Doklad.Views
             }
             else
             {
-                CoolingSeasonRow.Visibility = Visibility.Collapsed;
+                if (_coolingSeasonEnabled)
+                {
+                    // Enabled but no months defined -> show 0
+                    CoolingSeasonRow.Visibility = Visibility.Visible;
+                    CoolingMonthsText.Text = "0 месеца";
+                    CoolingGEffAvg.Text = "0,000";
+                    CoolingNote.Text = "Охладителният период не е зададен в Секция 5";
+                }
+                else
+                {
+                    CoolingSeasonRow.Visibility = Visibility.Collapsed;
+                }
             }
-        }
-
-        /// <summary>
-        /// Returns list of months (0-11) that belong to the heating season.
-        /// Season is defined by (startMonth, startDay) to (endMonth, endDay).
-        /// Assumes year wraparound (e.g. Oct 21 - Apr 20 crosses year boundary).
-        /// </summary>
-        private List<int> GetSeasonMonths(int startMonth, int startDay, int endMonth, int endDay)
-        {
-            List<int> months = new();
-            
-            // Convert to 0-based months for array indexing
-            int sm = startMonth - 1;  // e.g. 10 → 9 (October index)
-            int em = endMonth - 1;    // e.g. 4 → 3 (April index)
-
-            // If season wraps around year (e.g. Oct-Apr)
-            if (sm > em)
-            {
-                // Add months from start to December
-                for (int m = sm; m < 12; m++)
-                    months.Add(m);
-                // Add months from January to end
-                for (int m = 0; m <= em; m++)
-                    months.Add(m);
-            }
-            else
-            {
-                // Season within same year (e.g. May-Sep)
-                for (int m = sm; m <= em; m++)
-                    months.Add(m);
-            }
-
-            return months;
         }
 
         private string GetMonthName(int monthIndex)
@@ -666,19 +647,17 @@ namespace EE.Doklad.Views
                 }
 
                 // 8. Сезонни g_eff стойности (Heat / Cool) – всеки с отделен shading factor
-                int zone = _climateZone ?? 1;
-                zone = Math.Clamp(zone, 1, 9);
-                var season = HeatingSeason[zone - 1];
-                List<int> heatingMonths = GetSeasonMonths(season.sm, season.sd, season.em, season.ed);
-                List<int> coolingMonths = Enumerable.Range(0, 12).Except(heatingMonths).ToList();
+                //    Месеците идват ИЗЦЯЛО от Секция 5 (без complement логика).
+                WindowCalculator.TryGetHeatingMonths(_climateZone, _heatingSeasonEnabled, out List<int> heatingMonths);
+                WindowCalculator.TryGetCoolingMonths(_coolingStartMonth, _coolingEndMonth, _coolingSeasonEnabled, out List<int> coolingMonths);
 
-                _batch.GEffHeat = heatingMonths.Count > 0 && _heatingSeasonEnabled
+                _batch.GEffHeat = heatingMonths.Count > 0
                     ? heatingMonths.Average(m => g_n_save * shadingFactorHeat_save * _batch.FshDirMonthly[m])
-                    : g_n_save * shadingFactorHeat_save;
+                    : 0.0;
 
-                _batch.GEffCool = coolingMonths.Count > 0 && _coolingSeasonEnabled
+                _batch.GEffCool = coolingMonths.Count > 0
                     ? coolingMonths.Average(m => g_n_save * shadingFactorCool_save * _batch.FshDirMonthly[m])
-                    : g_n_save * shadingFactorCool_save;
+                    : 0.0;
             }
 
             // Генериране на TypeName

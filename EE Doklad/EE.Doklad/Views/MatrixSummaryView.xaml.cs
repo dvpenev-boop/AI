@@ -49,6 +49,36 @@ namespace EE.Doklad.Views
             set => SetValue(CoolingEnabledProperty, value);
         }
 
+        public static readonly DependencyProperty ClimateZoneProperty = DependencyProperty.Register(
+            "ClimateZone", typeof(int?), typeof(MatrixSummaryView),
+            new PropertyMetadata(null, OnSeasonChanged));
+
+        public int? ClimateZone
+        {
+            get => (int?)GetValue(ClimateZoneProperty);
+            set => SetValue(ClimateZoneProperty, value);
+        }
+
+        public static readonly DependencyProperty CoolingStartMonthProperty = DependencyProperty.Register(
+            "CoolingStartMonth", typeof(int?), typeof(MatrixSummaryView),
+            new PropertyMetadata(null, OnSeasonChanged));
+
+        public int? CoolingStartMonth
+        {
+            get => (int?)GetValue(CoolingStartMonthProperty);
+            set => SetValue(CoolingStartMonthProperty, value);
+        }
+
+        public static readonly DependencyProperty CoolingEndMonthProperty = DependencyProperty.Register(
+            "CoolingEndMonth", typeof(int?), typeof(MatrixSummaryView),
+            new PropertyMetadata(null, OnSeasonChanged));
+
+        public int? CoolingEndMonth
+        {
+            get => (int?)GetValue(CoolingEndMonthProperty);
+            set => SetValue(CoolingEndMonthProperty, value);
+        }
+
         // Change callbacks
 
         private static void OnBatchesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -92,16 +122,20 @@ namespace EE.Doklad.Views
 
             if (Batches == null) return;
 
+            // Resolve live cooling months once per rebuild using current DP values
+            WindowCalculator.TryGetCoolingMonths(CoolingStartMonth, CoolingEndMonth, CoolingEnabled,
+                                                  out List<int> coolingMonths);
+
             var outerStack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Vertical };
 
             if (HeatingEnabled)
-                outerStack.Children.Add(BuildSummaryTable(WindowSummarizationMode.Heating));
+                outerStack.Children.Add(BuildSummaryTable(WindowSummarizationMode.Heating, coolingMonths));
 
             if (CoolingEnabled)
             {
                 if (HeatingEnabled)
                     outerStack.Children.Add(new FrameworkElement { Height = 12 }); // spacer
-                outerStack.Children.Add(BuildSummaryTable(WindowSummarizationMode.Cooling));
+                outerStack.Children.Add(BuildSummaryTable(WindowSummarizationMode.Cooling, coolingMonths));
             }
 
             MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -111,7 +145,7 @@ namespace EE.Doklad.Views
             MatrixGrid.Children.Add(outerStack);
         }
 
-        private FrameworkElement BuildSummaryTable(WindowSummarizationMode mode)
+        private FrameworkElement BuildSummaryTable(WindowSummarizationMode mode, List<int> coolingMonths)
         {
             var container = new StackPanel { Orientation = System.Windows.Controls.Orientation.Vertical };
 
@@ -143,7 +177,7 @@ namespace EE.Doklad.Views
                 return container;
             }
 
-            var groups = WindowCalculator.GroupBatchesForMode(Batches, mode);
+            var groups = WindowCalculator.GroupBatchesForMode(Batches, mode, coolingMonths);
             var typeGroups = groups
                 .GroupBy(g => g.TypeSignature)
                 .Select(g => new
@@ -265,7 +299,7 @@ namespace EE.Doklad.Views
 
             foreach (var bt in Batches ?? Enumerable.Empty<WindowBatch>())
             {
-                double gEffMode = WindowCalculator.GetGEffForMode(bt, mode);
+                double gEffMode = WindowCalculator.GetGEffForMode(bt, mode, coolingMonths);
                 double weight = bt.AreaGlass > 0 ? bt.AreaGlass : bt.AreaGross;
                 double A = bt.Count * bt.AreaGross;
                 var lbl = WindowCalculator.GetOrientationLabel(bt.Orientation);
@@ -355,7 +389,14 @@ namespace EE.Doklad.Views
                     Orientation   = combinedBatches.First().Orientation
                 };
 
-                var dialog = new WindowBatchDetailsDialog(summary, Batches);
+                var dialog = new WindowBatchDetailsDialog(
+                    summary,
+                    Batches,
+                    climateZone: ClimateZone,
+                    heatingEnabled: HeatingEnabled,
+                    coolingEnabled: CoolingEnabled,
+                    coolingStartMonth: CoolingStartMonth,
+                    coolingEndMonth: CoolingEndMonth);
                 dialog.ShowDialog();
                 RebuildMatrix();
             }

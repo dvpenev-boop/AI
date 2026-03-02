@@ -65,6 +65,9 @@
         <local:MatrixSummaryView Batches="{Binding WindowBatches}"
                                  HeatingEnabled="{Binding HeatingEnabled}"
                                  CoolingEnabled="{Binding CoolingEnabled}"
+                                 ClimateZone="{Binding ClimateZone}"
+                                 CoolingStartMonth="{Binding CoolingStartMonth}"
+                                 CoolingEndMonth="{Binding CoolingEndMonth}"
                                  Margin="0,5,0,20"/>
 
         <!-- Info panel -->

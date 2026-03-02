@@ -341,6 +341,12 @@ namespace EE.Doklad.Views
                 if (combo?.SelectedValue is int sv) startMonth = sv;
                 else if (combo?.SelectedValue is string s && int.TryParse(s, out var p)) startMonth = p;
 
+                // Ensure model is updated even if SelectedValue binding doesn't coerce Tag correctly
+                if (DataContext is ObjectDataSectionData objData)
+                {
+                    objData.CoolingSeasonStartMonth = startMonth;
+                }
+
                 // Update start-day valid values and end-months
                 UpdateStartDays(startMonth);
                 UpdateEndMonths(startMonth);
@@ -387,6 +393,12 @@ namespace EE.Doklad.Views
                 int endMonth = 1;
                 if (combo?.SelectedValue is int sv) endMonth = sv;
                 else if (combo?.SelectedValue is string s && int.TryParse(s, out var p)) endMonth = p;
+
+                // Ensure model is updated even if SelectedValue binding doesn't coerce Tag correctly
+                if (DataContext is ObjectDataSectionData objData)
+                {
+                    objData.CoolingSeasonEndMonth = endMonth;
+                }
 
                 UpdateEndDays(endMonth);
                 EnsureEndDateNotBeforeStart();
