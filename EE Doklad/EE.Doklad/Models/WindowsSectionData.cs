@@ -154,7 +154,7 @@ namespace EE.Doklad.Models
         public double AreaGlass => AreaGross * (1 - FrameFraction);
 
         /// <summary>
-        /// Базова ефективна пропускливост (преди shading).
+        /// Базова ефективна пропускливост (преди shading) — legacy, базира се на ShadingTypeId.
         /// При Врата с F_fr=100% → 0 (без остъкляване).
         /// </summary>
         public double GEffBase
@@ -173,9 +173,40 @@ namespace EE.Doklad.Models
                 else
                 {
                     // 3.42: g_eff_base = g_n  (с щора или не-Clear стъкло)
-                    // ShadingReductionFactor (FShadeInt/FShadeExt) се прилага отделно
                     return GN;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Базова ефективна пропускливост за ОТОПЛИТЕЛЕН режим.
+        /// Зависи САМО от ShadingTypeIdHeat — независима от охлаждащата щора.
+        /// </summary>
+        public double GEffBaseHeat
+        {
+            get
+            {
+                if (Kind == WindowKind.Door && FrameFraction >= 1.0)
+                    return 0.0;
+                if (OpticalType == OpticalType.Clear && string.IsNullOrEmpty(ShadingTypeIdHeat))
+                    return 0.90 * GN;   // формула 3.41
+                return GN;              // формула 3.42
+            }
+        }
+
+        /// <summary>
+        /// Базова ефективна пропускливост за ОХЛАДИТЕЛЕН режим.
+        /// Зависи САМО от ShadingTypeIdCool — независима от отоплителната щора.
+        /// </summary>
+        public double GEffBaseCool
+        {
+            get
+            {
+                if (Kind == WindowKind.Door && FrameFraction >= 1.0)
+                    return 0.0;
+                if (OpticalType == OpticalType.Clear && string.IsNullOrEmpty(ShadingTypeIdCool))
+                    return 0.90 * GN;   // формула 3.41
+                return GN;              // формула 3.42
             }
         }
 
@@ -211,12 +242,16 @@ namespace EE.Doklad.Models
         partial void OnGNChanged(double value)
         {
             OnPropertyChanged(nameof(GEffBase));
+            OnPropertyChanged(nameof(GEffBaseHeat));
+            OnPropertyChanged(nameof(GEffBaseCool));
             OnPropertyChanged(nameof(GEff));
         }
 
         partial void OnOpticalTypeChanged(OpticalType value)
         {
             OnPropertyChanged(nameof(GEffBase));
+            OnPropertyChanged(nameof(GEffBaseHeat));
+            OnPropertyChanged(nameof(GEffBaseCool));
             OnPropertyChanged(nameof(GEff));
         }
 
@@ -229,6 +264,16 @@ namespace EE.Doklad.Models
         {
             OnPropertyChanged(nameof(GEffBase));
             OnPropertyChanged(nameof(GEff));
+        }
+
+        partial void OnShadingTypeIdHeatChanged(string? value)
+        {
+            OnPropertyChanged(nameof(GEffBaseHeat));
+        }
+
+        partial void OnShadingTypeIdCoolChanged(string? value)
+        {
+            OnPropertyChanged(nameof(GEffBaseCool));
         }
     }
 

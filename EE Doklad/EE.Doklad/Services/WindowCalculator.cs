@@ -161,7 +161,7 @@ namespace EE.Doklad.Services
         /// <summary>
         /// Връща g_eff за партида и режим.
         /// При Door + F_fr=100% → 0 (независимо от режима).
-        /// Приоритет: 1) GEffHeat/GEffCool (изчислени при Save), 2) per-mode shading factor × GEffBase.
+        /// Приоритет: 1) GEffHeat/GEffCool (изчислени при Save), 2) per-mode shading factor × per-mode GEffBase.
         /// </summary>
         public static double GetGEffForMode(WindowBatch batch, WindowSummarizationMode mode)
         {
@@ -173,26 +173,23 @@ namespace EE.Doklad.Services
             {
                 // Ако е изрично зададено при Save, ползваме него
                 if (batch.GEffHeat > 0) return batch.GEffHeat;
-                // Иначе – изчисляваме от per-mode shading factor
+                // Иначе – изчисляваме от per-mode shading factor × per-mode GEffBase
                 double srf = batch.ShadingModeHeat > 0 ? batch.ShadingReductionFactorHeat : 1.0;
-                return batch.GEffBase * srf;
+                return batch.GEffBaseHeat * srf;
             }
             else
             {
                 if (batch.GEffCool > 0) return batch.GEffCool;
                 double srf = batch.ShadingModeCool > 0 ? batch.ShadingReductionFactorCool : 1.0;
-                return batch.GEffBase * srf;
+                return batch.GEffBaseCool * srf;
             }
         }
 
         /// <summary>
         /// Връща g_eff за партида и режим, като за охлаждане ПРЕИЗЧИСЛЯВА стойността
         /// от FshDirMonthly и текущите месеци на охладителния сезон (live season months).
-        /// Използва се при визуализация на обобщената таблица след смяна на охладителния период.
-        /// За отопление: поведението е същото като GetGEffForMode(batch, mode).
-        /// За охлаждане:
-        ///   - Ако coolingMonths е непразен → avg(g_n * srf_cool * FshDir[m]) по тези месеци.
-        ///   - Ако е празен → 0.
+        /// Използва per-mode GEffBase (GEffBaseHeat / GEffBaseCool) — промяна на единия режим
+        /// НЕ влияе на другия.
         /// </summary>
         public static double GetGEffForMode(
             WindowBatch batch,
@@ -210,11 +207,11 @@ namespace EE.Doklad.Services
 
             double srf = batch.ShadingModeCool > 0 ? batch.ShadingReductionFactorCool : 1.0;
             var fsh = batch.FshDirMonthly;
-            // If no monthly shading array -> fall back to flat GEffBase * srf
+            // If no monthly shading array -> fall back to flat GEffBaseCool * srf
             if (fsh == null || fsh.Length < 12)
-                return batch.GEffBase * srf;
+                return batch.GEffBaseCool * srf;
 
-            return coolingMonths.Average(m => batch.GEffBase * srf * fsh[m]);
+            return coolingMonths.Average(m => batch.GEffBaseCool * srf * fsh[m]);
         }
 
         /// <summary>

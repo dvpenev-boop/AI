@@ -415,14 +415,17 @@ namespace EE.Doklad.Views
                 UpdateShadingSummaryUI();
             }
 
-            // Compute GEffBase as the preview base value (consistent with model GEffBase)
+            // Compute per-mode GEffBase for preview — each depends ONLY on its own shading selection.
+            // This mirrors the GEffBaseHeat / GEffBaseCool properties in the model.
             var optSel = OpticalTypeComboBox.SelectedItem is OpticalType otSel ? otSel : _batch.OpticalType;
-            bool hasShadingSelected = ShadingModeHeatComboBox.SelectedIndex > 0 || ShadingModeCoolComboBox.SelectedIndex > 0;
-            double geffBasePreview = WindowCalculator.CalculateGEffBase(g_n_computed, optSel, hasShadingSelected);
+            bool hasShadingHeat = ShadingModeHeatComboBox.SelectedIndex > 0;
+            bool hasShadingCool = ShadingModeCoolComboBox.SelectedIndex > 0;
+            double geffBaseHeatPreview = WindowCalculator.CalculateGEffBase(g_n_computed, optSel, hasShadingHeat);
+            double geffBaseCoolPreview = WindowCalculator.CalculateGEffBase(g_n_computed, optSel, hasShadingCool);
 
-            // Update preview fields and seasonal results using GEffBase so preview matches saved values
-            PreviewGBase.Text = geffBasePreview.ToString("F3");
-            UpdateSeasonalResults(geffBasePreview, g_n_computed, shadingFactorHeat, shadingFactorCool);
+            // The top "g_base" field in the preview panel shows the heating base (most common reference)
+            PreviewGBase.Text = geffBaseHeatPreview.ToString("F3");
+            UpdateSeasonalResults(geffBaseHeatPreview, geffBaseCoolPreview, shadingFactorHeat, shadingFactorCool);
         }
 
         /// <summary>Reads the shading reduction factor from a mode/grid pair.</summary>
@@ -436,7 +439,7 @@ namespace EE.Doklad.Views
             return modeCombo.SelectedIndex == 1 ? sop.FShadeInt : sop.FShadeExt;
         }
 
-    private void UpdateSeasonalResults(double gBase, double gN, double shadingFactorHeat, double shadingFactorCool)
+    private void UpdateSeasonalResults(double gBaseHeat, double gBaseCool, double shadingFactorHeat, double shadingFactorCool)
         {
             // Ако нито един режим не е активен, скриваме целия GroupBox
             if (!_heatingSeasonEnabled && !_coolingSeasonEnabled)
@@ -450,17 +453,12 @@ namespace EE.Doklad.Views
             // ── Месечни g_eff (всички 12 месеца, всеки сезон с отделен shading factor) ──
             double[] gEffHeatMonthly = new double[12];
             double[] gEffCoolMonthly = new double[12];
-            double[] gEffHeatMonthlyGn = new double[12];
-            double[] gEffCoolMonthlyGn = new double[12];
             for (int m = 0; m < 12; m++)
             {
                 double F_sh_dir_m = _batch.FshDirMonthly[m];
-                // new (standard) values using GEffBase
-                gEffHeatMonthly[m] = gBase * shadingFactorHeat * F_sh_dir_m;
-                gEffCoolMonthly[m] = gBase * shadingFactorCool * F_sh_dir_m;
-                // legacy preview values using g_n (for backward compatibility / comparison)
-                gEffHeatMonthlyGn[m] = gN * shadingFactorHeat * F_sh_dir_m;
-                gEffCoolMonthlyGn[m] = gN * shadingFactorCool * F_sh_dir_m;
+                // standard values using GEffBase (consistent with SaveButton_Click and matrix)
+                gEffHeatMonthly[m] = gBaseHeat * shadingFactorHeat * F_sh_dir_m;
+                gEffCoolMonthly[m] = gBaseCool * shadingFactorCool * F_sh_dir_m;
             }
 
             // ── Отоплителен сезон – месеците идват от климатична зона (Секция 5) ──
@@ -469,11 +467,10 @@ namespace EE.Doklad.Views
             if (_heatingSeasonEnabled && heatingMonths.Count > 0)
             {
                 double heatingAvg = heatingMonths.Average(m => gEffHeatMonthly[m]);
-                double heatingAvgLegacy = heatingMonths.Average(m => gEffHeatMonthlyGn[m]);
                 HeatingSeasonRow.Visibility = Visibility.Visible;
                 // Display the first and last month names from the resolved list
                 HeatingMonthsText.Text = $"{GetMonthName(heatingMonths[0])}-{GetMonthName(heatingMonths[^1])} ({heatingMonths.Count} месеца)";
-                HeatingGEffAvg.Text = $"{heatingAvg:F3} (legacy {heatingAvgLegacy:F3})";
+                HeatingGEffAvg.Text = heatingAvg.ToString("F3");
                 int zone = Math.Clamp(_climateZone ?? 1, 1, 9);
                 HeatingNote.Text = $"Средно за отоплителен период (Климатична зона {zone})";
             }
@@ -499,10 +496,9 @@ namespace EE.Doklad.Views
             if (_coolingSeasonEnabled && coolingMonths.Count > 0)
             {
                 double coolingAvg = coolingMonths.Average(m => gEffCoolMonthly[m]);
-                double coolingAvgLegacy = coolingMonths.Average(m => gEffCoolMonthlyGn[m]);
                 CoolingSeasonRow.Visibility = Visibility.Visible;
                 CoolingMonthsText.Text = $"{GetMonthName(coolingMonths[0])}-{GetMonthName(coolingMonths[^1])} ({coolingMonths.Count} месеца)";
-                CoolingGEffAvg.Text = $"{coolingAvg:F3} (legacy {coolingAvgLegacy:F3})";
+                CoolingGEffAvg.Text = coolingAvg.ToString("F3");
                 CoolingNote.Text = "Средно за охладителен период";
             }
             else
@@ -633,9 +629,18 @@ namespace EE.Doklad.Views
                 }
                 else _batch.ShadingTypeIdCool = null;
 
-                // Keep legacy single-shading field in sync (use heating factor as representative)
-                _batch.ShadingReductionFactor = shadingFactorHeat_save;
-                _batch.ShadingTypeId = _batch.ShadingTypeIdHeat;
+                // Legacy single-shading fields (ShadingTypeId / ShadingReductionFactor) are used
+                // ONLY to determine the GEffBase formula branch (3.41 vs 3.42) in the model.
+                // IMPORTANT: they must reflect ONLY the HEATING shading selection.
+                // Cooling-only shading must NOT change ShadingTypeId, otherwise GEffBase changes
+                // and the heating g_eff is silently modified.
+                _batch.ShadingTypeId = !string.IsNullOrEmpty(_batch.ShadingTypeIdHeat)
+                    ? _batch.ShadingTypeIdHeat
+                    : null;
+
+                _batch.ShadingReductionFactor = ShadingModeHeatComboBox.SelectedIndex > 0
+                    ? shadingFactorHeat_save
+                    : 1.0;
 
                 // 6. Препятствия (засенчване)
                 if (_shadingConfigLocal != null)
@@ -652,27 +657,28 @@ namespace EE.Doklad.Views
                     _batch.FshDirMonthly = Enumerable.Repeat(1.0, 12).ToArray();
                 }
 
-                // 7. Месечни g_eff стойности – използваме GEffBase (според формули 3.41/3.42)
-                //    (предишната реализация използваше g_n_save което водеше до несъответствие
-                //     с матрицата, защото GEffBase може да е 0.90*g_n при Clear стъкло).
+                // 7. Месечни g_eff стойности – използваме GEffBaseHeat (за heating reference, legacy поле)
+                //    Всеки режим ползва собствен per-mode GEffBase за пълна независимост.
+                double gEffBaseHeat_save = _batch.GEffBaseHeat;
+                double gEffBaseCool_save = _batch.GEffBaseCool;
                 _batch.GEffMonthly = new double[12];
                 for (int m = 0; m < 12; m++)
                 {
                     double F_sh_dir_m = _batch.FshDirMonthly[m];
-                    _batch.GEffMonthly[m] = _batch.GEffBase * shadingFactorHeat_save * F_sh_dir_m;
+                    _batch.GEffMonthly[m] = gEffBaseHeat_save * shadingFactorHeat_save * F_sh_dir_m;
                 }
 
                 // 8. Сезонни g_eff стойности (Heat / Cool) – всеки с отделен shading factor
-                //    Месеците идват ИЗЦЯЛО от Секция 5 (без complement логика).
+                //    и собствен per-mode GEffBase → промяна на единия режим НЕ влияе на другия.
                 WindowCalculator.TryGetHeatingMonths(_climateZone, _heatingSeasonEnabled, out List<int> heatingMonths);
                 WindowCalculator.TryGetCoolingMonths(_coolingStartMonth, _coolingEndMonth, _coolingSeasonEnabled, out List<int> coolingMonths);
 
                 _batch.GEffHeat = heatingMonths.Count > 0
-                    ? heatingMonths.Average(m => _batch.GEffBase * shadingFactorHeat_save * _batch.FshDirMonthly[m])
+                    ? heatingMonths.Average(m => gEffBaseHeat_save * shadingFactorHeat_save * _batch.FshDirMonthly[m])
                     : 0.0;
 
                 _batch.GEffCool = coolingMonths.Count > 0
-                    ? coolingMonths.Average(m => _batch.GEffBase * shadingFactorCool_save * _batch.FshDirMonthly[m])
+                    ? coolingMonths.Average(m => gEffBaseCool_save * shadingFactorCool_save * _batch.FshDirMonthly[m])
                     : 0.0;
             }
 
