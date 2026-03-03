@@ -56,4 +56,50 @@ namespace EE.Doklad.Converters
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// Конвертира ShadingMode (int: 0/1/2) към текстов етикет за щора
+    /// </summary>
+    public class ShadingModeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int mode)
+            {
+                return mode switch
+                {
+                    0 => "Без",
+                    1 => "Вътрешна",
+                    2 => "Външна",
+                    _ => "Без"
+                };
+            }
+            return "Без";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Конвертира ShadingConfig към "Да"/"Не" за показване дали има засенчване
+    /// </summary>
+    public class HasShadingConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is EE.Doklad.Models.ShadingConfig config && config != null && config.Shadings.Count > 0)
+            {
+                return "Да";
+            }
+            return "Не";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

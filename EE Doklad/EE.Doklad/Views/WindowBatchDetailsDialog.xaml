@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:EE.Doklad.Converters"
         mc:Ignorable="d"
-        Title="Детайли на група" Height="550" Width="1000"
+        Title="Детайли на група" Height="750" Width="1200"
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <converters:OrientationConverter x:Key="OrientationConverter"/>
+        <converters:ShadingModeConverter x:Key="ShadingModeConverter"/>
+        <converters:HasShadingConverter x:Key="HasShadingConverter"/>
     </Window.Resources>
     
     <Grid Margin="20">
@@ -27,70 +29,142 @@
             <TextBlock x:Name="SummaryTextBlock" TextWrapping="Wrap" FontWeight="SemiBold"/>
         </Border>
 
-        <!-- Batches Table -->
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- Tabs for Heating and Cooling -->
+        <TabControl Grid.Row="2">
+            <!-- Tab 1: Отоплителен режим -->
+            <TabItem Header="Отоплителен режим">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-            <Button Grid.Row="0" Content="+ Добави партида към тази група" 
-                    Background="#4CAF50" Foreground="White" 
-                    HorizontalAlignment="Left" Padding="10,5" Margin="0,0,0,10"
-                    Click="AddBatchButton_Click"/>
+                    <Button Grid.Row="0" Content="+ Добави партида към тази група" 
+                            Background="#4CAF50" Foreground="White" 
+                            HorizontalAlignment="Left" Padding="10,5" Margin="0,0,0,10"
+                            Click="AddBatchButton_Click"/>
 
-            <DataGrid Grid.Row="1" x:Name="BatchesDataGrid" 
-                      AutoGenerateColumns="False" CanUserAddRows="False" 
-                      SelectionMode="Single" IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="№" Binding="{Binding Count}" Width="50"/>
-                    
-                    <DataGridTextColumn Header="Щора" Width="120">
-                        <DataGridTextColumn.Binding>
-                            <Binding Path="ShadingTypeId">
-                                <Binding.Converter>
-                                    <converters:ShadingTypeConverter/>
-                                </Binding.Converter>
-                            </Binding>
-                        </DataGridTextColumn.Binding>
-                    </DataGridTextColumn>
-                    
-                    <DataGridTextColumn Header="Препятствия" Width="120">
-                        <DataGridTextColumn.Binding>
-                            <Binding Path="ObstacleProfileId">
-                                <Binding.Converter>
-                                    <converters:ObstacleProfileConverter/>
-                                </Binding.Converter>
-                            </Binding>
-                        </DataGridTextColumn.Binding>
-                    </DataGridTextColumn>
-                    
-                    <DataGridTextColumn Header="F_fr (%)" Width="70">
-                        <DataGridTextColumn.Binding>
-                            <Binding Path="FrameFraction" StringFormat="P0"/>
-                        </DataGridTextColumn.Binding>
-                    </DataGridTextColumn>
-                    
-                    <DataGridTextColumn Header="A_gross [m²]" Binding="{Binding AreaGross, StringFormat=F2}" Width="90"/>
-                    <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
-                    <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
-                    <DataGridTextColumn Header="g_eff" Binding="{Binding GEff, StringFormat=F3}" Width="70"/>
-                    
-                    <DataGridTemplateColumn Header="" Width="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="Edit" Background="#2196F3" Foreground="White" 
-                                            Padding="8,2" Margin="0,0,5,0" Click="EditBatchButton_Click"/>
-                                    <Button Content="Delete" Background="#F44336" Foreground="White" 
-                                            Padding="8,2" Click="DeleteBatchButton_Click"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
+                    <DataGrid Grid.Row="1" x:Name="BatchesDataGridHeat" 
+                              AutoGenerateColumns="False" CanUserAddRows="False" 
+                              SelectionMode="Single" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="№" Binding="{Binding Count}" Width="50"/>
+                            
+                            <DataGridTextColumn Header="Щора (отопл.)" Width="120">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="ShadingModeHeat">
+                                        <Binding.Converter>
+                                            <converters:ShadingModeConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="Засенчване" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="ShadingConfig">
+                                        <Binding.Converter>
+                                            <converters:HasShadingConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="F_fr (%)" Width="70">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="FrameFraction" StringFormat="P0"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="A_gross [m²]" Binding="{Binding AreaGross, StringFormat=F2}" Width="90"/>
+                            <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="g_eff (отопл.)" Binding="{Binding GEffHeat, StringFormat=F3}" Width="90"/>
+                            
+                            <DataGridTemplateColumn Header="" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Edit" Background="#2196F3" Foreground="White" 
+                                                    Padding="8,2" Margin="0,0,5,0" Click="EditBatchButton_Click"/>
+                                            <Button Content="Delete" Background="#F44336" Foreground="White" 
+                                                    Padding="8,2" Click="DeleteBatchButton_Click"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 2: Охладителен режим -->
+            <TabItem Header="Охладителен режим">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Content="+ Добави партида към тази група" 
+                            Background="#4CAF50" Foreground="White" 
+                            HorizontalAlignment="Left" Padding="10,5" Margin="0,0,0,10"
+                            Click="AddBatchButton_Click"/>
+
+                    <DataGrid Grid.Row="1" x:Name="BatchesDataGridCool" 
+                              AutoGenerateColumns="False" CanUserAddRows="False" 
+                              SelectionMode="Single" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="№" Binding="{Binding Count}" Width="50"/>
+                            
+                            <DataGridTextColumn Header="Щора (охл.)" Width="120">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="ShadingModeCool">
+                                        <Binding.Converter>
+                                            <converters:ShadingModeConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="Засенчване" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="ShadingConfig">
+                                        <Binding.Converter>
+                                            <converters:HasShadingConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="F_fr (%)" Width="70">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="FrameFraction" StringFormat="P0"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="A_gross [m²]" Binding="{Binding AreaGross, StringFormat=F2}" Width="90"/>
+                            <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="g_eff (охл.)" Binding="{Binding GEffCool, StringFormat=F3}" Width="90"/>
+                            
+                            <DataGridTemplateColumn Header="" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Edit" Background="#2196F3" Foreground="White" 
+                                                    Padding="8,2" Margin="0,0,5,0" Click="EditBatchButton_Click"/>
+                                            <Button Content="Delete" Background="#F44336" Foreground="White" 
+                                                    Padding="8,2" Click="DeleteBatchButton_Click"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
 
         <!-- Close Button -->
         <Button Grid.Row="3" Content="Затвори" Width="100" HorizontalAlignment="Right" 

@@ -37,8 +37,9 @@ namespace EE.Doklad.Views
             // Set title
             Title = $"Детайли за група: {summaryRow.TypeName} / {WindowCalculator.GetOrientationLabel(summaryRow.Orientation)}";
 
-            // Bind to batches
-            BatchesDataGrid.ItemsSource = _summaryRow.Batches;
+            // Bind to batches for both grids
+            BatchesDataGridHeat.ItemsSource = _summaryRow.Batches;
+            BatchesDataGridCool.ItemsSource = _summaryRow.Batches;
 
             UpdateSummary();
         }
@@ -75,7 +76,8 @@ namespace EE.Doklad.Views
             {
                 _batchesCollection.Add(dialog.Result);
                 _summaryRow.Batches.Add(dialog.Result);
-                BatchesDataGrid.Items.Refresh();
+                BatchesDataGridHeat.Items.Refresh();
+                BatchesDataGridCool.Items.Refresh();
                 UpdateSummary();
             }
         }
@@ -101,7 +103,8 @@ namespace EE.Doklad.Views
                         _summaryRow.Batches[summaryIndex] = dialog.Result;
                     }
 
-                    BatchesDataGrid.Items.Refresh();
+                    BatchesDataGridHeat.Items.Refresh();
+                    BatchesDataGridCool.Items.Refresh();
                     UpdateSummary();
                 }
             }
@@ -118,7 +121,8 @@ namespace EE.Doklad.Views
                 {
                     _batchesCollection.Remove(batch);
                     _summaryRow.Batches.Remove(batch);
-                    BatchesDataGrid.Items.Refresh();
+                    BatchesDataGridHeat.Items.Refresh();
+                    BatchesDataGridCool.Items.Refresh();
                     UpdateSummary();
 
                     // If no more batches, close dialog
