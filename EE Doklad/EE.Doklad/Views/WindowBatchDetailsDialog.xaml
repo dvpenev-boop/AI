@@ -80,6 +80,7 @@
                             <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="g_eff (отопл.)" Binding="{Binding GEffHeat, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="ε" Binding="{Binding GlassEmissivity, StringFormat=F2}" Width="55"/>
                             
                             <DataGridTemplateColumn Header="" Width="150">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -147,6 +148,7 @@
                             <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="g_eff (охл.)" Binding="{Binding GEffCool, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="ε" Binding="{Binding GlassEmissivity, StringFormat=F2}" Width="55"/>
                             
                             <DataGridTemplateColumn Header="" Width="150">
                                 <DataGridTemplateColumn.CellTemplate>

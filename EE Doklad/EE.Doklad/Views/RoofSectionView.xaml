@@ -55,6 +55,8 @@
                         <DataGridTextColumn Header="Тип покрив" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                         <DataGridTextColumn Header="Режим" Binding="{Binding ModeLabel}" IsReadOnly="True" Width="120"/>
                         <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding UDisplay}" IsReadOnly="True" Width="100"/>
+                        <DataGridTextColumn Header="α" Binding="{Binding SurfaceProperties.AlphaDefault, StringFormat=0.00}" IsReadOnly="True" Width="55"/>
+                        <DataGridTextColumn Header="ε" Binding="{Binding SurfaceProperties.EpsilonDefault, StringFormat=0.00}" IsReadOnly="True" Width="55"/>
                         <DataGridTextColumn Header="A (m²)" Binding="{Binding Area, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=N3}" Width="100"/>
                         <DataGridTemplateColumn Header="" Width="80">
                             <DataGridTemplateColumn.CellTemplate>

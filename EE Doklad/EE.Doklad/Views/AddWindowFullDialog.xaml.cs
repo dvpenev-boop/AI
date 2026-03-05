@@ -25,6 +25,8 @@ namespace EE.Doklad.Views
         // Cooling season month range from Section 5 (1-based, null = not configured)
         private int? _coolingStartMonth;
         private int? _coolingEndMonth;
+        // Whether this dialog was opened for a new (not existing) batch
+        private bool _isNewBatch;
 
         public WindowBatch Result => _batch;
 
@@ -33,6 +35,7 @@ namespace EE.Doklad.Views
                                     int? coolingStartMonth = null, int? coolingEndMonth = null)
         {
             InitializeComponent();
+            _isNewBatch = existingBatch == null;
             _batch = existingBatch ?? new WindowBatch();
             _climateZone = climateZone;
             _heatingSeasonEnabled = heatingEnabled;
@@ -91,6 +94,34 @@ namespace EE.Doklad.Views
             OpticalTypeComboBox.ItemsSource = Enum.GetValues(typeof(OpticalType));
             OpticalTypeComboBox.SelectedItem = _batch.OpticalType;
             OpticalTypeComboBox.SelectionChanged += AnyInputChanged;
+
+            // Glazing emissivity preset (Тип стъкло) and ε field
+            var emissivityPresets = Enum.GetValues(typeof(GlazingEmissivityPreset))
+                .Cast<GlazingEmissivityPreset>()
+                .Select(p => new { Value = p, Label = GetEnumDescription(p) })
+                .ToList();
+            GlazingEmissivityPresetComboBox.ItemsSource = emissivityPresets;
+            GlazingEmissivityPresetComboBox.DisplayMemberPath = "Label";
+            GlazingEmissivityPresetComboBox.SelectedValuePath = "Value";
+            GlazingEmissivityPresetComboBox.SelectedValue = _batch.GlazingEmissivityPreset;
+            // For a brand-new batch the stored GlassEmissivity matches the model field default (0.84).
+            // If the stored value equals the old model default AND we are in a new batch (no area set),
+            // show the preset value (0.05 for LowEHighInsulation) so the UI reflects the selected preset.
+            double displayEmissivity = _isNewBatch
+                ? GlazingEmissivityHelper.GetEmissivity(_batch.GlazingEmissivityPreset)
+                : (_batch.GlassEmissivity > 0 ? _batch.GlassEmissivity : 0.84);
+            GlassEmissivityTextBox.Text = displayEmissivity.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+
+            // When a preset is selected → auto-populate the emissivity field
+            GlazingEmissivityPresetComboBox.SelectionChanged += (s, e) =>
+            {
+                if (GlazingEmissivityPresetComboBox.SelectedValue is GlazingEmissivityPreset preset)
+                {
+                    double eps = GlazingEmissivityHelper.GetEmissivity(preset);
+                    GlassEmissivityTextBox.Text = eps.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                }
+            };
+            // Manual override is allowed – the TextBox is not read-only
 
             // Glazing type (Table 3) and g_diff input
             GlazingTypeComboBox.ItemsSource = Enum.GetValues(typeof(GlazingType)).Cast<GlazingType>().Select(g => new { Value = g, Label = GetEnumDescription(g) }).ToList();
@@ -590,6 +621,12 @@ namespace EE.Doklad.Views
                 _batch.GEffMonthly = new double[12]; // all 0
                 _batch.GEffHeat = 0.0;
                 _batch.GEffCool = 0.0;
+                // Still save emissivity for solid doors (informative)
+                if (GlazingEmissivityPresetComboBox.SelectedValue is GlazingEmissivityPreset epDoor)
+                    _batch.GlazingEmissivityPreset = epDoor;
+                _batch.GlassEmissivity = TryParseDouble(GlassEmissivityTextBox.Text, out double epsDoor)
+                    ? Math.Clamp(epsDoor, 0.0, 1.0)
+                    : GlazingEmissivityHelper.GetEmissivity(_batch.GlazingEmissivityPreset);
             }
             else
             {
@@ -602,6 +639,13 @@ namespace EE.Doklad.Views
                 double g_n_save = Fw * g_no_shade_base_save;
                 _batch.GN = g_n_save;
                 _batch.OpticalType = OpticalTypeComboBox.SelectedItem is OpticalType ot ? ot : OpticalType.Clear;
+
+                // Тип стъкло / емисивитет ε (информативно – не влияе на U или g изчисленията)
+                if (GlazingEmissivityPresetComboBox.SelectedValue is GlazingEmissivityPreset ep)
+                    _batch.GlazingEmissivityPreset = ep;
+                _batch.GlassEmissivity = TryParseDouble(GlassEmissivityTextBox.Text, out double eps)
+                    ? Math.Clamp(eps, 0.0, 1.0)
+                    : GlazingEmissivityHelper.GetEmissivity(_batch.GlazingEmissivityPreset);
 
                 // 5. Слънцезащита – запазваме отделно за отопление и охлаждане
                 double shadingFactorHeat_save = GetShadingFactor(ShadingModeHeatComboBox, ShadingOptionsHeatDataGrid);

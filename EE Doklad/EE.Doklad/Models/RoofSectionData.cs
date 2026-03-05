@@ -47,6 +47,14 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private ColdRoofDetail? _coldDetail;
 
+        /// <summary>
+        /// Surface optical/thermal properties (α_sol, ε) for this roof type.
+        /// UseOrientationOverride is always false for roofs (no orientation logic).
+        /// Initialized with defaults (α=0.6, ε=0.9) for backward compatibility.
+        /// </summary>
+        [ObservableProperty]
+        private WallSurfaceProperties _surfaceProperties = new() { UseOrientationOverride = false };
+
         public bool IsConfigured => Mode != RoofMode.Unselected;
 
         public string ModeLabel => Mode switch

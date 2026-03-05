@@ -71,6 +71,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="180"/>
@@ -96,6 +98,14 @@
                     <TextBlock Text="Оптичен тип:" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center"/>
                     <ComboBox x:Name="OpticalTypeComboBox" Width="200" Grid.Row="7" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="OpticalTypeError" Foreground="Red" FontSize="12" Grid.Row="8" Grid.Column="1"/>
+
+                    <TextBlock Text="Тип стъкло:" Grid.Row="9" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="GlazingEmissivityPresetComboBox" Width="320" Grid.Row="9" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"
+                              ToolTip="Тип стъкло по EN 673 / EN ISO 10077 / ISO 52016. Влияе само върху емисивитета ε – не променя U или g_n."/>
+
+                    <TextBlock Text="ε (емисивитет):" Grid.Row="10" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GlassEmissivityTextBox" Width="100" Grid.Row="10" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"
+                             ToolTip="Емисивитет на стъклото ε (0..1). Стойността е информативна и не влияе на U или g изчисленията."/>
                 </Grid>
             </GroupBox>
             <!-- Секция 4: Рамка -->

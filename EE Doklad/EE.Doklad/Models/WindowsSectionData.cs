@@ -53,7 +53,19 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private OpticalType opticalType = OpticalType.Clear;
 
-        
+        /// <summary>
+        /// Пресет тип стъкло за емисивитет (Тип стъкло)
+        /// </summary>
+        [ObservableProperty]
+        private GlazingEmissivityPreset glazingEmissivityPreset = GlazingEmissivityPreset.LowEHighInsulation;
+
+        /// <summary>
+        /// Емисивитет на стъклото ε (EN 673 / EN ISO 10077).
+        /// Стойност по подразбиране ε = 0.84 за обикновено стъкло.
+        /// При по-стари проекти без избран пресет се ползва 0.84.
+        /// </summary>
+        [ObservableProperty]
+        private double glassEmissivity = 0.84;
 
         [ObservableProperty]
         private GlazingType glazingType = GlazingType.Double;
@@ -399,5 +411,42 @@ namespace EE.Doklad.Models
         Internal,
         [Description("Външна")]
         External
+    }
+
+    /// <summary>
+    /// Пресети за тип стъкло и емисивитет (EN 673 / EN ISO 10077 / ISO 52016 / ASHRAE)
+    /// </summary>
+    public enum GlazingEmissivityPreset
+    {
+        [Description("Обикновено стъкло")]
+        Standard,
+        [Description("Low-E стъкло – твърдо покритие (К-стъкло)")]
+        LowEHardCoat,
+        [Description("Low-E стъкло – висока изолация (4 сезона)")]
+        LowEHighInsulation,
+        [Description("Слънцезащитно стъкло (рефлекторно)")]
+        SolarControl,
+        [Description("Слънцезащитно Low-E (4 сезона / рефлекторно)")]
+        SolarControlLowE
+    }
+
+    /// <summary>
+    /// Помощен клас за емисивитет по пресет
+    /// </summary>
+    public static class GlazingEmissivityHelper
+    {
+        /// <summary>
+        /// Връща емисивитета ε за даден пресет тип стъкло.
+        /// Стойности базирани на EN 673, EN ISO 10077, ISO 52016, ASHRAE Handbook – Fundamentals.
+        /// </summary>
+        public static double GetEmissivity(GlazingEmissivityPreset preset) => preset switch
+        {
+            GlazingEmissivityPreset.Standard            => 0.84,
+            GlazingEmissivityPreset.LowEHardCoat        => 0.20,
+            GlazingEmissivityPreset.LowEHighInsulation  => 0.05,
+            GlazingEmissivityPreset.SolarControl        => 0.15,
+            GlazingEmissivityPreset.SolarControlLowE    => 0.05,
+            _                                           => 0.84
+        };
     }
 }

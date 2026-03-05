@@ -6,6 +6,7 @@
              xmlns:models="clr-namespace:EE.Doklad.Models"
              xmlns:converters="clr-namespace:EE.Doklad.Converters"
              xmlns:views="clr-namespace:EE.Doklad.Views"
+             xmlns:controls="clr-namespace:EE.Doklad.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -241,6 +242,25 @@
                 <TextBlock Text="{Binding ColdDetail.Ur, StringFormat=0.000, TargetNullValue='—'}" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" Foreground="#2196F3"/>
                 <TextBlock Text="W/m²K" VerticalAlignment="Center" Margin="5,0,0,0" Foreground="Gray"/>
             </StackPanel>
+
+            <!-- ══════ Surface Parameters Expander ══════ -->
+            <Expander Margin="0,12,0,0"
+                      IsExpanded="{Binding SurfaceProperties.IsExpanded, Mode=TwoWay, FallbackValue=False}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Повърхностни параметри (α_sol, ε)"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="#1565C0" VerticalAlignment="Center"/>
+                        <Border Background="#E3F2FD" CornerRadius="4"
+                                Padding="5,1" Margin="8,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="αε: default" FontSize="10" Foreground="#1565C0"/>
+                        </Border>
+                    </StackPanel>
+                </Expander.Header>
+                <controls:RoofSurfaceParamsEditor DataContext="{Binding SurfaceProperties}"/>
+            </Expander>
+
         </StackPanel>
     </Border>
 </UserControl>

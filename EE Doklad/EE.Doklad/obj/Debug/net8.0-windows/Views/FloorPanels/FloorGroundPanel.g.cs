@@ -54,7 +54,7 @@ namespace EE.Doklad.Views.FloorPanels {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/EE.Doklad;V1.0.0.0;component/views/floorpanels/floorgroundpanel.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/EE.Doklad;component/views/floorpanels/floorgroundpanel.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Views\FloorPanels\FloorGroundPanel.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
