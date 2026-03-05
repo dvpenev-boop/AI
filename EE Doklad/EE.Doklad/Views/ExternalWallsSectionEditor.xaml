@@ -4,13 +4,59 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             xmlns:controls="clr-namespace:EE.Doklad.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="900">
 
     <UserControl.Resources>
         <converters:AttachmentToImageSourceConverter x:Key="AttachmentToImageSourceConverter"/>
         <converters:AttachmentToVisibilityConverter x:Key="AttachmentToVisibilityConverter"/>
+        <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </UserControl.Resources>
+
+    <Grid>
+    <!-- Orientation breakdown popup – opens when user clicks an α or ε cell -->
+    <Popup x:Name="OrientationPopup"
+           AllowsTransparency="True"
+           StaysOpen="False"
+           Placement="MousePoint"
+           PopupAnimation="Fade">
+        <Border Background="White" BorderBrush="#90CAF9" BorderThickness="1"
+                CornerRadius="4" Padding="12" Effect="{x:Null}">
+            <StackPanel MinWidth="380">
+                <TextBlock x:Name="PopupTitle" FontWeight="Bold" FontSize="12"
+                           Foreground="#1565C0" Margin="0,0,0,8"
+                           Text="Повърхностни параметри по ориентации"/>
+                <!-- Breakdown table -->
+                <DataGrid x:Name="OrientationBreakdownGrid"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          FontSize="11"
+                          Margin="0,0,0,10"
+                          GridLinesVisibility="Horizontal"
+                          BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ориент." Binding="{Binding Label}" Width="60"/>
+                        <DataGridTextColumn Header="α"       Binding="{Binding Alpha, StringFormat=0.00}" Width="60"/>
+                        <DataGridTextColumn Header="ε"       Binding="{Binding Epsilon, StringFormat=0.00}" Width="60"/>
+                        <DataGridTextColumn Header="A (m²)"  Binding="{Binding Area, StringFormat=0.000}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <!-- Actions -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Редактирай стойностите" Padding="8,3" FontSize="11"
+                            Background="#1976D2" Foreground="White" BorderThickness="0"
+                            Margin="0,0,8,0" Click="PopupEditValues_Click"/>
+                    <Button Content="Копирай default навсякъде" Padding="8,3" FontSize="11"
+                            Background="#EF6C00" Foreground="White" BorderThickness="0"
+                            Click="PopupCopyDefault_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Popup>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
@@ -63,6 +109,101 @@
                     <DataGridTextColumn Header="Тип стена" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                     <DataGridTextColumn Header="A (m²)" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged, StringFormat=0.000}" Width="90"/>
                     <DataGridTextColumn Header="U (W/m²K)" Binding="{Binding Uw, StringFormat=0.000}" IsReadOnly="True" Width="90"/>
+                    <!-- α column – shows α_eff; entire cell is a clickable button -->
+                    <DataGridTemplateColumn x:Name="AlphaColumn" Header="α" IsReadOnly="True" Width="65">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="AlphaEpsilonCell_Click"
+                                        Tag="Alpha"
+                                        Cursor="Hand"
+                                        BorderThickness="0"
+                                        Padding="4,2"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#E3F2FD"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding AlphaEff, StringFormat=0.00}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock VerticalAlignment="Center" Margin="3,0,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value=""/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SurfaceProperties.UseOrientationOverride}" Value="True">
+                                                            <Setter Property="Text" Value="▾"/>
+                                                            <Setter Property="Foreground" Value="#E65100"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <!-- ε column – shows ε_eff; entire cell is a clickable button -->
+                    <DataGridTemplateColumn x:Name="EpsilonColumn" Header="ε" IsReadOnly="True" Width="65">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="AlphaEpsilonCell_Click"
+                                        Tag="Epsilon"
+                                        Cursor="Hand"
+                                        BorderThickness="0"
+                                        Padding="4,2"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#E3F2FD"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding EpsilonEff, StringFormat=0.00}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock VerticalAlignment="Center" Margin="3,0,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value=""/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SurfaceProperties.UseOrientationOverride}" Value="True">
+                                                            <Setter Property="Text" Value="▾"/>
+                                                            <Setter Property="Foreground" Value="#E65100"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn x:Name="EastColumn" Header="И" Binding="{Binding FacadeEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="NorthColumn" Header="С" Binding="{Binding FacadeNorth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="WestColumn" Header="З" Binding="{Binding FacadeWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="SouthColumn" Header="Ю" Binding="{Binding FacadeSouth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="NorthEastColumn" Header="СИ" Binding="{Binding FacadeNorthEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="NorthWestColumn" Header="СЗ" Binding="{Binding FacadeNorthWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="SouthWestColumn" Header="ЮЗ" Binding="{Binding FacadeSouthWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <DataGridTextColumn x:Name="SouthEastColumn" Header="ЮИ" Binding="{Binding FacadeSouthEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
+                    <!-- Премахни – last column, after all facade directions -->
                     <DataGridTemplateColumn Header="" Width="80">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -71,18 +212,10 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn x:Name="EastColumn" Header="И" Binding="{Binding FacadeEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                    <DataGridTextColumn x:Name="NorthColumn" Header="С" Binding="{Binding FacadeNorth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                    <DataGridTextColumn x:Name="WestColumn" Header="З" Binding="{Binding FacadeWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                    <DataGridTextColumn x:Name="SouthColumn" Header="Ю" Binding="{Binding FacadeSouth, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                        <DataGridTextColumn x:Name="NorthEastColumn" Header="СИ" Binding="{Binding FacadeNorthEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                        <DataGridTextColumn x:Name="NorthWestColumn" Header="СЗ" Binding="{Binding FacadeNorthWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                        <DataGridTextColumn x:Name="SouthWestColumn" Header="ЮЗ" Binding="{Binding FacadeSouthWest, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
-                        <DataGridTextColumn x:Name="SouthEastColumn" Header="ЮИ" Binding="{Binding FacadeSouthEast, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.000}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
 
-            <ItemsControl ItemsSource="{Binding WallTypes}">
+            <ItemsControl x:Name="WallTypesItemsControl" ItemsSource="{Binding WallTypes}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="10" Margin="0,0,0,15">
@@ -162,6 +295,41 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
+
+                                <!-- ══════ Surface Parameters Expander ══════ -->
+                                <Expander Margin="0,12,0,0"
+                                          IsExpanded="{Binding SurfaceProperties.IsExpanded,
+                                                               Mode=TwoWay,
+                                                               FallbackValue=False}">
+                                    <Expander.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Повърхностни параметри (α_sol, ε)"
+                                                       FontSize="12" FontWeight="SemiBold"
+                                                       Foreground="#1565C0" VerticalAlignment="Center"/>
+                                            <!-- Indicator badge -->
+                                            <Border Background="#E3F2FD" CornerRadius="4"
+                                                    Padding="5,1" Margin="8,0,0,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock FontSize="10" Foreground="#1565C0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="αε: default"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SurfaceProperties.UseOrientationOverride}" Value="True">
+                                                                    <Setter Property="Text" Value="αε: ориент."/>
+                                                                    <Setter Property="Foreground" Value="#E65100"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </StackPanel>
+                                    </Expander.Header>
+                                    <controls:WallSurfaceParamsEditor
+                                        DataContext="{Binding SurfaceProperties}"/>
+                                </Expander>
+
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -169,4 +337,5 @@
             </ItemsControl>
         </StackPanel>
     </ScrollViewer>
+    </Grid>
 </UserControl>

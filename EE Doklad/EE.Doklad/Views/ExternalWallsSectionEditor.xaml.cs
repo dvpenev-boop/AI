@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using EE.Doklad.Models;
 using EE.Doklad.Services;
 using Microsoft.Win32;
@@ -17,6 +19,9 @@ namespace EE.Doklad.Views
     {
         private const int MaxWallTypes = 8;
         private readonly MaterialsService _materialsService;
+
+        // Tracks the wall type whose popup is currently open
+        private ExternalWallType? _popupWallType;
 
         public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
 
@@ -325,8 +330,10 @@ namespace EE.Doklad.Views
                 NorthWestColumn    // СЗ
             };
 
-            // Base index is number of columns before the facade columns (№, Тип стена, A (m²), U (W/m²K)) == 4
-            int baseIndex = 4;
+            // Base index is number of fixed columns before the facade direction columns
+            // (№, Тип стена, A (m²), U (W/m²K), α, ε) == 6
+            // "Премахни" is now the LAST column, after all facade columns — do not include it here
+            int baseIndex = 6;
             // Compute visible and collapsed lists to assign contiguous valid DisplayIndex values
             var visibleCols = desiredOrder.Where(c => c.Visibility == Visibility.Visible).ToList();
             var collapsedCols = desiredOrder.Where(c => c.Visibility != Visibility.Visible).ToList();
@@ -387,5 +394,116 @@ namespace EE.Doklad.Views
                     "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  α / ε column cell click → orientation breakdown popup
+        // ──────────────────────────────────────────────────────────────────
+
+        private static readonly (WallOrientation Orientation, string Label,
+            Func<ExternalWallType, double> GetArea)[] _orientationMeta =
+        {
+            (WallOrientation.NE, "СИ", w => w.FacadeNorthEast),
+            (WallOrientation.E,  "И",  w => w.FacadeEast),
+            (WallOrientation.SE, "ЮИ", w => w.FacadeSouthEast),
+            (WallOrientation.S,  "Ю",  w => w.FacadeSouth),
+            (WallOrientation.SW, "ЮЗ", w => w.FacadeSouthWest),
+            (WallOrientation.W,  "З",  w => w.FacadeWest),
+            (WallOrientation.NW, "СЗ", w => w.FacadeNorthWest),
+        };
+
+        private void AlphaEpsilonCell_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn) return;
+            if (btn.DataContext is not ExternalWallType wallType) return;
+
+            _popupWallType = wallType;
+            RefreshOrientationPopup(wallType);
+            OrientationPopup.IsOpen = true;
+        }
+
+        private void PopupEditValues_Click(object sender, RoutedEventArgs e)
+        {
+            OrientationPopup.IsOpen = false;
+            if (_popupWallType == null) return;
+
+            // Expand the surface-params panel for that wall type so user can edit
+            _popupWallType.SurfaceProperties.IsExpanded = true;
+
+            // Scroll to and focus the detail card – find the ItemsControl container
+            if (WallTypesItemsControl.ItemContainerGenerator
+                    .ContainerFromItem(_popupWallType) is FrameworkElement container)
+            {
+                container.BringIntoView();
+            }
+        }
+
+        private void PopupCopyDefault_Click(object sender, RoutedEventArgs e)
+        {
+            if (_popupWallType == null) return;
+
+            var sp = _popupWallType.SurfaceProperties;
+
+            var result = MessageBox.Show(
+                $"Заменяне на всички ориентационни стойности с:\n\n" +
+                $"  α = {sp.AlphaDefault:0.00}\n" +
+                $"  ε = {sp.EpsilonDefault:0.00}\n\n" +
+                "Сигурни ли сте?",
+                "Копиране на default стойности",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                // User said No – keep popup open with current values unchanged
+                return;
+            }
+
+            foreach (WallOrientation o in Enum.GetValues(typeof(WallOrientation)))
+            {
+                if (!sp.Overrides.ContainsKey(o))
+                    sp.Overrides[o] = new SurfaceProps();
+                sp.Overrides[o].Alpha   = sp.AlphaDefault;
+                sp.Overrides[o].Epsilon = sp.EpsilonDefault;
+            }
+
+            // Refresh popup rows to show the updated values
+            RefreshOrientationPopup(_popupWallType);
+        }
+
+        /// <summary>Rebuilds the popup table rows and title for the given wall type.</summary>
+        private void RefreshOrientationPopup(ExternalWallType wallType)
+        {
+            var rows = _orientationMeta.Select(m => new OrientationRow
+            {
+                Label   = m.Label,
+                Alpha   = wallType.SurfaceProperties.GetAlpha(m.Orientation),
+                Epsilon = wallType.SurfaceProperties.GetEpsilon(m.Orientation),
+                Area    = m.GetArea(wallType)
+            }).ToList();
+
+            OrientationBreakdownGrid.ItemsSource = rows;
+
+            PopupTitle.Text = wallType.SurfaceProperties.UseOrientationOverride
+                ? "Повърхностни параметри по ориентации  ▸ ориент. режим"
+                : "Повърхностни параметри по ориентации  ▸ еднакви стойности";
+        }
+
+        private void AlphaEpsilonCell_ClickForWallType(ExternalWallType wallType)
+        {
+            _popupWallType = wallType;
+            RefreshOrientationPopup(wallType);
+            OrientationPopup.IsOpen = true;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    //  Helper DTO for the orientation breakdown DataGrid
+    // ──────────────────────────────────────────────────────────────────
+    internal sealed class OrientationRow
+    {
+        public string Label   { get; set; } = string.Empty;
+        public double Alpha   { get; set; }
+        public double Epsilon { get; set; }
+        public double Area    { get; set; }
     }
 }

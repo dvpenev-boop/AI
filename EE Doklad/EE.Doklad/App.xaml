@@ -10,6 +10,8 @@
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
         <!-- Global converters and styles for ComboBoxes / editable inputs so UI is consistent on first render -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
 
         <Style x:Key="EditableTextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="5"/>

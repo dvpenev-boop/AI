@@ -1,0 +1,247 @@
+<UserControl x:Class="EE.Doklad.Views.Controls.WallSurfaceParamsEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:EE.Doklad.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="220" d:DesignWidth="700">
+
+    <UserControl.Resources>
+        <!-- Local converter instances (also available globally via App.xaml) -->
+        <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Help button style – round blue circle, tooltip shown on hover -->
+        <Style x:Key="HelpButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="#1976D2"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Validated TextBox style (red border on error) -->
+        <Style x:Key="NumericInputStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="65"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderBrush" Value="#AAAAAA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="BorderBrush" Value="#D32F2F"/>
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self},
+                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="OrientationLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="OrientationInputStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="54"/>
+            <Setter Property="Padding" Value="3,2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="BorderBrush" Value="#AAAAAA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="3,0"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="BorderBrush" Value="#D32F2F"/>
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self},
+                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Root bound to WallSurfaceProperties instance -->
+    <Border Background="#F8F9FA" BorderBrush="#BBDEFB" BorderThickness="1"
+            Padding="12,10" Margin="0,4,0,0">
+        <StackPanel>
+
+            <!-- ══════════════════ HEADER ══════════════════ -->
+            <TextBlock Text="Повърхностни параметри" FontWeight="Bold" FontSize="12"
+                       Foreground="#1565C0" Margin="0,0,0,8"/>
+
+            <!-- ══════════════════ UNIFORM MODE ══════════════════ -->
+            <Grid Visibility="{Binding UseOrientationOverride,
+                                       Converter={StaticResource BoolToVisibilityInverseConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Alpha row -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
+                    <TextBlock Text="Alpha (α_sol):" VerticalAlignment="Center" Width="110" FontSize="12"/>
+                    <TextBox x:Name="AlphaDefaultBox"
+                             Style="{StaticResource NumericInputStyle}"
+                             Text="{Binding AlphaDefault, UpdateSourceTrigger=LostFocus,
+                                            StringFormat=0.00}"
+                             LostFocus="AlphaDefaultBox_LostFocus"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <!-- Help button -->
+                    <Button x:Name="AlphaHelpButton" Style="{StaticResource HelpButtonStyle}"
+                            Content="?" Margin="6,0,0,0" Click="AlphaHelp_Click"
+                            VerticalAlignment="Center"
+                            ToolTip="Кликнете за помощ относно коефициента α_sol"/>
+                    <TextBlock x:Name="AlphaValidationMsg" Text="" Foreground="#D32F2F"
+                               FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- Epsilon row -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,6">
+                    <TextBlock Text="Emissivity (ε):" VerticalAlignment="Center" Width="110" FontSize="12"/>
+                    <TextBox x:Name="EpsilonDefaultBox"
+                             Style="{StaticResource NumericInputStyle}"
+                             Text="{Binding EpsilonDefault, UpdateSourceTrigger=LostFocus,
+                                            StringFormat=0.00}"
+                             LostFocus="EpsilonDefaultBox_LostFocus"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <!-- Help button -->
+                    <Button x:Name="EpsilonHelpButton" Style="{StaticResource HelpButtonStyle}"
+                            Content="?" Margin="6,0,0,0" Click="EpsilonHelp_Click"
+                            VerticalAlignment="Center"
+                            ToolTip="Кликнете за помощ относно топлинната излъчваемост ε"/>
+                    <TextBlock x:Name="EpsilonValidationMsg" Text="" Foreground="#D32F2F"
+                               FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- Typical values dropdown -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Типични стойности:" VerticalAlignment="Center"
+                               FontSize="11" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="TypicalValuesCombo"
+                              Width="200" FontSize="11"
+                              SelectionChanged="TypicalValuesCombo_SelectionChanged">
+                        <ComboBoxItem Content="--- изберете ---" IsEnabled="False" IsSelected="True"/>
+                        <ComboBoxItem Content="Светла фасада   α=0.3  ε=0.9"  Tag="0.3|0.9"/>
+                        <ComboBoxItem Content="Средна фасада   α=0.6  ε=0.9"  Tag="0.6|0.9"/>
+                        <ComboBoxItem Content="Тъмна фасада    α=0.9  ε=0.9"  Tag="0.9|0.9"/>
+                        <ComboBoxItem Content="Метална фасада  α=0.5  ε=0.85" Tag="0.5|0.85"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
+            <!-- ══════════════════ PER-ORIENTATION MODE ══════════════════ -->
+            <Grid Visibility="{Binding UseOrientationOverride,
+                                       Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header row with orientation labels -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Width="90" FontSize="11" FontWeight="Bold" Text=""/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="СИ"/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="И"/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="ЮИ"/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="Ю"/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="ЮЗ"/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="З"/>
+                    <TextBlock Style="{StaticResource OrientationLabelStyle}" Text="СЗ"/>
+                </StackPanel>
+
+                <!-- Alpha per-orientation row -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="Alpha (α):" VerticalAlignment="Center" Width="90" FontSize="11"/>
+                    <TextBox x:Name="AlphaNEBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|NE"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="AlphaEBox"    Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|E"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="AlphaSEBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|SE"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="AlphaSBox"    Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|S"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="AlphaSWBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|SW"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="AlphaWBox"    Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|W"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="AlphaNWBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Alpha|NW"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                </StackPanel>
+
+                <!-- Epsilon per-orientation row -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="Epsilon (ε):" VerticalAlignment="Center" Width="90" FontSize="11"/>
+                    <TextBox x:Name="EpsilonNEBox"  Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|NE"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="EpsilonEBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|E"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="EpsilonSEBox"  Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|SE"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="EpsilonSBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|S"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="EpsilonSWBox"  Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|SW"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="EpsilonWBox"   Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|W"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                    <TextBox x:Name="EpsilonNWBox"  Style="{StaticResource OrientationInputStyle}"
+                             LostFocus="OrientationBox_LostFocus" Tag="Epsilon|NW"
+                             PreviewTextInput="NumericInput_PreviewTextInput"/>
+                </StackPanel>
+
+                <!-- Copy first value button + typical values -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,6,0,0">
+                    <Button Content="Копирай първа стойност навсякъде"
+                            Padding="8,3" FontSize="11" Background="#EF6C00" Foreground="White"
+                            BorderThickness="0" Margin="0,0,10,0" Click="CopyFirstValue_Click"/>
+                    <TextBlock Text="Типични стойности:" VerticalAlignment="Center"
+                               FontSize="11" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="TypicalValuesComboOrientation"
+                              Width="200" FontSize="11"
+                              SelectionChanged="TypicalValuesComboOrientation_SelectionChanged">
+                        <ComboBoxItem Content="--- изберете ---" IsEnabled="False" IsSelected="True"/>
+                        <ComboBoxItem Content="Светла фасада   α=0.3  ε=0.9"  Tag="0.3|0.9"/>
+                        <ComboBoxItem Content="Средна фасада   α=0.6  ε=0.9"  Tag="0.6|0.9"/>
+                        <ComboBoxItem Content="Тъмна фасада    α=0.9  ε=0.9"  Tag="0.9|0.9"/>
+                        <ComboBoxItem Content="Метална фасада  α=0.5  ε=0.85" Tag="0.5|0.85"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
+            <!-- ══════════════════ SHARED FOOTER: checkbox + info ══════════════════ -->
+            <Separator Margin="0,10,0,6" Background="#BBDEFB"/>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Content="Различни стойности по ориентации"
+                          IsChecked="{Binding UseOrientationOverride, UpdateSourceTrigger=PropertyChanged}"
+                          FontSize="11" VerticalAlignment="Center"
+                          Checked="OrientationOverride_CheckedChanged"
+                          Unchecked="OrientationOverride_CheckedChanged"/>
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</UserControl>
