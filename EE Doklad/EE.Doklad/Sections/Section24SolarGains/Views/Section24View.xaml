@@ -104,20 +104,11 @@
             <TextBlock Text="24. Топлинни печалби от слънчево греене"
                        Style="{StaticResource SectionTitle}"/>
 
-            <!-- ИЗЧИСЛИ -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                <Button Style="{StaticResource ButtonPrimary}"
-                        Content="▶  Изчисли"
-                        Command="{Binding CalculateCommand}"/>
-                <Button Style="{StaticResource ButtonAdd}"
-                        Content="Синхронизирай от 6/7/9"
-                        Command="{Binding SyncFromSectionsCommand}"/>
-
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="11"
-                           Foreground="#888"
-                           Text="Натиснете 'Изчисли' след задаване на данните."/>
-            </StackPanel>
+            <TextBlock Margin="0,0,0,14"
+                       VerticalAlignment="Center"
+                       FontSize="11"
+                       Foreground="#888"
+                       Text="Данните се синхронизират и изчисляват автоматично."/>
 
             <!-- ВАЛИДАЦИЯ -->
             <Border Background="#FFF3E0" BorderBrush="#FF9800" BorderThickness="1"
@@ -250,11 +241,11 @@
                         <StackPanel Margin="12,16">
 
                             <!-- Без резултати -->
-                            <TextBlock Text="Натиснете 'Изчисли' за да видите резултатите."
+                            <TextBlock Text="Резултатите се обновяват автоматично след промяна на данните."
                                        FontStyle="Italic" Foreground="#999"
                                        Visibility="{Binding IsCalculated,
-                                           Converter={StaticResource BoolToVis},
-                                           ConverterParameter=Inverse}"/>
+                                            Converter={StaticResource BoolToVis},
+                                            ConverterParameter=Inverse}"/>
 
                             <!-- Прозорци: Expanders -->
                             <TextBlock Text="Прозрачни елементи" Style="{StaticResource SubTitle}"
@@ -389,11 +380,11 @@
                         <StackPanel Margin="12,16">
 
                             <!-- Без резултати -->
-                            <TextBlock Text="Натиснете 'Изчисли' за да видите резултатите."
+                            <TextBlock Text="Резултатите се обновяват автоматично след промяна на данните."
                                        FontStyle="Italic" Foreground="#999"
                                        Visibility="{Binding IsCalculated,
-                                           Converter={StaticResource BoolToVis},
-                                           ConverterParameter=Inverse}"/>
+                                            Converter={StaticResource BoolToVis},
+                                            ConverterParameter=Inverse}"/>
 
                             <!-- KPI карти -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,20"

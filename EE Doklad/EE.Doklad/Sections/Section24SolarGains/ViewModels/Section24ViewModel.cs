@@ -120,6 +120,8 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
 
             if (_autoSyncEnabled)
                 EnsureAutoSyncWired();
+
+            ExecuteCalculate();
         }
 
         // ------------------------------------------------------------------ //
@@ -370,6 +372,7 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
             HasErrors = false;
             HasWarnings = false;
             ValidationSummary = "Синхронизацията от секции 6, 7 и 9 е изпълнена.";
+            ExecuteCalculate();
         }
 
         private void ExecuteAddWindow()
