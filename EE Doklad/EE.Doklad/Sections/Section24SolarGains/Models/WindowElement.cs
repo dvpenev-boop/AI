@@ -19,6 +19,8 @@ namespace EE.Doklad.Sections.Section24SolarGains.Models
         private double[] _hSol  = new double[12];
         private double[] _fShObst = new double[12];
         private double[] _gGl    = new double[12];
+        private double _gGlHeat;
+        private double _gGlCool;
 
         // ------------------------------------------------------------------ //
 
@@ -126,6 +128,24 @@ namespace EE.Doklad.Sections.Section24SolarGains.Models
         {
             get => _gGl;
             set { _gGl = value ?? new double[12]; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// Ефективна сумарна пропускливост за отоплителен режим g_eff,heat [-].
+        /// </summary>
+        public double G_gl_heat
+        {
+            get => _gGlHeat;
+            set { _gGlHeat = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// Ефективна сумарна пропускливост за охладителен режим g_eff,cool [-].
+        /// </summary>
+        public double G_gl_cool
+        {
+            get => _gGlCool;
+            set { _gGlCool = value; OnPropertyChanged(); }
         }
 
         // ------------------------------------------------------------------ //

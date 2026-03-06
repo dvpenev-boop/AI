@@ -130,8 +130,8 @@ namespace EE.Doklad.Sections.Section24SolarGains.Validation
 
             for (int i = 0; i < 12; i++)
             {
-                if (monthly[i].DeltaT_m <= 0)
-                    result.Errors.Add($"Месец {i + 1}: Δt_m трябва да е > 0 h.");
+                if (monthly[i].DeltaT_m < 0)
+                    result.Errors.Add($"Месец {i + 1}: Δt_m не може да е отрицателно.");
                 if (monthly[i].DeltaTheta_sky_m < 0)
                     result.Errors.Add($"Месец {i + 1}: Δθ_sky_m не може да е отрицателно.");
             }

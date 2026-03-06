@@ -6,7 +6,6 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EE.Doklad.Models;
-using EE.Doklad.Sections.Section24SolarGains;
 using EE.Doklad.Services;
 using Microsoft.Win32;
 
@@ -829,7 +828,7 @@ namespace EE.Doklad.ViewModels
                 else if (laterTitles[i].Contains("24. Топлинни печалби от слънчево греене"))
                 {
                     section.Type = SectionType.SolarGains;
-                    section.SolarGainsData = SampleSolarGainsData.Create();
+                    section.SolarGainsData = new EE.Doklad.Sections.Section24SolarGains.Models.Section24SolarGainsData();
                     section.StaticText = string.Empty;
                 }
 

@@ -17,6 +17,8 @@ namespace EE.Doklad.Sections.Section24SolarGains.Models
         private int _monthIndex;
         private double _deltaTm;
         private double _deltaThetaSkyM;
+        private int _heatingDays;
+        private int _coolingDays;
 
         // ------------------------------------------------------------------ //
 
@@ -49,6 +51,20 @@ namespace EE.Doklad.Sections.Section24SolarGains.Models
         {
             get => _deltaThetaSkyM;
             set { _deltaThetaSkyM = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>Брой активни дни от отоплителен период за месеца.</summary>
+        public int HeatingDays
+        {
+            get => _heatingDays;
+            set { _heatingDays = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>Брой активни дни от охладителен период за месеца.</summary>
+        public int CoolingDays
+        {
+            get => _coolingDays;
+            set { _coolingDays = value; OnPropertyChanged(); }
         }
 
         // ------------------------------------------------------------------ //

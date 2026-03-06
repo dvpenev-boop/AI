@@ -48,7 +48,7 @@ namespace EE.Doklad.Sections.Section24SolarGains.Calculator
                 .Select(o => CalculateOpaque(o, data.MonthlyData))
                 .ToArray();
 
-            var monthlyTotals = BuildMonthlyTotals(windowResults, opaqueResults, data.MonthlyData);
+            var monthlyTotals = BuildMonthlyTotals(data.Windows, data.OpaqueElements, data.MonthlyData);
 
             return new Section24Results
             {
@@ -224,18 +224,69 @@ namespace EE.Doklad.Sections.Section24SolarGains.Calculator
         // ------------------------------------------------------------------ //
 
         private static MonthlyTotalResult[] BuildMonthlyTotals(
-            WindowElementResult[] winResults,
-            OpaqueElementResult[] opaqueResults,
+            IEnumerable<WindowElement> windows,
+            IEnumerable<OpaqueElement> opaqueElements,
             MonthlyGeneralData[] monthly)
         {
             var totals = new MonthlyTotalResult[12];
 
             for (int m = 0; m < 12; m++)
             {
-                double sumWindows = winResults.Sum(w => w.MonthlyResults[m].Q_sol_window);
-                double sumOpaque  = opaqueResults.Sum(o => o.MonthlyResults[m].Q_sol_opaque);
-                double sumQsky    = winResults.Sum(w => w.MonthlyResults[m].Q_sky)
-                                  + opaqueResults.Sum(o => o.MonthlyResults[m].Q_sky);
+                double deltaTHeat = Math.Max(0, monthly[m].HeatingDays) * 24.0;
+                double deltaTCool = Math.Max(0, monthly[m].CoolingDays) * 24.0;
+                double deltaTUnion = monthly[m].DeltaT_m;
+                double deltaSky = monthly[m].DeltaTheta_sky_m;
+
+                double sumWindows = 0.0;
+                double sumOpaque = 0.0;
+                double sumQsky = 0.0;
+                double qHeating = 0.0;
+                double qCooling = 0.0;
+
+                foreach (var win in windows)
+                {
+                    double a_gl = win.A_wi * (1.0 - win.F_fr);
+                    double fSh = SafeGet(win.F_sh_obst, m);
+                    double hSol = SafeGet(win.H_sol, m);
+
+                    SplitBySeasonHours(hSol, deltaTUnion, deltaTHeat, deltaTCool, out double hSolHeat, out double hSolCool);
+
+                    double gHeat = ResolveModeG(win.G_gl_heat, win.G_gl, m);
+                    double gCool = ResolveModeG(win.G_gl_cool, win.G_gl, m);
+                    double hLr = ComputeH_lr(win.Epsilon, win.ThetaSs);
+
+                    double qSkyHeat = ComputeQ_sky(win.F_sky, win.R_se, win.U_c, win.A_wi, hLr, deltaSky, deltaTHeat);
+                    double qSkyCool = ComputeQ_sky(win.F_sky, win.R_se, win.U_c, win.A_wi, hLr, deltaSky, deltaTCool);
+
+                    double qWinHeat = gHeat * a_gl * fSh * hSolHeat - qSkyHeat;
+                    double qWinCool = gCool * a_gl * fSh * hSolCool - qSkyCool;
+
+                    qHeating += qWinHeat;
+                    qCooling += qWinCool;
+                    sumWindows += qWinHeat + qWinCool;
+                    sumQsky += qSkyHeat + qSkyCool;
+                }
+
+                foreach (var op in opaqueElements)
+                {
+                    double fSh = SafeGet(op.F_sh_obst, m);
+                    double hSol = SafeGet(op.H_sol, m);
+                    SplitBySeasonHours(hSol, deltaTUnion, deltaTHeat, deltaTCool, out double hSolHeat, out double hSolCool);
+
+                    double hLr = ComputeH_lr(op.Epsilon, op.ThetaSs);
+                    double qSkyHeat = ComputeQ_sky(op.F_sky, op.R_se, op.U_c, op.A_c, hLr, deltaSky, deltaTHeat);
+                    double qSkyCool = ComputeQ_sky(op.F_sky, op.R_se, op.U_c, op.A_c, hLr, deltaSky, deltaTCool);
+
+                    double qOpHeat = op.Alpha_sol * op.R_se * op.U_c * op.A_c * fSh * hSolHeat - qSkyHeat;
+                    double qOpCool = op.Alpha_sol * op.R_se * op.U_c * op.A_c * fSh * hSolCool - qSkyCool;
+
+                    qHeating += qOpHeat;
+                    qCooling += qOpCool;
+                    sumOpaque += qOpHeat + qOpCool;
+                    sumQsky += qSkyHeat + qSkyCool;
+                }
+
+                double qSolTotal = qHeating + qCooling;
 
                 totals[m] = new MonthlyTotalResult
                 {
@@ -244,7 +295,9 @@ namespace EE.Doklad.Sections.Section24SolarGains.Calculator
                     SumQ_sol_windows = sumWindows,
                     SumQ_sol_opaque  = sumOpaque,
                     SumQ_sky         = sumQsky,
-                    Q_sol_total      = sumWindows + sumOpaque   // (3.36)
+                    Q_sol_total      = qSolTotal,   // (3.36)
+                    Q_sol_heating    = qHeating,
+                    Q_sol_cooling    = qCooling
                 };
             }
 
@@ -253,5 +306,29 @@ namespace EE.Doklad.Sections.Section24SolarGains.Calculator
 
         private static double SafeGet(double[] arr, int index)
             => (arr != null && index < arr.Length) ? arr[index] : 0.0;
+
+        private static void SplitBySeasonHours(
+            double total,
+            double deltaTUnion,
+            double deltaTHeat,
+            double deltaTCool,
+            out double heating,
+            out double cooling)
+        {
+            double denominator = deltaTHeat + deltaTCool;
+            if (denominator <= 0)
+            {
+                heating = 0.0;
+                cooling = 0.0;
+                return;
+            }
+
+            double source = deltaTUnion > 0 ? total : 0.0;
+            heating = source * (deltaTHeat / denominator);
+            cooling = source * (deltaTCool / denominator);
+        }
+
+        private static double ResolveModeG(double modeG, double[] gMonthly, int monthIndex)
+            => modeG > 0 ? modeG : SafeGet(gMonthly, monthIndex);
     }
 }

@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using EE.Doklad.Models;
 using EE.Doklad.Sections.Section24SolarGains.Calculator;
 using EE.Doklad.Sections.Section24SolarGains.Models;
 using EE.Doklad.Sections.Section24SolarGains.Results;
+using EE.Doklad.Sections.Section24SolarGains.Services;
 using EE.Doklad.Sections.Section24SolarGains.Validation;
 
 namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
@@ -64,6 +67,8 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
         public double SumOpaque        { get; set; }
         public double SumQsky          { get; set; }
         public double Q_sol_total      { get; set; }
+        public double Q_sol_heating    { get; set; }
+        public double Q_sol_cooling    { get; set; }
     }
 
     // ======================================================================
@@ -77,20 +82,27 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
     public class Section24ViewModel : INotifyPropertyChanged
     {
         private readonly Section24SolarGainsData _data;
+        private readonly Report? _report;
+        private readonly Section24SyncService _syncService = new();
 
         private bool _hasErrors;
         private bool _hasWarnings;
         private string _validationSummary = string.Empty;
         private Section24Results? _results;
         private bool _isCalculated;
+        private bool _autoSyncEnabled;
+        private bool _autoSyncWired;
 
         // ------------------------------------------------------------------ //
 
-        public Section24ViewModel(Section24SolarGainsData data)
+        public Section24ViewModel(Section24SolarGainsData data, Report? report = null, bool autoSyncEnabled = false)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
+            _report = report;
+            _autoSyncEnabled = autoSyncEnabled;
 
             CalculateCommand = new RelayCommand(ExecuteCalculate);
+            SyncFromSectionsCommand = new RelayCommand(ExecuteSyncFromSections, () => _report != null);
             AddWindowCommand  = new RelayCommand(ExecuteAddWindow);
             RemoveWindowCommand = new RelayCommand<WindowElement>(ExecuteRemoveWindow);
             AddOpaqueCommand  = new RelayCommand(ExecuteAddOpaque);
@@ -99,6 +111,15 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
             // Subscribe to collection changes
             _data.Windows.CollectionChanged       += (_, _) => { IsCalculated = false; };
             _data.OpaqueElements.CollectionChanged += (_, _) => { IsCalculated = false; };
+
+            if (_report != null)
+            {
+                _syncService.SyncFromReport(_report, _data);
+                ValidationSummary = "Synced from sections 6/7/9.";
+            }
+
+            if (_autoSyncEnabled)
+                EnsureAutoSyncWired();
         }
 
         // ------------------------------------------------------------------ //
@@ -144,6 +165,19 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
             private set { _isCalculated = value; OnPropertyChanged(); }
         }
 
+        public bool AutoSyncEnabled
+        {
+            get => _autoSyncEnabled;
+            set
+            {
+                if (_autoSyncEnabled == value) return;
+                _autoSyncEnabled = value;
+                if (_autoSyncEnabled)
+                    EnsureAutoSyncWired();
+                OnPropertyChanged();
+            }
+        }
+
         // ------------------------------------------------------------------ //
         //  RESULT PROPERTIES (за Таб 3)
         // ------------------------------------------------------------------ //
@@ -177,6 +211,20 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
             private set { _annualQ_sol_total = value; OnPropertyChanged(); }
         }
 
+        private double _annualQ_sol_heating;
+        public double AnnualQ_sol_heating
+        {
+            get => _annualQ_sol_heating;
+            private set { _annualQ_sol_heating = value; OnPropertyChanged(); }
+        }
+
+        private double _annualQ_sol_cooling;
+        public double AnnualQ_sol_cooling
+        {
+            get => _annualQ_sol_cooling;
+            private set { _annualQ_sol_cooling = value; OnPropertyChanged(); }
+        }
+
         private double _annualQ_sol_windows;
         public double AnnualQ_sol_windows
         {
@@ -203,6 +251,7 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
         // ------------------------------------------------------------------ //
 
         public RelayCommand CalculateCommand { get; }
+        public RelayCommand SyncFromSectionsCommand { get; }
         public RelayCommand AddWindowCommand { get; }
         public RelayCommand<WindowElement> RemoveWindowCommand { get; }
         public RelayCommand AddOpaqueCommand { get; }
@@ -214,6 +263,11 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
 
         private void ExecuteCalculate()
         {
+            // Always refresh Section 24 input from sections 6/7/9 (and climate zone from section 5)
+            // before calculation, so intermediate results cannot use stale climate/orientation data.
+            if (_report != null)
+                _syncService.SyncFromReport(_report, _data);
+
             // Validate
             var validation = Section24Validator.ValidateAll(_data);
             HasErrors   = !validation.IsValid;
@@ -289,17 +343,33 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
                     SumWindows  = mt.SumQ_sol_windows,
                     SumOpaque   = mt.SumQ_sol_opaque,
                     SumQsky     = mt.SumQ_sky,
-                    Q_sol_total = mt.Q_sol_total
+                    Q_sol_total = mt.Q_sol_total,
+                    Q_sol_heating = mt.Q_sol_heating,
+                    Q_sol_cooling = mt.Q_sol_cooling
                 });
             }
             TotalRows = totalRows;
 
             AnnualQ_sol_total   = _results.AnnualQ_sol_total;
+            AnnualQ_sol_heating = _results.AnnualQ_sol_heating;
+            AnnualQ_sol_cooling = _results.AnnualQ_sol_cooling;
             AnnualQ_sol_windows = _results.AnnualQ_sol_windows;
             AnnualQ_sol_opaque  = _results.AnnualQ_sol_opaque;
             AnnualQ_sky         = _results.AnnualQ_sky;
 
             IsCalculated = true;
+        }
+
+        private void ExecuteSyncFromSections()
+        {
+            if (_report == null)
+                return;
+
+            _syncService.SyncFromReport(_report, _data);
+            IsCalculated = false;
+            HasErrors = false;
+            HasWarnings = false;
+            ValidationSummary = "Синхронизацията от секции 6, 7 и 9 е изпълнена.";
         }
 
         private void ExecuteAddWindow()
@@ -349,6 +419,103 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
         {
             if (op != null && _data.OpaqueElements.Contains(op))
                 _data.OpaqueElements.Remove(op);
+        }
+
+        private void EnsureAutoSyncWired()
+        {
+            if (_autoSyncWired)
+                return;
+
+            if (_report?.Sections == null)
+                return;
+
+            _autoSyncWired = true;
+
+            var objectData = _report.Sections.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            if (objectData != null)
+            {
+                objectData.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(ObjectDataSectionData.ClimateZone))
+                        OnSourceDataChanged();
+                };
+            }
+
+            var windowsData = _report.Sections.FirstOrDefault(s => s.Type == SectionType.Windows)?.WindowsSectionData;
+            if (windowsData != null)
+            {
+                foreach (var b in windowsData.WindowBatches)
+                    b.PropertyChanged += SourceItem_PropertyChanged;
+
+                windowsData.WindowBatches.CollectionChanged += (s, e) =>
+                {
+                    if (e.OldItems != null)
+                    {
+                        foreach (WindowBatch b in e.OldItems)
+                            b.PropertyChanged -= SourceItem_PropertyChanged;
+                    }
+                    if (e.NewItems != null)
+                    {
+                        foreach (WindowBatch b in e.NewItems)
+                            b.PropertyChanged += SourceItem_PropertyChanged;
+                    }
+                    OnSourceDataChanged();
+                };
+            }
+
+            var wallsData = _report.Sections.FirstOrDefault(s => s.Type == SectionType.ExternalWalls)?.ExternalWallsSectionData;
+            if (wallsData != null)
+            {
+                foreach (var w in wallsData.WallTypes)
+                    w.PropertyChanged += SourceItem_PropertyChanged;
+
+                wallsData.WallTypes.CollectionChanged += (s, e) =>
+                {
+                    if (e.OldItems != null)
+                    {
+                        foreach (ExternalWallType w in e.OldItems)
+                            w.PropertyChanged -= SourceItem_PropertyChanged;
+                    }
+                    if (e.NewItems != null)
+                    {
+                        foreach (ExternalWallType w in e.NewItems)
+                            w.PropertyChanged += SourceItem_PropertyChanged;
+                    }
+                    OnSourceDataChanged();
+                };
+            }
+
+            var roofData = _report.Sections.FirstOrDefault(s => s.Type == SectionType.Roof)?.RoofSectionData;
+            if (roofData != null)
+            {
+                foreach (var r in roofData.RoofTypes)
+                    r.PropertyChanged += SourceItem_PropertyChanged;
+
+                roofData.RoofTypes.CollectionChanged += (s, e) =>
+                {
+                    if (e.OldItems != null)
+                    {
+                        foreach (RoofType r in e.OldItems)
+                            r.PropertyChanged -= SourceItem_PropertyChanged;
+                    }
+                    if (e.NewItems != null)
+                    {
+                        foreach (RoofType r in e.NewItems)
+                            r.PropertyChanged += SourceItem_PropertyChanged;
+                    }
+                    OnSourceDataChanged();
+                };
+            }
+        }
+
+        private void SourceItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+            => OnSourceDataChanged();
+
+        private void OnSourceDataChanged()
+        {
+            IsCalculated = false;
+            if (AutoSyncEnabled)
+                ExecuteSyncFromSections();
         }
 
         // ------------------------------------------------------------------ //

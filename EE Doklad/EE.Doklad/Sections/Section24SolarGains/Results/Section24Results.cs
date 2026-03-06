@@ -27,6 +27,16 @@ namespace EE.Doklad.Sections.Section24SolarGains.Results
         /// Формула (3.36).
         /// </summary>
         public double Q_sol_total { get; init; }
+
+        /// <summary>
+        /// Част от Q_sol_total, отнесена към отоплителния период за месеца, kWh.
+        /// </summary>
+        public double Q_sol_heating { get; init; }
+
+        /// <summary>
+        /// Част от Q_sol_total, отнесена към охладителния период за месеца, kWh.
+        /// </summary>
+        public double Q_sol_cooling { get; init; }
     }
 
     /// <summary>
@@ -46,6 +56,14 @@ namespace EE.Doklad.Sections.Section24SolarGains.Results
         /// <summary>Годишна сума Q_sol_total [kWh].</summary>
         public double AnnualQ_sol_total
             => MonthlyTotals.Sum(r => r.Q_sol_total);
+
+        /// <summary>Годишна сума Q_sol_heating [kWh].</summary>
+        public double AnnualQ_sol_heating
+            => MonthlyTotals.Sum(r => r.Q_sol_heating);
+
+        /// <summary>Годишна сума Q_sol_cooling [kWh].</summary>
+        public double AnnualQ_sol_cooling
+            => MonthlyTotals.Sum(r => r.Q_sol_cooling);
 
         /// <summary>Годишна Σ Q_sol_windows [kWh].</summary>
         public double AnnualQ_sol_windows

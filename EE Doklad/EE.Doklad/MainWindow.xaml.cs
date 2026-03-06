@@ -207,12 +207,35 @@ public partial class MainWindow : Window
                 section.RoofSectionData = new Models.RoofSectionData();
 
             section.Type = ModelSectionType.Roof;
-
-            var roofSectionView = new RoofSectionView
+            try
             {
-                DataContext = new ViewModels.RoofSectionViewModel(section.RoofSectionData)
-            };
-            ContentScrollViewer.Content = roofSectionView;
+                var roofSectionView = new RoofSectionView
+                {
+                    DataContext = new ViewModels.RoofSectionViewModel(section.RoofSectionData)
+                };
+                ContentScrollViewer.Content = roofSectionView;
+            }
+            catch (System.Exception ex)
+            {
+                var errorPanel = new StackPanel { Margin = new Thickness(40, 40, 40, 0) };
+                errorPanel.Children.Add(new TextBlock
+                {
+                    Text = "Грешка при зареждане на секция 'Покрив':",
+                    FontSize = 16,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 10)
+                });
+                var tb = new TextBox
+                {
+                    Text = ex.ToString(),
+                    TextWrapping = TextWrapping.Wrap,
+                    IsReadOnly = true,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    Height = 300
+                };
+                errorPanel.Children.Add(tb);
+                ContentScrollViewer.Content = errorPanel;
+            }
         }
         else if (section.Type == ModelSectionType.Floor ||
                  (!string.IsNullOrEmpty(section.Title) && section.Title.Contains("Под")))
@@ -811,7 +834,10 @@ public partial class MainWindow : Window
 
             section.Type = ModelSectionType.SolarGains;
 
-            var solarGainsVm = new EE.Doklad.Sections.Section24SolarGains.ViewModels.Section24ViewModel(section.SolarGainsData);
+            var solarGainsVm = new EE.Doklad.Sections.Section24SolarGains.ViewModels.Section24ViewModel(
+                section.SolarGainsData,
+                viewModel.CurrentReport,
+                autoSyncEnabled: true);
             var solarGainsView = new EE.Doklad.Sections.Section24SolarGains.Views.Section24View
             {
                 DataContext = solarGainsVm
