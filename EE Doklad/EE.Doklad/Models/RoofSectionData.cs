@@ -55,6 +55,24 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private WallSurfaceProperties _surfaceProperties = new() { UseOrientationOverride = false };
 
+        /// <summary>
+        /// Настройки за топлинни мостове за този тип покрив.
+        /// Използва същите модели като при „Външни стени".
+        /// </summary>
+        [ObservableProperty]
+        private WallThermalBridgeSettings _thermalBridges = new();
+
+        /// <summary>
+        /// Unified U-value used by the thermal bridge calculator.
+        /// Returns WarmDetail.Uw or ColdDetail.Ur depending on mode.
+        /// </summary>
+        public double UValue => Mode switch
+        {
+            RoofMode.Warm => WarmDetail?.Uw ?? 0,
+            RoofMode.Cold => ColdDetail?.Ur ?? 0,
+            _ => 0
+        };
+
         public bool IsConfigured => Mode != RoofMode.Unselected;
 
         public string ModeLabel => Mode switch
@@ -105,6 +123,7 @@ namespace EE.Doklad.Models
                 e.PropertyName == nameof(ColdRoofDetail.IsCalculated))
             {
                 OnPropertyChanged(nameof(UDisplay));
+                OnPropertyChanged(nameof(UValue));
             }
         }
     }

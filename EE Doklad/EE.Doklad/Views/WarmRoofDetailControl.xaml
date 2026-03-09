@@ -109,6 +109,164 @@
                 <controls:RoofSurfaceParamsEditor DataContext="{Binding SurfaceProperties}"/>
             </Expander>
 
+            <!-- ══════ Thermal Bridges Expander ══════ -->
+            <Expander Margin="0,8,0,0"
+                      IsExpanded="{Binding ThermalBridges.IsExpanded, Mode=TwoWay, FallbackValue=False}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Топлинни мостове"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="#4A148C" VerticalAlignment="Center"/>
+                        <Border Background="#EDE7F6" CornerRadius="4"
+                                Padding="5,1" Margin="8,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock FontSize="10" Foreground="#4A148C">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Няма"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ThermalBridges.Mode}" Value="GlobalPercentage">
+                                                <Setter Property="Text" Value="Глобален %"/>
+                                                <Setter Property="Foreground" Value="#E65100"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ThermalBridges.Mode}" Value="Manual">
+                                                <Setter Property="Text" Value="Ръчно"/>
+                                                <Setter Property="Foreground" Value="#1B5E20"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
+                </Expander.Header>
+
+                <Border Padding="10,8,10,10" Background="#FAF5FF">
+                    <StackPanel DataContext="{Binding ThermalBridges}">
+
+                        <!-- Режим ComboBox -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Режим:" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox SelectedValue="{Binding Mode, Mode=TwoWay}"
+                                      SelectedValuePath="Tag"
+                                      Width="200" FontSize="12"
+                                      SelectionChanged="TbMode_SelectionChanged">
+                                <ComboBoxItem Content="Няма"              Tag="None"/>
+                                <ComboBoxItem Content="Глобална стойност" Tag="GlobalPercentage"/>
+                                <ComboBoxItem Content="Ръчно въвеждане"   Tag="Manual"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Панел: Няма -->
+                        <StackPanel Margin="0,0,0,4">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Mode}" Value="None">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock FontSize="11" Foreground="#555" Text="Htb = 0  |  Htotal = Hel = U × A"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="Hel =" FontSize="12" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Hel, StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="W/K" FontSize="11" Foreground="#777" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Панел: Глобална стойност -->
+                        <StackPanel Margin="0,0,0,4">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Mode}" Value="GlobalPercentage">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="Процент (0–10 %):" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Text="{Binding GlobalPercent, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.0}"
+                                         Width="70" FontSize="12" Padding="5,3"
+                                         BorderBrush="#7B1FA2" BorderThickness="1"
+                                         LostFocus="TbGlobalPercent_LostFocus"/>
+                                <TextBlock Text=" %" FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Hel ="    FontSize="12" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Hel,    StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Htb ="    FontSize="12" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Htb,    StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Htotal =" FontSize="12" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Htotal, StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="W/K" FontSize="11" Foreground="#777" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Панел: Ръчно въвеждане -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Mode}" Value="Manual">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <DataGrid x:Name="ThermalBridgesGrid"
+                                      ItemsSource="{Binding Items}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      SelectionMode="Single"
+                                      FontSize="11"
+                                      Margin="0,0,0,6"
+                                      MaxHeight="220"
+                                      VerticalScrollBarVisibility="Auto"
+                                      SelectionChanged="TbGrid_SelectionChanged">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Тип"      Binding="{Binding Type}"                           Width="*"/>
+                                    <DataGridTextColumn Header="L (m)"    Binding="{Binding Length, StringFormat=0.000}"      Width="65"/>
+                                    <DataGridTextColumn Header="Ψ (W/mK)" Binding="{Binding Psi,    StringFormat=0.000}"      Width="75"/>
+                                    <DataGridTextColumn Header="χ (W/K)"  Binding="{Binding Chi,    StringFormat=0.000}"      Width="65"/>
+                                    <DataGridTextColumn Header="L×Ψ"      Binding="{Binding LinearLoss,       StringFormat=0.000}" Width="65" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="Общо"      Binding="{Binding TotalLossNoFacade,StringFormat=0.000}" Width="65" IsReadOnly="True"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Button Content="+ Добави"    Padding="8,3" Margin="0,0,8,0"
+                                        Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                        Click="TbAdd_Click"/>
+                                <Button Content="Редактирай" Padding="8,3" Margin="0,0,8,0"
+                                        Background="#1976D2" Foreground="White" BorderThickness="0"
+                                        Click="TbEdit_Click"/>
+                                <Button Content="Изтрий"     Padding="8,3"
+                                        Background="#e53935" Foreground="White" BorderThickness="0"
+                                        Click="TbDelete_Click"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Hel ="    FontSize="12" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Hel,    StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Htb ="    FontSize="12" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Htb,    StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Htotal =" FontSize="12" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Htotal, StringFormat=0.000}" FontSize="12" FontWeight="Bold" Margin="0,0,4,0"  VerticalAlignment="Center"/>
+                                <TextBlock Text="W/K" FontSize="11" Foreground="#777" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+            </Expander>
+
         </StackPanel>
     </Border>
 </UserControl>

@@ -127,6 +127,12 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private WallSurfaceProperties _surfaceProperties = new();
 
+        /// <summary>
+        /// Настройки за топлинни мостове за този тип стена.
+        /// </summary>
+        [ObservableProperty]
+        private WallThermalBridgeSettings _thermalBridges = new();
+
         partial void OnSurfacePropertiesChanged(WallSurfaceProperties? oldValue, WallSurfaceProperties newValue)
         {
             if (oldValue != null)
@@ -374,5 +380,143 @@ namespace EE.Doklad.Models
         /// </summary>
         public double GetEpsilon(WallOrientation orientation)
             => UseOrientationOverride && Overrides.TryGetValue(orientation, out var p) ? p.Epsilon : EpsilonDefault;
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    //  Thermal bridges (топлинни мостове) – Секция „Външни стени"
+    // ──────────────────────────────────────────────────────────────────
+
+    /// <summary>Режим за изчисление на топлинни мостове за един тип стена.</summary>
+    public enum ThermalBridgeMode
+    {
+        None,               // Няма – Htb = 0
+        GlobalPercentage,   // Глобална стойност (%)
+        Manual              // Ръчно въвеждане на отделни топлинни мостове
+    }
+
+    /// <summary>
+    /// Един топлинен мост (linear ψ-bridge + point χ-bridge).
+    /// </summary>
+    public partial class WallThermalBridgeItem : ObservableObject
+    {
+        [ObservableProperty] private string _id   = System.Guid.NewGuid().ToString();
+        [ObservableProperty] private string _wallId = string.Empty;
+
+        /// <summary>Описателен тип / наименование.</summary>
+        [ObservableProperty] private string _type = "Топлинен мост";
+
+        /// <summary>Дължина на линейния мост [m].</summary>
+        [ObservableProperty] private double _length;
+
+        /// <summary>Линеен коефициент на топлопреминаване ψ [W/(m·K)].</summary>
+        [ObservableProperty] private double _psi;
+
+        /// <summary>Точков коефициент χ [W/K].</summary>
+        [ObservableProperty] private double _chi;
+
+        // ── Фасади (може повече от една да е отметната) ──
+        [ObservableProperty] private bool _facadeNorth;
+        [ObservableProperty] private bool _facadeNorthEast;
+        [ObservableProperty] private bool _facadeEast;
+        [ObservableProperty] private bool _facadeSouthEast;
+        [ObservableProperty] private bool _facadeSouth;
+        [ObservableProperty] private bool _facadeSouthWest;
+        [ObservableProperty] private bool _facadeWest;
+        [ObservableProperty] private bool _facadeNorthWest;
+
+        /// <summary>
+        /// Брой чекнати фасади. Използва се като множител при изчислението на Htb.
+        /// Ако нито една фасада не е чекната, приемаме 1 (мостът важи веднъж).
+        /// </summary>
+        public int FacadeCount =>
+            System.Math.Max(1,
+                (FacadeNorth     ? 1 : 0) +
+                (FacadeNorthEast ? 1 : 0) +
+                (FacadeEast      ? 1 : 0) +
+                (FacadeSouthEast ? 1 : 0) +
+                (FacadeSouth     ? 1 : 0) +
+                (FacadeSouthWest ? 1 : 0) +
+                (FacadeWest      ? 1 : 0) +
+                (FacadeNorthWest ? 1 : 0));
+
+        /// <summary>L × ψ [W/K] — за един екземпляр на моста.</summary>
+        public double LinearLoss => Length * Psi;
+
+        /// <summary>
+        /// (L × ψ + χ) × FacadeCount [W/K] — пълна загуба с отчитане на фасадите.
+        /// Използва се при „Външни стени".
+        /// </summary>
+        public double TotalLoss => (LinearLoss + Chi) * FacadeCount;
+
+        /// <summary>
+        /// L × ψ + χ [W/K] — загуба БЕЗ множител по фасади.
+        /// Използва се при „Покрив" (няма фасади).
+        /// </summary>
+        public double TotalLossNoFacade => LinearLoss + Chi;
+
+        partial void OnLengthChanged(double value)
+        {
+            OnPropertyChanged(nameof(LinearLoss));
+            OnPropertyChanged(nameof(TotalLoss));
+            OnPropertyChanged(nameof(TotalLossNoFacade));
+        }
+        partial void OnPsiChanged(double value)
+        {
+            OnPropertyChanged(nameof(LinearLoss));
+            OnPropertyChanged(nameof(TotalLoss));
+            OnPropertyChanged(nameof(TotalLossNoFacade));
+        }
+        partial void OnChiChanged(double value)
+        {
+            OnPropertyChanged(nameof(TotalLoss));
+            OnPropertyChanged(nameof(TotalLossNoFacade));
+        }
+
+        // Notify FacadeCount и TotalLoss при промяна на всяка фасада
+        partial void OnFacadeNorthChanged(bool value)     { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeNorthEastChanged(bool value) { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeEastChanged(bool value)      { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeSouthEastChanged(bool value) { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeSouthChanged(bool value)     { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeSouthWestChanged(bool value) { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeWestChanged(bool value)      { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+        partial void OnFacadeNorthWestChanged(bool value) { OnPropertyChanged(nameof(FacadeCount)); OnPropertyChanged(nameof(TotalLoss)); }
+    }
+
+    /// <summary>
+    /// Настройки за топлинни мостове, прикачени към един тип стена.
+    /// </summary>
+    public partial class WallThermalBridgeSettings : ObservableObject
+    {
+        [ObservableProperty] private ThermalBridgeMode _mode = ThermalBridgeMode.None;
+
+        /// <summary>Процент за режим GlobalPercentage (0–10 %).</summary>
+        [ObservableProperty] private double _globalPercent = 5.0;
+
+        /// <summary>Дали Expander-ът е разгърнат в UI (не се персистира).</summary>
+        [ObservableProperty] private bool _isExpanded;
+
+        /// <summary>Топлинни мостове (само за Manual режим).</summary>
+        public ObservableCollection<WallThermalBridgeItem> Items { get; } = new();
+
+        // ── Computed (попълват се от ThermalBridgeCalculator) ──
+
+        /// <summary>Hel = U × A  [W/K].</summary>
+        [ObservableProperty] private double _hel;
+
+        /// <summary>Htb [W/K] – принос от термомостовете.</summary>
+        [ObservableProperty] private double _htb;
+
+        /// <summary>Htotal = Hel + Htb  [W/K].</summary>
+        [ObservableProperty] private double _htotal;
+
+        /// <summary>Брой термомостове (удобно за popup summary).</summary>
+        public int BridgeCount => Items.Count;
+
+        partial void OnModeChanged(ThermalBridgeMode value)
+        {
+            // Нотифицирай UI за промяна на computed свойствата при смяна на режим
+            OnPropertyChanged(nameof(BridgeCount));
+        }
     }
 }

@@ -52,8 +52,7 @@ namespace EE.Doklad.Sections.Section24SolarGains.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri(("/EE.Doklad;V1.0.0.0;component/sections/section24solargains/views/section24view.xa" +
-                    "ml"), System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/EE.Doklad;component/sections/section24solargains/views/section24view.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\Sections\Section24SolarGains\Views\Section24View.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

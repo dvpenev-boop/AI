@@ -1,5 +1,5 @@
 ﻿EE.Doklad
-1.0.0.0
+
 
 winexe
 C#
@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 E:\AI\EE Doklad\EE.Doklad\App.xaml
-491180711281
+50-97212747
 
-2101294989765
+210-1091395663
 215-386734492
-MainWindow.xaml;Sections\Section24SolarGains\Views\Section24View.xaml;Views\AddSectionDialog.xaml;Views\AddWindowFullDialog.xaml;Views\AddWindowWizardDialog.xaml;Views\AppliancesCatalogView.xaml;Views\AppliancesSectionEditor.xaml;Views\CertificatesSectionEditor.xaml;Views\ClimateDataView.xaml;Views\ColdRoofDetailControl.xaml;Views\ConclusionSectionEditor.xaml;Views\Controls\RoofSurfaceParamsEditor.xaml;Views\Controls\WallSurfaceParamsEditor.xaml;Views\CoolingSectionView.xaml;Views\CoverPageEditor.xaml;Views\DhwLossMethodologyWindow.xaml;Views\EnergyClassSectionEditor.xaml;Views\ExternalWallsSectionEditor.xaml;Views\FloorPanels\FloorExternalAirPanel.xaml;Views\FloorPanels\FloorGroundPanel.xaml;Views\FloorPanels\FloorHeatedBasementPanel.xaml;Views\FloorPanels\FloorUnheatedBasementPanel.xaml;Views\FloorPanels\FloorUnheatedSpacePanel.xaml;Views\FloorSectionView.xaml;Views\FloorTypeSelectionDialog.xaml;Views\HeatingSectionView.xaml;Views\HotWaterSectionEditor.xaml;Views\ImportOptionsWindow.xaml;Views\InsertSectionDialog.xaml;Views\InternalGainsDebugView.xaml;Views\IntroSectionEditor.xaml;Views\LightingCatalogView.xaml;Views\LightingSectionEditor.xaml;Views\MaterialsCatalogView.xaml;Views\MaterialsEditWindow.xaml;Views\MatrixSummaryView.xaml;Views\ObjectDataSectionEditor.xaml;Views\PumpsAndFansSectionView.xaml;Views\ResultsSectionEditor.xaml;Views\RoofSectionView.xaml;Views\RoofSectionViewResources.xaml;Views\RoofTypeSelectionDialog.xaml;Views\ShadingEditorDialog.xaml;Views\UnconditionedZonesSectionView.xaml;Views\VentilationCoolingSectionView.xaml;Views\VentilationSectionView.xaml;Views\WarmRoofDetailControl.xaml;Views\WindowBatchDetailsDialog.xaml;Views\WindowsSectionView.xaml;
+MainWindow.xaml;Sections\Section24SolarGains\Views\Section24View.xaml;Views\AddSectionDialog.xaml;Views\AddWindowFullDialog.xaml;Views\AddWindowWizardDialog.xaml;Views\AppliancesCatalogView.xaml;Views\AppliancesSectionEditor.xaml;Views\CertificatesSectionEditor.xaml;Views\ClimateDataView.xaml;Views\ColdRoofDetailControl.xaml;Views\ConclusionSectionEditor.xaml;Views\Controls\RoofSurfaceParamsEditor.xaml;Views\Controls\WallSurfaceParamsEditor.xaml;Views\CoolingSectionView.xaml;Views\CoverPageEditor.xaml;Views\DhwLossMethodologyWindow.xaml;Views\EnergyClassSectionEditor.xaml;Views\ExternalWallsSectionEditor.xaml;Views\FloorPanels\FloorExternalAirPanel.xaml;Views\FloorPanels\FloorGroundPanel.xaml;Views\FloorPanels\FloorHeatedBasementPanel.xaml;Views\FloorPanels\FloorUnheatedBasementPanel.xaml;Views\FloorPanels\FloorUnheatedSpacePanel.xaml;Views\FloorSectionView.xaml;Views\FloorTypeSelectionDialog.xaml;Views\HeatingSectionView.xaml;Views\HotWaterSectionEditor.xaml;Views\ImportOptionsWindow.xaml;Views\InsertSectionDialog.xaml;Views\InternalGainsDebugView.xaml;Views\IntroSectionEditor.xaml;Views\LightingCatalogView.xaml;Views\LightingSectionEditor.xaml;Views\MaterialsCatalogView.xaml;Views\MaterialsEditWindow.xaml;Views\MatrixSummaryView.xaml;Views\ObjectDataSectionEditor.xaml;Views\PumpsAndFansSectionView.xaml;Views\ResultsSectionEditor.xaml;Views\RoofSectionView.xaml;Views\RoofSectionViewResources.xaml;Views\RoofTypeSelectionDialog.xaml;Views\ShadingEditorDialog.xaml;Views\UnconditionedZonesSectionView.xaml;Views\VentilationCoolingSectionView.xaml;Views\VentilationSectionView.xaml;Views\WallThermalBridgeItemDialog.xaml;Views\WarmRoofDetailControl.xaml;Views\WindowBatchDetailsDialog.xaml;Views\WindowsSectionView.xaml;
 
 False
 

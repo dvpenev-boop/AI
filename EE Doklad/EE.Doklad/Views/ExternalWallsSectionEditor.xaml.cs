@@ -10,6 +10,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using EE.Doklad.Models;
+using EE.Doklad.Sections.ThermalBridges;
 using EE.Doklad.Services;
 using Microsoft.Win32;
 
@@ -22,6 +23,9 @@ namespace EE.Doklad.Views
 
         // Tracks the wall type whose popup is currently open
         private ExternalWallType? _popupWallType;
+
+        // Dictionary to track selected thermal bridge items per Settings object
+        private readonly Dictionary<WallThermalBridgeSettings, WallThermalBridgeItem?> _selectedTbItems = new();
 
         public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
 
@@ -70,6 +74,8 @@ namespace EE.Doklad.Views
                 foreach (var wt in newData.WallTypes)
                 {
                     wt.PropertyChanged += WallType_PropertyChanged;
+                    // Initial recalc so Hel/Htb/Htotal are populated on load
+                    ThermalBridgeCalculator.Recalculate(wt);
                 }
             }
         }
@@ -88,6 +94,8 @@ namespace EE.Doklad.Views
                 foreach (ExternalWallType wt in e.NewItems)
                 {
                     wt.PropertyChanged += WallType_PropertyChanged;
+                    // Initial recalc for newly added wall
+                    ThermalBridgeCalculator.Recalculate(wt);
                 }
             }
 
@@ -96,6 +104,8 @@ namespace EE.Doklad.Views
 
         private void WallType_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (sender is not ExternalWallType wall) return;
+
             // Recalculate column visibility if any facade area changed
             if (e.PropertyName is nameof(ExternalWallType.FacadeEast)
                 or nameof(ExternalWallType.FacadeNorth)
@@ -107,6 +117,14 @@ namespace EE.Doklad.Views
                 or nameof(ExternalWallType.FacadeSouthWest))
             {
                 UpdateFacadeColumnsVisibility();
+                // Area changed → Hel must be recalculated
+                ThermalBridgeCalculator.Recalculate(wall);
+            }
+
+            // U changed (layer edit, Rsi/Rse change) → Hel must be recalculated
+            if (e.PropertyName is nameof(ExternalWallType.Uw))
+            {
+                ThermalBridgeCalculator.Recalculate(wall);
             }
         }
 
@@ -332,7 +350,7 @@ namespace EE.Doklad.Views
 
             // Base index is number of fixed columns before the facade direction columns
             // (№, Тип стена, A (m²), U (W/m²K), α, ε) == 6
-            // "Премахни" is now the LAST column, after all facade columns — do not include it here
+            // After facade columns: Режим ТМ, Htb, Hel, Htotal, Премахни — do not include them here
             int baseIndex = 6;
             // Compute visible and collapsed lists to assign contiguous valid DisplayIndex values
             var visibleCols = desiredOrder.Where(c => c.Visibility == Visibility.Visible).ToList();
@@ -494,7 +512,180 @@ namespace EE.Doklad.Views
             RefreshOrientationPopup(wallType);
             OrientationPopup.IsOpen = true;
         }
-    }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Thermal Bridges – ComboBox mode switch
+        // ──────────────────────────────────────────────────────────────────
+
+        private void TbMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not ComboBox cb) return;
+            if (cb.SelectedItem is not ComboBoxItem item) return;
+
+            // Resolve the WallThermalBridgeSettings from Tag or DataContext
+            WallThermalBridgeSettings? settings = null;
+
+            if (cb.Tag is WallThermalBridgeSettings tbTag)
+                settings = tbTag;
+            else if (cb.DataContext is WallThermalBridgeSettings tbDc)
+                settings = tbDc;
+
+            if (settings == null) return;
+
+            settings.Mode = item.Tag?.ToString() switch
+            {
+                "GlobalPercentage" => ThermalBridgeMode.GlobalPercentage,
+                "Manual"           => ThermalBridgeMode.Manual,
+                _                  => ThermalBridgeMode.None
+            };
+
+            RecalcThermalBridgesForSettings(settings);
+        }
+
+        private void TbGlobalPercent_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox tb) return;
+            if (tb.DataContext is not WallThermalBridgeSettings settings) return;
+            RecalcThermalBridgesForSettings(settings);
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Thermal Bridges – Manual CRUD
+        // ──────────────────────────────────────────────────────────────────
+
+        private void TbGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not DataGrid grid) return;
+            if (grid.DataContext is not WallThermalBridgeSettings settings) return;
+            
+            _selectedTbItems[settings] = grid.SelectedItem as WallThermalBridgeItem;
+        }
+
+        private void TbAdd_Click(object sender, RoutedEventArgs e)
+        {
+            var settings = GetSettingsFromButton(sender);
+            if (settings == null) return;
+
+            var dlg = new WallThermalBridgeItemDialog { Owner = Window.GetWindow(this) };
+            if (dlg.ShowDialog() == true && dlg.Result != null)
+            {
+                settings.Items.Add(dlg.Result);
+                RecalcThermalBridgesForSettings(settings);
+            }
+        }
+
+        private void TbEdit_Click(object sender, RoutedEventArgs e)
+        {
+            var settings = GetSettingsFromButton(sender);
+            if (settings == null) return;
+
+            // Get selected item from dictionary
+            if (!_selectedTbItems.TryGetValue(settings, out var selected) || selected == null)
+            {
+                MessageBox.Show("Моля изберете термомост от таблицата.", "Информация", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var dlg = new WallThermalBridgeItemDialog(selected) { Owner = Window.GetWindow(this) };
+            if (dlg.ShowDialog() == true)
+            {
+                RecalcThermalBridgesForSettings(settings);
+            }
+        }
+
+        private void TbDelete_Click(object sender, RoutedEventArgs e)
+        {
+            var settings = GetSettingsFromButton(sender);
+            if (settings == null) return;
+
+            // Get selected item from dictionary
+            if (!_selectedTbItems.TryGetValue(settings, out var selected) || selected == null)
+            {
+                MessageBox.Show("Моля изберете термомост от таблицата.", "Информация", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            settings.Items.Remove(selected);
+            _selectedTbItems[settings] = null;
+            RecalcThermalBridgesForSettings(settings);
+        }
+
+        private static WallThermalBridgeSettings? GetSettingsFromButton(object sender)
+        {
+            if (sender is not Button btn) return null;
+            if (btn.Tag is WallThermalBridgeSettings s) return s;
+            if (btn.DataContext is WallThermalBridgeSettings d) return d;
+            return null;
+        }
+
+        private void RecalcThermalBridgesForSettings(WallThermalBridgeSettings settings)
+        {
+            if (DataContext is not ExternalWallsSectionData data) return;
+            var wall = data.WallTypes.FirstOrDefault(w => w.ThermalBridges == settings);
+            if (wall != null)
+                ThermalBridgeCalculator.Recalculate(wall);
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Thermal Bridges – Summary cell popup (аналогично на α/ε)
+        // ──────────────────────────────────────────────────────────────────
+
+        private ExternalWallType? _tbPopupWallType;
+
+        private void ThermalBridgeModeCell_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn) return;
+            if (btn.DataContext is not ExternalWallType wallType) return;
+
+            _tbPopupWallType = wallType;
+            RefreshThermalBridgesPopup(wallType);
+            ThermalBridgesPopup.IsOpen = true;
+        }
+
+        private void RefreshThermalBridgesPopup(ExternalWallType wallType)
+        {
+            var tb = wallType.ThermalBridges;
+
+            TbPopupTitle.Text = $"Топлинни мостове  ▸ {wallType.Name}";
+
+            TbPopupMode.Text = tb.Mode switch
+            {
+                ThermalBridgeMode.GlobalPercentage => "Глобална стойност",
+                ThermalBridgeMode.Manual           => "Ръчно въвеждане",
+                _                                  => "Няма"
+            };
+
+            TbPopupPercentRow.Visibility = tb.Mode == ThermalBridgeMode.GlobalPercentage
+                ? Visibility.Visible : Visibility.Collapsed;
+            TbPopupPercent.Text = $"{tb.GlobalPercent:0.0} %";
+
+            TbPopupCountRow.Visibility = tb.Mode == ThermalBridgeMode.Manual
+                ? Visibility.Visible : Visibility.Collapsed;
+            TbPopupCount.Text = tb.Items.Count.ToString();
+
+            TbPopupHel.Text    = tb.Hel.ToString("0.000");
+            TbPopupHtb.Text    = tb.Htb.ToString("0.000");
+            TbPopupHtotal.Text = tb.Htotal.ToString("0.000");
+        }
+
+        private void TbPopupNavigate_Click(object sender, RoutedEventArgs e)
+        {
+            ThermalBridgesPopup.IsOpen = false;
+            if (_tbPopupWallType == null) return;
+
+            // Expand the thermal bridges panel for that wall type
+            _tbPopupWallType.ThermalBridges.IsExpanded = true;
+
+            // Scroll to and focus the detail card
+            if (WallTypesItemsControl.ItemContainerGenerator
+                    .ContainerFromItem(_tbPopupWallType) is FrameworkElement container)
+            {
+                container.BringIntoView();
+            }
+        }
+    }   // end class ExternalWallsSectionEditor
 
     // ──────────────────────────────────────────────────────────────────
     //  Helper DTO for the orientation breakdown DataGrid
