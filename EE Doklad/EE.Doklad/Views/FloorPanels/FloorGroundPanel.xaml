@@ -137,6 +137,21 @@
                 </StackPanel>
             </GroupBox>
 
+            <GroupBox Header="Periodic results (ISO 13370)" Margin="0,0,0,10">
+                <StackPanel>
+                    <WrapPanel Margin="0,0,0,6">
+                        <TextBlock Text="{Binding PeriodicHg, StringFormat='Hg={0:F2} W/K'}" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding PeriodicHel, StringFormat='Hel={0:F2} W/K'}" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding PeriodicHpi, StringFormat='Hpi={0:F2} W/K'}" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding PeriodicHpe, StringFormat='Hpe={0:F2} W/K'}" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding PeriodicDelta, StringFormat='Delta={0:F3} m'}" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding PeriodicBeta, StringFormat='Beta={0}'}" Margin="0,0,16,4"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding PeriodicMonthlySummary, StringFormat='Hmonthly: {0}'}" TextWrapping="Wrap"/>
+                </StackPanel>
+            </GroupBox>
+
+
             <TextBlock Text="Топлинно съпротивление" FontWeight="SemiBold" Margin="0,6,0,4"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
             </StackPanel>
@@ -201,3 +216,4 @@
         </StackPanel>
     </Border>
 </UserControl>
+

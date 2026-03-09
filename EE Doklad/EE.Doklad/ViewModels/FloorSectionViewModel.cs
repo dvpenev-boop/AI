@@ -3,10 +3,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using EE.Doklad.Models;
 using EE.Doklad.Services;
+using EE.Doklad.Services.FloorStrategies;
 
 namespace EE.Doklad.ViewModels
 {
@@ -14,6 +16,7 @@ namespace EE.Doklad.ViewModels
     {
         private readonly FloorSectionData _data;
     private readonly MaterialsService _materialsService;
+    private readonly ClimateService _climateService;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -79,6 +82,8 @@ namespace EE.Doklad.ViewModels
             Debug.WriteLine("[FloorSectionViewModel] Constructor called with data");
             _data = data;
             _materialsService = new MaterialsService(new JsonMaterialsRepository());
+            _climateService = new ClimateService(new JsonClimateRepository());
+            AttachObjectDataClimateHandler();
             
             LoadMaterialOptions();
             
@@ -115,6 +120,64 @@ namespace EE.Doklad.ViewModels
                 }
             }
             Debug.WriteLine("[FloorSectionViewModel] Constructor completed");
+        }
+
+        private void AttachObjectDataClimateHandler()
+        {
+            var objectData = GetObjectData();
+            if (objectData == null)
+            {
+                return;
+            }
+
+            objectData.PropertyChanged += ObjectData_PropertyChanged;
+        }
+
+        private void ObjectData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ObjectDataSectionData.ClimateZone))
+            {
+                RecalculateAllFloorsForClimateChange();
+            }
+        }
+
+        private void RecalculateAllFloorsForClimateChange()
+        {
+            foreach (var item in FloorItems.ToList())
+            {
+                if (item.IsComposite && item.CompositeType == "Wall")
+                {
+                    continue;
+                }
+
+                switch (item.FloorType)
+                {
+                    case FloorType.Ground:
+                        RecalculateGround(item);
+                        break;
+                    case FloorType.HeatedBasement:
+                        RecalculateHeatedBasement(item);
+                        break;
+                    case FloorType.UnheatedBasement:
+                        RecalculateUnheatedBasement(item);
+                        break;
+                    case FloorType.ExternalAir:
+                        RecalculateExternalAir(item);
+                        break;
+                }
+            }
+        }
+
+        private ObjectDataSectionData? GetObjectData()
+        {
+            var mainVm = Application.Current?.MainWindow?.DataContext as MainViewModel;
+            var sections = mainVm?.CurrentReport?.Sections;
+            if (sections == null)
+            {
+                return null;
+            }
+
+            return sections.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
         }
 
         private void LoadMaterialOptions()
@@ -181,11 +244,17 @@ namespace EE.Doklad.ViewModels
                 {
                     item.UValue = result.U;
                     item.Area = detail.Area;
+                    item.PeriodicHg = detail.Area * result.U;
+                    item.PeriodicHpi = 0.0;
+                    item.PeriodicHpe = 0.0;
+                    item.PeriodicHmonthlyAvg = item.PeriodicHg;
+                    item.HasPeriodicResult = true;
                     item.NotifyDisplayPropertiesChanged();
                 }
                 else
                 {
                     item.UValue = 0;
+                    ResetPeriodicForItem(item);
                     item.NotifyDisplayPropertiesChanged();
                 }
                 OnPropertyChanged(nameof(FloorItems));
@@ -246,7 +315,6 @@ namespace EE.Doklad.ViewModels
                 {
                     item.UValue = result.U;
                     item.Area = input.Area;
-                    item.NotifyDisplayPropertiesChanged();
                     detail.DebugInfo = string.Join("\n", result.Assumptions);
                     detail.Error = string.Empty;
 
@@ -262,12 +330,21 @@ namespace EE.Doklad.ViewModels
                     detail.ResultB = GetAssumptionValue(result.Assumptions, "B = ");
                     detail.ResultRf = GetAssumptionValue(result.Assumptions, "Rf = ");
                     detail.ResultDf = GetAssumptionValue(result.Assumptions, "df = ");
+
+                    var periodicInput = BuildPeriodicInputForGround(detail, item, result);
+                    var periodic = GroundFloorPeriodicCalculator.Calculate(periodicInput);
+                    ApplyPeriodicToGroundDetail(detail, periodic);
+                    ApplyPeriodicToItem(item, periodic);
+                    item.NotifyDisplayPropertiesChanged();
                 }
                 else
                 {
                     item.UValue = 0;
+                    ResetPeriodicForGroundDetail(detail);
+                    ResetPeriodicForItem(item);
                     detail.DebugInfo = string.Empty;
                     detail.Error = result.ErrorMessage;
+                    item.NotifyDisplayPropertiesChanged();
                 }
                 OnPropertyChanged(nameof(FloorItems));
             }
@@ -602,11 +679,17 @@ namespace EE.Doklad.ViewModels
                         }
                     }
 
+                    var periodicInput = BuildPeriodicInputForUnheatedBasement(detail, item, result);
+                    var periodic = GroundFloorPeriodicCalculator.Calculate(periodicInput);
+                    ApplyPeriodicToUnheatedBasementDetail(detail, periodic);
+                    ApplyPeriodicToItem(item, periodic);
                     item.NotifyDisplayPropertiesChanged();
                 }
                 else
                 {
                     item.UValue = 0;
+                    ResetPeriodicForUnheatedBasementDetail(detail);
+                    ResetPeriodicForItem(item);
                     item.NotifyDisplayPropertiesChanged();
                 }
 
@@ -708,6 +791,9 @@ namespace EE.Doklad.ViewModels
                     detail.ResultDf = d_f;
                     detail.ResultDwb = d_w_b;
                     detail.ResultAwalls = A_walls;
+                    var periodicInput = BuildPeriodicInputForHeatedBasement(detail, item, H_g, U_f_g_b, d_f, d_w_b);
+                    var periodic = GroundFloorPeriodicCalculator.Calculate(periodicInput);
+                    ApplyPeriodicToHeatedBasementDetail(detail, periodic);
 
                     // КРИТИЧНО: Обновяваме ДВАТА реда в таблицата
                     if (!string.IsNullOrEmpty(item.GroupId))
@@ -721,6 +807,7 @@ namespace EE.Doklad.ViewModels
                                 // Ред 1: Под към земя
                                 groupItem.UValue = U_f_g_b;
                                 groupItem.Area = detail.Area;
+                                ApplyPeriodicToItem(groupItem, periodic);
                                 groupItem.NotifyDisplayPropertiesChanged();
                             }
                             else if (groupItem.CompositeType == "Wall")
@@ -728,6 +815,7 @@ namespace EE.Doklad.ViewModels
                                 // Ред 2: Стена към земя
                                 groupItem.UValue = U_w_g_b;
                                 groupItem.Area = A_walls; // z * P
+                                ApplyPeriodicToItem(groupItem, periodic);
                                 groupItem.NotifyDisplayPropertiesChanged();
                             }
                         }
@@ -735,6 +823,7 @@ namespace EE.Doklad.ViewModels
                 }
                 else
                 {
+                    ResetPeriodicForHeatedBasementDetail(detail);
                     // При грешка, нулираме U на всички редове от групата
                     if (!string.IsNullOrEmpty(item.GroupId))
                     {
@@ -742,6 +831,7 @@ namespace EE.Doklad.ViewModels
                         foreach (var groupItem in groupItems)
                         {
                             groupItem.UValue = 0;
+                            ResetPeriodicForItem(groupItem);
                             groupItem.NotifyDisplayPropertiesChanged();
                         }
                     }
@@ -759,6 +849,197 @@ namespace EE.Doklad.ViewModels
         {
             var component = components.FirstOrDefault(c => c.Name == name);
             return component?.Value ?? 0.0;
+        }
+
+        private GroundFloorPeriodicInput BuildPeriodicInputForGround(FloorGroundDetail detail, FloorItem item, FloorCalculationResult steadyResult)
+        {
+            var climate = GetPeriodicClimateData();
+            var df = detail.ResultDf > 0 ? detail.ResultDf : GetAssumptionValue(steadyResult.Assumptions, "df = ");
+
+            return new GroundFloorPeriodicInput
+            {
+                FloorType = FloorType.Ground,
+                Area = detail.Area,
+                ExposedPerimeter = detail.Perimeter,
+                LambdaGround = detail.LambdaGround,
+                df = df,
+                Ufg = steadyResult.U,
+                Hg_steady = detail.Area * steadyResult.U,
+                InsulationType = detail.InsulationType,
+                MonthlyExteriorTemperature = climate.MonthlyExteriorTemperature,
+                AnnualMeanExteriorTemperature = climate.AnnualMeanExteriorTemperature,
+                ExteriorTemperatureAmplitude = climate.ExteriorTemperatureAmplitude,
+                ColdestMonth = climate.ColdestMonth
+            };
+        }
+
+        private GroundFloorPeriodicInput BuildPeriodicInputForHeatedBasement(
+            FloorHeatedBasementDetail detail,
+            FloorItem item,
+            double hgSteady,
+            double uFloorToGround,
+            double df,
+            double dwb)
+        {
+            var climate = GetPeriodicClimateData();
+
+            return new GroundFloorPeriodicInput
+            {
+                FloorType = FloorType.HeatedBasement,
+                Area = detail.Area,
+                ExposedPerimeter = detail.Perimeter,
+                LambdaGround = detail.LambdaGround,
+                df = df,
+                dw_b = dwb,
+                Ufg = uFloorToGround,
+                Hg_steady = hgSteady,
+                BasementDepth = detail.Depth,
+                MonthlyExteriorTemperature = climate.MonthlyExteriorTemperature,
+                AnnualMeanExteriorTemperature = climate.AnnualMeanExteriorTemperature,
+                ExteriorTemperatureAmplitude = climate.ExteriorTemperatureAmplitude,
+                ColdestMonth = climate.ColdestMonth
+            };
+        }
+
+        private GroundFloorPeriodicInput BuildPeriodicInputForUnheatedBasement(
+            FloorUnheatedBasementDetail detail,
+            FloorItem item,
+            FloorCalculationResult steadyResult)
+        {
+            var climate = GetPeriodicClimateData();
+
+            return new GroundFloorPeriodicInput
+            {
+                FloorType = FloorType.UnheatedBasement,
+                Area = detail.Area,
+                ExposedPerimeter = detail.Perimeter,
+                LambdaGround = detail.LambdaGround,
+                df = detail.ResultDf,
+                dw_b = detail.ResultDwb,
+                Ufg = steadyResult.U,
+                Hg_steady = detail.Area * steadyResult.U,
+                BasementDepth = detail.DepthBelowGround,
+                MonthlyExteriorTemperature = climate.MonthlyExteriorTemperature,
+                AnnualMeanExteriorTemperature = climate.AnnualMeanExteriorTemperature,
+                ExteriorTemperatureAmplitude = climate.ExteriorTemperatureAmplitude,
+                ColdestMonth = climate.ColdestMonth
+            };
+        }
+
+        private (double[] MonthlyExteriorTemperature, double AnnualMeanExteriorTemperature, double ExteriorTemperatureAmplitude, int ColdestMonth) GetPeriodicClimateData()
+        {
+            int zoneId = Math.Clamp(GetObjectData()?.ClimateZone ?? 1, 1, 9);
+            double[] monthly;
+
+            if (_climateService.TryGetZone(zoneId, out var zone) && zone?.Monthly?.AvgMonthlyTempC is { Length: 12 } avg)
+            {
+                monthly = avg.ToArray();
+            }
+            else
+            {
+                monthly = new[] { 0.0, 1.0, 5.0, 10.0, 15.0, 19.0, 22.0, 22.0, 18.0, 12.0, 6.0, 2.0 };
+            }
+
+            double annual = monthly.Average();
+            double amplitude = (monthly.Max() - monthly.Min()) / 2.0;
+            int coldestMonth = Array.IndexOf(monthly, monthly.Min()) + 1;
+
+            return (monthly, annual, amplitude, coldestMonth);
+        }
+
+        private void ApplyPeriodicToItem(FloorItem item, GroundFloorPeriodicResult periodic)
+        {
+            item.PeriodicHg = periodic.Hg;
+            item.PeriodicHpi = periodic.Hpi;
+            item.PeriodicHpe = periodic.Hpe;
+            item.PeriodicHmonthlyAvg = periodic.Hmonthly?.Length == 12 ? periodic.Hmonthly.Average() : periodic.Hg;
+            item.HasPeriodicResult = true;
+        }
+
+        private static void ResetPeriodicForItem(FloorItem item)
+        {
+            item.PeriodicHg = 0.0;
+            item.PeriodicHpi = 0.0;
+            item.PeriodicHpe = 0.0;
+            item.PeriodicHmonthlyAvg = 0.0;
+            item.HasPeriodicResult = false;
+        }
+
+        private static void ApplyPeriodicToGroundDetail(FloorGroundDetail detail, GroundFloorPeriodicResult periodic)
+        {
+            detail.PeriodicHg = periodic.Hg;
+            detail.PeriodicHel = periodic.Hel;
+            detail.PeriodicHpi = periodic.Hpi;
+            detail.PeriodicHpe = periodic.Hpe;
+            detail.PeriodicDelta = periodic.Delta;
+            detail.PeriodicBeta = periodic.Beta;
+            detail.PeriodicMonthlySummary = FormatMonthlySummary(periodic.Hmonthly);
+        }
+
+        private static void ResetPeriodicForGroundDetail(FloorGroundDetail detail)
+        {
+            detail.PeriodicHg = 0.0;
+            detail.PeriodicHel = 0.0;
+            detail.PeriodicHpi = 0.0;
+            detail.PeriodicHpe = 0.0;
+            detail.PeriodicDelta = 0.0;
+            detail.PeriodicBeta = 0;
+            detail.PeriodicMonthlySummary = string.Empty;
+        }
+
+        private static void ApplyPeriodicToHeatedBasementDetail(FloorHeatedBasementDetail detail, GroundFloorPeriodicResult periodic)
+        {
+            detail.PeriodicHg = periodic.Hg;
+            detail.PeriodicHel = periodic.Hel;
+            detail.PeriodicHpi = periodic.Hpi;
+            detail.PeriodicHpe = periodic.Hpe;
+            detail.PeriodicDelta = periodic.Delta;
+            detail.PeriodicBeta = periodic.Beta;
+            detail.PeriodicMonthlySummary = FormatMonthlySummary(periodic.Hmonthly);
+        }
+
+        private static void ResetPeriodicForHeatedBasementDetail(FloorHeatedBasementDetail detail)
+        {
+            detail.PeriodicHg = 0.0;
+            detail.PeriodicHel = 0.0;
+            detail.PeriodicHpi = 0.0;
+            detail.PeriodicHpe = 0.0;
+            detail.PeriodicDelta = 0.0;
+            detail.PeriodicBeta = 0;
+            detail.PeriodicMonthlySummary = string.Empty;
+        }
+
+        private static void ApplyPeriodicToUnheatedBasementDetail(FloorUnheatedBasementDetail detail, GroundFloorPeriodicResult periodic)
+        {
+            detail.PeriodicHg = periodic.Hg;
+            detail.PeriodicHel = periodic.Hel;
+            detail.PeriodicHpi = periodic.Hpi;
+            detail.PeriodicHpe = periodic.Hpe;
+            detail.PeriodicDelta = periodic.Delta;
+            detail.PeriodicBeta = periodic.Beta;
+            detail.PeriodicMonthlySummary = FormatMonthlySummary(periodic.Hmonthly);
+        }
+
+        private static void ResetPeriodicForUnheatedBasementDetail(FloorUnheatedBasementDetail detail)
+        {
+            detail.PeriodicHg = 0.0;
+            detail.PeriodicHel = 0.0;
+            detail.PeriodicHpi = 0.0;
+            detail.PeriodicHpe = 0.0;
+            detail.PeriodicDelta = 0.0;
+            detail.PeriodicBeta = 0;
+            detail.PeriodicMonthlySummary = string.Empty;
+        }
+
+        private static string FormatMonthlySummary(double[] monthly)
+        {
+            if (monthly == null || monthly.Length != 12)
+            {
+                return string.Empty;
+            }
+
+            string[] months = { "Ян", "Фев", "Мар", "Апр", "Май", "Юни", "Юли", "Авг", "Сеп", "Окт", "Ное", "Дек" };
+            return string.Join("; ", monthly.Select((v, i) => $"{months[i]}={v:F2}"));
         }
 
         private void UpdateIndexes()

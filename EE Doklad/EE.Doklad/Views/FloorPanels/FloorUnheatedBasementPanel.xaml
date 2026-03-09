@@ -332,6 +332,19 @@
                 
                 <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding ResultUub, StringFormat='★ Uub: {0:F4} W/m²K'}" FontWeight="Bold" FontSize="14" Foreground="#D32F2F" Margin="0,8,0,2"/>
             </Grid>
+
+            <TextBlock Text="Periodic results (ISO 13370)" FontWeight="SemiBold" Margin="0,10,0,4" Background="#EDE7F6" Padding="4"/>
+            <WrapPanel Margin="0,0,0,6">
+                <TextBlock Text="{Binding PeriodicHg, StringFormat='Hg: {0:F2} W/K'}" Margin="0,0,16,4"/>
+                <TextBlock Text="{Binding PeriodicHel, StringFormat='Hel: {0:F2} W/K'}" Margin="0,0,16,4"/>
+                <TextBlock Text="{Binding PeriodicHpi, StringFormat='Hpi: {0:F2} W/K'}" Margin="0,0,16,4"/>
+                <TextBlock Text="{Binding PeriodicHpe, StringFormat='Hpe: {0:F2} W/K'}" Margin="0,0,16,4"/>
+                <TextBlock Text="{Binding PeriodicDelta, StringFormat='Delta: {0:F3} m'}" Margin="0,0,16,4"/>
+                <TextBlock Text="{Binding PeriodicBeta, StringFormat='Beta: {0}'}" Margin="0,0,16,4"/>
+            </WrapPanel>
+            <TextBlock Text="{Binding PeriodicMonthlySummary, StringFormat='Hmonthly: {0}'}" TextWrapping="Wrap"/>
+
         </StackPanel>
     </Border>
 </UserControl>
+

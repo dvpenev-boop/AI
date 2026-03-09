@@ -51,6 +51,21 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private double uValue;
 
+        [ObservableProperty]
+        private double periodicHg;
+
+        [ObservableProperty]
+        private double periodicHpi;
+
+        [ObservableProperty]
+        private double periodicHpe;
+
+        [ObservableProperty]
+        private double periodicHmonthlyAvg;
+
+        [ObservableProperty]
+        private bool hasPeriodicResult;
+
         // Detail properties for each floor type
         [ObservableProperty]
         private FloorExternalAirDetail? externalAirDetail;
@@ -98,11 +113,19 @@ namespace EE.Doklad.Models
 
         public string UDisplay => UValue > 0 ? $"{UValue:F3}" : "—";
         public string ADisplay => Area > 0 ? $"{Area:F2}" : "—";
+        public string HgDisplay => HasPeriodicResult ? $"{PeriodicHg:F2}" : "—";
+        public string HpiDisplay => HasPeriodicResult ? $"{PeriodicHpi:F2}" : "—";
+        public string HpeDisplay => HasPeriodicResult ? $"{PeriodicHpe:F2}" : "—";
+        public string HmAvgDisplay => HasPeriodicResult ? $"{PeriodicHmonthlyAvg:F2}" : "—";
 
         // Partial method to notify display changes when Area changes
         partial void OnAreaChanged(double value)
         {
             OnPropertyChanged(nameof(ADisplay));
+            OnPropertyChanged(nameof(HgDisplay));
+            OnPropertyChanged(nameof(HpiDisplay));
+            OnPropertyChanged(nameof(HpeDisplay));
+            OnPropertyChanged(nameof(HmAvgDisplay));
         }
 
         partial void OnCompositeTypeChanged(string? value)
@@ -115,6 +138,10 @@ namespace EE.Doklad.Models
             // Only notify display properties, not Area itself to avoid triggering recursive recalculation
             OnPropertyChanged(nameof(UDisplay));
             OnPropertyChanged(nameof(ADisplay));
+            OnPropertyChanged(nameof(HgDisplay));
+            OnPropertyChanged(nameof(HpiDisplay));
+            OnPropertyChanged(nameof(HpeDisplay));
+            OnPropertyChanged(nameof(HmAvgDisplay));
             OnPropertyChanged(nameof(TypeLabel));
         }
     }
@@ -167,6 +194,13 @@ namespace EE.Doklad.Models
     [ObservableProperty] private double resultPsiGed;
     [ObservableProperty] private double resultU0;
     [ObservableProperty] private double resultU;
+    [ObservableProperty] private double periodicHg;
+    [ObservableProperty] private double periodicHel;
+    [ObservableProperty] private double periodicHpi;
+    [ObservableProperty] private double periodicHpe;
+    [ObservableProperty] private double periodicDelta;
+    [ObservableProperty] private int periodicBeta;
+    [ObservableProperty] private string periodicMonthlySummary = string.Empty;
     public ObservableCollection<FloorLayer> Layers { get; } = new ObservableCollection<FloorLayer>();
 
     // Image attachment for the grid
@@ -280,6 +314,26 @@ namespace EE.Doklad.Models
 
         [ObservableProperty]
         private double resultAwalls; // Площ на стените към земя
+        [ObservableProperty]
+        private double periodicHg;
+
+        [ObservableProperty]
+        private double periodicHel;
+
+        [ObservableProperty]
+        private double periodicHpi;
+
+        [ObservableProperty]
+        private double periodicHpe;
+
+        [ObservableProperty]
+        private double periodicDelta;
+
+        [ObservableProperty]
+        private int periodicBeta;
+
+        [ObservableProperty]
+        private string periodicMonthlySummary = string.Empty;
 
         // === Слоеве на конструкции ===
         /// <summary>
@@ -333,6 +387,13 @@ namespace EE.Doklad.Models
         [ObservableProperty] private double resultDwb;
         [ObservableProperty] private double resultS;
         [ObservableProperty] private double resultUub;
+        [ObservableProperty] private double periodicHg;
+        [ObservableProperty] private double periodicHel;
+        [ObservableProperty] private double periodicHpi;
+        [ObservableProperty] private double periodicHpe;
+        [ObservableProperty] private double periodicDelta;
+        [ObservableProperty] private int periodicBeta;
+        [ObservableProperty] private string periodicMonthlySummary = string.Empty;
 
         // === Слоеве на конструкции ===
         public ObservableCollection<FloorLayer> FloorToBasementLayers { get; } = new ObservableCollection<FloorLayer>();
@@ -376,3 +437,10 @@ namespace EE.Doklad.Models
         }
     }
 }
+
+
+
+
+
+
+

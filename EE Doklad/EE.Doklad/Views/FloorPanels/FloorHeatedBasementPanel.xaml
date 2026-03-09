@@ -218,6 +218,11 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="B (характеристичен размер, m):" Margin="0,2"/>
@@ -241,9 +246,25 @@
                 <TextBlock Grid.Row="6" Grid.Column="0" Text="H_g (стационарен коеф., W/K):" Margin="0,2" Foreground="DarkGreen"/>
                 <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding ResultHg, StringFormat=0.000}" FontWeight="Bold" Foreground="DarkGreen" Margin="0,2"/>
                 
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="⚠️ Периодичните колебания не са изчислени" 
-                           Grid.ColumnSpan="2" Foreground="Gray" FontStyle="Italic" Margin="0,8,0,0"/>
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Hel (A*Ufg, W/K):" Margin="0,2"/>
+                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding PeriodicHel, StringFormat=0.000}" FontWeight="SemiBold" Margin="0,2"/>
+
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Hpi (W/K):" Margin="0,2" Foreground="DarkSlateBlue"/>
+                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding PeriodicHpi, StringFormat=0.000}" FontWeight="Bold" Foreground="DarkSlateBlue" Margin="0,2"/>
+
+                <TextBlock Grid.Row="9" Grid.Column="0" Text="Hpe (W/K):" Margin="0,2" Foreground="DarkSlateBlue"/>
+                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding PeriodicHpe, StringFormat=0.000}" FontWeight="Bold" Foreground="DarkSlateBlue" Margin="0,2"/>
+
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="Delta (m):" Margin="0,2"/>
+                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding PeriodicDelta, StringFormat=0.000}" FontWeight="SemiBold" Margin="0,2"/>
+
+                <TextBlock Grid.Row="11" Grid.Column="0" Text="Beta (months):" Margin="0,2"/>
+                <TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding PeriodicBeta}" FontWeight="SemiBold" Margin="0,2"/>
+
+                <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding PeriodicMonthlySummary, StringFormat='Hmonthly: {0}'}" TextWrapping="Wrap" Margin="0,6,0,0"/>
             </Grid>
         </StackPanel>
     </Border>
 </UserControl>
+
+
