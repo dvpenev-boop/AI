@@ -64,6 +64,12 @@ namespace EE.Doklad.Models
         private double periodicHmonthlyAvg;
 
         [ObservableProperty]
+        private double periodicHhAdj;
+
+        [ObservableProperty]
+        private double periodicHcAdj;
+
+        [ObservableProperty]
         private bool hasPeriodicResult;
 
         // Detail properties for each floor type
@@ -117,6 +123,8 @@ namespace EE.Doklad.Models
         public string HpiDisplay => HasPeriodicResult ? $"{PeriodicHpi:F2}" : "—";
         public string HpeDisplay => HasPeriodicResult ? $"{PeriodicHpe:F2}" : "—";
         public string HmAvgDisplay => HasPeriodicResult ? $"{PeriodicHmonthlyAvg:F2}" : "—";
+        public string HhAdjDisplay => HasPeriodicResult ? $"{PeriodicHhAdj:F2}" : "—";
+        public string HcAdjDisplay => HasPeriodicResult ? $"{PeriodicHcAdj:F2}" : "—";
 
         // Partial method to notify display changes when Area changes
         partial void OnAreaChanged(double value)
@@ -126,6 +134,8 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(HpiDisplay));
             OnPropertyChanged(nameof(HpeDisplay));
             OnPropertyChanged(nameof(HmAvgDisplay));
+            OnPropertyChanged(nameof(HhAdjDisplay));
+            OnPropertyChanged(nameof(HcAdjDisplay));
         }
 
         partial void OnCompositeTypeChanged(string? value)
@@ -142,6 +152,8 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(HpiDisplay));
             OnPropertyChanged(nameof(HpeDisplay));
             OnPropertyChanged(nameof(HmAvgDisplay));
+            OnPropertyChanged(nameof(HhAdjDisplay));
+            OnPropertyChanged(nameof(HcAdjDisplay));
             OnPropertyChanged(nameof(TypeLabel));
         }
     }
@@ -437,6 +449,11 @@ namespace EE.Doklad.Models
         }
     }
 }
+
+
+
+
+
 
 
 

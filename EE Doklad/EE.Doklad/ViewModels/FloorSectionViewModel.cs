@@ -83,7 +83,7 @@ namespace EE.Doklad.ViewModels
             _data = data;
             _materialsService = new MaterialsService(new JsonMaterialsRepository());
             _climateService = new ClimateService(new JsonClimateRepository());
-            AttachObjectDataClimateHandler();
+            AttachSeasonAndTemperatureHandlers();
             
             LoadMaterialOptions();
             
@@ -122,20 +122,50 @@ namespace EE.Doklad.ViewModels
             Debug.WriteLine("[FloorSectionViewModel] Constructor completed");
         }
 
-        private void AttachObjectDataClimateHandler()
+        private void AttachSeasonAndTemperatureHandlers()
         {
             var objectData = GetObjectData();
-            if (objectData == null)
+            if (objectData != null)
             {
-                return;
+                objectData.PropertyChanged += ObjectData_PropertyChanged;
             }
 
-            objectData.PropertyChanged += ObjectData_PropertyChanged;
+            var heatingData = GetHeatingSectionData();
+            if (heatingData != null)
+            {
+                heatingData.PropertyChanged += HeatingData_PropertyChanged;
+            }
+
+            var coolingData = GetCoolingSectionData();
+            if (coolingData != null)
+            {
+                coolingData.PropertyChanged += CoolingData_PropertyChanged;
+            }
         }
 
         private void ObjectData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ObjectDataSectionData.ClimateZone))
+            if (e.PropertyName == nameof(ObjectDataSectionData.ClimateZone)
+                || e.PropertyName == nameof(ObjectDataSectionData.HeatingSeasonEnabled)
+                || e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonEnabled)
+                || e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonStartMonth)
+                || e.PropertyName == nameof(ObjectDataSectionData.CoolingSeasonEndMonth))
+            {
+                RecalculateAllFloorsForClimateChange();
+            }
+        }
+
+        private void HeatingData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(HeatingSectionData.DesignTemperature))
+            {
+                RecalculateAllFloorsForClimateChange();
+            }
+        }
+
+        private void CoolingData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CoolingSectionData.DesignTemperature))
             {
                 RecalculateAllFloorsForClimateChange();
             }
@@ -178,6 +208,30 @@ namespace EE.Doklad.ViewModels
             }
 
             return sections.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+        }
+
+        private HeatingSectionData? GetHeatingSectionData()
+        {
+            var mainVm = Application.Current?.MainWindow?.DataContext as MainViewModel;
+            var sections = mainVm?.CurrentReport?.Sections;
+            if (sections == null)
+            {
+                return null;
+            }
+
+            return sections.FirstOrDefault(s => s.Type == SectionType.Heating)?.HeatingSectionData;
+        }
+
+        private CoolingSectionData? GetCoolingSectionData()
+        {
+            var mainVm = Application.Current?.MainWindow?.DataContext as MainViewModel;
+            var sections = mainVm?.CurrentReport?.Sections;
+            if (sections == null)
+            {
+                return null;
+            }
+
+            return sections.FirstOrDefault(s => s.CoolingSectionData != null)?.CoolingSectionData;
         }
 
         private void LoadMaterialOptions()
@@ -334,7 +388,7 @@ namespace EE.Doklad.ViewModels
                     var periodicInput = BuildPeriodicInputForGround(detail, item, result);
                     var periodic = GroundFloorPeriodicCalculator.Calculate(periodicInput);
                     ApplyPeriodicToGroundDetail(detail, periodic);
-                    ApplyPeriodicToItem(item, periodic);
+                    ApplyPeriodicToItem(item, periodic, periodicInput.MonthlyExteriorTemperature, periodicInput.AnnualMeanExteriorTemperature);
                     item.NotifyDisplayPropertiesChanged();
                 }
                 else
@@ -682,7 +736,7 @@ namespace EE.Doklad.ViewModels
                     var periodicInput = BuildPeriodicInputForUnheatedBasement(detail, item, result);
                     var periodic = GroundFloorPeriodicCalculator.Calculate(periodicInput);
                     ApplyPeriodicToUnheatedBasementDetail(detail, periodic);
-                    ApplyPeriodicToItem(item, periodic);
+                    ApplyPeriodicToItem(item, periodic, periodicInput.MonthlyExteriorTemperature, periodicInput.AnnualMeanExteriorTemperature);
                     item.NotifyDisplayPropertiesChanged();
                 }
                 else
@@ -807,7 +861,7 @@ namespace EE.Doklad.ViewModels
                                 // Ред 1: Под към земя
                                 groupItem.UValue = U_f_g_b;
                                 groupItem.Area = detail.Area;
-                                ApplyPeriodicToItem(groupItem, periodic);
+                                ApplyPeriodicToItem(groupItem, periodic, periodicInput.MonthlyExteriorTemperature, periodicInput.AnnualMeanExteriorTemperature);
                                 groupItem.NotifyDisplayPropertiesChanged();
                             }
                             else if (groupItem.CompositeType == "Wall")
@@ -815,7 +869,7 @@ namespace EE.Doklad.ViewModels
                                 // Ред 2: Стена към земя
                                 groupItem.UValue = U_w_g_b;
                                 groupItem.Area = A_walls; // z * P
-                                ApplyPeriodicToItem(groupItem, periodic);
+                                ResetPeriodicForItem(groupItem);
                                 groupItem.NotifyDisplayPropertiesChanged();
                             }
                         }
@@ -947,12 +1001,18 @@ namespace EE.Doklad.ViewModels
             return (monthly, annual, amplitude, coldestMonth);
         }
 
-        private void ApplyPeriodicToItem(FloorItem item, GroundFloorPeriodicResult periodic)
+        private void ApplyPeriodicToItem(
+            FloorItem item,
+            GroundFloorPeriodicResult periodic,
+            double[] monthlyExteriorTemp,
+            double annualMeanExteriorTemp)
         {
             item.PeriodicHg = periodic.Hg;
             item.PeriodicHpi = periodic.Hpi;
             item.PeriodicHpe = periodic.Hpe;
             item.PeriodicHmonthlyAvg = periodic.Hmonthly?.Length == 12 ? periodic.Hmonthly.Average() : periodic.Hg;
+            item.PeriodicHhAdj = CalculateHeatingSeasonAdjustedH(periodic, monthlyExteriorTemp, annualMeanExteriorTemp);
+            item.PeriodicHcAdj = CalculateCoolingSeasonAdjustedH(periodic, monthlyExteriorTemp, annualMeanExteriorTemp);
             item.HasPeriodicResult = true;
         }
 
@@ -962,7 +1022,97 @@ namespace EE.Doklad.ViewModels
             item.PeriodicHpi = 0.0;
             item.PeriodicHpe = 0.0;
             item.PeriodicHmonthlyAvg = 0.0;
+            item.PeriodicHhAdj = 0.0;
+            item.PeriodicHcAdj = 0.0;
             item.HasPeriodicResult = false;
+        }
+
+        private double CalculateHeatingSeasonAdjustedH(
+            GroundFloorPeriodicResult periodic,
+            double[] monthlyExteriorTemp,
+            double annualMeanExteriorTemp)
+        {
+            var objectData = GetObjectData();
+            if (objectData?.HeatingSeasonEnabled != true)
+            {
+                return 0.0;
+            }
+
+            var heatingData = GetHeatingSectionData();
+            double thetaIntH = heatingData?.DesignTemperature ?? 20.0;
+
+            // Northern hemisphere default heating season months: Oct-Mar.
+            int[] heatingMonths = { 9, 10, 11, 0, 1, 2 };
+            return CalculateSeasonAdjustedH(periodic, monthlyExteriorTemp, annualMeanExteriorTemp, thetaIntH, heatingMonths);
+        }
+
+        private double CalculateCoolingSeasonAdjustedH(
+            GroundFloorPeriodicResult periodic,
+            double[] monthlyExteriorTemp,
+            double annualMeanExteriorTemp)
+        {
+            var objectData = GetObjectData();
+            if (objectData?.CoolingSeasonEnabled != true)
+            {
+                return 0.0;
+            }
+
+            var coolingData = GetCoolingSectionData();
+            double thetaIntC = coolingData?.DesignTemperature ?? 26.0;
+            int[] coolingMonths = ResolveCoolingSeasonMonths(objectData);
+            if (coolingMonths.Length == 0)
+            {
+                return 0.0;
+            }
+
+            return CalculateSeasonAdjustedH(periodic, monthlyExteriorTemp, annualMeanExteriorTemp, thetaIntC, coolingMonths);
+        }
+
+        private static int[] ResolveCoolingSeasonMonths(ObjectDataSectionData objectData)
+        {
+            int start = objectData.CoolingSeasonStartMonth ?? 0;
+            int end = objectData.CoolingSeasonEndMonth ?? 0;
+            if (start < 1 || start > 12 || end < 1 || end > 12)
+            {
+                return Array.Empty<int>();
+            }
+
+            int startIdx = start - 1;
+            int endIdx = end - 1;
+            if (startIdx <= endIdx)
+            {
+                return Enumerable.Range(startIdx, endIdx - startIdx + 1).ToArray();
+            }
+
+            var months = Enumerable.Range(startIdx, 12 - startIdx).ToList();
+            months.AddRange(Enumerable.Range(0, endIdx + 1));
+            return months.ToArray();
+        }
+
+        private static double CalculateSeasonAdjustedH(
+            GroundFloorPeriodicResult periodic,
+            double[] monthlyExteriorTemp,
+            double annualMeanExteriorTemp,
+            double thetaInt,
+            int[] seasonMonths)
+        {
+            if (periodic.Hmonthly == null || periodic.Hmonthly.Length != 12 || monthlyExteriorTemp == null || monthlyExteriorTemp.Length != 12 || seasonMonths.Length == 0)
+            {
+                return 0.0;
+            }
+
+            double monthCount = seasonMonths.Length;
+            double avgSeasonalMonthlyH = seasonMonths.Sum(m => periodic.Hmonthly[m]) / monthCount;
+            double seasonalDeltaTSum = seasonMonths.Sum(m => thetaInt - monthlyExteriorTemp[m]);
+            double annualDeltaT = thetaInt - annualMeanExteriorTemp;
+
+            if (Math.Abs(annualDeltaT) <= 0.01)
+            {
+                return avgSeasonalMonthlyH;
+            }
+
+            double correction = seasonalDeltaTSum / (monthCount * annualDeltaT);
+            return avgSeasonalMonthlyH * correction;
         }
 
         private static void ApplyPeriodicToGroundDetail(FloorGroundDetail detail, GroundFloorPeriodicResult periodic)
@@ -1061,3 +1211,4 @@ namespace EE.Doklad.ViewModels
         }
     }
 }
+

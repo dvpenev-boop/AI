@@ -48,7 +48,8 @@
                 <DataGridTextColumn Header="Hg (W/K)" Binding="{Binding HgDisplay, Mode=OneWay}" Width="90" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Hpi (W/K)" Binding="{Binding HpiDisplay, Mode=OneWay}" Width="90" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Hpe (W/K)" Binding="{Binding HpeDisplay, Mode=OneWay}" Width="90" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Hm avg (W/K)" Binding="{Binding HmAvgDisplay, Mode=OneWay}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Hh adj (W/K)" Binding="{Binding HhAdjDisplay, Mode=OneWay}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Hc adj (W/K)" Binding="{Binding HcAdjDisplay, Mode=OneWay}" Width="100" IsReadOnly="True"/>
                 <DataGridTemplateColumn Header="" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -149,5 +150,7 @@
         </ItemsControl>
     </StackPanel>
 </UserControl>
+
+
 
 
