@@ -62,6 +62,102 @@ namespace EE.Doklad.Services
         }
 
         /// <summary>
+        /// Compute effective indoor cooling temperature per month (theta_int for cooling regime).
+        /// Uses cooling schedule from section 5, holidays and cooling season (start/end day+month).
+        /// During active cooling hours temperature == design; during other in-season hours == elevated/reduction temp.
+        /// </summary>
+        public static double[] ComputeThetaIntCalcC(
+            ObjectDataSectionData? objectData,
+            CoolingSectionData? coolingData,
+            int yearRef = 2024)
+        {
+            var result = new double[12];
+
+            double designTemp = coolingData?.DesignTemperature ?? 25.0;
+            // For cooling, "reduction" means relaxed (typically higher) setpoint.
+            double elevatedTemp = coolingData != null
+                ? Math.Max(coolingData.ReductionTemperature, designTemp)
+                : designTemp + 2.0;
+
+            // Prefer new Section 5 cooling schedule (Graph B time ranges).
+            double workdayHours = objectData?.CoolingSchedules?.CoolingSchedule?.Workdays?.GetHours() ?? 0.0;
+            double saturdayHours = objectData?.CoolingSchedules?.CoolingSchedule?.Saturday?.GetHours() ?? 0.0;
+            double sundayHours = objectData?.CoolingSchedules?.CoolingSchedule?.Sunday?.GetHours() ?? 0.0;
+
+            // Backward compatibility with legacy numeric fields.
+            if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
+            {
+                workdayHours = ParseDoubleOrZero(objectData?.CoolingWorkdaysHours);
+                saturdayHours = ParseDoubleOrZero(objectData?.CoolingSaturdayHours);
+                sundayHours = ParseDoubleOrZero(objectData?.CoolingSundayHours);
+            }
+            bool hasSchedule = workdayHours > 0 || saturdayHours > 0 || sundayHours > 0;
+
+            int[] monthlyDaysOff = new int[12];
+            if (objectData != null)
+            {
+                int ParseMonth(string? s) { if (string.IsNullOrWhiteSpace(s)) return 0; if (int.TryParse(s.Trim(), out var v)) return Math.Max(0, v); return 0; }
+                monthlyDaysOff[0] = ParseMonth(objectData.DaysOffJanuary);
+                monthlyDaysOff[1] = ParseMonth(objectData.DaysOffFebruary);
+                monthlyDaysOff[2] = ParseMonth(objectData.DaysOffMarch);
+                monthlyDaysOff[3] = ParseMonth(objectData.DaysOffApril);
+                monthlyDaysOff[4] = ParseMonth(objectData.DaysOffMay);
+                monthlyDaysOff[5] = ParseMonth(objectData.DaysOffJune);
+                monthlyDaysOff[6] = ParseMonth(objectData.DaysOffJuly);
+                monthlyDaysOff[7] = ParseMonth(objectData.DaysOffAugust);
+                monthlyDaysOff[8] = ParseMonth(objectData.DaysOffSeptember);
+                monthlyDaysOff[9] = ParseMonth(objectData.DaysOffOctober);
+                monthlyDaysOff[10] = ParseMonth(objectData.DaysOffNovember);
+                monthlyDaysOff[11] = ParseMonth(objectData.DaysOffDecember);
+            }
+
+            for (int m = 0; m < 12; m++)
+            {
+                int monthNumber = m + 1;
+                int daysInMonth = DateTime.DaysInMonth(yearRef, monthNumber);
+
+                int workdayCount = 0;
+                int saturdayCount = 0;
+                int sundayCount = 0;
+                int seasonDays = 0;
+
+                for (int d = 1; d <= daysInMonth; d++)
+                {
+                    var dt = new DateTime(yearRef, monthNumber, d);
+                    if (!IsDateInCoolingSeason(dt, objectData, yearRef))
+                        continue;
+
+                    seasonDays++;
+                    switch (dt.DayOfWeek)
+                    {
+                        case DayOfWeek.Saturday: saturdayCount++; break;
+                        case DayOfWeek.Sunday: sundayCount++; break;
+                        default: workdayCount++; break;
+                    }
+                }
+
+                if (!hasSchedule || seasonDays == 0)
+                {
+                    result[m] = designTemp;
+                    continue;
+                }
+
+                double coolingHours = workdayCount * workdayHours + saturdayCount * saturdayHours + sundayCount * sundayHours;
+                int holidays = Math.Max(0, monthlyDaysOff[m]);
+                if (holidays > 0 && seasonDays > 0)
+                {
+                    double avgDaily = coolingHours / seasonDays;
+                    coolingHours = Math.Max(0.0, coolingHours - Math.Min(coolingHours, holidays * avgDaily));
+                }
+
+                double totalSeasonHours = seasonDays * 24.0;
+                result[m] = GetEffectiveHeatingIndoorTemp(designTemp, elevatedTemp, coolingHours, totalSeasonHours);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Compute effective indoor heating temperature per month (θint for heating regime) given object data and heating data.
         /// Simple model: during 'heating hours' temperature == designTemperature; during other heating-season hours == reductionTemperature.
         /// If heating schedule is missing, fallback to heatingData.DesignTemperature (or 20°C if null).
@@ -170,6 +266,28 @@ namespace EE.Doklad.Services
             if (string.IsNullOrWhiteSpace(s)) return 0.0;
             if (double.TryParse(s.Trim(), out var v)) return v;
             return 0.0;
+        }
+
+        private static bool IsDateInCoolingSeason(DateTime dt, ObjectDataSectionData? objectData, int yearRef)
+        {
+            if (objectData == null ||
+                !objectData.CoolingSeasonStartMonth.HasValue || !objectData.CoolingSeasonStartDay.HasValue ||
+                !objectData.CoolingSeasonEndMonth.HasValue || !objectData.CoolingSeasonEndDay.HasValue)
+            {
+                return true;
+            }
+
+            int sm = objectData.CoolingSeasonStartMonth.Value;
+            int sd = objectData.CoolingSeasonStartDay.Value;
+            int em = objectData.CoolingSeasonEndMonth.Value;
+            int ed = objectData.CoolingSeasonEndDay.Value;
+
+            var seasonStart = new DateTime(yearRef, sm, Math.Min(sd, DateTime.DaysInMonth(yearRef, sm)));
+            var seasonEnd = new DateTime(yearRef, em, Math.Min(ed, DateTime.DaysInMonth(yearRef, em)));
+            if (seasonEnd < seasonStart)
+                seasonEnd = seasonEnd.AddYears(1);
+
+            return IsDateInRange(dt, seasonStart, seasonEnd) || IsDateInRange(dt.AddYears(1), seasonStart, seasonEnd);
         }
     }
 }

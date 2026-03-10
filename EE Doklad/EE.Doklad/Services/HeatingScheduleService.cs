@@ -150,9 +150,18 @@ namespace EE.Doklad.Services
             var result = new double[12];
             if (objectData == null) return result;
 
-            double workdayHours = ParseDoubleOrZero(objectData.CoolingWorkdaysHours);
-            double saturdayHours = ParseDoubleOrZero(objectData.CoolingSaturdayHours);
-            double sundayHours = ParseDoubleOrZero(objectData.CoolingSundayHours);
+            // Prefer the new time-range schedule model (Section 5, Graph B).
+            double workdayHours = objectData.CoolingSchedules?.CoolingSchedule?.Workdays?.GetHours() ?? 0.0;
+            double saturdayHours = objectData.CoolingSchedules?.CoolingSchedule?.Saturday?.GetHours() ?? 0.0;
+            double sundayHours = objectData.CoolingSchedules?.CoolingSchedule?.Sunday?.GetHours() ?? 0.0;
+
+            // Backward compatibility: legacy numeric fields.
+            if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
+            {
+                workdayHours = ParseDoubleOrZero(objectData.CoolingWorkdaysHours);
+                saturdayHours = ParseDoubleOrZero(objectData.CoolingSaturdayHours);
+                sundayHours = ParseDoubleOrZero(objectData.CoolingSundayHours);
+            }
 
             if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
             {
@@ -164,15 +173,26 @@ namespace EE.Doklad.Services
                 int monthNumber = m + 1;
                 int daysInMonth = DateTime.DaysInMonth(yearRef, monthNumber);
                 int workdayCount = 0, saturdayCount = 0, sundayCount = 0;
+                int seasonDays = 0;
                 for (int d = 1; d <= daysInMonth; d++)
                 {
                     var dt = new DateTime(yearRef, monthNumber, d);
+                    if (!IsDateInCoolingSeason(dt, objectData, yearRef))
+                        continue;
+
+                    seasonDays++;
                     switch (dt.DayOfWeek)
                     {
                         case DayOfWeek.Saturday: saturdayCount++; break;
                         case DayOfWeek.Sunday: sundayCount++; break;
                         default: workdayCount++; break;
                     }
+                }
+
+                if (seasonDays == 0)
+                {
+                    result[m] = 0.0;
+                    continue;
                 }
 
                 double baseHours = workdayCount * workdayHours + saturdayCount * saturdayHours + sundayCount * sundayHours;
@@ -197,9 +217,9 @@ namespace EE.Doklad.Services
                 }
 
                 double reduction = 0.0;
-                if (holidays > 0 && daysInMonth > 0)
+                if (holidays > 0 && seasonDays > 0)
                 {
-                    double avgDaily = baseHours / (double)daysInMonth;
+                    double avgDaily = baseHours / (double)seasonDays;
                     reduction = Math.Min(baseHours, holidays * avgDaily);
                 }
 
@@ -207,6 +227,27 @@ namespace EE.Doklad.Services
             }
 
             return result;
+        }
+
+        private static bool IsDateInCoolingSeason(DateTime dt, ObjectDataSectionData objectData, int yearRef)
+        {
+            if (!objectData.CoolingSeasonStartMonth.HasValue || !objectData.CoolingSeasonStartDay.HasValue ||
+                !objectData.CoolingSeasonEndMonth.HasValue || !objectData.CoolingSeasonEndDay.HasValue)
+            {
+                return true;
+            }
+
+            int sm = objectData.CoolingSeasonStartMonth.Value;
+            int sd = objectData.CoolingSeasonStartDay.Value;
+            int em = objectData.CoolingSeasonEndMonth.Value;
+            int ed = objectData.CoolingSeasonEndDay.Value;
+
+            var seasonStart = new DateTime(yearRef, sm, Math.Min(sd, DateTime.DaysInMonth(yearRef, sm)));
+            var seasonEnd = new DateTime(yearRef, em, Math.Min(ed, DateTime.DaysInMonth(yearRef, em)));
+            if (seasonEnd < seasonStart)
+                seasonEnd = seasonEnd.AddYears(1);
+
+            return IsDateInRange(dt, seasonStart, seasonEnd) || IsDateInRange(dt.AddYears(1), seasonStart, seasonEnd);
         }
     }
 }

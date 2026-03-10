@@ -278,10 +278,12 @@ public partial class MainWindow : Window
             var objectData = objectDataSection?.ObjectDataSectionData;
             var heatingSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.Heating);
             var heatingData = heatingSection?.HeatingSectionData;
+            var coolingSection = viewModel.CurrentReport?.Sections?.FirstOrDefault(s => s.Type == ModelSectionType.Normal && !string.IsNullOrEmpty(s.Title) && s.Title.Contains("Охлаждане"));
+            var coolingData = coolingSection?.CoolingSectionData;
 
             var unconditionedZonesView = new UnconditionedZonesSectionView
             {
-                DataContext = new ViewModels.UnconditionedZonesSectionViewModel(section.UnconditionedZoneSectionData, objectData, heatingData)
+                DataContext = new ViewModels.UnconditionedZonesSectionViewModel(section.UnconditionedZoneSectionData, objectData, heatingData, coolingData)
             };
             ContentScrollViewer.Content = unconditionedZonesView;
         }

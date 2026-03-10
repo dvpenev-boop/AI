@@ -56,6 +56,7 @@ namespace EE.Doklad.Services
             ZtuZone zone,
             ClimateZoneData climateData,
             double thetaIntSummer = 25.0,
+            double[]? thetaIntCoolingCalc = null,
             double[]? thetaIntWinterCalc = null,
             bool isWinterOverride = false,
             double? winterOverrideValue = null)
@@ -72,8 +73,15 @@ namespace EE.Doklad.Services
                 int monthNumber = month + 1;
                 if (monthNumber >= 5 && monthNumber <= 9)
                 {
-                    // May..Sep -> summer fixed
-                    thetaUsed = thetaIntSummer;
+                    // Cooling months: use calculated cooling indoor temperature if available.
+                    if (thetaIntCoolingCalc != null && thetaIntCoolingCalc.Length == 12)
+                    {
+                        thetaUsed = thetaIntCoolingCalc[month];
+                    }
+                    else
+                    {
+                        thetaUsed = thetaIntSummer;
+                    }
                 }
                 else
                 {
@@ -216,6 +224,7 @@ namespace EE.Doklad.Services
             ZtuMonthlyResults monthlyResults,
             ObjectDataSectionData? objectData,
             HeatingSectionData? heatingData,
+            CoolingSectionData? coolingData,
             UnconditionedZoneSectionData? unconditionedSectionData,
             ClimateZoneData climateData,
             int yearRef = 2024)
@@ -229,21 +238,16 @@ namespace EE.Doklad.Services
 
             // Compute thetaIntCalcHeating (effective indoor temperature for heating) from heating module/object data
             var thetaIntCalcHeating = ScheduleHelper.ComputeThetaIntCalcH(objectData, heatingData, climateData, yearRef);
+            var thetaIntCalcCooling = ScheduleHelper.ComputeThetaIntCalcC(objectData, coolingData, yearRef);
 
             for (int m = 0; m < 12; m++)
             {
                 var monthly = monthlyResults.Months[m];
                 double sumUA_sep = monthly.HztcZtu_WK; // W/K
 
-                // Determine thetaAdjUsed (adjacent unconditioned space temperature)
-                double thetaAdjWinter = unconditionedSectionData?.ThetaAdjWinter ?? 5.0;
-                double thetaAdjSummer = unconditionedSectionData?.ThetaAdjSummer ?? 25.0;
-
-                // Heating: use thetaAdjWinter as per requirement
-                double thetaAdjUsed_heating = thetaAdjWinter;
-
-                // Cooling: use thetaAdjSummer
-                double thetaAdjUsed_cooling = thetaAdjSummer;
+                // Adjacent temperature follows the calculated monthly ztu temperature.
+                double thetaAdjUsed_heating = monthly.TempZtu_C;
+                double thetaAdjUsed_cooling = monthly.TempZtu_C;
 
                 double heatingHours_m = heatingHours != null && heatingHours.Length == 12 ? heatingHours[m] : 0.0;
                 double coolingHours_m = coolingHours != null && coolingHours.Length == 12 ? coolingHours[m] : 0.0;
@@ -264,18 +268,20 @@ namespace EE.Doklad.Services
                 // Qtr heating
                 double deltaT_heat = thetaHeatedHeat - thetaAdjUsed_heating;
                 double q_heat_kWh = 0.0;
-                if (deltaT_heat > 0 && sumUA_sep > 0 && heatingHours_m > 0)
+                if (sumUA_sep > 0 && heatingHours_m > 0)
                 {
-                    q_heat_kWh = Math.Max(0.0, sumUA_sep * deltaT_heat) * heatingHours_m / 1000.0;
+                    q_heat_kWh = sumUA_sep * deltaT_heat * heatingHours_m / 1000.0;
                 }
 
-                // Qtr cooling (temporary May..Sep)
-                double thetaHeatedCool = 25.0; // project temp for cooling
+                // Qtr cooling: use calculated indoor cooling temperature from schedule/season.
+                double thetaHeatedCool = coolingData?.DesignTemperature ?? 25.0;
+                if (thetaIntCalcCooling != null && thetaIntCalcCooling.Length == 12)
+                    thetaHeatedCool = thetaIntCalcCooling[m];
                 double deltaT_cool = thetaAdjUsed_cooling - thetaHeatedCool;
                 double q_cool_kWh = 0.0;
-                if (deltaT_cool > 0 && sumUA_sep > 0 && coolingHours_m > 0)
+                if (sumUA_sep > 0 && coolingHours_m > 0)
                 {
-                    q_cool_kWh = Math.Max(0.0, sumUA_sep * deltaT_cool) * coolingHours_m / 1000.0;
+                    q_cool_kWh = sumUA_sep * deltaT_cool * coolingHours_m / 1000.0;
                 }
 
                 qtrResults.Months.Add(new ZtuQtrMonthResult

@@ -16,6 +16,7 @@ namespace EE.Doklad.ViewModels
         private readonly UnconditionedZonesCalculator _calculator;
         private readonly ObjectDataSectionData? _objectData;
         private readonly HeatingSectionData? _heatingData;
+        private readonly CoolingSectionData? _coolingData;
 
         [ObservableProperty]
         private ZtuZone? _selectedZone;
@@ -34,13 +35,18 @@ namespace EE.Doklad.ViewModels
 
         public ObservableCollection<MaterialOption> MaterialOptions { get; } = new();
 
-        public UnconditionedZonesSectionViewModel(UnconditionedZoneSectionData data, ObjectDataSectionData? objectData = null, HeatingSectionData? heatingData = null)
+        public UnconditionedZonesSectionViewModel(
+            UnconditionedZoneSectionData data,
+            ObjectDataSectionData? objectData = null,
+            HeatingSectionData? heatingData = null,
+            CoolingSectionData? coolingData = null)
         {
             _data = data;
             _materialsService = new MaterialsService(new JsonMaterialsRepository());
             _calculator = new UnconditionedZonesCalculator();
             _objectData = objectData;
             _heatingData = heatingData;
+            _coolingData = coolingData;
             LoadMaterialOptions();
 
             // Attach handlers to zones collection
@@ -348,12 +354,14 @@ namespace EE.Doklad.ViewModels
 
             // Compute thetaIntCalcH per month from section 5 + heating section data
             double[] thetaIntWinterCalc = ScheduleHelper.ComputeThetaIntCalcH(_objectData, _heatingData, climateData);
+            double[] thetaIntCoolingCalc = ScheduleHelper.ComputeThetaIntCalcC(_objectData, _coolingData);
 
             // Use Data.ThetaIntSummer and override flags from section data
             CalculationResults = _calculator.CalculateWithSeasonalTemps(
                 SelectedZone,
                 climateData,
                 thetaIntSummer: _data.ThetaIntSummer,
+                thetaIntCoolingCalc: thetaIntCoolingCalc,
                 thetaIntWinterCalc: thetaIntWinterCalc,
                 isWinterOverride: _data.IsWinterTempOverride,
                 winterOverrideValue: _data.ThetaIntWinterOverride);
@@ -371,6 +379,7 @@ namespace EE.Doklad.ViewModels
                     CalculationResults,
                     _objectData,
                     _heatingData,
+                    _coolingData,
                     _data,
                     climateData);
             }
