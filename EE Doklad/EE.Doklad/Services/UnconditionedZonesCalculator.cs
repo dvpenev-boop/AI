@@ -129,9 +129,12 @@ namespace EE.Doklad.Services
 
             // Стъпка 1: Hztu,e,m = Σ(Uk,m * Ak) за елементите към външна среда
             double hztuE = 0.0;
-            foreach (var element in zone.ElementsToExternal)
+            if (zone.Type == ZtuType.External)
             {
-                hztuE += element.UValue * element.Area;
+                foreach (var element in zone.ElementsToExternal)
+                {
+                    hztuE += element.UValue * element.Area;
+                }
             }
             result.HztuE_WK = hztuE;
 
@@ -159,7 +162,19 @@ namespace EE.Doklad.Services
             result.Bztu = bztu;
 
             // Стъпка 5: θztu,m = θe,a,m + bztu,m * (θint_used - θe,a,m)
-            double tempZtu = outdoorTempC + bztu * (thetaIntUsed - outdoorTempC);
+            double tempZtu;
+            if (zone.Type == ZtuType.Internal)
+            {
+                int monthNumber = monthIndex + 1;
+                bool isCoolingMonth = monthNumber >= 5 && monthNumber <= 9;
+                tempZtu = isCoolingMonth
+                    ? zone.ManualUnconditionedTempSummerC
+                    : zone.ManualUnconditionedTempWinterC;
+            }
+            else
+            {
+                tempZtu = outdoorTempC + bztu * (thetaIntUsed - outdoorTempC);
+            }
             result.TempZtu_C = tempZtu;
 
             return result;

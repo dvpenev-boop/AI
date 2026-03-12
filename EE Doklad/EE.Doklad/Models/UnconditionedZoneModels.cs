@@ -154,6 +154,12 @@ public partial class ZtuZone : ObservableObject
     /// Разделящи елементи ZTC↔ZTU (участват в Hztc-ztu)
     /// </summary>
     public ObservableCollection<ZtuElement> ElementsToBoundary { get; } = new();
+
+    [ObservableProperty]
+    private double _manualUnconditionedTempWinterC = 10.0;
+
+    [ObservableProperty]
+    private double _manualUnconditionedTempSummerC = 25.0;
 }
 
 /// <summary>
