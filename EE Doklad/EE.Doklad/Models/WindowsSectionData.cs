@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace EE.Doklad.Models
@@ -48,6 +50,39 @@ namespace EE.Doklad.Models
         private double uValue; // W/m²K
 
         [ObservableProperty]
+        private bool useDetailedUwMode;
+
+        [ObservableProperty]
+        private string? profileSystemId;
+
+        [ObservableProperty]
+        private string profileSystemLabel = string.Empty;
+
+        [ObservableProperty]
+        private double? profileMountingDepthMm;
+
+        [ObservableProperty]
+        private double? profileVisibleHeightMm;
+
+        [ObservableProperty]
+        private double profileUFrame;
+
+        [ObservableProperty]
+        private double profileUGlass;
+
+        [ObservableProperty]
+        private bool hasThermalBridge;
+
+        [ObservableProperty]
+        private string? thermalBridgeTypeId;
+
+        [ObservableProperty]
+        private string thermalBridgeTypeLabel = string.Empty;
+
+        [ObservableProperty]
+        private double thermalBridgePsi;
+
+        [ObservableProperty]
         private double gN; // g perpendicular (0..1)
 
         [ObservableProperty]
@@ -57,7 +92,7 @@ namespace EE.Doklad.Models
         /// Пресет тип стъкло за емисивитет (Тип стъкло)
         /// </summary>
         [ObservableProperty]
-        private GlazingEmissivityPreset glazingEmissivityPreset = GlazingEmissivityPreset.LowEHighInsulation;
+        private GlazingEmissivityPreset glazingEmissivityPreset = GlazingEmissivityPreset.Standard;
 
         /// <summary>
         /// Емисивитет на стъклото ε (EN 673 / EN ISO 10077).
@@ -230,6 +265,19 @@ namespace EE.Doklad.Models
         /// </summary>
         public double GEff => GEffBase * ShadingReductionFactor;
 
+        public string SystemDisplayLabel
+        {
+            get
+            {
+                if (Kind == WindowKind.Door)
+                    return FrameFraction >= 1.0 ? "плътна" : "остъклена";
+
+                return string.IsNullOrWhiteSpace(ProfileSystemLabel) ? "-" : ProfileSystemLabel;
+            }
+        }
+
+        public double ThermalBridgePsiDisplay => HasThermalBridge ? ThermalBridgePsi : 0.0;
+
         partial void OnAreaGrossChanged(double value)
         {
             OnPropertyChanged(nameof(AreaGlass));
@@ -242,6 +290,7 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(ShortKindLabel));
             OnPropertyChanged(nameof(GEffBase));
             OnPropertyChanged(nameof(GEff));
+            OnPropertyChanged(nameof(SystemDisplayLabel));
         }
 
         partial void OnFrameFractionChanged(double value)
@@ -249,6 +298,7 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(AreaGlass));
             OnPropertyChanged(nameof(GEffBase));
             OnPropertyChanged(nameof(GEff));
+            OnPropertyChanged(nameof(SystemDisplayLabel));
         }
 
         partial void OnGNChanged(double value)
@@ -287,6 +337,21 @@ namespace EE.Doklad.Models
         {
             OnPropertyChanged(nameof(GEffBaseCool));
         }
+
+        partial void OnProfileSystemLabelChanged(string value)
+        {
+            OnPropertyChanged(nameof(SystemDisplayLabel));
+        }
+
+        partial void OnHasThermalBridgeChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ThermalBridgePsiDisplay));
+        }
+
+        partial void OnThermalBridgePsiChanged(double value)
+        {
+            OnPropertyChanged(nameof(ThermalBridgePsiDisplay));
+        }
     }
 
     /// <summary>
@@ -297,6 +362,7 @@ namespace EE.Doklad.Models
         public Orientation Orientation { get; set; }
         public string TypeSignature { get; set; } = string.Empty;
         public string TypeName { get; set; } = string.Empty;
+        public string SystemLabel { get; set; } = string.Empty;
         public int TotalCount { get; set; }
         public double ATotalGross { get; set; } // m²
         public double ATotalGlass { get; set; } // m²
@@ -309,6 +375,39 @@ namespace EE.Doklad.Models
         /// Партидите, които формират тази група
         /// </summary>
         public List<WindowBatch> Batches { get; set; } = new List<WindowBatch>();
+    }
+
+    public partial class WindowSystemLossSummaryRow : ObservableObject
+    {
+        [ObservableProperty]
+        private string systemLabel = string.Empty;
+
+        [ObservableProperty]
+        private double totalArea;
+
+        [ObservableProperty]
+        private double averageUw;
+
+        [ObservableProperty]
+        private double hel;
+
+        [ObservableProperty]
+        private double htb;
+
+        [ObservableProperty]
+        private double htotal;
+
+        [ObservableProperty]
+        private string thermalBridgeModeLabel = "няма";
+
+        [ObservableProperty]
+        private string? selectedGlobalThermalBridgeId;
+
+        public List<WindowBatch> Batches { get; set; } = new List<WindowBatch>();
+
+        public List<WindowThermalBridgeOption> ThermalBridgeOptions { get; set; } = new List<WindowThermalBridgeOption>();
+
+        public int TotalCount => Batches.Sum(b => b.Count);
     }
 
     /// <summary>
@@ -393,6 +492,27 @@ namespace EE.Doklad.Models
     /// <summary>
     /// Профил на препятствие
     /// </summary>
+    public class WindowProfileSystemOption
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Material { get; set; } = string.Empty;
+        public string MountingDepthLabel { get; set; } = string.Empty;
+        public double? MountingDepthMm { get; set; }
+        public double? VisibleHeightMm { get; set; }
+        public bool RequiresManualInput { get; set; }
+        public string DisplayLabel => RequiresManualInput
+            ? "Друго"
+            : $"{Material} - {MountingDepthLabel}";
+    }
+
+    public class WindowThermalBridgeOption
+    {
+        public string Id { get; set; } = string.Empty;
+        public string InstallationType { get; set; } = string.Empty;
+        public double Psi { get; set; }
+        public string DisplayLabel => $"{InstallationType} ({Psi:F2})";
+    }
+
     public class ObstacleProfile
     {
         public string Id { get; set; } = string.Empty;

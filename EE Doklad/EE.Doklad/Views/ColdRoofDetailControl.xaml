@@ -282,7 +282,7 @@
                                                 <Setter Property="Foreground" Value="#E65100"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding ThermalBridges.Mode}" Value="Manual">
-                                                <Setter Property="Text" Value="Ръчно"/>
+                                                <Setter Property="Text" Value="Детайлно"/>
                                                 <Setter Property="Foreground" Value="#1B5E20"/>
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -305,7 +305,7 @@
                                       SelectionChanged="TbMode_SelectionChanged">
                                 <ComboBoxItem Content="Няма"              Tag="None"/>
                                 <ComboBoxItem Content="Глобална стойност" Tag="GlobalPercentage"/>
-                                <ComboBoxItem Content="Ръчно въвеждане"   Tag="Manual"/>
+                                <ComboBoxItem Content="Детайлно въвеждане"   Tag="Manual"/>
                             </ComboBox>
                         </StackPanel>
 

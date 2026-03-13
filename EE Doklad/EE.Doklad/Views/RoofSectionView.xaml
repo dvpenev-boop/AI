@@ -138,7 +138,7 @@
                                                                 <Setter Property="Text" Value="Глобален %"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding ThermalBridges.Mode}" Value="Manual">
-                                                                <Setter Property="Text" Value="Ръчно"/>
+                                                                <Setter Property="Text" Value="Детайлно"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

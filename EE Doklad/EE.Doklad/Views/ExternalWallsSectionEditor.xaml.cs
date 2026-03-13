@@ -653,7 +653,7 @@ namespace EE.Doklad.Views
             TbPopupMode.Text = tb.Mode switch
             {
                 ThermalBridgeMode.GlobalPercentage => "Глобална стойност",
-                ThermalBridgeMode.Manual           => "Ръчно въвеждане",
+                ThermalBridgeMode.Manual           => "Детайлно въвеждане",
                 _                                  => "Няма"
             };
 

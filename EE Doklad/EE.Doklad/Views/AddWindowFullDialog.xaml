@@ -4,15 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Добавяне на прозорец/врата (Пълен преглед)" Height="700" Width="950"
-        MinWidth="700" MinHeight="500"
+        Title="Добавяне на прозорец/врата (Пълен преглед)" Height="760" Width="980"
+        MinWidth="760" MinHeight="560"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" SizeToContent="Manual">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-        <StackPanel Margin="12" x:Name="MainPanel" Orientation="Vertical" >
-            <!-- Секция 1: Основни данни -->
+        <StackPanel Margin="12" x:Name="MainPanel" Orientation="Vertical">
             <GroupBox Header="1. Основни данни" Margin="0,6">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -22,6 +25,7 @@
                         <ColumnDefinition Width="180"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+
                     <TextBlock Text="Вид:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
                     <ComboBox x:Name="KindComboBox" Width="200" Grid.Row="0" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
 
@@ -31,9 +35,24 @@
                     <TextBlock Text="Брой:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
                     <TextBox x:Name="CountTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="CountError" Foreground="Red" FontSize="12" Grid.Row="3" Grid.Column="1"/>
+
+                    <TextBlock x:Name="ProfileSystemLabel" Text="Профилна система:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Visibility="Collapsed"/>
+                    <StackPanel x:Name="ProfileSystemPanel" Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Visibility="Collapsed">
+                        <ComboBox x:Name="ProfileSystemComboBox" Width="220" Margin="0,2,8,2" HorizontalAlignment="Left"/>
+                        <TextBox x:Name="ManualMountingDepthTextBox" Width="90" Margin="0,2,8,2" HorizontalAlignment="Left" Visibility="Collapsed" ToolTip="Монтажна дълбочина [mm]"/>
+                        <TextBox x:Name="ManualVisibleHeightTextBox" Width="90" Margin="0,2,0,2" HorizontalAlignment="Left" Visibility="Collapsed" ToolTip="Видима височина [mm]"/>
+                    </StackPanel>
+                    <TextBlock x:Name="ProfileSystemHintTextBlock" Grid.Row="5" Grid.Column="1" Foreground="Gray" FontSize="12" Visibility="Collapsed"/>
+
+                    <TextBlock Text="Термомостове:" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal">
+                        <RadioButton x:Name="ThermalBridgeNoRadioButton" Content="Не" Margin="0,2,14,2" GroupName="ThermalBridgeGroup" IsChecked="True"/>
+                        <RadioButton x:Name="ThermalBridgeYesRadioButton" Content="Да" Margin="0,2,0,2" GroupName="ThermalBridgeGroup"/>
+                    </StackPanel>
+                    <ComboBox x:Name="ThermalBridgeComboBox" Grid.Row="7" Grid.Column="1" Width="240" Margin="0,2" HorizontalAlignment="Left" Visibility="Collapsed"/>
                 </Grid>
             </GroupBox>
-            <!-- Секция 2: Геометрия -->
+
             <GroupBox Header="2. Геометрия" Margin="0,6">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
@@ -58,7 +77,7 @@
                     </StackPanel>
                 </Grid>
             </GroupBox>
-            <!-- Секция 3: Топлотехнически и оптични данни -->
+
             <GroupBox Header="3. Топлотехнически и оптични данни" Margin="0,6">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
@@ -73,45 +92,64 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="180"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+
                     <TextBlock Text="U [W/m²K]:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
                     <TextBox x:Name="UValueTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="UError" Foreground="Red" FontSize="12" Grid.Row="1" Grid.Column="1"/>
 
-                    <TextBlock Text="g_n (изчислен):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="GNTextBox" Width="100" Grid.Row="2" Grid.Column="1" Margin="0,2" IsReadOnly="True" Background="#FFF0F0F0" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="GNError" Foreground="Red" FontSize="12" Grid.Row="3" Grid.Column="1"/>
+                    <CheckBox x:Name="DetailedUwModeCheckBox" Grid.Row="2" Grid.Column="1" Margin="0,4,0,2" Content="Детайлен режим за Uw" HorizontalAlignment="Left"/>
 
-                    <TextBlock Text="Вид остъкляване:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="GlazingTypeComboBox" Width="220" Grid.Row="4" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
+                    <StackPanel x:Name="DetailedUwPanel" Grid.Row="3" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                            <TextBlock Text="Ufr [W/m²K]:" Width="110" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ProfileUFrameTextBox" Width="100" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                            <TextBlock Text="Ugl [W/m²K]:" Width="110" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ProfileUGlassTextBox" Width="100" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock x:Name="DetailedUwHintTextBlock" Grid.Row="4" Grid.Column="1" Foreground="Gray" FontSize="12" Visibility="Collapsed"/>
 
-                    <TextBlock Text="g_gl,alt;wi (табл.3):" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="GlazingGAltTextBlock" Grid.Row="5" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <TextBlock Text="g_n (изчислен):" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GNTextBox" Width="100" Grid.Row="5" Grid.Column="1" Margin="0,2" IsReadOnly="True" Background="#FFF0F0F0" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="GNError" Foreground="Red" FontSize="12" Grid.Row="6" Grid.Column="1"/>
 
-                    <TextBlock Text="g_gl,dif,wi (дифузна):" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="GlazingGDiffTextBox" Width="100" Grid.Row="6" Grid.Column="1" Margin="0,2" ToolTip="Въведете стойност от сертификат (ISO 15099)." HorizontalAlignment="Left"/>
+                    <TextBlock Text="Вид остъкляване:" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="GlazingTypeComboBox" Width="220" Grid.Row="7" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
 
-                    <TextBlock Text="Оптичен тип:" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="OpticalTypeComboBox" Width="200" Grid.Row="7" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="OpticalTypeError" Foreground="Red" FontSize="12" Grid.Row="8" Grid.Column="1"/>
+                    <TextBlock Text="g_gl,alt;wi (табл.3):" Grid.Row="8" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="GlazingGAltTextBlock" Grid.Row="8" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
-                    <TextBlock Text="Тип стъкло:" Grid.Row="9" Grid.Column="0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="GlazingEmissivityPresetComboBox" Width="320" Grid.Row="9" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"
+                    <TextBlock Text="g_gl,dif,wi (дифузна):" Grid.Row="9" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GlazingGDiffTextBox" Width="100" Grid.Row="9" Grid.Column="1" Margin="0,2" ToolTip="Въведете стойност от сертификат (ISO 15099)." HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="Оптичен тип:" Grid.Row="10" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="OpticalTypeComboBox" Width="200" Grid.Row="10" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="OpticalTypeError" Foreground="Red" FontSize="12" Grid.Row="11" Grid.Column="1"/>
+
+                    <TextBlock Text="Тип стъкло:" Grid.Row="12" Grid.Column="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="GlazingEmissivityPresetComboBox" Width="320" Grid.Row="12" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"
                               ToolTip="Тип стъкло по EN 673 / EN ISO 10077 / ISO 52016. Влияе само върху емисивитета ε – не променя U или g_n."/>
 
-                    <TextBlock Text="ε (емисивитет):" Grid.Row="10" Grid.Column="0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="GlassEmissivityTextBox" Width="100" Grid.Row="10" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"
+                    <TextBlock Text="ε (емисивитет):" Grid.Row="13" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="GlassEmissivityTextBox" Width="100" Grid.Row="13" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"
                              ToolTip="Емисивитет на стъклото ε (0..1). Стойността е информативна и не влияе на U или g изчисленията."/>
                 </Grid>
             </GroupBox>
-            <!-- Секция 4: Рамка -->
+
             <GroupBox Header="4. Рамка" Margin="0,6">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
@@ -122,13 +160,12 @@
                     <TextBlock Text="F_fr (%):" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
                     <TextBox x:Name="FrameFractionTextBox" Width="100" Grid.Row="0" Grid.Column="1" Margin="0,2" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="FrameFractionError" Foreground="Red" FontSize="12" Grid.Row="1" Grid.Column="1"/>
+                    <TextBlock x:Name="FrameFractionAutoHintTextBlock" Grid.Row="2" Grid.Column="1" Foreground="Gray" FontSize="12" Visibility="Collapsed"/>
                 </Grid>
             </GroupBox>
-            <!-- Секция 5: Слънцезащита -->
+
             <GroupBox Header="5. Слънцезащита" Margin="0,6">
                 <StackPanel Margin="8" Orientation="Vertical">
-
-                    <!-- Отопление -->
                     <TextBlock Text="Отоплителен сезон:" FontWeight="SemiBold" Margin="0,0,0,4"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <StackPanel Orientation="Vertical" Margin="0,0,20,0">
@@ -155,10 +192,10 @@
                                       VerticalScrollBarVisibility="Disabled"
                                       HorizontalScrollBarVisibility="Disabled">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="&#945;" Binding="{Binding AbsorptionAlpha,  StringFormat=F2}" Width="65"  IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="&#964;" Binding="{Binding TransmittanceTau, StringFormat=F2}" Width="65"  IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="F_sh,int" Binding="{Binding FShadeInt,      StringFormat=F2}" Width="90"  IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="F_sh,ext" Binding="{Binding FShadeExt,      StringFormat=F2}" Width="90"  IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="&#945;" Binding="{Binding AbsorptionAlpha, StringFormat=F2}" Width="65" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="&#964;" Binding="{Binding TransmittanceTau, StringFormat=F2}" Width="65" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="F_sh,int" Binding="{Binding FShadeInt, StringFormat=F2}" Width="90" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="F_sh,ext" Binding="{Binding FShadeExt, StringFormat=F2}" Width="90" IsReadOnly="True"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
@@ -166,7 +203,6 @@
 
                     <Separator Margin="0,0,0,8"/>
 
-                    <!-- Охлаждане -->
                     <TextBlock Text="Охладителен сезон:" FontWeight="SemiBold" Margin="0,0,0,4"/>
                     <StackPanel Orientation="Horizontal">
                         <StackPanel Orientation="Vertical" Margin="0,0,20,0">
@@ -193,18 +229,17 @@
                                       VerticalScrollBarVisibility="Disabled"
                                       HorizontalScrollBarVisibility="Disabled">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="&#945;" Binding="{Binding AbsorptionAlpha,  StringFormat=F2}" Width="65"  IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="&#964;" Binding="{Binding TransmittanceTau, StringFormat=F2}" Width="65"  IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="F_sh,int" Binding="{Binding FShadeInt,      StringFormat=F2}" Width="90"  IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="F_sh,ext" Binding="{Binding FShadeExt,      StringFormat=F2}" Width="90"  IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="&#945;" Binding="{Binding AbsorptionAlpha, StringFormat=F2}" Width="65" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="&#964;" Binding="{Binding TransmittanceTau, StringFormat=F2}" Width="65" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="F_sh,int" Binding="{Binding FShadeInt, StringFormat=F2}" Width="90" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="F_sh,ext" Binding="{Binding FShadeExt, StringFormat=F2}" Width="90" IsReadOnly="True"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
                     </StackPanel>
-
                 </StackPanel>
             </GroupBox>
-            <!-- Секция 6: Препятствия (засенчване) -->
+
             <GroupBox Header="6. Препятствия (засенчване)" Margin="0,6">
                 <StackPanel Margin="8" Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -219,7 +254,7 @@
                     <TextBlock x:Name="ShadingSummaryTextBlock" Text="" Margin="0,6,0,0" Foreground="Gray" FontStyle="Italic"/>
                 </StackPanel>
             </GroupBox>
-            <!-- Preview панел -->
+
             <GroupBox Header="Преглед на изчисленията" Margin="0,0,0,15">
                 <StackPanel Margin="10">
                     <TextBlock Text="Площ (AreaGross):"/>
@@ -244,10 +279,9 @@
                     <TextBlock x:Name="PreviewTotalGA" FontWeight="Bold"/>
                 </StackPanel>
             </GroupBox>
-            <!-- Резултати по режим -->
+
             <GroupBox x:Name="SeasonalResultsGroupBox" Header="Резултати по режим (g_eff средно)" Margin="0,0,0,15">
                 <StackPanel Margin="10">
-                    <!-- Header -->
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
@@ -260,8 +294,7 @@
                         <TextBlock Text="g_eff средно" Grid.Column="2" FontWeight="Bold"/>
                         <TextBlock Text="Забележки" Grid.Column="3" FontWeight="Bold"/>
                     </Grid>
-                    
-                    <!-- Отоплителен ред -->
+
                     <Grid x:Name="HeatingSeasonRow" Margin="0,5,0,5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
@@ -274,8 +307,7 @@
                         <TextBlock x:Name="HeatingGEffAvg" Text="—" Grid.Column="2" FontWeight="Bold"/>
                         <TextBlock x:Name="HeatingNote" Text="" Grid.Column="3" Foreground="Gray" FontSize="11"/>
                     </Grid>
-                    
-                    <!-- Охладителен ред -->
+
                     <Grid x:Name="CoolingSeasonRow" Margin="0,5,0,5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
@@ -290,7 +322,7 @@
                     </Grid>
                 </StackPanel>
             </GroupBox>
-            <!-- Долни бутони -->
+
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                 <Button x:Name="SaveButton" Content="Запиши" Width="120" Height="36" Background="#4CAF50" Foreground="White" FontWeight="Bold" Margin="0,0,10,0"/>
                 <Button x:Name="ResetButton" Content="Нулирай" Width="100" Height="36" Margin="0,0,10,0"/>

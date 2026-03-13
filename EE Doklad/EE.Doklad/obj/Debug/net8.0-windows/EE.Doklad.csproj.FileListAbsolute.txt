@@ -178,7 +178,6 @@ E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\EE.Doklad.genruntimeconfig.ca
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\ref\EE.Doklad.dll
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\Controls\RoofSurfaceParamsEditor.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\Controls\RoofSurfaceParamsEditor.baml
-E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\EE.Doklad.exe
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WallThermalBridgeItemDialog.g.cs
 E:\AI\EE Doklad\EE.Doklad\obj\Debug\net8.0-windows\Views\WallThermalBridgeItemDialog.baml
 e:\AI\EE Doklad\build_tmp\LatoFont\Lato-Black.ttf
@@ -205,3 +204,4 @@ e:\AI\EE Doklad\build_tmp\EE.Doklad.deps.json
 e:\AI\EE Doklad\build_tmp\EE.Doklad.runtimeconfig.json
 e:\AI\EE Doklad\build_tmp\EE.Doklad.dll
 e:\AI\EE Doklad\build_tmp\EE.Doklad.pdb
+E:\AI\EE Doklad\EE.Doklad\bin\Debug\net8.0-windows\EE.Doklad.exe

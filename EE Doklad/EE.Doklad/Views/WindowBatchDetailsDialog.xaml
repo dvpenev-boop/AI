@@ -49,7 +49,16 @@
                               SelectionMode="Single" IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="№" Binding="{Binding Count}" Width="50"/>
-                            
+                            <DataGridTextColumn Header="Посока" Width="70">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Orientation">
+                                        <Binding.Converter>
+                                            <converters:OrientationConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Система" Binding="{Binding SystemDisplayLabel}" Width="130"/>                            
                             <DataGridTextColumn Header="Щора (отопл.)" Width="120">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="ShadingModeHeat">
@@ -80,6 +89,7 @@
                             <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="g_eff (отопл.)" Binding="{Binding GEffHeat, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="ψ" Binding="{Binding ThermalBridgePsiDisplay, StringFormat=F2}" Width="55"/>
                             <DataGridTextColumn Header="ε" Binding="{Binding GlassEmissivity, StringFormat=F2}" Width="55"/>
                             
                             <DataGridTemplateColumn Header="" Width="150">
@@ -117,7 +127,16 @@
                               SelectionMode="Single" IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="№" Binding="{Binding Count}" Width="50"/>
-                            
+                            <DataGridTextColumn Header="Посока" Width="70">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Orientation">
+                                        <Binding.Converter>
+                                            <converters:OrientationConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Система" Binding="{Binding SystemDisplayLabel}" Width="130"/>                            
                             <DataGridTextColumn Header="Щора (охл.)" Width="120">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="ShadingModeCool">
@@ -148,6 +167,7 @@
                             <DataGridTextColumn Header="A_gl [m²]" Binding="{Binding AreaGlass, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="U [W/m²K]" Binding="{Binding UValue, StringFormat=F3}" Width="90"/>
                             <DataGridTextColumn Header="g_eff (охл.)" Binding="{Binding GEffCool, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="ψ" Binding="{Binding ThermalBridgePsiDisplay, StringFormat=F2}" Width="55"/>
                             <DataGridTextColumn Header="ε" Binding="{Binding GlassEmissivity, StringFormat=F2}" Width="55"/>
                             
                             <DataGridTemplateColumn Header="" Width="150">

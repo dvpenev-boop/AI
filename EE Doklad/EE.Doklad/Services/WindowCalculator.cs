@@ -42,6 +42,7 @@ namespace EE.Doklad.Services
                     {
                         Orientation = g.Key.Orientation,
                         TypeSignature = g.Key.TypeSignature,
+                        SystemLabel = firstBatch.SystemDisplayLabel,
                         TypeName = string.IsNullOrEmpty(firstBatch.TypeName) 
                             ? $"{firstBatch.Width:F2}×{firstBatch.Height:F2} {GetKindLabel(firstBatch.Kind)}"
                             : firstBatch.TypeName,
@@ -87,6 +88,7 @@ namespace EE.Doklad.Services
                     {
                         Orientation = g.Key.Orientation,
                         TypeSignature = g.Key.TypeSignature,
+                        SystemLabel = firstBatch.SystemDisplayLabel,
                         TypeName = string.IsNullOrEmpty(firstBatch.TypeName)
                             ? $"{firstBatch.Width:F2}×{firstBatch.Height:F2} {GetKindLabel(firstBatch.Kind)}"
                             : firstBatch.TypeName,
@@ -225,6 +227,98 @@ namespace EE.Doklad.Services
                 WindowKind.Door => "Врата",
                 _ => "Неизвестен"
             };
+        }
+
+        public static string GetSystemLabel(WindowBatch batch)
+        {
+            return batch.SystemDisplayLabel;
+        }
+
+        public static List<WindowProfileSystemOption> GetProfileSystemOptions()
+        {
+            return new List<WindowProfileSystemOption>
+            {
+                new() { Id = "PVC_60", Material = "PVC", MountingDepthLabel = "60 mm", MountingDepthMm = 60, VisibleHeightMm = 53 },
+                new() { Id = "PVC_70", Material = "PVC", MountingDepthLabel = "70 mm", MountingDepthMm = 70, VisibleHeightMm = 55 },
+                new() { Id = "PVC_76", Material = "PVC", MountingDepthLabel = "76 mm", MountingDepthMm = 76, VisibleHeightMm = 58 },
+                new() { Id = "PVC_80_82", Material = "PVC", MountingDepthLabel = "80-82 mm", MountingDepthMm = 81, VisibleHeightMm = 60 },
+                new() { Id = "PVC_88_90", Material = "PVC", MountingDepthLabel = "88-90 mm", MountingDepthMm = 89, VisibleHeightMm = 63 },
+                new() { Id = "AL_60", Material = "AL", MountingDepthLabel = "60 mm", MountingDepthMm = 60, VisibleHeightMm = 48 },
+                new() { Id = "AL_65_70", Material = "AL", MountingDepthLabel = "65-70 mm", MountingDepthMm = 67.5, VisibleHeightMm = 53 },
+                new() { Id = "AL_75_80", Material = "AL", MountingDepthLabel = "75-80 mm", MountingDepthMm = 77.5, VisibleHeightMm = 56 },
+                new() { Id = "AL_90", Material = "AL", MountingDepthLabel = "90 mm", MountingDepthMm = 90, VisibleHeightMm = 60 },
+                new() { Id = "OTHER", Material = "Друго", MountingDepthLabel = "Ръчно", RequiresManualInput = true }
+            };
+        }
+
+        public static List<WindowThermalBridgeOption> GetThermalBridgeOptions()
+        {
+            return new List<WindowThermalBridgeOption>
+            {
+                new() { Id = "NO_INSULATION", InstallationType = "Фасада без изолация", Psi = 0.06 },
+                new() { Id = "STANDARD_RETURN", InstallationType = "Стандартно обръщане", Psi = 0.04 },
+                new() { Id = "OFFSET_INSTALL", InstallationType = "Изнесен монтаж", Psi = 0.01 }
+            };
+        }
+
+        public static List<WindowSystemLossSummaryRow> BuildSystemLossSummary(IEnumerable<WindowBatch> batches)
+        {
+            var thermalBridgeOptions = GetThermalBridgeOptions();
+
+            return batches
+                .GroupBy(GetSystemLabel)
+                .Select(g =>
+                {
+                    var items = g.ToList();
+                    double totalArea = items.Sum(b => b.Count * b.AreaGross);
+                    double hel = items.Sum(b => b.Count * b.AreaGross * b.UValue);
+                    double htb = items.Sum(b => b.Count * CalculatePerimeter(b) * b.ThermalBridgePsiDisplay);
+
+                    return new WindowSystemLossSummaryRow
+                    {
+                        SystemLabel = string.IsNullOrWhiteSpace(g.Key) ? "-" : g.Key,
+                        TotalArea = totalArea,
+                        AverageUw = totalArea > 0 ? hel / totalArea : 0.0,
+                        Hel = hel,
+                        Htb = htb,
+                        Htotal = hel + htb,
+                        ThermalBridgeModeLabel = items.Any(b => b.HasThermalBridge) ? "детайлно" : "няма",
+                        Batches = items,
+                        ThermalBridgeOptions = thermalBridgeOptions
+                    };
+                })
+                .OrderBy(r => r.SystemLabel)
+                .ToList();
+        }
+
+        public static double CalculatePerimeter(WindowBatch batch)
+        {
+            if (batch.Width <= 0 || batch.Height <= 0)
+                return 0.0;
+
+            return 2.0 * (batch.Width + batch.Height);
+        }
+
+        public static double CalculateFrameFractionFromProfile(double widthMeters, double heightMeters, double visibleHeightMm)
+        {
+            if (widthMeters <= 0 || heightMeters <= 0 || visibleHeightMm <= 0)
+                return 0;
+
+            double profileVisibleMeters = visibleHeightMm / 1000.0;
+            double glassWidth = Math.Max(0, widthMeters - 2 * profileVisibleMeters);
+            double glassHeight = Math.Max(0, heightMeters - 2 * profileVisibleMeters);
+            double grossArea = widthMeters * heightMeters;
+            if (grossArea <= 0)
+                return 0;
+
+            double glassArea = glassWidth * glassHeight;
+            return Math.Clamp(1.0 - (glassArea / grossArea), 0.0, 1.0);
+        }
+
+        public static double CalculateUwFromDetailedInputs(double frameFraction, double uFrame, double uGlass)
+        {
+            frameFraction = Math.Clamp(frameFraction, 0.0, 1.0);
+            return frameFraction * uFrame + (1.0 - frameFraction) * uGlass;
         }
 
         /// <summary>

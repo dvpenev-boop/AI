@@ -62,6 +62,55 @@
         </WrapPanel>
 
         <!-- Summary Tables (Matrix view – Отопление и/или Охлаждане) -->
+        <GroupBox Header="Обобщение по системи" Margin="0,0,0,12">
+            <DataGrid ItemsSource="{Binding SystemLossRows}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      Margin="0,6,0,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Система" Binding="{Binding SystemLabel}" IsReadOnly="True" Width="150"/>
+                    <DataGridTextColumn Header="Брой" Binding="{Binding TotalCount}" IsReadOnly="True" Width="55"/>
+                    <DataGridTextColumn Header="A общо [m²]" Binding="{Binding TotalArea, StringFormat=F3}" IsReadOnly="True" Width="95"/>
+                    <DataGridTextColumn Header="Uw ср." Binding="{Binding AverageUw, StringFormat=F3}" IsReadOnly="True" Width="80"/>
+                    <DataGridTextColumn Header="Режим ТМ" Binding="{Binding ThermalBridgeModeLabel}" IsReadOnly="True" Width="85"/>
+                    <DataGridTemplateColumn Header="Глобален ТМ" Width="210">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding ThermalBridgeOptions}"
+                                          DisplayMemberPath="DisplayLabel"
+                                          SelectedValuePath="Id"
+                                          SelectedValue="{Binding SelectedGlobalThermalBridgeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Width="190"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="" Width="70">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Приложи"
+                                        Padding="6,2"
+                                        Click="ApplySystemThermalBridge_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Htb [W/K]" Binding="{Binding Htb, StringFormat=F3}" IsReadOnly="True" Width="85"/>
+                    <DataGridTextColumn Header="Hel [W/K]" Binding="{Binding Hel, StringFormat=F3}" IsReadOnly="True" Width="85"/>
+                    <DataGridTextColumn Header="Htotal [W/K]" Binding="{Binding Htotal, StringFormat=F3}" IsReadOnly="True" Width="95"/>
+                    <DataGridTemplateColumn Header="" Width="40">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="→"
+                                        FontWeight="Bold"
+                                        Padding="4,1"
+                                        Click="OpenSystemDetails_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
         <local:MatrixSummaryView Batches="{Binding WindowBatches}"
                                  HeatingEnabled="{Binding HeatingEnabled}"
                                  CoolingEnabled="{Binding CoolingEnabled}"

@@ -190,8 +190,8 @@ namespace EE.Doklad.Views
                 .OrderByDescending(t => t.Groups.Sum(x => x.ATotalGross))
                 .ToList();
 
-            // Columns: #, Вид, L, h, A, U, [n,g,A]*8, A_total, Details
-            int fixedCols = 6;
+            // Columns: #, Вид, Система, L, h, A, U, [n,g,A]*8, A_total, Details
+            int fixedCols = 7;
             int orientationCols = orientationsOrder.Length * 3;
             int rightCols = 2;
             int totalCols = fixedCols + orientationCols + rightCols;
@@ -204,6 +204,7 @@ namespace EE.Doklad.Views
             int col = 0;
             AddHeaderCell(tableGrid, "#",          0, col++);
             AddHeaderCell(tableGrid, "Вид",        0, col++);
+            AddHeaderCell(tableGrid, "Система",    0, col++);
             AddHeaderCell(tableGrid, "L [m]",      0, col++);
             AddHeaderCell(tableGrid, "h [m]",      0, col++);
             AddHeaderCell(tableGrid, "A [m\u00B2]",     0, col++);
@@ -248,6 +249,7 @@ namespace EE.Doklad.Views
                     ? (tg.FirstBatch.Kind == WindowKind.Door ? "ВР" : "ПР")
                     : "ПР";
                 AddTextCell(tableGrid, kindLabel, rowIndex, col++, HorizontalAlignment.Center);
+                AddTextCell(tableGrid, tg.FirstBatch != null ? WindowCalculator.GetSystemLabel(tg.FirstBatch) : "-", rowIndex, col++);
 
                 string lv = tg.FirstBatch != null && tg.FirstBatch.Width  > 0 ? tg.FirstBatch.Width.ToString("F2")  : "-";
                 string hv = tg.FirstBatch != null && tg.FirstBatch.Height > 0 ? tg.FirstBatch.Height.ToString("F2") : "-";
@@ -388,6 +390,7 @@ namespace EE.Doklad.Views
                 {
                     TypeName      = filtered.First().TypeName,
                     TypeSignature = typeSignature,
+                    SystemLabel   = filtered.First().SystemLabel,
                     Batches       = combinedBatches,
                     TotalCount    = combinedBatches.Sum(b => b.Count),
                     ATotalGross   = combinedBatches.Sum(b => b.Count * b.AreaGross),

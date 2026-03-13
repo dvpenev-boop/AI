@@ -15,6 +15,8 @@ namespace EE.Doklad.Views
         private List<ShadingOption> _allShadingOptions = new();
         private Dictionary<string, List<ShadingOption>> _shadingByCategory = new();
         private List<ObstacleProfile> _obstacleProfiles = new();
+        private List<WindowProfileSystemOption> _profileSystemOptions = new();
+        private List<WindowThermalBridgeOption> _thermalBridgeOptions = new();
         // shading
         private ShadingConfig? _shadingConfigLocal;
         // Climate zone for seasonal calculations (1-9), null = use defaults
@@ -27,6 +29,9 @@ namespace EE.Doklad.Views
         private int? _coolingEndMonth;
         // Whether this dialog was opened for a new (not existing) batch
         private bool _isNewBatch;
+        private static string? s_lastProfileSystemId;
+        private static double? s_lastManualMountingDepthMm;
+        private static double? s_lastManualVisibleHeightMm;
 
         public WindowBatch Result => _batch;
 
@@ -44,6 +49,8 @@ namespace EE.Doklad.Views
             _coolingEndMonth = coolingEndMonth;
             LoadShadingOptions();
             LoadObstacleProfiles();
+            LoadProfileSystems();
+            LoadThermalBridgeOptions();
             InitializeAllSections();
             UpdatePreview();
         }
@@ -57,6 +64,16 @@ namespace EE.Doklad.Views
         private void LoadObstacleProfiles()
         {
             _obstacleProfiles = WindowCalculator.GetObstacleProfiles();
+        }
+
+        private void LoadProfileSystems()
+        {
+            _profileSystemOptions = WindowCalculator.GetProfileSystemOptions();
+        }
+
+        private void LoadThermalBridgeOptions()
+        {
+            _thermalBridgeOptions = WindowCalculator.GetThermalBridgeOptions();
         }
 
         private void InitializeAllSections()
@@ -79,6 +96,9 @@ namespace EE.Doklad.Views
             CountTextBox.Text = _batch.Count.ToString();
             CountTextBox.TextChanged += AnyInputChanged;
 
+            InitializeProfileSystemControls();
+            InitializeThermalBridgeControls();
+
             // Geometry
             // Initialize width/height (user inputs are in cm)
             WidthTextBox.Text = _batch.Width > 0 ? (_batch.Width * 100.0).ToString("F0") : string.Empty;
@@ -89,6 +109,13 @@ namespace EE.Doklad.Views
             // U/g/OpticalType
             UValueTextBox.Text = _batch.UValue > 0 ? _batch.UValue.ToString("F2") : "1.40";
             UValueTextBox.TextChanged += AnyInputChanged;
+            DetailedUwModeCheckBox.IsChecked = _batch.UseDetailedUwMode;
+            DetailedUwModeCheckBox.Checked += AnyInputChanged;
+            DetailedUwModeCheckBox.Unchecked += AnyInputChanged;
+            ProfileUFrameTextBox.Text = _batch.ProfileUFrame > 0 ? _batch.ProfileUFrame.ToString("F2") : string.Empty;
+            ProfileUGlassTextBox.Text = _batch.ProfileUGlass > 0 ? _batch.ProfileUGlass.ToString("F2") : string.Empty;
+            ProfileUFrameTextBox.TextChanged += AnyInputChanged;
+            ProfileUGlassTextBox.TextChanged += AnyInputChanged;
             // GN is computed from glazing tables (read-only)
             GNTextBox.Text = _batch.GN > 0 ? _batch.GN.ToString("F3") : string.Empty;
             OpticalTypeComboBox.ItemsSource = Enum.GetValues(typeof(OpticalType));
@@ -144,6 +171,7 @@ namespace EE.Doklad.Views
             // FrameFraction
             FrameFractionTextBox.Text = (_batch.FrameFraction * 100).ToString("F1");
             FrameFractionTextBox.TextChanged += AnyInputChanged;
+            UpdateWindowSpecificUi();
 
             // ── Слънцезащита – Отоплителен сезон ──────────────────────────────
             InitShadingControls(
@@ -195,8 +223,155 @@ namespace EE.Doklad.Views
             ResetButton.Click += (s, e) => { InitializeAllSections(); UpdatePreview(); };
         }
 
+        private void InitializeProfileSystemControls()
+        {
+            ProfileSystemComboBox.ItemsSource = _profileSystemOptions;
+            ProfileSystemComboBox.DisplayMemberPath = nameof(WindowProfileSystemOption.DisplayLabel);
+            ProfileSystemComboBox.SelectedValuePath = nameof(WindowProfileSystemOption.Id);
+
+            string? selectedProfileId = _batch.ProfileSystemId;
+            if (string.IsNullOrWhiteSpace(selectedProfileId) && _isNewBatch)
+                selectedProfileId = s_lastProfileSystemId;
+            if (string.IsNullOrWhiteSpace(selectedProfileId))
+                selectedProfileId = _profileSystemOptions.FirstOrDefault()?.Id;
+
+            ProfileSystemComboBox.SelectedValue = selectedProfileId;
+            ProfileSystemComboBox.SelectionChanged += AnyInputChanged;
+
+            if (_batch.ProfileMountingDepthMm.HasValue)
+                ManualMountingDepthTextBox.Text = _batch.ProfileMountingDepthMm.Value.ToString("F0");
+            else if (_isNewBatch && s_lastManualMountingDepthMm.HasValue)
+                ManualMountingDepthTextBox.Text = s_lastManualMountingDepthMm.Value.ToString("F0");
+
+            if (_batch.ProfileVisibleHeightMm.HasValue)
+                ManualVisibleHeightTextBox.Text = _batch.ProfileVisibleHeightMm.Value.ToString("F0");
+            else if (_isNewBatch && s_lastManualVisibleHeightMm.HasValue)
+                ManualVisibleHeightTextBox.Text = s_lastManualVisibleHeightMm.Value.ToString("F0");
+
+            ManualMountingDepthTextBox.TextChanged += AnyInputChanged;
+            ManualVisibleHeightTextBox.TextChanged += AnyInputChanged;
+        }
+
+        private void InitializeThermalBridgeControls()
+        {
+            ThermalBridgeComboBox.ItemsSource = _thermalBridgeOptions;
+            ThermalBridgeComboBox.DisplayMemberPath = nameof(WindowThermalBridgeOption.DisplayLabel);
+            ThermalBridgeComboBox.SelectedValuePath = nameof(WindowThermalBridgeOption.Id);
+            ThermalBridgeComboBox.SelectionChanged += AnyInputChanged;
+
+            ThermalBridgeYesRadioButton.Checked += AnyInputChanged;
+            ThermalBridgeNoRadioButton.Checked += AnyInputChanged;
+
+            ThermalBridgeYesRadioButton.IsChecked = _batch.HasThermalBridge;
+            ThermalBridgeNoRadioButton.IsChecked = !_batch.HasThermalBridge;
+
+            if (!string.IsNullOrWhiteSpace(_batch.ThermalBridgeTypeId))
+            {
+                ThermalBridgeComboBox.SelectedValue = _batch.ThermalBridgeTypeId;
+            }
+            else if (_thermalBridgeOptions.Count > 0)
+            {
+                ThermalBridgeComboBox.SelectedIndex = 0;
+            }
+
+            UpdateThermalBridgeUi();
+        }
+
+        private void UpdateThermalBridgeUi()
+        {
+            bool hasThermalBridge = ThermalBridgeYesRadioButton.IsChecked == true;
+            ThermalBridgeComboBox.Visibility = hasThermalBridge ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void UpdateWindowSpecificUi()
+        {
+            bool isWindow = KindComboBox.SelectedValue is WindowKind kind && kind == WindowKind.Window;
+            bool detailedMode = isWindow && DetailedUwModeCheckBox.IsChecked == true;
+
+            ProfileSystemLabel.Visibility = isWindow ? Visibility.Visible : Visibility.Collapsed;
+            ProfileSystemPanel.Visibility = isWindow ? Visibility.Visible : Visibility.Collapsed;
+            ProfileSystemHintTextBlock.Visibility = isWindow ? Visibility.Visible : Visibility.Collapsed;
+            DetailedUwModeCheckBox.Visibility = isWindow ? Visibility.Visible : Visibility.Collapsed;
+            DetailedUwPanel.Visibility = detailedMode ? Visibility.Visible : Visibility.Collapsed;
+            DetailedUwHintTextBlock.Visibility = detailedMode ? Visibility.Visible : Visibility.Collapsed;
+            FrameFractionAutoHintTextBlock.Visibility = detailedMode ? Visibility.Visible : Visibility.Collapsed;
+
+            UValueTextBox.IsReadOnly = detailedMode;
+            UValueTextBox.Background = detailedMode ? System.Windows.Media.Brushes.WhiteSmoke : System.Windows.Media.Brushes.White;
+            FrameFractionTextBox.IsReadOnly = detailedMode;
+            FrameFractionTextBox.Background = detailedMode ? System.Windows.Media.Brushes.WhiteSmoke : System.Windows.Media.Brushes.White;
+
+            bool requiresManualProfile = isWindow
+                && ProfileSystemComboBox.SelectedItem is WindowProfileSystemOption opt
+                && opt.RequiresManualInput;
+            ManualMountingDepthTextBox.Visibility = requiresManualProfile ? Visibility.Visible : Visibility.Collapsed;
+            ManualVisibleHeightTextBox.Visibility = requiresManualProfile ? Visibility.Visible : Visibility.Collapsed;
+
+            if (isWindow)
+            {
+                ProfileSystemHintTextBlock.Text = requiresManualProfile
+                    ? "За 'Друго' въведете монтажна дълбочина и видима височина в mm."
+                    : "Видимата височина на системата се използва за автоматично изчисление на F_fr.";
+            }
+
+            if (detailedMode)
+            {
+                DetailedUwHintTextBlock.Text = "Uw се изчислява автоматично от F_fr, Ufr и Ugl.";
+                FrameFractionAutoHintTextBlock.Text = "F_fr се изчислява автоматично от размерите и профилната система.";
+            }
+            else
+            {
+                DetailedUwHintTextBlock.Text = string.Empty;
+                FrameFractionAutoHintTextBlock.Text = string.Empty;
+            }
+        }
+
+        private WindowProfileSystemOption? GetSelectedProfileSystem()
+        {
+            return ProfileSystemComboBox.SelectedItem as WindowProfileSystemOption;
+        }
+
+        private double? GetSelectedVisibleHeightMm()
+        {
+            var option = GetSelectedProfileSystem();
+            if (option == null)
+                return null;
+
+            if (option.RequiresManualInput)
+                return TryParseDouble(ManualVisibleHeightTextBox.Text, out var manualVisible) && manualVisible > 0 ? manualVisible : null;
+
+            return option.VisibleHeightMm;
+        }
+
+        private double? GetSelectedMountingDepthMm()
+        {
+            var option = GetSelectedProfileSystem();
+            if (option == null)
+                return null;
+
+            if (option.RequiresManualInput)
+                return TryParseDouble(ManualMountingDepthTextBox.Text, out var manualDepth) && manualDepth > 0 ? manualDepth : null;
+
+            return option.MountingDepthMm;
+        }
+
+        private string GetSelectedProfileSystemLabel()
+        {
+            var option = GetSelectedProfileSystem();
+            if (option == null)
+                return string.Empty;
+
+            if (!option.RequiresManualInput)
+                return option.DisplayLabel;
+
+            string depthLabel = GetSelectedMountingDepthMm()?.ToString("F0", CultureInfo.InvariantCulture) ?? "?";
+            return $"Друго - {depthLabel} mm";
+        }
+
         private void AnyInputChanged(object? sender, EventArgs e)
         {
+            UpdateWindowSpecificUi();
+            UpdateThermalBridgeUi();
             UpdatePreview();
             ValidateAll();
         }
@@ -361,7 +536,26 @@ namespace EE.Doklad.Views
             double height = TryParseDouble(HeightTextBox.Text, out var h) ? h / 100.0 : 0;
             double areaGross = width * height;
             CalculatedAreaTextBlock.Text = areaGross > 0 ? $"Площ: {areaGross:F3} m² (от {w:F0}×{h:F0} см)" : "Площ: —";
+            bool isWindow = KindComboBox.SelectedValue is WindowKind kindValue && kindValue == WindowKind.Window;
+            bool detailedMode = isWindow && DetailedUwModeCheckBox.IsChecked == true;
             double ffr = TryParseDouble(FrameFractionTextBox.Text, out var f) ? f / 100.0 : 0;
+
+            if (detailedMode)
+            {
+                double? visibleHeightMm = GetSelectedVisibleHeightMm();
+                if (visibleHeightMm.HasValue)
+                {
+                    ffr = WindowCalculator.CalculateFrameFractionFromProfile(width, height, visibleHeightMm.Value);
+                    FrameFractionTextBox.Text = (ffr * 100.0).ToString("F1", CultureInfo.InvariantCulture);
+                }
+
+                if (TryParseDouble(ProfileUFrameTextBox.Text, out var uFrame) &&
+                    TryParseDouble(ProfileUGlassTextBox.Text, out var uGlass))
+                {
+                    double autoUw = WindowCalculator.CalculateUwFromDetailedInputs(ffr, uFrame, uGlass);
+                    UValueTextBox.Text = autoUw.ToString("F2", CultureInfo.InvariantCulture);
+                }
+            }
 
             // Специален случай: Врата + F_fr=100% → плътна врата, без остъкляване
             bool isDoor = KindComboBox.SelectedValue is WindowKind kv && kv == WindowKind.Door;
@@ -570,12 +764,35 @@ namespace EE.Doklad.Views
 
             // F_fr: Прозорец → 0..50%, Врата → 0..100%
             bool isDoor = KindComboBox.SelectedValue is WindowKind k && k == WindowKind.Door;
+            bool isWindow = !isDoor;
+            bool detailedMode = isWindow && DetailedUwModeCheckBox.IsChecked == true;
             double maxFfr = isDoor ? 100.0 : 50.0;
             if (!TryParseDouble(FrameFractionTextBox.Text, out var ffr) || ffr < 0 || ffr > maxFfr)
                 FrameFractionError.Text = isDoor ? "F_fr 0..100% (Врата)" : "F_fr 0..50% (Прозорец)";
             else
                 FrameFractionError.Text = "";
             valid &= string.IsNullOrEmpty(FrameFractionError.Text);
+
+            if (detailedMode)
+            {
+                if (!TryParseDouble(ProfileUFrameTextBox.Text, out var uFrame) || uFrame <= 0)
+                {
+                    UError.Text = "Ufr трябва да е > 0";
+                    valid = false;
+                }
+
+                if (!TryParseDouble(ProfileUGlassTextBox.Text, out var uGlass) || uGlass <= 0)
+                {
+                    UError.Text = "Ugl трябва да е > 0";
+                    valid = false;
+                }
+
+                if (!GetSelectedVisibleHeightMm().HasValue)
+                {
+                    FrameFractionError.Text = "Липсва видима височина на профила";
+                    valid = false;
+                }
+            }
 
             OpticalTypeError.Text = OpticalTypeComboBox.SelectedItem == null ? "Изберете тип" : "";
             valid &= string.IsNullOrEmpty(OpticalTypeError.Text);
@@ -599,11 +816,36 @@ namespace EE.Doklad.Views
             // 3. Топлотехнически и оптични данни
             TryParseDouble(UValueTextBox.Text, out double u);
             _batch.UValue = u;
+            _batch.UseDetailedUwMode = _batch.Kind == WindowKind.Window && DetailedUwModeCheckBox.IsChecked == true;
+            _batch.ProfileSystemId = _batch.Kind == WindowKind.Window ? ProfileSystemComboBox.SelectedValue as string : null;
+            _batch.ProfileSystemLabel = _batch.Kind == WindowKind.Window ? GetSelectedProfileSystemLabel() : string.Empty;
+            _batch.ProfileMountingDepthMm = _batch.Kind == WindowKind.Window ? GetSelectedMountingDepthMm() : null;
+            _batch.ProfileVisibleHeightMm = _batch.Kind == WindowKind.Window ? GetSelectedVisibleHeightMm() : null;
+            _batch.ProfileUFrame = TryParseDouble(ProfileUFrameTextBox.Text, out var uFrameSave) ? uFrameSave : 0.0;
+            _batch.ProfileUGlass = TryParseDouble(ProfileUGlassTextBox.Text, out var uGlassSave) ? uGlassSave : 0.0;
+            _batch.HasThermalBridge = ThermalBridgeYesRadioButton.IsChecked == true;
+            if (_batch.HasThermalBridge && ThermalBridgeComboBox.SelectedItem is WindowThermalBridgeOption thermalBridge)
+            {
+                _batch.ThermalBridgeTypeId = thermalBridge.Id;
+                _batch.ThermalBridgeTypeLabel = thermalBridge.InstallationType;
+                _batch.ThermalBridgePsi = thermalBridge.Psi;
+            }
+            else
+            {
+                _batch.ThermalBridgeTypeId = null;
+                _batch.ThermalBridgeTypeLabel = string.Empty;
+                _batch.ThermalBridgePsi = 0.0;
+            }
             _batch.GlazingType = GlazingTypeComboBox.SelectedValue is GlazingType gtv ? gtv : _batch.GlazingType;
             _batch.GlazingGDif = TryParseDouble(GlazingGDiffTextBox.Text, out var gd) ? gd : _batch.GlazingGDif;
 
             // 4. Рамка
             TryParseDouble(FrameFractionTextBox.Text, out double ffr);
+            if (_batch.UseDetailedUwMode && _batch.ProfileVisibleHeightMm.HasValue)
+            {
+                ffr = WindowCalculator.CalculateFrameFractionFromProfile(_batch.Width, _batch.Height, _batch.ProfileVisibleHeightMm.Value) * 100.0;
+                _batch.UValue = WindowCalculator.CalculateUwFromDetailedInputs(ffr / 100.0, _batch.ProfileUFrame, _batch.ProfileUGlass);
+            }
             _batch.FrameFraction = ffr / 100.0;
 
             // Специален случай: Врата + F_fr=100% → плътна врата
@@ -737,6 +979,13 @@ namespace EE.Doklad.Views
                 {
                     _batch.TypeName = $"A={_batch.AreaGross:F2}m² {GetKindLabel(_batch.Kind)}";
                 }
+            }
+
+            if (_batch.Kind == WindowKind.Window)
+            {
+                s_lastProfileSystemId = _batch.ProfileSystemId;
+                s_lastManualMountingDepthMm = _batch.ProfileMountingDepthMm;
+                s_lastManualVisibleHeightMm = _batch.ProfileVisibleHeightMm;
             }
 
             DialogResult = true;
