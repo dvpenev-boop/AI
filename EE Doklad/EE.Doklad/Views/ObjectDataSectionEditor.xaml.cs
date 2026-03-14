@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using EE.Doklad.Models;
+using EE.Doklad.ViewModels;
 
 namespace EE.Doklad.Views
 {
@@ -26,6 +27,8 @@ namespace EE.Doklad.Views
 
         private void ObjectDataSectionEditor_Loaded(object sender, RoutedEventArgs e)
         {
+            BindOccupantPanels();
+
             // Намираме ComboBox за типа сграда и зареждаме ItemsSource с групирани данни
             var buildingTypeCombo = FindName("BuildingTypeCombo") as ComboBox;
             if (buildingTypeCombo == null)
@@ -104,6 +107,47 @@ namespace EE.Doklad.Views
                 }
                 catch { }
             }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void BindOccupantPanels()
+        {
+            if (DataContext is not ObjectDataSectionData objectData)
+            {
+                return;
+            }
+
+            if (Application.Current.MainWindow?.DataContext is not MainViewModel mainVm || mainVm.CurrentReport == null)
+            {
+                HeatingOccupantsPanel.Visibility = Visibility.Collapsed;
+                CoolingOccupantsPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            var report = mainVm.CurrentReport;
+            var heatingData = report.Sections.FirstOrDefault(s => s.Type == SectionType.Heating)?.HeatingSectionData;
+            var coolingData = report.Sections
+                .FirstOrDefault(s => s.Type == SectionType.Normal && !string.IsNullOrEmpty(s.Title) && s.Title.Contains("Охлаждане"))
+                ?.CoolingSectionData;
+
+            if (heatingData != null)
+            {
+                HeatingOccupantsPanel.DataContext = new HeatingSectionViewModel(heatingData, objectData, report);
+                HeatingOccupantsPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                HeatingOccupantsPanel.Visibility = Visibility.Collapsed;
+            }
+
+            if (coolingData != null)
+            {
+                CoolingOccupantsPanel.DataContext = new CoolingSectionViewModel(coolingData, objectData);
+                CoolingOccupantsPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                CoolingOccupantsPanel.Visibility = Visibility.Collapsed;
+            }
         }
 
     private void UpdateEndMonths(int startMonth)

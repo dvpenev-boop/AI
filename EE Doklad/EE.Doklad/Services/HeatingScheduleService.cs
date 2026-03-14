@@ -8,6 +8,8 @@ namespace EE.Doklad.Services
     /// </summary>
     public static class HeatingScheduleService
     {
+        public readonly record struct HeatingHoursBreakdown(double FullHours, double SetbackHours);
+
         /// <summary>
         /// Compute heating hours per month [h] using ObjectData heating schedule and climate heating-season.
         /// If schedule fields are missing/empty -> returns zeros (caller may fallback).
@@ -15,103 +17,76 @@ namespace EE.Doklad.Services
         /// </summary>
         public static double[] ComputeHeatingHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = 2024)
         {
-            var result = new double[12];
+            return ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef)
+                .Select(x => x.FullHours)
+                .ToArray();
+        }
 
+        public static double[] ComputeHeatingSetbackHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = 2024)
+        {
+            return ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef)
+                .Select(x => x.SetbackHours)
+                .ToArray();
+        }
+
+        public static HeatingHoursBreakdown[] ComputeHeatingHoursBreakdownPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = 2024)
+        {
+            var result = new HeatingHoursBreakdown[12];
             if (objectData == null || climateData == null)
             {
                 return result;
             }
 
-            // Parse schedule hours (ч./ден)
-            double workdayHours = ParseDoubleOrZero(objectData.HeatingWorkdaysHours);
-            double saturdayHours = ParseDoubleOrZero(objectData.HeatingSaturdayHours);
-            double sundayHours = ParseDoubleOrZero(objectData.HeatingSundayHours);
+            double workdayHours = ClampHours(ParseDoubleOrZero(objectData.HeatingWorkdaysHours));
+            double saturdayHours = ClampHours(ParseDoubleOrZero(objectData.HeatingSaturdayHours));
+            double sundayHours = ClampHours(ParseDoubleOrZero(objectData.HeatingSundayHours));
 
-            // If no schedule defined, return zeros (caller will fallback to design temperature)
             if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
             {
                 return result;
             }
 
-            // Build monthly days-off array
-            int[] monthlyDaysOff = new int[12];
-            int ParseMonth(string? s) { if (string.IsNullOrWhiteSpace(s)) return 0; if (int.TryParse(s.Trim(), out var v)) return Math.Max(0, v); return 0; }
-            monthlyDaysOff[0] = ParseMonth(objectData.DaysOffJanuary);
-            monthlyDaysOff[1] = ParseMonth(objectData.DaysOffFebruary);
-            monthlyDaysOff[2] = ParseMonth(objectData.DaysOffMarch);
-            monthlyDaysOff[3] = ParseMonth(objectData.DaysOffApril);
-            monthlyDaysOff[4] = ParseMonth(objectData.DaysOffMay);
-            monthlyDaysOff[5] = ParseMonth(objectData.DaysOffJune);
-            monthlyDaysOff[6] = ParseMonth(objectData.DaysOffJuly);
-            monthlyDaysOff[7] = ParseMonth(objectData.DaysOffAugust);
-            monthlyDaysOff[8] = ParseMonth(objectData.DaysOffSeptember);
-            monthlyDaysOff[9] = ParseMonth(objectData.DaysOffOctober);
-            monthlyDaysOff[10] = ParseMonth(objectData.DaysOffNovember);
-            monthlyDaysOff[11] = ParseMonth(objectData.DaysOffDecember);
+            int[] monthlyDaysOff = ParseMonthlyDaysOff(objectData);
+            bool isFullTime247 = workdayHours >= 24.0 && saturdayHours >= 24.0 && sundayHours >= 24.0;
 
-            for (int m = 0; m < 12; m++)
+            for (int month = 0; month < 12; month++)
             {
-                int monthNumber = m + 1;
-                int daysInMonth = DateTime.DaysInMonth(yearRef, monthNumber);
-
-                // Count actual weekdays/saturdays/sundays that fall into the heating season
-                int workdayCount = 0;
-                int saturdayCount = 0;
-                int sundayCount = 0;
-                int heatingSeasonDays = 0;
-
-                // Prepare heating season range if available
-                DateTime? seasonStart = null;
-                DateTime? seasonEnd = null;
-                if (climateData?.HeatingSeason != null && !string.IsNullOrWhiteSpace(climateData.HeatingSeason.Start) && !string.IsNullOrWhiteSpace(climateData.HeatingSeason.End))
+                int seasonDays = ScheduleHelper.GetHeatingSeasonDaysInMonth(yearRef, month + 1, climateData);
+                if (seasonDays <= 0)
                 {
-                    if (TryParseMonthDay(climateData.HeatingSeason.Start, out int sm, out int sd) && TryParseMonthDay(climateData.HeatingSeason.End, out int em, out int ed))
-                    {
-                        seasonStart = new DateTime(yearRef, sm, Math.Min(sd, DateTime.DaysInMonth(yearRef, sm)));
-                        seasonEnd = new DateTime(yearRef, em, Math.Min(ed, DateTime.DaysInMonth(yearRef, em)));
-                        if (seasonEnd < seasonStart) seasonEnd = seasonEnd.Value.AddYears(1);
-                    }
+                    result[month] = new HeatingHoursBreakdown(0.0, 0.0);
+                    continue;
                 }
 
-                for (int d = 1; d <= daysInMonth; d++)
+                if (isFullTime247)
                 {
-                    var dt = new DateTime(yearRef, monthNumber, d);
-                    bool inSeason = true;
-                    if (seasonStart.HasValue && seasonEnd.HasValue)
-                    {
-                        inSeason = IsDateInRange(dt, seasonStart.Value, seasonEnd.Value) || IsDateInRange(dt.AddYears(1), seasonStart.Value, seasonEnd.Value);
-                    }
-                    if (!inSeason) continue;
-
-                    heatingSeasonDays++;
-                    switch (dt.DayOfWeek)
-                    {
-                        case DayOfWeek.Saturday: saturdayCount++; break;
-                        case DayOfWeek.Sunday: sundayCount++; break;
-                        default: workdayCount++; break;
-                    }
+                    result[month] = new HeatingHoursBreakdown(seasonDays * 24.0, 0.0);
+                    continue;
                 }
 
-                // Initial base hours = counts * schedule
-                double baseHours = workdayCount * workdayHours + saturdayCount * saturdayHours + sundayCount * sundayHours;
+                double totalWeeks = seasonDays / 7.0;
+                double rawWorkDays = totalWeeks * 5.0;
+                double saturdayDays = totalWeeks;
+                double sundayDays = totalWeeks;
+                double holidayDays = Math.Min(Math.Max(0, monthlyDaysOff[month]), rawWorkDays);
+                double workDays = Math.Max(0.0, rawWorkDays - holidayDays);
 
-                // Subtract holidays that fall within heating-season portion
-                int holidays = Math.Max(0, monthlyDaysOff[m]);
-                double reductionHours = 0.0;
-                if (holidays > 0 && heatingSeasonDays > 0)
-                {
-                    // Neutral approach: reduce by holidays * averageDailyHours (consistent with previous behavior that reduced days)
-                    double avgDailyHours = baseHours / (double)heatingSeasonDays;
-                    reductionHours = Math.Min(baseHours, holidays * avgDailyHours);
-                }
+                double fullHours =
+                    workDays * workdayHours +
+                    saturdayDays * saturdayHours +
+                    sundayDays * sundayHours;
 
-                double heatingHours = Math.Max(0.0, baseHours - reductionHours);
+                double setbackHours =
+                    workDays * Math.Max(0.0, 24.0 - workdayHours) +
+                    saturdayDays * Math.Max(0.0, 24.0 - saturdayHours) +
+                    sundayDays * Math.Max(0.0, 24.0 - sundayHours) +
+                    holidayDays * 24.0;
 
-                // Clamp to month total hours
-                double monthTotalHours = daysInMonth * 24.0;
-                if (heatingHours > monthTotalHours) heatingHours = monthTotalHours;
+                double monthTotalHours = seasonDays * 24.0;
+                fullHours = Math.Clamp(fullHours, 0.0, monthTotalHours);
+                setbackHours = Math.Clamp(setbackHours, 0.0, monthTotalHours - fullHours);
 
-                result[m] = heatingHours;
+                result[month] = new HeatingHoursBreakdown(fullHours, setbackHours);
             }
 
             return result;
@@ -124,6 +99,31 @@ namespace EE.Doklad.Services
             return 0.0;
         }
 
+        private static double ClampHours(double hours)
+        {
+            return Math.Clamp(hours, 0.0, 24.0);
+        }
+
+        private static int[] ParseMonthlyDaysOff(ObjectDataSectionData objectData)
+        {
+            int ParseMonth(string? s) { if (string.IsNullOrWhiteSpace(s)) return 0; if (int.TryParse(s.Trim(), out var v)) return Math.Max(0, v); return 0; }
+            return
+            [
+                ParseMonth(objectData.DaysOffJanuary),
+                ParseMonth(objectData.DaysOffFebruary),
+                ParseMonth(objectData.DaysOffMarch),
+                ParseMonth(objectData.DaysOffApril),
+                ParseMonth(objectData.DaysOffMay),
+                ParseMonth(objectData.DaysOffJune),
+                ParseMonth(objectData.DaysOffJuly),
+                ParseMonth(objectData.DaysOffAugust),
+                ParseMonth(objectData.DaysOffSeptember),
+                ParseMonth(objectData.DaysOffOctober),
+                ParseMonth(objectData.DaysOffNovember),
+                ParseMonth(objectData.DaysOffDecember)
+            ];
+        }
+
         private static bool TryParseMonthDay(string s, out int month, out int day)
         {
             month = 1; day = 1;
@@ -133,6 +133,68 @@ namespace EE.Doklad.Services
             if (!int.TryParse(parts[0], out month)) return false;
             if (!int.TryParse(parts[1], out day)) return false;
             return true;
+        }
+
+        private static int GetEffectiveHeatingYear(int yearRef, int monthNumber, ClimateZoneData? climateData)
+        {
+            if (climateData?.HeatingSeason == null ||
+                string.IsNullOrWhiteSpace(climateData.HeatingSeason.Start) ||
+                string.IsNullOrWhiteSpace(climateData.HeatingSeason.End) ||
+                !TryParseMonthDay(climateData.HeatingSeason.Start, out int startM, out int startD) ||
+                !TryParseMonthDay(climateData.HeatingSeason.End, out int endM, out int endD))
+            {
+                return yearRef;
+            }
+
+            bool wrapsYear = endM < startM || (endM == startM && endD < startD);
+            return wrapsYear && monthNumber <= endM ? yearRef + 1 : yearRef;
+        }
+
+        private static (int StartDay, int EndDay) GetHeatingSeasonDayRange(int yearRef, int monthNumber, ClimateZoneData? climateData)
+        {
+            int effectiveYear = GetEffectiveHeatingYear(yearRef, monthNumber, climateData);
+            int daysInMonth = DateTime.DaysInMonth(effectiveYear, monthNumber);
+
+            if (climateData?.HeatingSeason == null ||
+                string.IsNullOrWhiteSpace(climateData.HeatingSeason.Start) ||
+                string.IsNullOrWhiteSpace(climateData.HeatingSeason.End) ||
+                !TryParseMonthDay(climateData.HeatingSeason.Start, out int startM, out int startD) ||
+                !TryParseMonthDay(climateData.HeatingSeason.End, out int endM, out int endD))
+            {
+                return (1, daysInMonth);
+            }
+
+            int startMonthDays = DateTime.DaysInMonth(yearRef, startM);
+            int endMonthDays = DateTime.DaysInMonth(GetEffectiveHeatingYear(yearRef, endM, climateData), endM);
+            startD = Math.Min(startD, startMonthDays);
+            endD = Math.Min(endD, endMonthDays);
+
+            bool wrapsYear = endM < startM || (endM == startM && endD < startD);
+            bool monthInSeason = wrapsYear
+                ? monthNumber >= startM || monthNumber <= endM
+                : monthNumber >= startM && monthNumber <= endM;
+
+            if (!monthInSeason)
+            {
+                return (1, 0);
+            }
+
+            if (startM == endM && !wrapsYear)
+            {
+                return (Math.Min(daysInMonth + 1, startD + 1), Math.Min(endD, daysInMonth));
+            }
+
+            if (monthNumber == startM)
+            {
+                return (Math.Min(daysInMonth + 1, startD + 1), daysInMonth);
+            }
+
+            if (monthNumber == endM)
+            {
+                return (1, Math.Min(endD, daysInMonth));
+            }
+
+            return (1, daysInMonth);
         }
 
         private static bool IsDateInRange(DateTime dt, DateTime start, DateTime end)

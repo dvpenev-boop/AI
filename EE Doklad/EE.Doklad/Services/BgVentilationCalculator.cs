@@ -280,41 +280,54 @@ namespace EE.Doklad.Services
         /// </summary>
         private int GetHeatingSeasonDaysInMonth(int yearRef, int monthNumber, ClimateZoneData climateData)
         {
-            // Default: whole month
-            int daysInMonth = DateTime.DaysInMonth(yearRef, monthNumber);
-
             if (climateData?.HeatingSeason == null || string.IsNullOrWhiteSpace(climateData.HeatingSeason.Start) || string.IsNullOrWhiteSpace(climateData.HeatingSeason.End))
             {
-                return daysInMonth;
+                return DateTime.DaysInMonth(yearRef, monthNumber);
             }
 
             // Parse start and end
             if (!TryParseMonthDay(climateData.HeatingSeason.Start, out int startM, out int startD) ||
                 !TryParseMonthDay(climateData.HeatingSeason.End, out int endM, out int endD))
             {
-                return daysInMonth;
+                return DateTime.DaysInMonth(yearRef, monthNumber);
             }
 
-            DateTime startDate = new DateTime(yearRef, startM, Math.Min(startD, DateTime.DaysInMonth(yearRef, startM)));
-            DateTime endDate = new DateTime(yearRef, endM, Math.Min(endD, DateTime.DaysInMonth(yearRef, endM)));
-            if (endDate < startDate)
+            bool wrapsYear = endM < startM || (endM == startM && endD < startD);
+            int effectiveYear = wrapsYear && monthNumber <= endM
+                ? yearRef + 1
+                : yearRef;
+            int daysInMonth = DateTime.DaysInMonth(effectiveYear, monthNumber);
+            int startMonthDays = DateTime.DaysInMonth(yearRef, startM);
+            int endMonthDays = DateTime.DaysInMonth(wrapsYear ? yearRef + 1 : yearRef, endM);
+
+            startD = Math.Min(startD, startMonthDays);
+            endD = Math.Min(endD, endMonthDays);
+
+            bool monthInSeason = wrapsYear
+                ? monthNumber >= startM || monthNumber <= endM
+                : monthNumber >= startM && monthNumber <= endM;
+
+            if (!monthInSeason)
             {
-                // season wraps into next year
-                endDate = endDate.AddYears(1);
+                return 0;
             }
 
-            int count = 0;
-            for (int d = 1; d <= daysInMonth; d++)
+            if (startM == endM && !wrapsYear)
             {
-                DateTime dt = new DateTime(yearRef, monthNumber, d);
-                // check both this year and next year in case season wrapped
-                if (IsDateInRange(dt, startDate, endDate) || IsDateInRange(dt.AddYears(1), startDate, endDate))
-                {
-                    count++;
-                }
+                return Math.Max(0, endD - startD);
             }
 
-            return count;
+            if (monthNumber == startM)
+            {
+                return Math.Max(0, daysInMonth - startD);
+            }
+
+            if (monthNumber == endM)
+            {
+                return Math.Max(0, Math.Min(endD, daysInMonth));
+            }
+
+            return daysInMonth;
         }
 
         private bool TryParseMonthDay(string s, out int month, out int day)

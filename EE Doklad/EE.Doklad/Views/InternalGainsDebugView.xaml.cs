@@ -318,42 +318,46 @@ namespace EE.Doklad.Views
         private (double phiH, double phiC) GetSensibleHeatValues()
         {
             double phiH = 70.0;
+            double phiC = 67.0;
 
             if (_report != null)
             {
                 var heatSection = GetSection(SectionType.Heating);
                 if (heatSection?.HeatingSectionData != null)
                 {
-                    phiH = GetSensibleHeatFromActivity(
+                    phiH = GetSensibleHeatFromSection(
                         heatSection.HeatingSectionData.SelectedActivityLevel,
-                        isHeating: true);
+                        heatSection.HeatingSectionData.DesignTemperature,
+                        fallbackValue: phiH);
+                }
+
+                var coolingSection = GetCoolingSection();
+                if (coolingSection?.CoolingSectionData != null)
+                {
+                    phiC = GetSensibleHeatFromSection(
+                        coolingSection.CoolingSectionData.SelectedActivityLevel,
+                        coolingSection.CoolingSectionData.DesignTemperature,
+                        fallbackValue: phiC);
                 }
             }
 
-            double phiC = Math.Max(phiH * 0.85, 55.0);
             return (phiH, phiC);
         }
 
-        private static double GetSensibleHeatFromActivity(ActivityLevel level, bool isHeating)
+        private static double GetSensibleHeatFromSection(ActivityLevel level, double temperature, double fallbackValue)
         {
-            return level switch
-            {
-                ActivityLevel.Cinema               => isHeating ? 75  : 60,
-                ActivityLevel.Office               => isHeating ? 75  : 65,
-                ActivityLevel.HotelReceptionKasier => isHeating ? 80  : 70,
-                ActivityLevel.StandingLightWork    => isHeating ? 90  : 75,
-                ActivityLevel.WalkingSeated        => isHeating ? 100 : 85,
-                ActivityLevel.ModerateWork         => isHeating ? 110 : 95,
-                ActivityLevel.LightWorkSeated      => isHeating ? 105 : 90,
-                ActivityLevel.Dancing              => isHeating ? 140 : 120,
-                ActivityLevel.FastWalking          => isHeating ? 165 : 150,
-                ActivityLevel.HeavyWork            => isHeating ? 210 : 185,
-                _                                  => 70
-            };
+            var (sensible, _) = ActivityDataService.CalculateHeatForTemperature(level, temperature);
+            return sensible > 0 ? sensible : fallbackValue;
         }
 
         private Section? GetSection(SectionType type)
             => _report?.Sections?.FirstOrDefault(s => s.Type == type);
+
+        private Section? GetCoolingSection()
+            => _report?.Sections?.FirstOrDefault(s =>
+                s.CoolingSectionData != null &&
+                (s.Type == SectionType.Normal ||
+                 (s.Title?.Contains("Охлаждане", StringComparison.OrdinalIgnoreCase) ?? false)));
 
         private static double SumPower(System.Collections.IEnumerable rows)
         {
@@ -380,11 +384,33 @@ namespace EE.Doklad.Views
                 System.Globalization.CultureInfo.InvariantCulture, out double v) ? v : 0;
         }
 
-        private static List<string> BuildNotes(InternalGainsAggregatorInput inp)
+        private List<string> BuildNotes(InternalGainsAggregatorInput inp)
         {
             var notes = new List<string>();
-            if (inp.OccupantsSensibleHeat_H_W <= 0)
-                notes.Add("Phi_sens,H = 0 - обитателите не допринасят. Проверете Секция Отопление.");
+            var heatingSection = GetSection(SectionType.Heating);
+            var coolingSection = GetCoolingSection();
+
+            if (heatingSection?.HeatingSectionData == null)
+            {
+                notes.Add("Обитатели отопление: липсват данни от Секция 11.");
+            }
+            else if (inp.OccupantsSensibleHeat_H_W <= 0)
+            {
+                notes.Add("Обитатели отопление: Phi_sens,H = 0. Проверете активността и температурата в Секция 11.");
+            }
+
+            if (_objData?.CoolingSeasonEnabled == true)
+            {
+                if (coolingSection?.CoolingSectionData == null)
+                {
+                    notes.Add("Обитатели охлаждане: липсват данни от Секция 12.");
+                }
+                else if (inp.OccupantsSensibleHeat_C_W <= 0)
+                {
+                    notes.Add("Обитатели охлаждане: Phi_sens,C = 0. Проверете активността и температурата в Секция 12.");
+                }
+            }
+
             if (inp.Appliances_TotalPower_W <= 0 && inp.Appliances_TotalAnnualEnergy_kWh <= 0)
                 notes.Add("Уреди: нулева мощност/енергия - добавете данни в Секция 18.");
             if (inp.Lighting_TotalPower_W <= 0 && inp.Lighting_TotalAnnualEnergy_kWh <= 0)

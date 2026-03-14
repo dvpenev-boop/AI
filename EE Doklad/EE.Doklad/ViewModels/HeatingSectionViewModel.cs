@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using EE.Doklad.Models;
+using EE.Doklad.Services;
 
 namespace EE.Doklad.ViewModels
 {
@@ -16,7 +19,14 @@ namespace EE.Doklad.ViewModels
     {
         private readonly HeatingSectionData _data;
         private readonly ObjectDataSectionData? _objectData;
+        private readonly Report? _report;
+        private readonly ExternalWallsSectionData? _wallsData;
+        private readonly RoofSectionData? _roofData;
+        private readonly FloorSectionData? _floorData;
+        private readonly WindowsSectionData? _windowsData;
+        private readonly UnconditionedZoneSectionData? _ztuData;
         private bool _isAdjustingShares = false; // guard to avoid recursive share updates
+        private double _heatingInstallationHours;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -191,6 +201,8 @@ namespace EE.Doklad.ViewModels
                             _isAdjustingShares = false;
                         }
                     }
+
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -205,6 +217,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource1.EmissionEfficiency = clamped;
                     OnPropertyChanged(nameof(EnergySource1EmissionEfficiency));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -219,6 +232,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource1.DistributionEfficiency = clamped;
                     OnPropertyChanged(nameof(EnergySource1DistributionEfficiency));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -233,6 +247,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource1.AutomaticControl = clamped;
                     OnPropertyChanged(nameof(EnergySource1AutomaticControl));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -247,6 +262,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource1.EnergyManagement = clamped;
                     OnPropertyChanged(nameof(EnergySource1EnergyManagement));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -261,6 +277,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Max(value, 0); // Can be > 100 for heat pumps
                     _data.EnergySource1.GenerationEfficiency = clamped;
                     OnPropertyChanged(nameof(EnergySource1GenerationEfficiency));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -316,6 +333,7 @@ namespace EE.Doklad.ViewModels
                     }
 
                     OnPropertyChanged(nameof(UseSecondEnergySource));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -345,6 +363,8 @@ namespace EE.Doklad.ViewModels
                             _isAdjustingShares = false;
                         }
                     }
+
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -359,6 +379,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource2.EmissionEfficiency = clamped;
                     OnPropertyChanged(nameof(EnergySource2EmissionEfficiency));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -373,6 +394,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource2.DistributionEfficiency = clamped;
                     OnPropertyChanged(nameof(EnergySource2DistributionEfficiency));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -387,6 +409,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource2.AutomaticControl = clamped;
                     OnPropertyChanged(nameof(EnergySource2AutomaticControl));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -401,6 +424,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Clamp(value, 0, 100);
                     _data.EnergySource2.EnergyManagement = clamped;
                     OnPropertyChanged(nameof(EnergySource2EnergyManagement));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -415,6 +439,7 @@ namespace EE.Doklad.ViewModels
                     var clamped = Math.Max(value, 0);
                     _data.EnergySource2.GenerationEfficiency = clamped;
                     OnPropertyChanged(nameof(EnergySource2GenerationEfficiency));
+                    NotifyGrossHeatingEnergyChanged();
                 }
             }
         }
@@ -473,6 +498,42 @@ namespace EE.Doklad.ViewModels
         /// Температура в помещението (read-only, равна на проектна температура)
         /// </summary>
         public string RoomTemperatureDisplay => $"{_data.DesignTemperature:F2} °C";
+
+        public ObservableCollection<HeatingCharacteristicRow> ThermalCharacteristicsRows { get; } = new();
+        public string HeatingInstallationHoursDisplay => $"{_heatingInstallationHours:F0}";
+        public double NetHeatingEnergyNoGainsPerArea { get; private set; }
+        public string NetHeatingEnergyNoGainsPerAreaDisplay => NetHeatingEnergyNoGainsPerArea.ToString("F2", CultureInfo.InvariantCulture);
+        public double? EnergySource1RequiredEnergyPerArea => CalculateRequiredEnergyForSource(
+            NetHeatingEnergyNoGainsPerArea,
+            EnergySource1Share,
+            EnergySource1EmissionEfficiency,
+            EnergySource1DistributionEfficiency,
+            EnergySource1AutomaticControl,
+            EnergySource1EnergyManagement,
+            EnergySource1GenerationEfficiency);
+        public string EnergySource1RequiredEnergyPerAreaDisplay => FormatNullableDouble(EnergySource1RequiredEnergyPerArea);
+        public double? EnergySource2RequiredEnergyPerArea => UseSecondEnergySource
+            ? CalculateRequiredEnergyForSource(
+                NetHeatingEnergyNoGainsPerArea,
+                EnergySource2Share,
+                EnergySource2EmissionEfficiency,
+                EnergySource2DistributionEfficiency,
+                EnergySource2AutomaticControl,
+                EnergySource2EnergyManagement,
+                EnergySource2GenerationEfficiency)
+            : 0.0;
+        public string EnergySource2RequiredEnergyPerAreaDisplay => FormatNullableDouble(EnergySource2RequiredEnergyPerArea);
+        public double TotalGrossHeatingEnergyPerArea =>
+            (EnergySource1RequiredEnergyPerArea ?? 0.0) +
+            (EnergySource2RequiredEnergyPerArea ?? 0.0);
+        public string TotalGrossHeatingEnergyPerAreaDisplay => TotalGrossHeatingEnergyPerArea.ToString("F2", CultureInfo.InvariantCulture);
+        public double? OverallHeatGenerationEfficiencyPercent =>
+            TotalGrossHeatingEnergyPerArea > 0.0
+                ? NetHeatingEnergyNoGainsPerArea / TotalGrossHeatingEnergyPerArea * 100.0
+                : null;
+        public string OverallHeatGenerationEfficiencyDisplay => FormatNullableDouble(OverallHeatGenerationEfficiencyPercent);
+        public bool HasEnergySourceShareWarning => Math.Abs(GetTotalEnergySourceShare() - 100.0) > 0.01;
+        public string EnergySourceShareWarning => "Сборът на дяловете трябва да е 100%";
 
         // ========== ИЗЧИСЛЕНИ СТОЙНОСТИ ==========
 
@@ -635,10 +696,16 @@ namespace EE.Doklad.ViewModels
 
         // ========== CONSTRUCTOR ==========
 
-        public HeatingSectionViewModel(HeatingSectionData data, ObjectDataSectionData? objectData = null)
+        public HeatingSectionViewModel(HeatingSectionData data, ObjectDataSectionData? objectData = null, Report? report = null)
         {
             _data = data;
             _objectData = objectData;
+            _report = report;
+            _wallsData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ExternalWalls)?.ExternalWallsSectionData;
+            _roofData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Roof)?.RoofSectionData;
+            _floorData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Floor)?.FloorSectionData;
+            _windowsData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Windows)?.WindowsSectionData;
+            _ztuData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.UnconditionedZones)?.UnconditionedZoneSectionData;
 
             // Инициализация на activity options
             ActivityLevelOptions = ActivityDataService.GetAllActivities()
@@ -662,6 +729,8 @@ namespace EE.Doklad.ViewModels
 
             // Първоначално изчисление
             RecalculateOccupantHeat();
+            AttachSectionListeners();
+            RefreshThermalCharacteristics();
         }
 
         private void ObjectData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -670,6 +739,7 @@ namespace EE.Doklad.ViewModels
             {
                 OnPropertyChanged(nameof(NumberOfOccupants));
                 RecalculateOccupantHeat();
+                RefreshThermalCharacteristics();
             }
             else if (e.PropertyName == nameof(ObjectDataSectionData.HeatedArea))
             {
@@ -684,6 +754,8 @@ namespace EE.Doklad.ViewModels
                 OnPropertyChanged(nameof(IsHeatingSeasonEnabled));
                 OnPropertyChanged(nameof(HeatingSeasonWarning));
             }
+
+            RefreshThermalCharacteristics();
         }
 
         // ========== VALIDATION & PARSING ==========
@@ -718,6 +790,7 @@ namespace EE.Doklad.ViewModels
                     _infiltrationText = value.ToString("F2", CultureInfo.InvariantCulture);
                     OnPropertyChanged(nameof(InfiltrationText));
                 }
+                RefreshThermalCharacteristics();
             }
             else
             {
@@ -750,6 +823,7 @@ namespace EE.Doklad.ViewModels
                 // Преизчисли топлината (температурата влияе на интерполацията)
                 OnPropertyChanged(nameof(RoomTemperatureDisplay));
                 RecalculateOccupantHeat();
+                RefreshThermalCharacteristics();
             }
             else
             {
@@ -778,6 +852,7 @@ namespace EE.Doklad.ViewModels
                     _reductionTemperatureText = value.ToString("F2", CultureInfo.InvariantCulture);
                     OnPropertyChanged(nameof(ReductionTemperatureText));
                 }
+                RefreshThermalCharacteristics();
             }
             else
             {
@@ -814,6 +889,461 @@ namespace EE.Doklad.ViewModels
             OnPropertyChanged(nameof(TotalLatentHeatPerAreaDisplay));
         }
 
+        private void AttachSectionListeners()
+        {
+            AttachWallsListeners();
+            AttachRoofListeners();
+            AttachFloorListeners();
+            AttachWindowsListeners();
+            AttachZtuListeners();
+        }
+
+        private void AttachWallsListeners()
+        {
+            if (_wallsData == null)
+            {
+                return;
+            }
+
+            _wallsData.WallTypes.CollectionChanged += Walls_CollectionChanged;
+            foreach (var wall in _wallsData.WallTypes)
+            {
+                AttachWall(wall);
+            }
+        }
+
+        private void Walls_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (ExternalWallType wall in e.OldItems)
+                {
+                    wall.PropertyChanged -= SourceData_PropertyChanged;
+                    if (wall.ThermalBridges != null)
+                    {
+                        wall.ThermalBridges.PropertyChanged -= SourceData_PropertyChanged;
+                    }
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (ExternalWallType wall in e.NewItems)
+                {
+                    AttachWall(wall);
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void AttachWall(ExternalWallType wall)
+        {
+            wall.PropertyChanged += SourceData_PropertyChanged;
+            if (wall.ThermalBridges != null)
+            {
+                wall.ThermalBridges.PropertyChanged += SourceData_PropertyChanged;
+            }
+        }
+
+        private void AttachRoofListeners()
+        {
+            if (_roofData == null)
+            {
+                return;
+            }
+
+            _roofData.RoofTypes.CollectionChanged += Roof_CollectionChanged;
+            foreach (var roof in _roofData.RoofTypes)
+            {
+                AttachRoof(roof);
+            }
+        }
+
+        private void Roof_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (RoofType roof in e.OldItems)
+                {
+                    roof.PropertyChanged -= SourceData_PropertyChanged;
+                    if (roof.ThermalBridges != null)
+                    {
+                        roof.ThermalBridges.PropertyChanged -= SourceData_PropertyChanged;
+                    }
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (RoofType roof in e.NewItems)
+                {
+                    AttachRoof(roof);
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void AttachRoof(RoofType roof)
+        {
+            roof.PropertyChanged += SourceData_PropertyChanged;
+            if (roof.ThermalBridges != null)
+            {
+                roof.ThermalBridges.PropertyChanged += SourceData_PropertyChanged;
+            }
+        }
+
+        private void AttachFloorListeners()
+        {
+            if (_floorData == null)
+            {
+                return;
+            }
+
+            _floorData.FloorItems.CollectionChanged += Floor_CollectionChanged;
+            foreach (var item in _floorData.FloorItems)
+            {
+                item.PropertyChanged += SourceData_PropertyChanged;
+            }
+        }
+
+        private void Floor_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (FloorItem item in e.OldItems)
+                {
+                    item.PropertyChanged -= SourceData_PropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (FloorItem item in e.NewItems)
+                {
+                    item.PropertyChanged += SourceData_PropertyChanged;
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void AttachWindowsListeners()
+        {
+            if (_windowsData == null)
+            {
+                return;
+            }
+
+            _windowsData.WindowBatches.CollectionChanged += Windows_CollectionChanged;
+            foreach (var batch in _windowsData.WindowBatches)
+            {
+                batch.PropertyChanged += SourceData_PropertyChanged;
+            }
+        }
+
+        private void Windows_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (WindowBatch batch in e.OldItems)
+                {
+                    batch.PropertyChanged -= SourceData_PropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (WindowBatch batch in e.NewItems)
+                {
+                    batch.PropertyChanged += SourceData_PropertyChanged;
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void AttachZtuListeners()
+        {
+            if (_ztuData == null)
+            {
+                return;
+            }
+
+            _ztuData.Zones.CollectionChanged += ZtuZones_CollectionChanged;
+            foreach (var zone in _ztuData.Zones)
+            {
+                AttachZone(zone);
+            }
+        }
+
+        private void ZtuZones_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (ZtuZone zone in e.OldItems)
+                {
+                    DetachZone(zone);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (ZtuZone zone in e.NewItems)
+                {
+                    AttachZone(zone);
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void AttachZone(ZtuZone zone)
+        {
+            zone.PropertyChanged += SourceData_PropertyChanged;
+            zone.ElementsToExternal.CollectionChanged += ZtuElements_CollectionChanged;
+            zone.ElementsToBoundary.CollectionChanged += ZtuElements_CollectionChanged;
+
+            foreach (var element in zone.ElementsToExternal)
+            {
+                AttachElement(element);
+            }
+
+            foreach (var element in zone.ElementsToBoundary)
+            {
+                AttachElement(element);
+            }
+        }
+
+        private void DetachZone(ZtuZone zone)
+        {
+            zone.PropertyChanged -= SourceData_PropertyChanged;
+            zone.ElementsToExternal.CollectionChanged -= ZtuElements_CollectionChanged;
+            zone.ElementsToBoundary.CollectionChanged -= ZtuElements_CollectionChanged;
+
+            foreach (var element in zone.ElementsToExternal)
+            {
+                DetachElement(element);
+            }
+
+            foreach (var element in zone.ElementsToBoundary)
+            {
+                DetachElement(element);
+            }
+        }
+
+        private void ZtuElements_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (ZtuElement element in e.OldItems)
+                {
+                    DetachElement(element);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (ZtuElement element in e.NewItems)
+                {
+                    AttachElement(element);
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void AttachElement(ZtuElement element)
+        {
+            element.PropertyChanged += SourceData_PropertyChanged;
+            element.Layers.CollectionChanged += ZtuLayers_CollectionChanged;
+            foreach (var layer in element.Layers)
+            {
+                layer.PropertyChanged += SourceData_PropertyChanged;
+            }
+        }
+
+        private void DetachElement(ZtuElement element)
+        {
+            element.PropertyChanged -= SourceData_PropertyChanged;
+            element.Layers.CollectionChanged -= ZtuLayers_CollectionChanged;
+            foreach (var layer in element.Layers)
+            {
+                layer.PropertyChanged -= SourceData_PropertyChanged;
+            }
+        }
+
+        private void ZtuLayers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (ZtuLayer layer in e.OldItems)
+                {
+                    layer.PropertyChanged -= SourceData_PropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (ZtuLayer layer in e.NewItems)
+                {
+                    layer.PropertyChanged += SourceData_PropertyChanged;
+                }
+            }
+
+            RefreshThermalCharacteristics();
+        }
+
+        private void SourceData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            RefreshThermalCharacteristics();
+        }
+
+        private void RefreshThermalCharacteristics()
+        {
+            var snapshot = HeatingCharacteristicsService.Build(_report, _objectData, _data);
+
+            double hTrTotal = snapshot.Walls.H + snapshot.Roof.H + snapshot.Floor.H + snapshot.Windows.H + snapshot.ThermalBridgesH_WK + snapshot.ZtuH_WK;
+            double hInf = 0.34 * snapshot.InfiltrationRate_AirChangesPerHour * snapshot.BuildingVolume_m3;
+            double hVeTotal = hInf;
+            double hTotal = hTrTotal + hVeTotal;
+            double annualEquivalentHours = CalculateAnnualEquivalentHours(snapshot);
+            double deltaT = 1.0;
+            double energyHours = annualEquivalentHours;
+            _heatingInstallationHours = snapshot.HeatingOperatingHours_h;
+            NetHeatingEnergyNoGainsPerArea = snapshot.HeatedArea_m2 > 0.0
+                ? (hTotal * deltaT * energyHours / 1000.0) / snapshot.HeatedArea_m2
+                : 0.0;
+            OnPropertyChanged(nameof(HeatingInstallationHoursDisplay));
+            NotifyGrossHeatingEnergyChanged();
+
+            ThermalCharacteristicsRows.Clear();
+            ThermalCharacteristicsRows.Add(CreateMetricRow("Външни стени", snapshot.Walls.U, snapshot.Walls.Area, snapshot.Walls.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("Покрив", snapshot.Roof.U, snapshot.Roof.Area, snapshot.Roof.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("Под", snapshot.Floor.U, snapshot.Floor.Area, snapshot.Floor.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("Прозорци и врати", snapshot.Windows.U, snapshot.Windows.Area, snapshot.Windows.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("Топлинни мостове", null, null, snapshot.ThermalBridgesH_WK, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("ZTU (неотопляеми)", null, null, snapshot.ZtuH_WK, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(HeatingCharacteristicRow.Separator());
+            ThermalCharacteristicsRows.Add(CreateMetricRow("H_tr ОБЩО", null, null, hTrTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("Инфилтрация", snapshot.InfiltrationRate_AirChangesPerHour, snapshot.BuildingVolume_m3, hInf, snapshot.HeatedArea_m2, deltaT, energyHours, uUnit: "1/h", aUnit: "m³"));
+            ThermalCharacteristicsRows.Add(HeatingCharacteristicRow.Separator());
+            ThermalCharacteristicsRows.Add(CreateMetricRow("H_ve ОБЩО", null, null, hVeTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("H_TOTAL", null, null, hTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true, isHighlighted: true));
+        }
+
+        private static HeatingCharacteristicRow CreateMetricRow(
+            string parameter,
+            double? u,
+            double? area,
+            double h,
+            double heatedArea,
+            double deltaT,
+            double operatingHours,
+            bool isTotal = false,
+            bool isHighlighted = false,
+            string uUnit = "W/m²K",
+            string aUnit = "m²")
+        {
+            double kwh = h * deltaT * operatingHours / 1000.0;
+            return new HeatingCharacteristicRow
+            {
+                Parameter = parameter,
+                UDisplay = u.HasValue ? u.Value.ToString("F3", CultureInfo.InvariantCulture) : "-",
+                ADisplay = area.HasValue ? area.Value.ToString("F2", CultureInfo.InvariantCulture) : "-",
+                HDisplay = h.ToString("F2", CultureInfo.InvariantCulture),
+                KwhPerAreaDisplay = heatedArea > 0 ? (kwh / heatedArea).ToString("F2", CultureInfo.InvariantCulture) : "0.00",
+                KwhDisplay = kwh.ToString("F2", CultureInfo.InvariantCulture),
+                IsTotal = isTotal,
+                IsHighlighted = isHighlighted,
+                UToolTip = u.HasValue ? uUnit : null,
+                AToolTip = area.HasValue ? aUnit : null
+            };
+        }
+
+        private static double CalculateAnnualEquivalentHours(HeatingCharacteristicsSnapshot snapshot)
+        {
+            double annualEquivalentHours = 0.0;
+            int monthCount = new[]
+            {
+                snapshot.MonthlyOutdoorTemps_C.Length,
+                snapshot.MonthlyOperatingHours_h.Length,
+                snapshot.MonthlySetbackHours_h.Length
+            }.Min();
+
+            for (int month = 0; month < monthCount; month++)
+            {
+                double te = snapshot.MonthlyOutdoorTemps_C[month];
+                double fullDelta = Math.Max(0.0, snapshot.DesignIndoorTemp_C - te);
+                double setbackDelta = Math.Max(0.0, snapshot.SetbackIndoorTemp_C - te);
+                double fullHours = Math.Max(0.0, snapshot.MonthlyOperatingHours_h[month]);
+                double setbackHours = Math.Max(0.0, snapshot.MonthlySetbackHours_h[month]);
+
+                annualEquivalentHours += fullDelta * fullHours + setbackDelta * setbackHours;
+            }
+
+            return annualEquivalentHours;
+        }
+
+        private void NotifyGrossHeatingEnergyChanged()
+        {
+            OnPropertyChanged(nameof(NetHeatingEnergyNoGainsPerArea));
+            OnPropertyChanged(nameof(NetHeatingEnergyNoGainsPerAreaDisplay));
+            OnPropertyChanged(nameof(EnergySource1RequiredEnergyPerArea));
+            OnPropertyChanged(nameof(EnergySource1RequiredEnergyPerAreaDisplay));
+            OnPropertyChanged(nameof(EnergySource2RequiredEnergyPerArea));
+            OnPropertyChanged(nameof(EnergySource2RequiredEnergyPerAreaDisplay));
+            OnPropertyChanged(nameof(TotalGrossHeatingEnergyPerArea));
+            OnPropertyChanged(nameof(TotalGrossHeatingEnergyPerAreaDisplay));
+            OnPropertyChanged(nameof(OverallHeatGenerationEfficiencyPercent));
+            OnPropertyChanged(nameof(OverallHeatGenerationEfficiencyDisplay));
+            OnPropertyChanged(nameof(HasEnergySourceShareWarning));
+        }
+
+        private double GetTotalEnergySourceShare()
+        {
+            return UseSecondEnergySource
+                ? EnergySource1Share + EnergySource2Share
+                : EnergySource1Share;
+        }
+
+        private static double? CalculateRequiredEnergyForSource(
+            double netEnergyPerArea,
+            double sharePercent,
+            double emissionEfficiency,
+            double distributionEfficiency,
+            double automaticControl,
+            double energyManagement,
+            double generationEfficiency)
+        {
+            if (netEnergyPerArea <= 0.0 || sharePercent <= 0.0)
+            {
+                return 0.0;
+            }
+
+            double etaSys =
+                (emissionEfficiency / 100.0) *
+                (distributionEfficiency / 100.0) *
+                (automaticControl / 100.0) *
+                (energyManagement / 100.0) *
+                (generationEfficiency / 100.0);
+
+            if (etaSys <= 0.0)
+            {
+                return null;
+            }
+
+            return netEnergyPerArea * (sharePercent / 100.0) / etaSys;
+        }
+
+        private static string FormatNullableDouble(double? value)
+        {
+            return value.HasValue
+                ? value.Value.ToString("F2", CultureInfo.InvariantCulture)
+                : "-";
+        }
+
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -827,5 +1357,34 @@ namespace EE.Doklad.ViewModels
     {
         public ActivityLevel Level { get; set; }
         public string DisplayName { get; set; } = string.Empty;
+    }
+
+    public class HeatingCharacteristicRow
+    {
+        public string Parameter { get; set; } = string.Empty;
+        public string UDisplay { get; set; } = "-";
+        public string ADisplay { get; set; } = "-";
+        public string HDisplay { get; set; } = "0.00";
+        public string KwhPerAreaDisplay { get; set; } = "0.00";
+        public string KwhDisplay { get; set; } = "0.00";
+        public bool IsTotal { get; set; }
+        public bool IsHighlighted { get; set; }
+        public bool IsSeparator { get; set; }
+        public string? UToolTip { get; set; }
+        public string? AToolTip { get; set; }
+
+        public static HeatingCharacteristicRow Separator()
+        {
+            return new HeatingCharacteristicRow
+            {
+                IsSeparator = true,
+                Parameter = string.Empty,
+                UDisplay = string.Empty,
+                ADisplay = string.Empty,
+                HDisplay = string.Empty,
+                KwhPerAreaDisplay = string.Empty,
+                KwhDisplay = string.Empty
+            };
+        }
     }
 }

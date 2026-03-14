@@ -930,6 +930,271 @@
                 </StackPanel>
             </Border>
 
+            <TextBlock Text="Топлина от обитатели"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Margin="0,30,0,10"/>
+
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border x:Name="HeatingOccupantsPanel" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
+                                <TextBlock Text="Параметър" Padding="10,6" FontWeight="Bold" FontSize="13" Foreground="White"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
+                                <TextBlock Text="Отопление" Padding="10,6" FontWeight="Bold" FontSize="13" Foreground="White" TextAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Брой обитатели" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding NumberOfOccupants, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Степен на активност" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding ActivityLevelOptions}"
+                                          SelectedValue="{Binding SelectedActivityLevel}"
+                                          SelectedValuePath="Level"
+                                          DisplayMemberPath="DisplayName"
+                                          Padding="6,2"
+                                          Margin="2"
+                                          FontSize="11"
+                                          VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Температура в помещението" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding RoomTemperatureDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Явна топлина от един човек [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding SensibleHeatPerPersonDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Скрита топлина от един човек [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding LatentHeatPerPersonDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Топлина от обитатели [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalOccupantHeatDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Латентна топлина от обитатели [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalLatentHeatDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Топлина от обитатели [W/m²]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalOccupantHeatPerAreaDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Латентна топлина от обитатели [W/m²]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#FFF3F3"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalLatentHeatPerAreaDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="CoolingOccupantsPanel" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="1">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="#1E88E5" BorderBrush="White" BorderThickness="0,0,1,1">
+                                <TextBlock Text="Параметър" Padding="10,6" FontWeight="Bold" FontSize="13" Foreground="White"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="#1E88E5" BorderBrush="White" BorderThickness="0,0,0,1">
+                                <TextBlock Text="Охлаждане" Padding="10,6" FontWeight="Bold" FontSize="13" Foreground="White" TextAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Брой обитатели" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding NumberOfOccupants, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Степен на активност" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding ActivityLevelOptions}"
+                                          SelectedValue="{Binding SelectedActivityLevel}"
+                                          SelectedValuePath="Level"
+                                          DisplayMemberPath="DisplayName"
+                                          Padding="6,2"
+                                          Margin="2"
+                                          FontSize="11"
+                                          VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Температура в помещението" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding RoomTemperatureDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Явна топлина от един човек [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding SensibleHeatPerPersonDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Скрита топлина от един човек [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding LatentHeatPerPersonDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Топлина от обитатели [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalOccupantHeatDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Латентна топлина от обитатели [W]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalLatentHeatDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Топлина от обитатели [W/m²]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <TextBox Grid.Column="1" Text="{Binding TotalOccupantHeatPerAreaDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                            </Grid>
+                        </Border>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="0">
+                            <Grid Background="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Латентна топлина от обитатели [W/m²]" Padding="10,6" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Background="#F2F8FF"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBox Text="{Binding TotalLatentHeatPerAreaDisplay, Mode=OneWay}" Padding="10,6" Background="White" FontSize="12" BorderThickness="0" TextAlignment="Center" IsReadOnly="True"/>
+                                    <TextBlock Text="{Binding CooledAreaError}" Foreground="Red" FontSize="11" Margin="5,2,0,0"
+                                               Visibility="{Binding HasCooledAreaError, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
             <TextBlock Text="Всички полета могат да бъдат редактирани. Ако няма налична информация, напишете '–'."
                        Foreground="Gray"
                        FontSize="11"

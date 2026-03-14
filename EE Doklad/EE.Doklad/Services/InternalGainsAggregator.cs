@@ -216,7 +216,9 @@ namespace EE.Doklad.Services
                 EndMonth    = inp.HeatingEndMonth,
                 EndDay      = inp.HeatingEndDay,
                 HoursPerDay = inp.HeatingHoursPerDay,
-                YearRef     = inp.YearRef
+                YearRef     = inp.YearRef,
+                IncludeStartDay = false,
+                IncludeEndDay = false
             });
         }
 

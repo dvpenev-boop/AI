@@ -301,7 +301,7 @@ public partial class MainWindow : Window
 
             var heatingSectionView = new HeatingSectionView
             {
-                DataContext = new ViewModels.HeatingSectionViewModel(section.HeatingSectionData, objectData)
+                DataContext = new ViewModels.HeatingSectionViewModel(section.HeatingSectionData, objectData, viewModel.CurrentReport)
             };
             ContentScrollViewer.Content = heatingSectionView;
         }

@@ -19,6 +19,8 @@ namespace EE.Doklad.Services
         public double HoursPerDay { get; set; } = 24.0;
         /// <summary>Референтна година за изчисленията</summary>
         public int YearRef        { get; set; } = 2024;
+        public bool IncludeStartDay { get; set; } = true;
+        public bool IncludeEndDay { get; set; } = true;
     }
 
     /// <summary>
@@ -91,6 +93,10 @@ namespace EE.Doklad.Services
                 for (int m = 1; m <= 12; m++)
                 {
                     double days = IntersectDays(m, p.YearRef, seasonStart, seasonEnd);
+                    if (!p.IncludeStartDay && m == p.StartMonth && days > 0)
+                        days = Math.Max(0.0, days - 1.0);
+                    if (!p.IncludeEndDay && m == p.EndMonth && days > 0)
+                        days = Math.Max(0.0, days - 1.0);
                     result.Days[m - 1]  = days;
                     result.Hours[m - 1] = days * p.HoursPerDay;
                 }
@@ -111,15 +117,24 @@ namespace EE.Doklad.Services
                 var seasonStartA = new DateTime(p.YearRef, p.StartMonth, p.StartDay);
                 var seasonEndA   = new DateTime(p.YearRef, 12, 31);
 
-                var seasonStartB = new DateTime(p.YearRef, 1, 1);
-                var seasonEndB   = new DateTime(p.YearRef, p.EndMonth,
-                    Math.Min(p.EndDay, DateTime.DaysInMonth(p.YearRef, p.EndMonth)));
+                int nextYear = p.YearRef + 1;
+                var seasonStartB = new DateTime(nextYear, 1, 1);
+                var seasonEndB   = new DateTime(nextYear, p.EndMonth,
+                    Math.Min(p.EndDay, DateTime.DaysInMonth(nextYear, p.EndMonth)));
 
                 for (int m = 1; m <= 12; m++)
                 {
-                    double daysA = IntersectDays(m, p.YearRef, seasonStartA, seasonEndA);
-                    double daysB = IntersectDays(m, p.YearRef, seasonStartB, seasonEndB);
+                    double daysA = m >= p.StartMonth
+                        ? IntersectDays(m, p.YearRef, seasonStartA, seasonEndA)
+                        : 0.0;
+                    double daysB = m <= p.EndMonth
+                        ? IntersectDays(m, nextYear, seasonStartB, seasonEndB)
+                        : 0.0;
                     double days  = daysA + daysB;
+                    if (!p.IncludeStartDay && m == p.StartMonth && days > 0)
+                        days = Math.Max(0.0, days - 1.0);
+                    if (!p.IncludeEndDay && m == p.EndMonth && days > 0)
+                        days = Math.Max(0.0, days - 1.0);
                     result.Days[m - 1]  = days;
                     result.Hours[m - 1] = days * p.HoursPerDay;
                 }

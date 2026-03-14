@@ -12,37 +12,53 @@ namespace EE.Doklad.Services
         // Copy of logic used in ventilation to compute heating-season days per month.
         public static int GetHeatingSeasonDaysInMonth(int yearRef, int monthNumber, ClimateZoneData? climateData)
         {
-            int daysInMonth = DateTime.DaysInMonth(yearRef, monthNumber);
-
             if (climateData?.HeatingSeason == null || string.IsNullOrWhiteSpace(climateData.HeatingSeason.Start) || string.IsNullOrWhiteSpace(climateData.HeatingSeason.End))
             {
-                return daysInMonth;
+                return DateTime.DaysInMonth(yearRef, monthNumber);
             }
 
             if (!TryParseMonthDay(climateData.HeatingSeason.Start, out int startM, out int startD) ||
                 !TryParseMonthDay(climateData.HeatingSeason.End, out int endM, out int endD))
             {
-                return daysInMonth;
+                return DateTime.DaysInMonth(yearRef, monthNumber);
             }
 
-            DateTime startDate = new DateTime(yearRef, startM, Math.Min(startD, DateTime.DaysInMonth(yearRef, startM)));
-            DateTime endDate = new DateTime(yearRef, endM, Math.Min(endD, DateTime.DaysInMonth(yearRef, endM)));
-            if (endDate < startDate)
+            bool wrapsYear = endM < startM || (endM == startM && endD < startD);
+            int effectiveYear = wrapsYear && monthNumber <= endM
+                ? yearRef + 1
+                : yearRef;
+            int daysInMonth = DateTime.DaysInMonth(effectiveYear, monthNumber);
+            int startMonthDays = DateTime.DaysInMonth(yearRef, startM);
+            int endMonthDays = DateTime.DaysInMonth(wrapsYear ? yearRef + 1 : yearRef, endM);
+
+            startD = Math.Min(startD, startMonthDays);
+            endD = Math.Min(endD, endMonthDays);
+
+            bool monthInSeason = wrapsYear
+                ? monthNumber >= startM || monthNumber <= endM
+                : monthNumber >= startM && monthNumber <= endM;
+
+            if (!monthInSeason)
             {
-                endDate = endDate.AddYears(1);
+                return 0;
             }
 
-            int count = 0;
-            for (int d = 1; d <= daysInMonth; d++)
+            if (startM == endM && !wrapsYear)
             {
-                DateTime dt = new DateTime(yearRef, monthNumber, d);
-                if (IsDateInRange(dt, startDate, endDate) || IsDateInRange(dt.AddYears(1), startDate, endDate))
-                {
-                    count++;
-                }
+                return Math.Max(0, endD - startD);
             }
 
-            return count;
+            if (monthNumber == startM)
+            {
+                return Math.Max(0, daysInMonth - startD);
+            }
+
+            if (monthNumber == endM)
+            {
+                return Math.Max(0, Math.Min(endD, daysInMonth));
+            }
+
+            return daysInMonth;
         }
 
         private static bool TryParseMonthDay(string s, out int month, out int day)
@@ -174,49 +190,12 @@ namespace EE.Doklad.Services
             // Fallbacks
             double fallbackDesign = heatingData != null ? heatingData.DesignTemperature : 20.0;
 
-            // Parse heating schedule hours (ч./ден) - if missing we consider insufficient data
-            bool hasSchedule = false;
-            double workdayHours = ParseDoubleOrZero(objectData?.HeatingWorkdaysHours);
-            double saturdayHours = ParseDoubleOrZero(objectData?.HeatingSaturdayHours);
-            double sundayHours = ParseDoubleOrZero(objectData?.HeatingSundayHours);
-            double hoursPerWeek = workdayHours * 5.0 + saturdayHours + sundayHours;
-            double hoursPerDayEquivalent = hoursPerWeek / 7.0;
-            if (workdayHours > 0 || saturdayHours > 0 || sundayHours > 0)
-                hasSchedule = true;
-
-            // Build monthly days-off array
-            int[] monthlyDaysOff = new int[12];
-            if (objectData != null)
-            {
-                int ParseMonth(string? s) { if (string.IsNullOrWhiteSpace(s)) return 0; if (int.TryParse(s.Trim(), out var v)) return Math.Max(0, v); return 0; }
-                monthlyDaysOff[0] = ParseMonth(objectData.DaysOffJanuary);
-                monthlyDaysOff[1] = ParseMonth(objectData.DaysOffFebruary);
-                monthlyDaysOff[2] = ParseMonth(objectData.DaysOffMarch);
-                monthlyDaysOff[3] = ParseMonth(objectData.DaysOffApril);
-                monthlyDaysOff[4] = ParseMonth(objectData.DaysOffMay);
-                monthlyDaysOff[5] = ParseMonth(objectData.DaysOffJune);
-                monthlyDaysOff[6] = ParseMonth(objectData.DaysOffJuly);
-                monthlyDaysOff[7] = ParseMonth(objectData.DaysOffAugust);
-                monthlyDaysOff[8] = ParseMonth(objectData.DaysOffSeptember);
-                monthlyDaysOff[9] = ParseMonth(objectData.DaysOffOctober);
-                monthlyDaysOff[10] = ParseMonth(objectData.DaysOffNovember);
-                monthlyDaysOff[11] = ParseMonth(objectData.DaysOffDecember);
-            }
+            var monthlyBreakdown = HeatingScheduleService.ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef);
+            bool hasSchedule = monthlyBreakdown.Any(x => x.FullHours > 0.0 || x.SetbackHours > 0.0);
 
             for (int m = 0; m < 12; m++)
             {
-                // Determine heating-season days in month
                 int daysInHeatingSeason = GetHeatingSeasonDaysInMonth(yearRef, m + 1, climateData);
-
-                // Subtract monthly days-off that fall in heating-season portion (same rule as other modules)
-                if (monthlyDaysOff != null)
-                {
-                    int holidays = Math.Max(0, monthlyDaysOff[m]);
-                    if (holidays > 0 && daysInHeatingSeason > 0)
-                    {
-                        daysInHeatingSeason = Math.Max(0, daysInHeatingSeason - Math.Min(holidays, daysInHeatingSeason));
-                    }
-                }
 
                 if (!hasSchedule || daysInHeatingSeason == 0)
                 {
@@ -225,9 +204,8 @@ namespace EE.Doklad.Services
                     continue;
                 }
 
-                // heated hours in month
-                double heatedHours = hoursPerDayEquivalent * daysInHeatingSeason;
-                double totalHours = daysInHeatingSeason * 24.0;
+                double heatedHours = monthlyBreakdown[m].FullHours;
+                double totalHours = monthlyBreakdown[m].FullHours + monthlyBreakdown[m].SetbackHours;
 
                 // If for some reason totalHours is zero, fallback
                 if (totalHours <= 0.0)
