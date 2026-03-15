@@ -468,7 +468,7 @@
                                       Content="С топлинен капацитет"
                                       IsChecked="{Binding NightVentUseThermalMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       VerticalAlignment="Center" Margin="8,0,8,0" FontSize="11"
-                                      ToolTip="Когато е включен: изчислението на нощната вентилация използва 1R1C динамичен модел с топлинния капацитет от Секция 12 (c_eff, Wh/m²K). Когато е изключен: използва се sensible-only режимът (ρ·ca·ΔT)."/>
+                                      ToolTip="Когато е включен: изчислението на нощната вентилация използва 1R1C динамичен модел с топлинния капацитет от Секция 5 (c_eff, Wh/m²K). Когато е изключен: използва се sensible-only режимът (ρ·ca·ΔT)."/>
 
                             <!-- Row 7: Climate zone (readonly from section 5) -->
                             <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">

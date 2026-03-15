@@ -88,6 +88,13 @@ namespace EE.Doklad.Models
     [ObservableProperty]
     private int? _coolingSeasonEndMonth;
 
+    /// <summary>
+    /// Специфичен топлинен капацитет на сградата [Wh/m²K].
+    /// Използва се за режима "С топлинен капацитет" при нощна вентилация.
+    /// </summary>
+    [ObservableProperty]
+    private double _specificHeatCapacityWhPerM2K = 30.0;
+
         // Whether cooling season is enabled (controls visibility of cooling-related UI and data)
         [ObservableProperty]
         private bool _coolingSeasonEnabled;
@@ -431,6 +438,16 @@ namespace EE.Doklad.Models
             {
                 // When re-enabled, update display of HeatingSeasonInfo
                 OnPropertyChanged(nameof(HeatingSeasonInfo));
+            }
+        }
+
+        partial void OnSpecificHeatCapacityWhPerM2KChanged(double value)
+        {
+            var clamped = Math.Max(0.0, Math.Round(value, 2));
+            if (Math.Abs(_specificHeatCapacityWhPerM2K - clamped) > 0.0001)
+            {
+                _specificHeatCapacityWhPerM2K = clamped;
+                OnPropertyChanged(nameof(SpecificHeatCapacityWhPerM2K));
             }
         }
 

@@ -197,7 +197,7 @@
                           Background="White"
                           MinWidth="820">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Параметър" Binding="{Binding Parameter}" Width="320"/>
+                        <DataGridTextColumn Header="Параметър" Binding="{Binding Parameter}" Width="344"/>
                         <DataGridTemplateColumn Header="U (W/m²K)" Width="88">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -214,7 +214,7 @@
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="H (W/K)" Binding="{Binding HDisplay}" Width="88" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
                         <DataGridTextColumn Header="kWh/m²" Binding="{Binding KwhPerAreaDisplay}" Width="88" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
-                        <DataGridTextColumn Header="kWh" Binding="{Binding KwhDisplay}" Width="110" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="kWh" Binding="{Binding KwhDisplay}" Width="124" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -292,6 +292,78 @@
                                           Style="{StaticResource ErrorTextStyle}"
                                           Visibility="{Binding HasReductionTemperatureError, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <Grid Background="#F0F0F0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="520"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="1" Text="kWh/m²" FontWeight="SemiBold" FontSize="11"
+                                       Padding="10,3" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBlock Grid.Column="2" Text="kWh" FontWeight="SemiBold" FontSize="11"
+                                       Padding="10,3" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </Border>
+                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="520"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Приноси от вентилация" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Grid.Column="1" Text="{Binding VentilationGainPerAreaDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="2" Text="{Binding VentilationGainKwhDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </Border>
+                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="520"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Приноси от осветление" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Grid.Column="1" Text="{Binding LightingGainPerAreaDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="2" Text="{Binding LightingGainKwhDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </Border>
+                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="520"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Приноси от уреди" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Grid.Column="1" Text="{Binding AppliancesGainPerAreaDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="2" Text="{Binding AppliancesGainKwhDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </Border>
+                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <Grid Background="#FFF0E6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="520"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Нетна енергия" Style="{StaticResource LabelStyle}" FontWeight="Bold"/>
+                            <TextBox Grid.Column="1" Text="{Binding NetHeatingEnergyAfterGainsDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center"
+                                     HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                            <TextBox Grid.Column="2" Text="{Binding NetHeatingEnergyAfterGainsKwhDisplay, Mode=OneWay}"
+                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center"
+                                     HorizontalAlignment="Stretch" FontWeight="Bold"/>
                         </Grid>
                     </Border>
                 </StackPanel>

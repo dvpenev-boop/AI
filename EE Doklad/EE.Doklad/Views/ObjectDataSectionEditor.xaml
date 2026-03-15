@@ -342,6 +342,32 @@
                             </Border>
                         </Grid>
                     </Border>
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" MinHeight="37">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Специфичен топлинен капацитет [Wh/m²K]"
+                                       Padding="12,10"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Background="#F0F0F0"
+                                       ToolTip="Използва се при режим &quot;С топлинен капацитет&quot; за нощна вентилация в секция 14. Препоръчителни стойности: 15 (лека), 30 (средна), 60+ (тежка конструкция)."/>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SpecificHeatCapacityWhPerM2K, UpdateSourceTrigger=PropertyChanged, StringFormat=F2}"
+                                     Padding="12,10"
+                                     VerticalAlignment="Center"
+                                     Background="White"
+                                     FontSize="12"
+                                     BorderThickness="0"
+                                     TextAlignment="Left"
+                                     ToolTip="Wh/m²K"/>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </Border>
 

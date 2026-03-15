@@ -503,8 +503,28 @@ namespace EE.Doklad.ViewModels
         public string HeatingInstallationHoursDisplay => $"{_heatingInstallationHours:F0}";
         public double NetHeatingEnergyNoGainsPerArea { get; private set; }
         public string NetHeatingEnergyNoGainsPerAreaDisplay => NetHeatingEnergyNoGainsPerArea.ToString("F2", CultureInfo.InvariantCulture);
+        public double VentilationGainPerArea { get; private set; } = 0.0;
+        public double LightingGainPerArea { get; private set; } = 0.0;
+        public double AppliancesGainPerArea { get; private set; } = 0.0;
+        public double NetHeatingEnergyAfterGains =>
+            Math.Max(0.0, NetHeatingEnergyNoGainsPerArea
+                - VentilationGainPerArea
+                - LightingGainPerArea
+                - AppliancesGainPerArea);
+        public string VentilationGainPerAreaDisplay => VentilationGainPerArea.ToString("F2", CultureInfo.InvariantCulture);
+        public string LightingGainPerAreaDisplay => LightingGainPerArea.ToString("F2", CultureInfo.InvariantCulture);
+        public string AppliancesGainPerAreaDisplay => AppliancesGainPerArea.ToString("F2", CultureInfo.InvariantCulture);
+        public string NetHeatingEnergyAfterGainsDisplay => NetHeatingEnergyAfterGains.ToString("F2", CultureInfo.InvariantCulture);
+        public double VentilationGainKwh => VentilationGainPerArea * HeatedArea;
+        public double LightingGainKwh => LightingGainPerArea * HeatedArea;
+        public double AppliancesGainKwh => AppliancesGainPerArea * HeatedArea;
+        public double NetHeatingEnergyAfterGainsKwh => NetHeatingEnergyAfterGains * HeatedArea;
+        public string VentilationGainKwhDisplay => VentilationGainKwh.ToString("F2", CultureInfo.InvariantCulture);
+        public string LightingGainKwhDisplay => LightingGainKwh.ToString("F2", CultureInfo.InvariantCulture);
+        public string AppliancesGainKwhDisplay => AppliancesGainKwh.ToString("F2", CultureInfo.InvariantCulture);
+        public string NetHeatingEnergyAfterGainsKwhDisplay => NetHeatingEnergyAfterGainsKwh.ToString("F2", CultureInfo.InvariantCulture);
         public double? EnergySource1RequiredEnergyPerArea => CalculateRequiredEnergyForSource(
-            NetHeatingEnergyNoGainsPerArea,
+            NetHeatingEnergyAfterGains,
             EnergySource1Share,
             EnergySource1EmissionEfficiency,
             EnergySource1DistributionEfficiency,
@@ -514,7 +534,7 @@ namespace EE.Doklad.ViewModels
         public string EnergySource1RequiredEnergyPerAreaDisplay => FormatNullableDouble(EnergySource1RequiredEnergyPerArea);
         public double? EnergySource2RequiredEnergyPerArea => UseSecondEnergySource
             ? CalculateRequiredEnergyForSource(
-                NetHeatingEnergyNoGainsPerArea,
+                NetHeatingEnergyAfterGains,
                 EnergySource2Share,
                 EnergySource2EmissionEfficiency,
                 EnergySource2DistributionEfficiency,
@@ -529,7 +549,7 @@ namespace EE.Doklad.ViewModels
         public string TotalGrossHeatingEnergyPerAreaDisplay => TotalGrossHeatingEnergyPerArea.ToString("F2", CultureInfo.InvariantCulture);
         public double? OverallHeatGenerationEfficiencyPercent =>
             TotalGrossHeatingEnergyPerArea > 0.0
-                ? NetHeatingEnergyNoGainsPerArea / TotalGrossHeatingEnergyPerArea * 100.0
+                ? NetHeatingEnergyAfterGains / TotalGrossHeatingEnergyPerArea * 100.0
                 : null;
         public string OverallHeatGenerationEfficiencyDisplay => FormatNullableDouble(OverallHeatGenerationEfficiencyPercent);
         public bool HasEnergySourceShareWarning => Math.Abs(GetTotalEnergySourceShare() - 100.0) > 0.01;
@@ -1290,6 +1310,16 @@ namespace EE.Doklad.ViewModels
         {
             OnPropertyChanged(nameof(NetHeatingEnergyNoGainsPerArea));
             OnPropertyChanged(nameof(NetHeatingEnergyNoGainsPerAreaDisplay));
+            OnPropertyChanged(nameof(NetHeatingEnergyAfterGains));
+            OnPropertyChanged(nameof(NetHeatingEnergyAfterGainsDisplay));
+            OnPropertyChanged(nameof(NetHeatingEnergyAfterGainsKwh));
+            OnPropertyChanged(nameof(NetHeatingEnergyAfterGainsKwhDisplay));
+            OnPropertyChanged(nameof(VentilationGainPerAreaDisplay));
+            OnPropertyChanged(nameof(VentilationGainKwhDisplay));
+            OnPropertyChanged(nameof(LightingGainPerAreaDisplay));
+            OnPropertyChanged(nameof(LightingGainKwhDisplay));
+            OnPropertyChanged(nameof(AppliancesGainPerAreaDisplay));
+            OnPropertyChanged(nameof(AppliancesGainKwhDisplay));
             OnPropertyChanged(nameof(EnergySource1RequiredEnergyPerArea));
             OnPropertyChanged(nameof(EnergySource1RequiredEnergyPerAreaDisplay));
             OnPropertyChanged(nameof(EnergySource2RequiredEnergyPerArea));

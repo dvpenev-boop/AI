@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -1180,8 +1180,8 @@ namespace EE.Doklad.ViewModels
             var nightSched = new NightVentSchedule(wdActive, satActive, sunActive);
 
             // ── c_eff за thermal-mass режим ──────────────────────────────────────
-            double cEffWhPerM2K = (thermalMass && _coolingData != null)
-                ? _coolingData.SpecificHeatCapacityWhPerM2K
+            double cEffWhPerM2K = (thermalMass && _objectData != null)
+                ? _objectData.SpecificHeatCapacityWhPerM2K
                 : 0.0;
 
             // ── Входен DTO ──────────────────────────────────────────────────────
@@ -1239,14 +1239,14 @@ namespace EE.Doklad.ViewModels
             sb.AppendLine($"  Ti (вътр. setpoint, Сек.12)  = {ti:F2} °C");
             sb.AppendLine($"  VdotSpecNight                = {_data.NightVentSpecAirflow:F4} m³/h·m²");
 
-            if (useThermalMass && _coolingData != null)
+            if (useThermalMass && _objectData != null)
             {
-                double cEff   = _coolingData.SpecificHeatCapacityWhPerM2K;
+                double cEff   = _objectData.SpecificHeatCapacityWhPerM2K;
                 double area2  = CooledArea_m2;
                 double vdot2  = _data.NightVentSpecAirflow * area2;
                 double hnv    = 0.34 * vdot2;
                 double cEffWK = cEff * area2;
-                sb.AppendLine($"  cEff (Wh/m²K, Сек.12)        = {cEff:F2}");
+                sb.AppendLine($"  cEff (Wh/m²K, Сек.5)         = {cEff:F2}");
                 sb.AppendLine($"  A                             = {area2:F2} m²");
                 sb.AppendLine($"  Hnv = 0.34 × VdotNight        = {hnv:F2} W/K");
                 sb.AppendLine($"  Ceff_WhPerK = cEff × A        = {cEffWK:F2} Wh/K");
@@ -1484,6 +1484,7 @@ namespace EE.Doklad.ViewModels
                 e.PropertyName == nameof(ObjectDataSectionData.VentilationCoolingSaturdayHours) ||
                 e.PropertyName == nameof(ObjectDataSectionData.VentilationCoolingSundayHours) ||
                 e.PropertyName == nameof(ObjectDataSectionData.CooledArea) ||
+                e.PropertyName == nameof(ObjectDataSectionData.SpecificHeatCapacityWhPerM2K) ||
                 e.PropertyName == nameof(ObjectDataSectionData.CoolingSchedules) ||
                 e.PropertyName?.StartsWith("DaysOff", StringComparison.OrdinalIgnoreCase) == true)
             {
@@ -1511,8 +1512,7 @@ namespace EE.Doklad.ViewModels
         private void OnCoolingDataPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CoolingSectionData.DesignTemperature) ||
-                e.PropertyName == nameof(CoolingSectionData.ReductionTemperature) ||
-                e.PropertyName == nameof(CoolingSectionData.SpecificHeatCapacityWhPerM2K))
+                e.PropertyName == nameof(CoolingSectionData.ReductionTemperature))
             {
                 Recalculate();
             }

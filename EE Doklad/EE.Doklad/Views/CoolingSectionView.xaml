@@ -68,7 +68,7 @@
             <Border Background="#FFF3CD" BorderBrush="#FFC107" BorderThickness="2" Padding="12" Margin="0,0,0,15"
                     Visibility="{Binding CoolingSeasonWarning, Converter={StaticResource StringToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="??" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <TextBlock Text="{Binding CoolingSeasonWarning}" 
                                FontSize="13" FontWeight="SemiBold" 
                                Foreground="#856404" VerticalAlignment="Center"/>
@@ -369,28 +369,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- Специфичен топлинен капацитет -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
-                        <Grid Background="White">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="320"/>
-                                <ColumnDefinition Width="150"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}"
-                                       ToolTip="Специфичен топлинен капацитет на сградата. Използва се само при режим &quot;С топлинен капацитет&quot; за нощна вентилация (Секция 14). Типично: 15 Wh/m²K (лека конструкция) / 30 (средна) / 60+ (тежка).">
-                                <Run Text="Специфичен топлинен капацитет [Wh/m²K]"/>
-                            </TextBlock>
-                            <StackPanel Grid.Column="1">
-                                <TextBox Text="{Binding SpecificHeatCapacityText, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource EditableTextBoxStyle}" Width="120" TextAlignment="Center" HorizontalAlignment="Center"
-                                         ToolTip="Wh/m²K — препоръчани стойности: 15 (лека), 30 (средна, default), 60 (тежка конструкция)"/>
-                                <TextBlock Text="{Binding SpecificHeatCapacityError}"
-                                           Style="{StaticResource ErrorTextStyle}"
-                                           Visibility="{Binding HasSpecificHeatCapacityError, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
                 </StackPanel>
             </Border>
 
@@ -619,7 +597,7 @@
             <!-- Информационна бележка -->
             <Border Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="1" Padding="15" Margin="0,10,0,0">
                 <StackPanel>
-                    <TextBlock Text="ℹ Забележки:" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBlock Text="? Забележки:" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                     <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="18">
                         <Run Text="• Стойностите за топлина на човек се изчисляват автоматично чрез линейна интерполация по температура."/>
                         <LineBreak/>
@@ -629,7 +607,7 @@
                         <LineBreak/>
                         <Run Text="• Десетичните стойности могат да се въвеждат с ',' или '.' като разделител."/>
                         <LineBreak/>
-                        <Run Text="• Стойностите в W/m² се изчисляват на база охлаждаемата площ от секция 5."/>
+                        <Run Text="• Стойностите в W/m? се изчисляват на база охлаждаемата площ от секция 5."/>
                     </TextBlock>
                 </StackPanel>
             </Border>

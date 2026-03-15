@@ -35,6 +35,7 @@ namespace EE.Doklad.ViewModels
 
             // Закачаме обработчик за промяна на климатичната зона
             AttachClimateZoneHandler();
+            SyncSpecificHeatCapacityAcrossSections();
 
             // Initial sync
             TrySyncCurrentClimateZone();
@@ -59,9 +60,44 @@ namespace EE.Doklad.ViewModels
             }
         }
 
+        private void SyncSpecificHeatCapacityAcrossSections()
+        {
+            var objectData = CurrentReport?.Sections?.FirstOrDefault(s => s.Type == SectionType.ObjectData)?.ObjectDataSectionData;
+            var coolingData = CurrentReport?.Sections?
+                .FirstOrDefault(s => s.Type == SectionType.Normal && !string.IsNullOrEmpty(s.Title) && s.Title.Contains("Охлаждане"))
+                ?.CoolingSectionData;
+
+            if (objectData == null || coolingData == null)
+            {
+                return;
+            }
+
+            const double defaultValue = 30.0;
+            bool objectLooksUnmigrated = Math.Abs(objectData.SpecificHeatCapacityWhPerM2K - defaultValue) < 0.0001;
+            bool coolingDiffers = Math.Abs(coolingData.SpecificHeatCapacityWhPerM2K - objectData.SpecificHeatCapacityWhPerM2K) > 0.0001;
+
+            if (objectLooksUnmigrated && coolingDiffers)
+            {
+                objectData.SpecificHeatCapacityWhPerM2K = coolingData.SpecificHeatCapacityWhPerM2K;
+            }
+
+            coolingData.SpecificHeatCapacityWhPerM2K = objectData.SpecificHeatCapacityWhPerM2K;
+        }
+
         private void ObjectDataSectionData_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(EE.Doklad.Models.ObjectDataSectionData.ClimateZone))
+            if (e.PropertyName == nameof(EE.Doklad.Models.ObjectDataSectionData.SpecificHeatCapacityWhPerM2K))
+            {
+                var coolingData = CurrentReport?.Sections?
+                    .FirstOrDefault(s => s.Type == SectionType.Normal && !string.IsNullOrEmpty(s.Title) && s.Title.Contains("Охлаждане"))
+                    ?.CoolingSectionData;
+
+                if (sender is ObjectDataSectionData objectData && coolingData != null)
+                {
+                    coolingData.SpecificHeatCapacityWhPerM2K = objectData.SpecificHeatCapacityWhPerM2K;
+                }
+            }
+            else if (e.PropertyName == nameof(EE.Doklad.Models.ObjectDataSectionData.ClimateZone))
             {
                 if (CurrentReport?.Sections == null)
                     return;
@@ -104,6 +140,9 @@ namespace EE.Doklad.ViewModels
             }
 
             CurrentReport = CreateSampleReport();
+            AttachClimateZoneHandler();
+            SyncSpecificHeatCapacityAcrossSections();
+            TrySyncCurrentClimateZone();
             SelectedSection = CurrentReport.Sections.FirstOrDefault();
         }
 
@@ -124,6 +163,9 @@ namespace EE.Doklad.ViewModels
                     if (report != null)
                     {
                         CurrentReport = report;
+                        AttachClimateZoneHandler();
+                        TrySyncCurrentClimateZone();
+                        SyncSpecificHeatCapacityAcrossSections();
                         SelectedSection = CurrentReport.Sections.FirstOrDefault();
                         MessageBox.Show("Докладът е зареден успешно!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
