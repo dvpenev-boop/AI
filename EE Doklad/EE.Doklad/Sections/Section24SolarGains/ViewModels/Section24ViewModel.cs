@@ -351,6 +351,7 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
                 });
             }
             TotalRows = totalRows;
+            ReplaceStoredMonthlyResults(_results.MonthlyTotals);
 
             AnnualQ_sol_total   = _results.AnnualQ_sol_total;
             AnnualQ_sol_heating = _results.AnnualQ_sol_heating;
@@ -519,6 +520,22 @@ namespace EE.Doklad.Sections.Section24SolarGains.ViewModels
             IsCalculated = false;
             if (AutoSyncEnabled)
                 ExecuteSyncFromSections();
+        }
+
+        private void ReplaceStoredMonthlyResults(IEnumerable<MonthlyTotalResult> monthlyTotals)
+        {
+            _data.MonthlyResults.Clear();
+            foreach (var mt in monthlyTotals)
+            {
+                _data.MonthlyResults.Add(new Section24MonthlyStoredResult
+                {
+                    MonthIndex = mt.MonthIndex,
+                    MonthName = mt.MonthName,
+                    Q_sol_total = mt.Q_sol_total,
+                    Q_sol_heating = mt.Q_sol_heating,
+                    Q_sol_cooling = mt.Q_sol_cooling
+                });
+            }
         }
 
         // ------------------------------------------------------------------ //

@@ -29,6 +29,11 @@ namespace EE.Doklad.Sections.Section24SolarGains.Models
         /// </summary>
         public MonthlyGeneralData[] MonthlyData { get; } = CreateDefaultMonthlyData();
 
+        /// <summary>
+        /// Persisted monthly totals produced by Section 24 so downstream sections can read them.
+        /// </summary>
+        public ObservableCollection<Section24MonthlyStoredResult> MonthlyResults { get; } = [];
+
         // ------------------------------------------------------------------ //
 
         private static MonthlyGeneralData[] CreateDefaultMonthlyData()
@@ -50,5 +55,17 @@ namespace EE.Doklad.Sections.Section24SolarGains.Models
 
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    /// <summary>
+    /// Persisted monthly Section 24 result row shared with downstream consumers.
+    /// </summary>
+    public sealed class Section24MonthlyStoredResult
+    {
+        public int MonthIndex { get; set; }
+        public string MonthName { get; set; } = string.Empty;
+        public double Q_sol_total { get; set; }
+        public double Q_sol_heating { get; set; }
+        public double Q_sol_cooling { get; set; }
     }
 }

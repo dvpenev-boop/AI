@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace EE.Doklad.Models
 {
@@ -132,6 +133,34 @@ namespace EE.Doklad.Models
         /// Годишни работни часове на процесното оборудване [h/год].
         /// </summary>
         public double ProcessAnnualHours { get; set; } = 0.0;
+
+        /// <summary>
+        /// Persisted monthly results for the heating season, produced by Section 23.
+        /// Section 11 reads these values directly and must not recompute them.
+        /// </summary>
+        public ObservableCollection<InternalGainsMonthlyResult> HeatingMonths { get; } = [];
+
+        /// <summary>
+        /// Persisted monthly results for the cooling season, produced by Section 23.
+        /// </summary>
+        public ObservableCollection<InternalGainsMonthlyResult> CoolingMonths { get; } = [];
+    }
+
+    /// <summary>
+    /// Persisted monthly internal-gains row shared between Section 23 and downstream readers.
+    /// All values are absolute monthly energies in kWh.
+    /// </summary>
+    public sealed class InternalGainsMonthlyResult
+    {
+        public int Month { get; set; }
+        public double Oc_kWh { get; set; }
+        public double A_kWh { get; set; }
+        public double L_kWh { get; set; }
+        public double WA_kWh { get; set; }
+        public double HVAC_kWh { get; set; }
+        public double Proc_kWh { get; set; }
+        public double Total_kWh { get; set; }
+        public double Total_kWh_m2 { get; set; }
     }
 
     /// <summary>

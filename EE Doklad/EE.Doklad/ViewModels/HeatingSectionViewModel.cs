@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using EE.Doklad.Models;
+using EE.Doklad.Sections.Section24SolarGains.Models;
 using EE.Doklad.Services;
 
 namespace EE.Doklad.ViewModels
@@ -26,6 +27,8 @@ namespace EE.Doklad.ViewModels
         private readonly WindowsSectionData? _windowsData;
         private readonly UnconditionedZoneSectionData? _ztuData;
         private readonly VentilationSectionData? _ventilationHeatingData;
+        private readonly InternalGainsDebugInput? _section23Data;
+        private readonly Section24SolarGainsData? _section24Data;
         private bool _isAdjustingShares = false; // guard to avoid recursive share updates
         private double _heatingInstallationHours;
 
@@ -727,6 +730,8 @@ namespace EE.Doklad.ViewModels
             _floorData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Floor)?.FloorSectionData;
             _windowsData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Windows)?.WindowsSectionData;
             _ztuData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.UnconditionedZones)?.UnconditionedZoneSectionData;
+            _section23Data = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.InternalGainsDebug)?.InternalGainsDebugInput;
+            _section24Data = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.SolarGains)?.SolarGainsData;
             _ventilationHeatingData = _report?.Sections?.FirstOrDefault(s =>
                 s.Type == SectionType.Ventilation &&
                 s.VentilationSectionData != null &&
@@ -933,6 +938,40 @@ namespace EE.Doklad.ViewModels
             AttachFloorListeners();
             AttachWindowsListeners();
             AttachZtuListeners();
+            AttachSection23Listeners();
+            AttachSection24Listeners();
+        }
+
+        private void AttachSection23Listeners()
+        {
+            if (_section23Data == null)
+            {
+                return;
+            }
+
+            _section23Data.HeatingMonths.CollectionChanged += Section23HeatingMonths_CollectionChanged;
+        }
+
+        private void AttachSection24Listeners()
+        {
+            if (_section24Data == null)
+            {
+                return;
+            }
+
+            _section24Data.MonthlyResults.CollectionChanged += Section24MonthlyResults_CollectionChanged;
+        }
+
+        private void Section23HeatingMonths_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RefreshSectionGainContributions();
+            NotifyGrossHeatingEnergyChanged();
+        }
+
+        private void Section24MonthlyResults_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RefreshSectionGainContributions();
+            NotifyGrossHeatingEnergyChanged();
         }
 
         private void AttachWallsListeners()
@@ -1241,6 +1280,7 @@ namespace EE.Doklad.ViewModels
         {
             var snapshot = HeatingCharacteristicsService.Build(_report, _objectData, _data);
             VentilationGainPerArea = CalculateVentilationHeatingContributionPerArea();
+            RefreshSectionGainContributions();
 
             double hTrTotal = snapshot.Walls.H + snapshot.Roof.H + snapshot.Floor.H + snapshot.Windows.H + snapshot.ThermalBridgesH_WK + snapshot.ZtuH_WK;
             double hInf = 0.34 * snapshot.InfiltrationRate_AirChangesPerHour * snapshot.BuildingVolume_m3;
@@ -1269,6 +1309,23 @@ namespace EE.Doklad.ViewModels
             ThermalCharacteristicsRows.Add(HeatingCharacteristicRow.Separator());
             ThermalCharacteristicsRows.Add(CreateMetricRow("H_ve ОБЩО", null, null, hVeTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
             ThermalCharacteristicsRows.Add(CreateMetricRow("H_TOTAL", null, null, hTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true, isHighlighted: true));
+        }
+
+        private void RefreshSectionGainContributions()
+        {
+            double area = HeatedArea;
+            if (_section23Data == null || area <= 0.0)
+            {
+                LightingGainPerArea = 0.0;
+                AppliancesGainPerArea = 0.0;
+                return;
+            }
+
+            double lightingGainKwh = _section23Data.HeatingMonths.Sum(m => m.L_kWh);
+            double appliancesGainKwh = _section23Data.HeatingMonths.Sum(m => m.A_kWh);
+
+            LightingGainPerArea = lightingGainKwh / area;
+            AppliancesGainPerArea = appliancesGainKwh / area;
         }
 
         private double CalculateVentilationHeatingContributionPerArea()

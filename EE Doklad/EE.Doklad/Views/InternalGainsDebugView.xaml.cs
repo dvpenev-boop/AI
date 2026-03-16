@@ -13,6 +13,7 @@ namespace EE.Doklad.Views
         private readonly Report? _report;
         private readonly InternalGainsDebugInput _input;
         private readonly ObjectDataSectionData? _objData;
+        private bool _autoRefreshWired;
 
         private static readonly (int sm, int sd, int em, int ed)[] HeatingSeason =
         {
@@ -58,6 +59,8 @@ namespace EE.Doklad.Views
             PopulateFromObjectData();
             TxtProcessHeat.Text  = _input.ProcessHeat_W.ToString("F1");
             TxtProcessHours.Text = _input.ProcessAnnualHours.ToString("F1");
+            EnsureAutoRefreshWired();
+            RecalculateAndStoreResults(updateUi: false);
         }
 
         private void PopulateFromObjectData()
@@ -135,10 +138,16 @@ namespace EE.Doklad.Views
         }
 
         private void BtnCalculate_Click(object sender, RoutedEventArgs e)
+            => RecalculateAndStoreResults(updateUi: true);
+
+        private void RecalculateAndStoreResults(bool updateUi)
         {
-            PanelErrors.Visibility    = Visibility.Collapsed;
-            PanelResults.Visibility   = Visibility.Collapsed;
-            PanelFallbacks.Visibility = Visibility.Collapsed;
+            if (updateUi)
+            {
+                PanelErrors.Visibility    = Visibility.Collapsed;
+                PanelResults.Visibility   = Visibility.Collapsed;
+                PanelFallbacks.Visibility = Visibility.Collapsed;
+            }
 
             _input.ProcessHeat_W      = ParseDoubleUI(TxtProcessHeat.Text);
             _input.ProcessAnnualHours = ParseDoubleUI(TxtProcessHours.Text);
@@ -147,13 +156,21 @@ namespace EE.Doklad.Views
 
             if (inp.A_use_m2 <= 0)
             {
-                ShowWarning("A_use (отопляема площ) = 0. Моля попълнете Секция 5.");
+                _input.HeatingMonths.Clear();
+                _input.CoolingMonths.Clear();
+                if (updateUi)
+                    ShowWarning("A_use (отопляема площ) = 0. Моля попълнете Секция 5.");
                 return;
             }
 
             var result = InternalGainsAggregator.Compute(inp);
-            PopulateResults(result, inp);
-            PanelResults.Visibility = Visibility.Visible;
+            StoreMonthlyResults(result);
+
+            if (updateUi)
+            {
+                PopulateResults(result, inp);
+                PanelResults.Visibility = Visibility.Visible;
+            }
         }
 
         private InternalGainsAggregatorInput BuildAggregatorInput()
@@ -352,6 +369,70 @@ namespace EE.Doklad.Views
 
         private Section? GetSection(SectionType type)
             => _report?.Sections?.FirstOrDefault(s => s.Type == type);
+
+        private void EnsureAutoRefreshWired()
+        {
+            if (_autoRefreshWired || _report == null)
+                return;
+
+            _autoRefreshWired = true;
+
+            if (_objData != null)
+                _objData.PropertyChanged += SourceSection_PropertyChanged;
+
+            AttachSectionPropertyChanged(SectionType.Heating, s => s.HeatingSectionData);
+            AttachSectionPropertyChanged(SectionType.AppliancesAffecting, s => s.AppliancesAffectingSectionData);
+            AttachSectionPropertyChanged(SectionType.Lighting, s => s.LightingSectionData);
+            AttachSectionPropertyChanged(SectionType.HotWater, s => s.HotWaterSectionData);
+            AttachSectionPropertyChanged(SectionType.PumpsAndFans, s => s.PumpsAndFansSectionData);
+
+            var coolingSection = GetCoolingSection();
+            if (coolingSection?.CoolingSectionData != null)
+                coolingSection.CoolingSectionData.PropertyChanged += SourceSection_PropertyChanged;
+        }
+
+        private void AttachSectionPropertyChanged<TSectionData>(SectionType type, Func<Section, TSectionData?> selector)
+            where TSectionData : class, System.ComponentModel.INotifyPropertyChanged
+        {
+            var section = GetSection(type);
+            var data = section == null ? null : selector(section);
+            if (data != null)
+                data.PropertyChanged += SourceSection_PropertyChanged;
+        }
+
+        private void SourceSection_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            PopulateFromObjectData();
+            RecalculateAndStoreResults(updateUi: false);
+        }
+
+        private void StoreMonthlyResults(InternalGainsAggregatorResult result)
+        {
+            ReplaceMonthlyResults(_input.HeatingMonths, result.HeatingTable);
+            ReplaceMonthlyResults(_input.CoolingMonths, result.CoolingTable);
+        }
+
+        private static void ReplaceMonthlyResults(
+            System.Collections.ObjectModel.ObservableCollection<InternalGainsMonthlyResult> target,
+            IEnumerable<MonthlyGainsRow> rows)
+        {
+            target.Clear();
+            foreach (var row in rows.Where(r => Math.Abs(r.Total) > 1e-9 || Math.Abs(r.TotalPerM2) > 1e-9))
+            {
+                target.Add(new InternalGainsMonthlyResult
+                {
+                    Month = row.Month,
+                    Oc_kWh = row.Oc,
+                    A_kWh = row.A,
+                    L_kWh = row.L,
+                    WA_kWh = row.WA,
+                    HVAC_kWh = row.HVAC,
+                    Proc_kWh = row.Proc,
+                    Total_kWh = row.Total,
+                    Total_kWh_m2 = row.TotalPerM2
+                });
+            }
+        }
 
         private Section? GetCoolingSection()
             => _report?.Sections?.FirstOrDefault(s =>
