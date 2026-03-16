@@ -110,7 +110,7 @@ namespace EE.Doklad.Services.Schedule
             DateTime seasonEnd,
             int[] daysOff,                          // length 12
             IReadOnlyList<DateTime>? officialHolidays,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             if (schedule == null) throw new ArgumentNullException(nameof(schedule));
             if (daysOff == null || daysOff.Length != 12) throw new ArgumentException("daysOff трябва да е с дължина 12.", nameof(daysOff));
@@ -206,7 +206,7 @@ namespace EE.Doklad.Services.Schedule
             DateTime seasonStart,
             DateTime seasonEnd,
             int month,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             int daysInMonth = DateTime.DaysInMonth(yearRef, month);
             int count = 0;

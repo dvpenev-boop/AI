@@ -23,7 +23,7 @@ namespace EE.Doklad.Services.Climate
     public class EpwParser
     {
         private const int ExpectedDataRecords = 8760; // 365 дни × 24 часа
-        private const int FixedYear = 2024;           // Референтна година за целия софтуер
+        private const int FixedYear = global::EE.Doklad.CalendarDefaults.ReferenceYear;
 
         // Regex за идентифициране на data ред: YYYY,M(M),D(D),…
         private static readonly Regex DataLineRegex = new Regex(

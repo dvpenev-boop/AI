@@ -14,6 +14,7 @@ namespace EE.Doklad.ViewModels
     {
         private readonly VentilationSectionData _data;
         private readonly ObjectDataSectionData? _objectData;
+        private readonly HeatingSectionData? _heatingData;
         private readonly ClimateZoneData? _climateData;
         private readonly BgVentilationCalculator _calculator;
 
@@ -38,10 +39,12 @@ namespace EE.Doklad.ViewModels
         public VentilationSectionViewModel(
             VentilationSectionData data,
             ObjectDataSectionData? objectData = null,
+            HeatingSectionData? heatingData = null,
             ClimateZoneData? climateData = null)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             _objectData = objectData;
+            _heatingData = heatingData;
             _climateData = climateData;
             _calculator = new BgVentilationCalculator();
 
@@ -50,6 +53,10 @@ namespace EE.Doklad.ViewModels
             if (_objectData != null)
             {
                 _objectData.PropertyChanged += OnObjectDataPropertyChanged;
+            }
+            if (_heatingData != null)
+            {
+                _heatingData.PropertyChanged += OnHeatingDataPropertyChanged;
             }
 
             // Initialize
@@ -748,6 +755,16 @@ namespace EE.Doklad.ViewModels
             {
                 OnPropertyChanged(nameof(IsHeatingSeasonEnabled));
                 OnPropertyChanged(nameof(HeatingSeasonWarning));
+            }
+        }
+
+        private void OnHeatingDataPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(HeatingSectionData.DesignTemperature))
+            {
+                _data.IndoorTemperature_C = _heatingData?.DesignTemperature ?? _data.IndoorTemperature_C;
+                OnPropertyChanged(nameof(IndoorTemperature_C));
+                Recalculate();
             }
         }
 

@@ -372,7 +372,7 @@ namespace EE.Doklad.ViewModels
                 if (!IsMonthInHeatingSeason(month, startMonth, endMonth))
                     continue;
 
-                var daysInMonth = DateTime.DaysInMonth(2024, month); // Using 2024 (leap year)
+                var daysInMonth = DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month);
                 var daysOff = GetDaysOffForMonth(month);
 
                 // Calculate active days for heating this month
@@ -447,7 +447,7 @@ namespace EE.Doklad.ViewModels
             avgHoursPerDay /= 7.0; // Average per day in week
 
             // Adjust for partial months
-            double daysInMonth = DateTime.DaysInMonth(2024, month);
+            double daysInMonth = DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month);
             double effectiveDays = activeDays;
 
             if (month == startMonth && startMonth == endMonth)
@@ -574,7 +574,7 @@ namespace EE.Doklad.ViewModels
             // Months: May (5), June (6), July (7), August (8), September (9)
             for (int month = 5; month <= 9; month++)
             {
-                var daysInMonth = DateTime.DaysInMonth(2024, month);
+                var daysInMonth = DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month);
                 var daysOff = GetDaysOffForMonth(month);
                 int activeDays = daysInMonth - daysOff;
 
@@ -606,7 +606,7 @@ namespace EE.Doklad.ViewModels
 
             for (int month = 1; month <= 12; month++)
             {
-                var daysInMonth = DateTime.DaysInMonth(2024, month);
+                var daysInMonth = DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month);
                 var daysOff = GetDaysOffForMonth(month);
                 int activeDays = daysInMonth - daysOff;
 

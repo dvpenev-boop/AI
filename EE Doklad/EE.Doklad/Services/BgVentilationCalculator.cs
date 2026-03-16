@@ -369,7 +369,7 @@ namespace EE.Doklad.Services
                 double indoorTemp_C = data.IndoorTemperature_C;
 
                 // Дни в отоплителния сезон за този месец (вземаме под внимание отоплителния период на климатичната зона)
-                int daysInMonth = GetHeatingSeasonDaysInMonth(2024, monthNumber, climateData);
+                int daysInMonth = GetHeatingSeasonDaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, monthNumber, climateData);
 
                 // If the caller supplied monthly days-off (from section 5), subtract the
                 // number of holidays that fall within the heating-season portion of the month.

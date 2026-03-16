@@ -872,7 +872,7 @@ namespace EE.Doklad.ViewModels
                 !_objectData.CoolingSeasonEndMonth.HasValue   || !_objectData.CoolingSeasonEndDay.HasValue)
                 return Fail("Не са въведени дати на охладителния сезон.");
 
-            int yearRef = 2024; // use 2024 for calendar calculations to match legacy behavior
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear;
             int sm = _objectData.CoolingSeasonStartMonth.Value, sd = _objectData.CoolingSeasonStartDay.Value;
             int em = _objectData.CoolingSeasonEndMonth.Value,   ed = _objectData.CoolingSeasonEndDay.Value;
             var seasonStart = new DateTime(yearRef, sm, Math.Min(sd, DateTime.DaysInMonth(yearRef, sm)));
@@ -1089,7 +1089,7 @@ namespace EE.Doklad.ViewModels
             // Compute exact counts of weekdays/saturdays/sundays per month inside the
             // exact season interval [StartDay.StartMonth … EndDay.EndMonth].
             IReadOnlyDictionary<int, (int Weekdays, int Saturdays, int Sundays)>? dayTypeCountsPerMonth = null;
-            int yearRef = 2024; // match other calendar calculations
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear;
             {
                 int sd = _objectData.CoolingSeasonStartDay.Value;
                 int ed = _objectData.CoolingSeasonEndDay.Value;
@@ -1953,7 +1953,7 @@ namespace EE.Doklad.ViewModels
 
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
             int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
-                int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
+                int year = global::EE.Doklad.CalendarDefaults.ReferenceYear;
 
             double totalDays = 0.0;
 
@@ -1991,7 +1991,7 @@ namespace EE.Doklad.ViewModels
 
             int startMonth = _objectData.CoolingSeasonStartMonth ?? 1;
             int endMonth = _objectData.CoolingSeasonEndMonth ?? 12;
-                int year = 2024; // consistent with Section 13 (BgVentilationCalculator uses hardcoded 2024)
+                int year = global::EE.Doklad.CalendarDefaults.ReferenceYear;
 
             double totalHours = 0.0;
 

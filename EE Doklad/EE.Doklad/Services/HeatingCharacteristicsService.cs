@@ -246,7 +246,7 @@ namespace EE.Doklad.Services
         private static double[] ComputeHeatingSeasonHoursPerMonth(
             ObjectDataSectionData? objectData,
             ClimateZoneData? climateData,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var result = new double[12];
             int[] monthlyDaysOff = ParseMonthlyDaysOff(objectData);
@@ -271,7 +271,7 @@ namespace EE.Doklad.Services
             HeatingSectionData? heatingData,
             ClimateZoneData? climateData,
             double[] heatingSeasonHoursByMonth,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             double designTemp = heatingData?.DesignTemperature ?? 20.0;
             if (climateData == null)

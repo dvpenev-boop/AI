@@ -48,7 +48,7 @@ namespace EE.Doklad.Tests
             var cooling = new CoolingSectionData { DesignTemperature = 24.0 };
             var calc = new VentCoolingCalculatorMonthly();
 
-            var output = calc.Calculate(data, objectData, climate, cooling, 2024);
+            var output = calc.Calculate(data, objectData, climate, cooling, global::EE.Doklad.CalendarDefaults.ReferenceYear);
             var july = output.Debug.Months.Single(m => m.MonthNumber == 7);
 
             Assert.True(july.Q_lat_kWh > 0.0);

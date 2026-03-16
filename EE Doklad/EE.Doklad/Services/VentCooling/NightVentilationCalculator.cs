@@ -98,7 +98,7 @@ namespace EE.Doklad.Services.VentCooling
         NightVentSchedule Schedule,
         /// <summary>
         /// Брой дни в месеца (ключ = месец 1..12).
-        /// Ако null, се използват стандартните стойности за 2024.
+        /// Ако null, се използват стандартните стойности за референтната година.
         /// </summary>
         IReadOnlyDictionary<int, int>? DaysInMonth = null,
         /// <summary>
@@ -208,10 +208,12 @@ namespace EE.Doklad.Services.VentCooling
         private const double RhoTimesCA_Wh_m3K = 0.34;
 
         /// <summary>
-        /// Стандартни дни в месеца (невисокосна 2024 за съответствие с останалите калкулатори).
+        /// Стандартни дни в месеца за референтната календарна година.
         /// </summary>
-        private static readonly int[] DefaultDaysInMonth2024 =
-            { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+        private static readonly int[] DefaultDaysInMonth =
+            Enumerable.Range(1, 12)
+                .Select(month => DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month))
+                .ToArray();
 
         // ── Public API ────────────────────────────────────────────────────────────
 
@@ -718,7 +720,7 @@ namespace EE.Doklad.Services.VentCooling
         {
             if (dict != null && dict.TryGetValue(month, out int d) && d > 0)
                 return d;
-            return DefaultDaysInMonth2024[month - 1];
+            return DefaultDaysInMonth[month - 1];
         }
 
         /// <summary>

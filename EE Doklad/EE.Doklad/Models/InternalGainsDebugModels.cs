@@ -113,7 +113,7 @@ namespace EE.Doklad.Models
         public int[] DaysOff { get; set; } = new int[12];
 
         // ── Референтна година за календарни изчисления ───────────────────────
-        public int YearRef { get; set; } = 2024;
+        public int YearRef { get; set; } = global::EE.Doklad.CalendarDefaults.ReferenceYear;
 
         // ── Вътрешни топлинни източници ───────────────────────────────────────
         public List<InternalGainsSourceInput> Sources { get; set; } = new();

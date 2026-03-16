@@ -29,14 +29,14 @@ namespace EE.Doklad.Models.Climate
         /// <param name="city">Град (от EPW header)</param>
         /// <param name="latitude">Географска ширина</param>
         /// <param name="longitude">Географска дължина</param>
-        /// <param name="fixedYearUsed">Фиксирана година използвана за DateTime (референтна, напр. 2024)</param>
+        /// <param name="fixedYearUsed">Фиксирана година използвана за DateTime (референтна, напр. 2026)</param>
         public EpwHourlyClimateProvider(
             ClimatePoint[] hourlyData,
             string originalFileName,
             string? city = null,
             double? latitude = null,
             double? longitude = null,
-            int fixedYearUsed = 2024)
+            int fixedYearUsed = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             if (hourlyData == null || hourlyData.Length != 8760)
                 throw new ArgumentException("EPW данни трябва да съдържат точно 8760 часови записа (365 дни × 24 часа).", nameof(hourlyData));

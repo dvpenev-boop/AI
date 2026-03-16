@@ -18,7 +18,7 @@ namespace EE.Doklad.Services
         /// <summary>Часове активност на ден (средно)</summary>
         public double HoursPerDay { get; set; } = 24.0;
         /// <summary>Референтна година за изчисленията</summary>
-        public int YearRef        { get; set; } = 2024;
+        public int YearRef        { get; set; } = global::EE.Doklad.CalendarDefaults.ReferenceYear;
         public bool IncludeStartDay { get; set; } = true;
         public bool IncludeEndDay { get; set; } = true;
     }

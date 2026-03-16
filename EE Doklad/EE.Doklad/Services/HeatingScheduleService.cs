@@ -15,21 +15,21 @@ namespace EE.Doklad.Services
         /// If schedule fields are missing/empty -> returns zeros (caller may fallback).
         /// Holidays (monthly days off) reduce heating-season days using the same rule as other modules.
         /// </summary>
-        public static double[] ComputeHeatingHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = 2024)
+        public static double[] ComputeHeatingHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             return ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef)
                 .Select(x => x.FullHours)
                 .ToArray();
         }
 
-        public static double[] ComputeHeatingSetbackHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = 2024)
+        public static double[] ComputeHeatingSetbackHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             return ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef)
                 .Select(x => x.SetbackHours)
                 .ToArray();
         }
 
-        public static HeatingHoursBreakdown[] ComputeHeatingHoursBreakdownPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = 2024)
+        public static HeatingHoursBreakdown[] ComputeHeatingHoursBreakdownPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var result = new HeatingHoursBreakdown[12];
             if (objectData == null || climateData == null)
@@ -207,7 +207,7 @@ namespace EE.Doklad.Services
         /// If no cooling schedule values provided -> returns zeros.
         /// Does not use heating season.
         /// </summary>
-        public static double[] ComputeCoolingHoursPerMonth(ObjectDataSectionData? objectData, int yearRef = 2024)
+        public static double[] ComputeCoolingHoursPerMonth(ObjectDataSectionData? objectData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var result = new double[12];
             if (objectData == null) return result;

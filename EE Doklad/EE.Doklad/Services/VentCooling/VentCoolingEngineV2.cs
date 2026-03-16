@@ -62,7 +62,7 @@ namespace EE.Doklad.Services.VentCooling
             VentCoolingInputV2 input,
             Func<int, IReadOnlyList<ClimateHourPoint>> getHourlyData,
             bool isBgAvgMode = true,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var output = new VentCoolingOutputV2();
 

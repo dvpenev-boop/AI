@@ -85,7 +85,7 @@ namespace EE.Doklad.Services
         public static double[] ComputeThetaIntCalcC(
             ObjectDataSectionData? objectData,
             CoolingSectionData? coolingData,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var result = new double[12];
 
@@ -183,7 +183,7 @@ namespace EE.Doklad.Services
             ObjectDataSectionData? objectData,
             HeatingSectionData? heatingData,
             ClimateZoneData? climateData,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var result = new double[12];
 

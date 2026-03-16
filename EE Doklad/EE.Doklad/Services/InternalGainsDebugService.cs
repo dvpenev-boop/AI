@@ -231,8 +231,8 @@ namespace EE.Doklad.Services
             if (input.Mode == EpbMode.Heating)
             {
                 // Отоплителен сезон обхваща края на YearRef и началото на следващата:
-                // напр. 21 окт 2024 – 20 апр 2025.
-                // WorkdayScheduleCalculator итерира с yearRef=YearRef (2024);
+                // напр. 21 окт 2026 – 20 апр 2027.
+                // WorkdayScheduleCalculator итерира с yearRef=YearRef (2026);
                 // IsInSeasonRange проверява с включително-изключително за wrapping.
                 // За да работи wrap-around, EndMonth < StartMonth → подаваме EndYear = YearRef+1.
                 // Но IsInSeasonRange очаква seasonEnd < seasonStart за wrap.

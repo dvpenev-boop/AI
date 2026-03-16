@@ -35,7 +35,7 @@ namespace EE.Doklad.Tests
                 HeatingSeasonStartMonth = 10, HeatingSeasonStartDay = 21,
                 HeatingSeasonEndMonth   = 4,  HeatingSeasonEndDay   = 20,
                 DaysOff = new int[12], // нула дни почивни
-                YearRef = 2024
+                YearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear
             };
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace EE.Doklad.Tests
                 CoolingSeasonStartMonth = 6, CoolingSeasonStartDay = 1,
                 CoolingSeasonEndMonth   = 9, CoolingSeasonEndDay   = 30,
                 DaysOff = new int[12],
-                YearRef = 2024
+                YearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear
             };
 
         private static InternalGainsSourceInput PowerSource(
@@ -90,7 +90,7 @@ namespace EE.Doklad.Tests
         [Fact]
         public void Test01_Formula333_PowerSource_FullMonth_Heating()
         {
-            var input = BaseHeating(month: 2); // февруари 2024 – изцяло в сезона
+            var input = BaseHeating(month: 2); // февруари в референтната година – изцяло в сезона
             input.Sources.Add(PowerSource(1000.0)); // 1000 W
 
             var r = _svc.Calculate(input);

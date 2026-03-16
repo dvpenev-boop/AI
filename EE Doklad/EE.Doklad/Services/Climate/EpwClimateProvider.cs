@@ -32,7 +32,7 @@ namespace EE.Doklad.Services.Climate
         /// </summary>
         /// <param name="hourlyData">Масив с точно 8760 точки, всяка с BarometricPressurePa > 0.</param>
         /// <param name="fixedYear">Фиксираната референтна година използвана в LocalTime.</param>
-        public EpwClimateProvider(ClimatePoint[] hourlyData, int fixedYear = 2024)
+        public EpwClimateProvider(ClimatePoint[] hourlyData, int fixedYear = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             if (hourlyData == null || hourlyData.Length != 8760)
                 throw new ArgumentException("EPW данни трябва да съдържат точно 8760 часови записа.", nameof(hourlyData));

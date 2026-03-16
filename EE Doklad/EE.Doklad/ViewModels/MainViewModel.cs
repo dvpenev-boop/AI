@@ -863,7 +863,7 @@ namespace EE.Doklad.ViewModels
                         HeatingSeasonStartDay   = 21,
                         HeatingSeasonEndMonth   = 4,
                         HeatingSeasonEndDay     = 20,
-                        YearRef = 2024
+                        YearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear
                     };
                     section.StaticText = string.Empty;
                 }

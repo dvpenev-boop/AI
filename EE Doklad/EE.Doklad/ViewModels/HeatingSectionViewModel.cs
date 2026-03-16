@@ -25,6 +25,7 @@ namespace EE.Doklad.ViewModels
         private readonly FloorSectionData? _floorData;
         private readonly WindowsSectionData? _windowsData;
         private readonly UnconditionedZoneSectionData? _ztuData;
+        private readonly VentilationSectionData? _ventilationHeatingData;
         private bool _isAdjustingShares = false; // guard to avoid recursive share updates
         private double _heatingInstallationHours;
 
@@ -726,6 +727,11 @@ namespace EE.Doklad.ViewModels
             _floorData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Floor)?.FloorSectionData;
             _windowsData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Windows)?.WindowsSectionData;
             _ztuData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.UnconditionedZones)?.UnconditionedZoneSectionData;
+            _ventilationHeatingData = _report?.Sections?.FirstOrDefault(s =>
+                s.Type == SectionType.Ventilation &&
+                s.VentilationSectionData != null &&
+                (s.Title?.Contains("Вентилация Отопление", StringComparison.OrdinalIgnoreCase) ?? false))
+                ?.VentilationSectionData;
 
             // Инициализация на activity options
             ActivityLevelOptions = ActivityDataService.GetAllActivities()
@@ -745,6 +751,11 @@ namespace EE.Doklad.ViewModels
             if (_objectData != null)
             {
                 _objectData.PropertyChanged += ObjectData_PropertyChanged;
+            }
+
+            if (_ventilationHeatingData != null)
+            {
+                _ventilationHeatingData.PropertyChanged += VentilationHeatingData_PropertyChanged;
             }
 
             // Първоначално изчисление
@@ -768,6 +779,7 @@ namespace EE.Doklad.ViewModels
                 OnPropertyChanged(nameof(TotalOccupantHeatPerAreaDisplay));
                 OnPropertyChanged(nameof(TotalLatentHeatPerArea));
                 OnPropertyChanged(nameof(TotalLatentHeatPerAreaDisplay));
+                NotifyGrossHeatingEnergyChanged();
             }
             else if (e.PropertyName == nameof(ObjectDataSectionData.HeatingSeasonEnabled))
             {
@@ -775,6 +787,11 @@ namespace EE.Doklad.ViewModels
                 OnPropertyChanged(nameof(HeatingSeasonWarning));
             }
 
+            RefreshThermalCharacteristics();
+        }
+
+        private void VentilationHeatingData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
             RefreshThermalCharacteristics();
         }
 
@@ -1223,6 +1240,7 @@ namespace EE.Doklad.ViewModels
         private void RefreshThermalCharacteristics()
         {
             var snapshot = HeatingCharacteristicsService.Build(_report, _objectData, _data);
+            VentilationGainPerArea = CalculateVentilationHeatingContributionPerArea();
 
             double hTrTotal = snapshot.Walls.H + snapshot.Roof.H + snapshot.Floor.H + snapshot.Windows.H + snapshot.ThermalBridgesH_WK + snapshot.ZtuH_WK;
             double hInf = 0.34 * snapshot.InfiltrationRate_AirChangesPerHour * snapshot.BuildingVolume_m3;
@@ -1251,6 +1269,55 @@ namespace EE.Doklad.ViewModels
             ThermalCharacteristicsRows.Add(HeatingCharacteristicRow.Separator());
             ThermalCharacteristicsRows.Add(CreateMetricRow("H_ve ОБЩО", null, null, hVeTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
             ThermalCharacteristicsRows.Add(CreateMetricRow("H_TOTAL", null, null, hTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true, isHighlighted: true));
+        }
+
+        private double CalculateVentilationHeatingContributionPerArea()
+        {
+            if (_ventilationHeatingData == null || _objectData == null)
+            {
+                return 0.0;
+            }
+
+            var climateService = new ClimateService(new JsonClimateRepository());
+            if (!climateService.TryGetZone(_objectData.ClimateZone, out var climateData) || climateData == null)
+            {
+                return 0.0;
+            }
+
+            _ventilationHeatingData.HeatedArea_m2 = HeatedArea;
+
+            int[] monthlyDaysOff =
+            {
+                ParseMonthlyDaysOff(_objectData.DaysOffJanuary),
+                ParseMonthlyDaysOff(_objectData.DaysOffFebruary),
+                ParseMonthlyDaysOff(_objectData.DaysOffMarch),
+                ParseMonthlyDaysOff(_objectData.DaysOffApril),
+                ParseMonthlyDaysOff(_objectData.DaysOffMay),
+                ParseMonthlyDaysOff(_objectData.DaysOffJune),
+                ParseMonthlyDaysOff(_objectData.DaysOffJuly),
+                ParseMonthlyDaysOff(_objectData.DaysOffAugust),
+                ParseMonthlyDaysOff(_objectData.DaysOffSeptember),
+                ParseMonthlyDaysOff(_objectData.DaysOffOctober),
+                ParseMonthlyDaysOff(_objectData.DaysOffNovember),
+                ParseMonthlyDaysOff(_objectData.DaysOffDecember)
+            };
+
+            var calculator = new BgVentilationCalculator();
+            var result = calculator.Calculate(_ventilationHeatingData, climateData, monthlyDaysOff);
+
+            return result?.VentilationHeatingNetContribution_kWh_m2a ?? 0.0;
+        }
+
+        private static int ParseMonthlyDaysOff(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return 0;
+            }
+
+            return int.TryParse(value.Trim(), out int parsed)
+                ? Math.Max(0, parsed)
+                : 0;
         }
 
         private static HeatingCharacteristicRow CreateMetricRow(

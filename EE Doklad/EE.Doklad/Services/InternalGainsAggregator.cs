@@ -36,7 +36,7 @@ namespace EE.Doklad.Services
         public double CoolingHoursPerDay { get; set; } = 24.0;
 
         /// <summary>Референтна година</summary>
-        public int YearRef { get; set; } = 2024;
+        public int YearRef { get; set; } = global::EE.Doklad.CalendarDefaults.ReferenceYear;
 
         // ── Компонент 1: Обитатели ────────────────────────────────────────────
         /// <summary>Явна топлина на обитател за отопление [W/person] (Секция 11)</summary>

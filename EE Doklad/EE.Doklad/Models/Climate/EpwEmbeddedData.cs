@@ -51,9 +51,9 @@ namespace EE.Doklad.Models.Climate
         public double? Elevation { get; set; }
 
         /// <summary>
-        /// Фиксирана година използвана за DateTime (референтна, напр. 2024).
+        /// Фиксирана година използвана за DateTime (референтна, напр. 2026).
         /// </summary>
-        public int FixedYearUsed { get; set; } = 2024;
+        public int FixedYearUsed { get; set; } = global::EE.Doklad.CalendarDefaults.ReferenceYear;
 
         /// <summary>
         /// 8760 часови записа (365 дни × 24 часа).

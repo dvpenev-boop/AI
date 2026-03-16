@@ -242,7 +242,7 @@ namespace EE.Doklad.Services
             CoolingSectionData? coolingData,
             UnconditionedZoneSectionData? unconditionedSectionData,
             ClimateZoneData climateData,
-            int yearRef = 2024)
+            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var qtrResults = new ZtuQtrResults();
 

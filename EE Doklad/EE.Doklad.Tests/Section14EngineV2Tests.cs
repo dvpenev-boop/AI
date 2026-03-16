@@ -147,15 +147,15 @@ namespace EE.Doklad.Tests
         // ── ComputeMonthly: basic workdays ────────────────────────────────────────
 
         [Fact]
-        public void ComputeMonthly_AllWeekdays_July2024_Returns23WorkdaysNoHolidays()
+        public void ComputeMonthly_AllWeekdays_JulyReferenceYear_Returns23WorkdaysNoHolidays()
         {
-            // July 2024 has 23 weekdays, season covers full month
+            // July in the reference year has 23 weekdays, season covers full month
             var schedule = MakeWeekdaySchedule(8, 17);
-            var seasonStart = new DateTime(2024, 7, 1);
-            var seasonEnd   = new DateTime(2024, 7, 31);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 7, 1);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 7, 31);
             var daysOff = new int[12];
 
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, 2024);
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             var july = results.Single(r => r.MonthNumber == 7);
             Assert.Equal(23, july.DaysInSeason);
@@ -166,19 +166,18 @@ namespace EE.Doklad.Tests
         [Fact]
         public void ComputeMonthly_20WorkdaysAnd5HolidaysDaysOff_Returns15WorkingDays()
         {
-            // Month with exactly 20 weekdays, 5 days-off (holidays)
-            // Use June 2024: Jun 2024 has 20 weekdays
+            // June in the reference year has 22 weekdays, so 5 days-off leave 17 working days
             var schedule = MakeWeekdaySchedule(8, 17);
-            var seasonStart = new DateTime(2024, 6, 1);
-            var seasonEnd   = new DateTime(2024, 6, 30);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 1);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 30);
             var daysOff = new int[12];
             daysOff[5] = 5; // June = index 5
 
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, 2024);
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             var june = results.Single(r => r.MonthNumber == 6);
-            Assert.Equal(20, june.DaysInSeason);
-            Assert.Equal(15.0, june.WorkingDays, 2);
+            Assert.Equal(22, june.DaysInSeason);
+            Assert.Equal(17.0, june.WorkingDays, 2);
             Assert.Equal(5, june.HolidaysSubtracted);
         }
 
@@ -187,14 +186,14 @@ namespace EE.Doklad.Tests
         {
             // Weekday-only schedule; official holidays on weekend → must NOT reduce workdays
             var schedule = MakeWeekdaySchedule(8, 17);
-            var seasonStart = new DateTime(2024, 6, 1);
-            var seasonEnd   = new DateTime(2024, 6, 30);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 1);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 30);
             var daysOff = new int[12]; // no DaysOff
 
-            // June 1 2024 = Saturday → holiday on weekend
-            var officialHolidays = new List<DateTime> { new DateTime(2024, 6, 1) };
+            // June 6 2026 = Saturday -> holiday on weekend
+            var officialHolidays = new List<DateTime> { new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 6) };
 
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, officialHolidays, 2024);
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, officialHolidays, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             var june = results.Single(r => r.MonthNumber == 6);
             Assert.Equal(0, june.HolidaysSubtracted);  // Saturday not active → no subtraction
@@ -211,43 +210,43 @@ namespace EE.Doklad.Tests
                 SaturdayActive  = true,
                 SundayActive    = false
             };
-            var seasonStart = new DateTime(2024, 6, 1);
-            var seasonEnd   = new DateTime(2024, 6, 30);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 1);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 30);
             var daysOff = new int[12];
 
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, 2024);
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, global::EE.Doklad.CalendarDefaults.ReferenceYear);
             var june = results.Single(r => r.MonthNumber == 6);
 
-            // June 2024: 20 weekdays + 5 Saturdays = 25 candidate days
-            Assert.Equal(25, june.DaysInSeason);
+            // June 2026: 22 weekdays + 4 Saturdays = 26 candidate days
+            Assert.Equal(26, june.DaysInSeason);
         }
 
         [Fact]
         public void ComputeMonthly_PartialMonthAtSeasonStart()
         {
-            // Season starts June 15 → only 12 weekdays (June 2024: June 17-28 is 10, 15=Sat 16=Sun skip)
+            // Season starts June 15 -> partial month must have fewer workdays than full June
             var schedule = MakeWeekdaySchedule(8, 17);
-            var seasonStart = new DateTime(2024, 6, 15);
-            var seasonEnd   = new DateTime(2024, 6, 30);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 15);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 30);
             var daysOff = new int[12];
 
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, 2024);
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, global::EE.Doklad.CalendarDefaults.ReferenceYear);
             var june = results.Single(r => r.MonthNumber == 6);
 
-            Assert.True(june.DaysInSeason < 20, "Partial month must have fewer working days than full month.");
+            Assert.True(june.DaysInSeason < 22, "Partial month must have fewer working days than full month.");
         }
 
         [Fact]
         public void ComputeMonthly_HolidaysOutsideSeason_NotSubtracted()
         {
             var schedule = MakeWeekdaySchedule(8, 17);
-            var seasonStart = new DateTime(2024, 7, 1);
-            var seasonEnd   = new DateTime(2024, 7, 31);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 7, 1);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 7, 31);
             var daysOff = new int[12];
 
             // Holiday in August (outside season)
-            var officialHolidays = new List<DateTime> { new DateTime(2024, 8, 15) };
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, officialHolidays, 2024);
+            var officialHolidays = new List<DateTime> { new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 8, 15) };
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, officialHolidays, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             var july = results.Single(r => r.MonthNumber == 7);
             Assert.Equal(0, july.HolidaysSubtracted);
@@ -257,11 +256,11 @@ namespace EE.Doklad.Tests
         public void ComputeMonthly_WorkingHours_EqualWorkingDaysTimesRunHours()
         {
             var schedule = MakeWeekdaySchedule(10, 19); // 10 h/day
-            var seasonStart = new DateTime(2024, 7, 1);
-            var seasonEnd   = new DateTime(2024, 7, 31);
+            var seasonStart = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 7, 1);
+            var seasonEnd   = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 7, 31);
             var daysOff = new int[12];
 
-            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, 2024);
+            var results = WorkdayScheduleCalculator.ComputeMonthly(schedule, seasonStart, seasonEnd, daysOff, null, global::EE.Doklad.CalendarDefaults.ReferenceYear);
             var july = results.Single(r => r.MonthNumber == 7);
 
             Assert.Equal(10, schedule.TimeRange.RunHoursPerDay);
@@ -330,9 +329,9 @@ namespace EE.Doklad.Tests
                     SaturdayActive = false,
                     SundayActive   = false
                 },
-                SeasonStart    = new DateTime(2024, seasonStartMonth, 1),
-                SeasonEnd      = new DateTime(2024, seasonEndMonth,
-                    DateTime.DaysInMonth(2024, seasonEndMonth)),
+                SeasonStart    = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, seasonStartMonth, 1),
+                SeasonEnd      = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, seasonEndMonth,
+                    DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, seasonEndMonth)),
                 DaysOffPerMonth = new int[12],
                 EnergySource1   = new EnergySourceConfigV2 { Share_Pct = 100, TotalEfficiency = 3.0 }
             };
@@ -443,8 +442,8 @@ namespace EE.Doklad.Tests
                     TimeRange      = new DailyTimeRange { StartHour = 10, EndHour = 19 },
                     WorkdaysActive = true
                 },
-                SeasonStart     = new DateTime(2024, 6, 1),
-                SeasonEnd       = new DateTime(2024, 8, 31),
+                SeasonStart     = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 1),
+                SeasonEnd       = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 8, 31),
                 DaysOffPerMonth = new int[12],
                 EnergySource1   = new EnergySourceConfigV2 { Share_Pct = 100, TotalEfficiency = 3.0 }
             };
@@ -463,8 +462,8 @@ namespace EE.Doklad.Tests
                     TimeRange      = new DailyTimeRange { StartHour = 10, EndHour = 19 },
                     WorkdaysActive = true
                 },
-                SeasonStart     = new DateTime(2024, 6, 1),
-                SeasonEnd       = new DateTime(2024, 8, 31),
+                SeasonStart     = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 6, 1),
+                SeasonEnd       = new DateTime(global::EE.Doklad.CalendarDefaults.ReferenceYear, 8, 31),
                 DaysOffPerMonth = new int[12],
                 EnergySource1   = new EnergySourceConfigV2 { Share_Pct = 100, TotalEfficiency = 3.0 }
             };

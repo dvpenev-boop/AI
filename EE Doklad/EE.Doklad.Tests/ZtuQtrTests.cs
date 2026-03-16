@@ -38,7 +38,7 @@ namespace EE.Doklad.Tests
             var climate = new ClimateZoneData();
 
             var calc = new UnconditionedZonesCalculator();
-            var qtr = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, unconditioned, climate, 2024);
+            var qtr = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, unconditioned, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             // Find July result
             var july = qtr.Months[6];
@@ -63,10 +63,10 @@ namespace EE.Doklad.Tests
             // define heating season full year
             climate.HeatingSeason = new HeatingSeasonInfo { Start = "1-1", End = "12-31" };
 
-            var hours = HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climate, 2024);
+            var hours = HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
             // Compute expected using calendar counts (consistent with implementation)
             int month = 7; // July
-            int year = 2024;
+            int year = global::EE.Doklad.CalendarDefaults.ReferenceYear;
             int workdayCount = 0, satCount = 0, sunCount = 0, heatingSeasonDays = 0;
             for (int d = 1; d <= DateTime.DaysInMonth(year, month); d++)
             {
@@ -108,7 +108,7 @@ namespace EE.Doklad.Tests
             var climate = new ClimateZoneData();
 
             var calc = new UnconditionedZonesCalculator();
-            var qtr = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, unconditioned, climate, 2024);
+            var qtr = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, unconditioned, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             foreach (var m in qtr.Months)
             {
@@ -129,10 +129,10 @@ namespace EE.Doklad.Tests
             var climate = new ClimateZoneData();
             climate.HeatingSeason = new HeatingSeasonInfo { Start = "1-1", End = "12-31" };
 
-            var hours = HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climate, 2024);
+            var hours = HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
             for (int m = 0; m < 12; m++)
             {
-                int days = DateTime.DaysInMonth(2024, m + 1);
+                int days = DateTime.DaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, m + 1);
                 Assert.InRange(hours[m], days * 24.0 - 0.1, days * 24.0 + 0.1);
             }
         }
@@ -168,10 +168,10 @@ namespace EE.Doklad.Tests
             var calc = new UnconditionedZonesCalculator();
 
             var uncondA = new UnconditionedZoneSectionData { ThetaAdjSummer = 30.0 };
-            var qA = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncondA, climate, 2024);
+            var qA = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncondA, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             var uncondB = new UnconditionedZoneSectionData { ThetaAdjSummer = 35.0 };
-            var qB = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncondB, climate, 2024);
+            var qB = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncondB, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             // Sum cooling May..Sep should be larger for B
             Assert.True(qB.Annual_Qtr_cool_kWh > qA.Annual_Qtr_cool_kWh);
@@ -196,7 +196,7 @@ namespace EE.Doklad.Tests
             var calc = new UnconditionedZonesCalculator();
             var uncond = new UnconditionedZoneSectionData { ThetaAdjSummer = 35.0 };
 
-            var q = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncond, climate, 2024);
+            var q = calc.CalculateQtrResults(zone, monthlyResults, objectData, heatingData, uncond, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
 
             // January index 0 must have zero cooling hours per temporary filter
             Assert.Equal(0.0, q.Months[0].CoolingHours_h);

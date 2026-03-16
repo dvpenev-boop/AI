@@ -405,6 +405,7 @@ public partial class MainWindow : Window
                     DataContext = new ViewModels.VentilationSectionViewModel(
                         section.VentilationSectionData,
                         objectData,
+                        heatingData,
                         climateData)
                 };
                 ContentScrollViewer.Content = ventilationView;

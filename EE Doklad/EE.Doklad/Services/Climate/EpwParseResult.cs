@@ -65,7 +65,7 @@ namespace EE.Doklad.Services.Climate
         public double? Elevation { get; set; }
 
         /// <summary>
-        /// Фиксирана година използвана за DateTime (референтна, напр. 2024).
+        /// Фиксирана година използвана за DateTime (референтна, напр. 2026).
         /// </summary>
         public int FixedYearUsed { get; set; }
 
