@@ -12,25 +12,38 @@
         <converters:FlexibleDoubleConverter x:Key="FlexibleDoubleConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        
-        <!-- Style за editable редове -->
-        <Style x:Key="EditableTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Padding" Value="5"/>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,8,0,2"/>
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="BorderBrush" Value="#2196F3"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
         </Style>
         
-        <!-- Style за read-only редове -->
-        <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource EditableTextBoxStyle}">
+        <!-- Style Р В Р’В·Р В Р’В° editable Р РЋР вЂљР В Р’ВµР В РўвЂР В РЎвЂўР В Р вЂ Р В Р’Вµ -->
+        <Style x:Key="EditableTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}"/>
+        
+        <!-- Style Р В Р’В·Р В Р’В° read-only Р РЋР вЂљР В Р’ВµР В РўвЂР В РЎвЂўР В Р вЂ Р В Р’Вµ -->
+        <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
             <Setter Property="IsReadOnly" Value="True"/>
-            <!-- Use white background (remove grey) so results display plainly -->
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="#F9F9F9"/>
+            <Setter Property="Foreground" Value="#555"/>
         </Style>
 
-        <!-- Style за ComboBox -->
+        <!-- Style Р В Р’В·Р В Р’В° ComboBox -->
         <Style x:Key="EnergyComboBoxItemStyle" TargetType="ComboBoxItem">
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="Black"/>
@@ -41,11 +54,11 @@
             <Setter Property="MinWidth" Value="300"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#1976D2"/>
+                    <Setter Property="Background" Value="#E53935"/>
                     <Setter Property="Foreground" Value="White"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="Background" Value="#FFF5F5"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -60,18 +73,29 @@
             <!-- Make the closed ComboBox white with dark text and a blue border for accessibility -->
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="BorderBrush" Value="#1976D2"/>
+            <Setter Property="BorderBrush" Value="#E53935"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <!-- Limit dropdown height but allow enough space to show many items -->
             <Setter Property="MaxDropDownHeight" Value="420"/>
         </Style>
+        <Style x:Key="CompactEnergyComboBoxItemStyle" TargetType="ComboBoxItem" BasedOn="{StaticResource EnergyComboBoxItemStyle}">
+            <Setter Property="Padding" Value="4,1"/>
+            <Setter Property="FontSize" Value="10"/>
+        </Style>
+        <Style x:Key="CompactEnergySourceComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource EnergySourceComboBoxStyle}">
+            <Setter Property="Padding" Value="4,0"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="MinHeight" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource CompactEnergyComboBoxItemStyle}"/>
+        </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
-            <!-- Заглавие -->
-            <TextBlock Text="12. Вентилация - отопление"
+            <!-- Р В РІР‚вЂќР В Р’В°Р В РЎвЂ“Р В Р’В»Р В Р’В°Р В Р вЂ Р В РЎвЂР В Р’Вµ -->
+            <TextBlock Text="13. Вентилация Отопление"
                        FontSize="18"
                        FontWeight="Bold"
                        Margin="0,0,0,15"
@@ -91,16 +115,16 @@
             <!-- Main content (disabled when heating season is NOT enabled) -->
             <StackPanel IsEnabled="{Binding IsHeatingSeasonEnabled}">
 
-                <!-- Статичен текст -->
-            <TextBlock Text="Попълнете данните за секция: 12. Вентилация"
+                <!-- Р В Р Р‹Р РЋРІР‚С™Р В Р’В°Р РЋРІР‚С™Р В РЎвЂР РЋРІР‚РЋР В Р’ВµР В Р вЂ¦ Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋР С“Р РЋРІР‚С™ -->
+            <TextBlock Text="Попълнете данните за секция: 13. Вентилация Отопление"
                        FontSize="12"
                        FontStyle="Italic"
                        Foreground="DimGray"
                        Margin="0,0,0,20"/>
 
-            <!-- Основни входни параметри -->
-            <TextBlock Text="Основни параметри" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
-            <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20">
+            <!-- Р В РЎвЂєР РЋР С“Р В Р вЂ¦Р В РЎвЂўР В Р вЂ Р В Р вЂ¦Р В РЎвЂ Р В Р вЂ Р РЋРІР‚В¦Р В РЎвЂўР В РўвЂР В Р вЂ¦Р В РЎвЂ Р В РЎвЂ”Р В Р’В°Р РЋР вЂљР В Р’В°Р В РЎВР В Р’ВµР РЋРІР‚С™Р РЋР вЂљР В РЎвЂ -->
+            <TextBlock Text="Основни параметри" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,10"/>
+            <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20" Width="820" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -115,101 +139,101 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <!-- First column reduced by 20% (400 -> 320) -->
-                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="520"/>
                         <!-- Uniform value column width for all tables -->
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="300"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Header Row -->
                     <Border Grid.Row="0" Grid.Column="0" Background="#D32F2F" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13"/>
+                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#D32F2F" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Стойност" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Стойност" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13" HorizontalAlignment="Center"/>
                     </Border>
                     <!-- unit column removed -->
 
-                    <!-- Row 1: Работен режим -->
+                    <!-- Row 1: Р В Р’В Р В Р’В°Р В Р’В±Р В РЎвЂўР РЋРІР‚С™Р В Р’ВµР В Р вЂ¦ Р РЋР вЂљР В Р’ВµР В Р’В¶Р В РЎвЂР В РЎВ -->
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Работен режим, h/week" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Работен режим, h/week" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding OperatingHoursPerWeek, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     
 
-                    <!-- Row 2: Дебит -->
+                    <!-- Row 2: Р В РІР‚СњР В Р’ВµР В Р’В±Р В РЎвЂР РЋРІР‚С™ -->
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Дебит, m³/h на m²" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Дебит, m³/h на m²" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding AirflowRatePerM2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     
 
-                    <!-- Row 3: Температура на подаване -->
+                    <!-- Row 3: Р В РЎС›Р В Р’ВµР В РЎВР В РЎвЂ”Р В Р’ВµР РЋР вЂљР В Р’В°Р РЋРІР‚С™Р РЋРЎвЂњР РЋР вЂљР В Р’В° Р В Р вЂ¦Р В Р’В° Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В Р’В°Р В Р вЂ Р В Р’В°Р В Р вЂ¦Р В Р’Вµ -->
                     <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Температура на подаване, °C" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Температура на подаване, °C" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding SupplyTemperature, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 4: Относителна влажност -->
+                    <!-- Row 4: Р В РЎвЂєР РЋРІР‚С™Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р В РЎвЂР РЋРІР‚С™Р В Р’ВµР В Р’В»Р В Р вЂ¦Р В Р’В° Р В Р вЂ Р В Р’В»Р В Р’В°Р В Р’В¶Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ -->
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Относителна влажност на подавания въздух, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Относителна влажност на подавания въздух, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding RelativeHumidity, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 5: Ефективност на първа степен на рекуперация -->
+                    <!-- Row 5: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р В РЎвЂ”Р РЋР вЂ°Р РЋР вЂљР В Р вЂ Р В Р’В° Р РЋР С“Р РЋРІР‚С™Р В Р’ВµР В РЎвЂ”Р В Р’ВµР В Р вЂ¦ Р В Р вЂ¦Р В Р’В° Р РЋР вЂљР В Р’ВµР В РЎвЂќР РЋРЎвЂњР В РЎвЂ”Р В Р’ВµР РЋР вЂљР В Р’В°Р РЋРІР‚В Р В РЎвЂР РЋР РЏ -->
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на първа степен на рекуперация, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на първа степен на рекуперация, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding FirstStageRecuperationEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 6: Ефективност на втора степен на рекуперация -->
+                    <!-- Row 6: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р В Р вЂ Р РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР В Р’В° Р РЋР С“Р РЋРІР‚С™Р В Р’ВµР В РЎвЂ”Р В Р’ВµР В Р вЂ¦ Р В Р вЂ¦Р В Р’В° Р РЋР вЂљР В Р’ВµР В РЎвЂќР РЋРЎвЂњР В РЎвЂ”Р В Р’ВµР РЋР вЂљР В Р’В°Р РЋРІР‚В Р В РЎвЂР РЋР РЏ -->
                     <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на втора степен на рекуперация, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на втора степен на рекуперация, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding SecondStageRecuperationEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 7: Макс. разлика на температура при загряване -->
+                    <!-- Row 7: Р В РЎС™Р В Р’В°Р В РЎвЂќР РЋР С“. Р РЋР вЂљР В Р’В°Р В Р’В·Р В Р’В»Р В РЎвЂР В РЎвЂќР В Р’В° Р В Р вЂ¦Р В Р’В° Р РЋРІР‚С™Р В Р’ВµР В РЎВР В РЎвЂ”Р В Р’ВµР РЋР вЂљР В Р’В°Р РЋРІР‚С™Р РЋРЎвЂњР РЋР вЂљР В Р’В° Р В РЎвЂ”Р РЋР вЂљР В РЎвЂ Р В Р’В·Р В Р’В°Р В РЎвЂ“Р РЋР вЂљР РЋР РЏР В Р вЂ Р В Р’В°Р В Р вЂ¦Р В Р’Вµ -->
                     <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Макс. разлика на температура при загряване на въздуха във втора степен(от 4 до 8), °C" 
-                                   Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Макс. разлика на температура при загряване на въздуха във втора степен (от 4 до 8), °C" 
+                                   Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="7" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding MaxTemperatureDifferenceSecondStage, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 8: Мин. крайна температура на отработения въздух -->
+                    <!-- Row 8: Р В РЎС™Р В РЎвЂР В Р вЂ¦. Р В РЎвЂќР РЋР вЂљР В Р’В°Р В РІвЂћвЂ“Р В Р вЂ¦Р В Р’В° Р РЋРІР‚С™Р В Р’ВµР В РЎВР В РЎвЂ”Р В Р’ВµР РЋР вЂљР В Р’В°Р РЋРІР‚С™Р РЋРЎвЂњР РЋР вЂљР В Р’В° Р В Р вЂ¦Р В Р’В° Р В РЎвЂўР РЋРІР‚С™Р РЋР вЂљР В Р’В°Р В Р’В±Р В РЎвЂўР РЋРІР‚С™Р В Р’ВµР В Р вЂ¦Р В РЎвЂР РЋР РЏ Р В Р вЂ Р РЋР вЂ°Р В Р’В·Р В РўвЂР РЋРЎвЂњР РЋРІР‚В¦ -->
                     <Border Grid.Row="8" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
-                        <TextBlock Text="Мин. крайна температура на отработения въздух(от 3 до 5), °C" 
-                                   Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Мин. крайна температура на отработения въздух (от 3 до 5), °C" 
+                                   Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="8" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
                         <TextBox Text="{Binding MinExhaustAirTemperature, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" VerticalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                 </Grid>
             </Border>
 
-            <!-- Енергиен източник 1 (ЕИ1) -->
+            <!-- Р В РІР‚СћР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР В Р’ВµР В Р вЂ¦ Р В РЎвЂР В Р’В·Р РЋРІР‚С™Р В РЎвЂўР РЋРІР‚РЋР В Р вЂ¦Р В РЎвЂР В РЎвЂќ 1 (Р В РІР‚СћР В Р’В1) -->
             <TextBlock Text="Енергиен източник 1 (ЕИ1), %" FontSize="14" FontWeight="Bold" Margin="0,10,0,10"/>
-            <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20">
+            <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20" Width="820" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -224,35 +248,35 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <!-- First column reduced by 20% -->
-                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="520"/>
                         <!-- Uniform value column width -->
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="300"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Header Row -->
-                    <Border Grid.Row="0" Grid.Column="0" Background="#1976D2" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13"/>
+                    <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
+                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
-                    <Border Grid.Row="0" Grid.Column="1" Background="#1976D2" BorderBrush="White" BorderThickness="0,0,0,1">
+                    <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
                         <ComboBox x:Name="EnergyCarrierCombo1"
                                   ItemsSource="{x:Static models:EnergyCarrierInfo.All}"
                                   SelectedValuePath="Code"
                                   SelectedValue="{Binding EnergySource1Carrier, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Padding="6,2"
-                                  FontSize="11"
+                                  Padding="0"
+                                  FontSize="10"
                                   HorizontalAlignment="Stretch"
-                                  Margin="2"
-                                  Style="{StaticResource EnergySourceComboBoxStyle}">
+                                  Margin="1"
+                                  Style="{StaticResource CompactEnergySourceComboBoxStyle}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding DisplayName}" FontSize="11" LineHeight="13" LineStackingStrategy="BlockLineHeight" Padding="0"/>
+                                    <TextBlock Text="{Binding DisplayName}" FontSize="10" LineHeight="13" LineStackingStrategy="BlockLineHeight" Padding="0"/>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                             <ComboBox.GroupStyle>
                                 <GroupStyle>
                                     <GroupStyle.HeaderTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="#0066CC" Margin="0,2,0,1"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="10" Foreground="#0066CC" Margin="0,2,0,1"/>
                                         </DataTemplate>
                                     </GroupStyle.HeaderTemplate>
                                 </GroupStyle>
@@ -260,70 +284,70 @@
                         </ComboBox>
                     </Border>
 
-                    <!-- Row 1: Дял -->
+                    <!-- Row 1: Р В РІР‚СњР РЋР РЏР В Р’В» -->
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Дял, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Дял, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1Share, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 2: Ефективност на отдаване -->
+                    <!-- Row 2: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р В РЎвЂўР РЋРІР‚С™Р В РўвЂР В Р’В°Р В Р вЂ Р В Р’В°Р В Р вЂ¦Р В Р’Вµ -->
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на отдаване, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на отдаване, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1EmissionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 3: Ефективност на разпределителната мрежа -->
+                    <!-- Row 3: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р РЋР вЂљР В Р’В°Р В Р’В·Р В РЎвЂ”Р РЋР вЂљР В Р’ВµР В РўвЂР В Р’ВµР В Р’В»Р В РЎвЂР РЋРІР‚С™Р В Р’ВµР В Р’В»Р В Р вЂ¦Р В Р’В°Р РЋРІР‚С™Р В Р’В° Р В РЎВР РЋР вЂљР В Р’ВµР В Р’В¶Р В Р’В° -->
                     <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на разпределителната мрежа, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на разпределителната мрежа, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1DistributionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 4: Автоматично управление -->
+                    <!-- Row 4: Р В РЎвЂ™Р В Р вЂ Р РЋРІР‚С™Р В РЎвЂўР В РЎВР В Р’В°Р РЋРІР‚С™Р В РЎвЂР РЋРІР‚РЋР В Р вЂ¦Р В РЎвЂў Р РЋРЎвЂњР В РЎвЂ”Р РЋР вЂљР В Р’В°Р В Р вЂ Р В Р’В»Р В Р’ВµР В Р вЂ¦Р В РЎвЂР В Р’Вµ -->
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Автоматично управление, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Автоматично управление, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1AutomaticControl, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 5: Енергиен мениджмънт -->
+                    <!-- Row 5: Р В РІР‚СћР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР В Р’ВµР В Р вЂ¦ Р В РЎВР В Р’ВµР В Р вЂ¦Р В РЎвЂР В РўвЂР В Р’В¶Р В РЎВР РЋР вЂ°Р В Р вЂ¦Р РЋРІР‚С™ -->
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергиен мениджмънт (ЕМ) и поддръжка, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Енергиен мениджмънт (ЕМ) и поддръжка, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1EnergyManagement, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 6: Ефективност на генератора на топлина -->
+                    <!-- Row 6: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р В РЎвЂ“Р В Р’ВµР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В Р’В°Р РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР В Р’В° Р В Р вЂ¦Р В Р’В° Р РЋРІР‚С™Р В РЎвЂўР В РЎвЂ”Р В Р’В»Р В РЎвЂР В Р вЂ¦Р В Р’В° -->
                     <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0">
-                        <TextBlock Text="Ефективност на генератора на топлина, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на генератора на топлина, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,0">
                         <TextBox Text="{Binding EnergySource1GenerationEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                 </Grid>
             </Border>
 
-            <!-- Енергиен източник 2 (ЕИ2) - опционален -->
+            <!-- Р В РІР‚СћР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР В Р’ВµР В Р вЂ¦ Р В РЎвЂР В Р’В·Р РЋРІР‚С™Р В РЎвЂўР РЋРІР‚РЋР В Р вЂ¦Р В РЎвЂР В РЎвЂќ 2 (Р В РІР‚СћР В Р’В2) - Р В РЎвЂўР В РЎвЂ”Р РЋРІР‚В Р В РЎвЂР В РЎвЂўР В Р вЂ¦Р В Р’В°Р В Р’В»Р В Р’ВµР В Р вЂ¦ -->
             <CheckBox Content="Използвай втори енергиен източник (ЕИ2)" 
                       IsChecked="{Binding UseSecondEnergySource}" 
                       FontWeight="Bold" 
                       Margin="0,0,0,10"/>
 
             <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20" 
-                    Visibility="{Binding UseSecondEnergySource, Converter={StaticResource BoolToVisibilityConverter}}">
+                    Visibility="{Binding UseSecondEnergySource, Converter={StaticResource BoolToVisibilityConverter}}" Width="820" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -335,34 +359,34 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="520"/>
+                        <ColumnDefinition Width="300"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Header Row -->
-                    <Border Grid.Row="0" Grid.Column="0" Background="#1976D2" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13"/>
+                    <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
+                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
-                    <Border Grid.Row="0" Grid.Column="1" Background="#1976D2" BorderBrush="White" BorderThickness="0,0,0,1">
+                    <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
                         <ComboBox x:Name="EnergyCarrierCombo2"
                                   ItemsSource="{x:Static models:EnergyCarrierInfo.All}"
                                   SelectedValuePath="Code"
                                   SelectedValue="{Binding EnergySource2Carrier, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Padding="6,2"
-                                  FontSize="11"
+                                  Padding="0"
+                                  FontSize="10"
                                   HorizontalAlignment="Stretch"
-                                  Margin="2"
-                                  Style="{StaticResource EnergySourceComboBoxStyle}">
+                                  Margin="1"
+                                  Style="{StaticResource CompactEnergySourceComboBoxStyle}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding DisplayName}" FontSize="11" LineHeight="13" LineStackingStrategy="BlockLineHeight" Padding="0"/>
+                                    <TextBlock Text="{Binding DisplayName}" FontSize="10" LineHeight="13" LineStackingStrategy="BlockLineHeight" Padding="0"/>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                             <ComboBox.GroupStyle>
                                 <GroupStyle>
                                     <GroupStyle.HeaderTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="#0066CC" Margin="0,2,0,1"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="10" Foreground="#0066CC" Margin="0,2,0,1"/>
                                         </DataTemplate>
                                     </GroupStyle.HeaderTemplate>
                                 </GroupStyle>
@@ -370,63 +394,63 @@
                         </ComboBox>
                     </Border>
 
-                    <!-- Row 1: Дял -->
+                    <!-- Row 1: Р В РІР‚СњР РЋР РЏР В Р’В» -->
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Дял, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Дял, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2Share, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 2: Ефективност на отдаване -->
+                    <!-- Row 2: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р В РЎвЂўР РЋРІР‚С™Р В РўвЂР В Р’В°Р В Р вЂ Р В Р’В°Р В Р вЂ¦Р В Р’Вµ -->
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на отдаване, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на отдаване, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2EmissionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 3: Ефективност на разпределителната мрежа -->
+                    <!-- Row 3: Р В РІР‚СћР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™ Р В Р вЂ¦Р В Р’В° Р РЋР вЂљР В Р’В°Р В Р’В·Р В РЎвЂ”Р РЋР вЂљР В Р’ВµР В РўвЂР В Р’ВµР В Р’В»Р В РЎвЂР РЋРІР‚С™Р В Р’ВµР В Р’В»Р В Р вЂ¦Р В Р’В°Р РЋРІР‚С™Р В Р’В° Р В РЎВР РЋР вЂљР В Р’ВµР В Р’В¶Р В Р’В° -->
                     <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на разпределителната мрежа, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на разпределителната мрежа, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2DistributionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Автоматично управление, %" Padding="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Автоматично управление, %" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2AutomaticControl, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергиен мениджмънт (ЕМ) и поддръжка, %" Padding="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Енергиен мениджмънт (ЕМ) и поддръжка, %" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2EnergyManagement, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                                 Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,0">
-                        <TextBlock Text="Ефективност на генератора на топлина, %" Padding="10" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Ефективност на генератора на топлина, %" Style="{StaticResource LabelStyle}" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,0">
                         <TextBox Text="{Binding EnergySource2GenerationEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}" 
-                               Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" Width="120"/>
+                               Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                 </Grid>
             </Border>
 
-            <!-- Резултати -->
+            <!-- Р В Р’В Р В Р’ВµР В Р’В·Р РЋРЎвЂњР В Р’В»Р РЋРІР‚С™Р В Р’В°Р РЋРІР‚С™Р В РЎвЂ -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,10">
-                <TextBlock Text="Резултати" FontSize="14" FontWeight="Bold" Foreground="#4CAF50" VerticalAlignment="Center" />
+                <TextBlock Text="Резултати" FontSize="14" FontWeight="Bold" Foreground="#E53935" VerticalAlignment="Center" />
                 <CheckBox Content="Debug (временно): Покажи вътрешни променливи" Margin="20,0,0,0" VerticalAlignment="Center"
                           IsChecked="{Binding ShowDebug, Mode=TwoWay}" />
             </StackPanel>
-            <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20">
+            <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,0,20" Width="820" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -438,95 +462,95 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <!-- First column reduced by 20% -->
-                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="520"/>
                         <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Header Row -->
-                    <Border Grid.Row="0" Grid.Column="0" Background="#4CAF50" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13"/>
+                    <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
+                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
-                    <Border Grid.Row="0" Grid.Column="1" Background="#4CAF50" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Разход на м² (kWh/m²)" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13" HorizontalAlignment="Center"/>
+                    <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
+                        <TextBlock Text="Разход на м² (kWh/m²)" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13" HorizontalAlignment="Center"/>
                     </Border>
-                    <Border Grid.Row="0" Grid.Column="2" Background="#4CAF50" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <TextBlock Text="Потребна енергия (kWh)" FontWeight="Bold" Foreground="White" Padding="10" FontSize="13" HorizontalAlignment="Center"/>
+                    <Border Grid.Row="0" Grid.Column="2" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
+                        <TextBlock Text="Потребна енергия (kWh)" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13" HorizontalAlignment="Center"/>
                     </Border>
 
-                    <!-- Row 1: Енергия за загряване на въздуха (нетна) -->
+                    <!-- Row 1: Р В РІР‚СћР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР РЋР РЏ Р В Р’В·Р В Р’В° Р В Р’В·Р В Р’В°Р В РЎвЂ“Р РЋР вЂљР РЋР РЏР В Р вЂ Р В Р’В°Р В Р вЂ¦Р В Р’Вµ Р В Р вЂ¦Р В Р’В° Р В Р вЂ Р РЋР вЂ°Р В Р’В·Р В РўвЂР РЋРЎвЂњР РЋРІР‚В¦Р В Р’В° (Р В Р вЂ¦Р В Р’ВµР РЋРІР‚С™Р В Р вЂ¦Р В Р’В°) -->
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергия за загряване на въздуха (нетна)" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="Енергия за загряване на въздуха (нетна)" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding SpecificVentilationHeatingEnergy_kWh_m2a, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" 
                                  FontWeight="SemiBold" 
-                                 TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding AnnualVentilationHeatingEnergy_kWh, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" 
                                  FontWeight="SemiBold" 
-                                 TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 2: Принос към отоплението от вентилация (нетен) - NEW -->
+                    <!-- Row 2: Р В РЎСџР РЋР вЂљР В РЎвЂР В Р вЂ¦Р В РЎвЂўР РЋР С“ Р В РЎвЂќР РЋР вЂ°Р В РЎВ Р В РЎвЂўР РЋРІР‚С™Р В РЎвЂўР В РЎвЂ”Р В Р’В»Р В Р’ВµР В Р вЂ¦Р В РЎвЂР В Р’ВµР РЋРІР‚С™Р В РЎвЂў Р В РЎвЂўР РЋРІР‚С™ Р В Р вЂ Р В Р’ВµР В Р вЂ¦Р РЋРІР‚С™Р В РЎвЂР В Р’В»Р В Р’В°Р РЋРІР‚В Р В РЎвЂР РЋР РЏ (Р В Р вЂ¦Р В Р’ВµР РЋРІР‚С™Р В Р’ВµР В Р вЂ¦) - NEW -->
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Принос към отоплението от вентилация (нетен)" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock Text="Принос към отоплението от вентилация (нетен)" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding VentilationHeatingNetContribution_kWh_m2a, Mode=OneWay, StringFormat=0.00}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" 
                                  FontWeight="SemiBold" 
-                                 TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding VentilationHeatingNetContribution_kWh, Mode=OneWay, StringFormat=N2}" 
                                  Style="{StaticResource ReadOnlyTextBoxStyle}" 
                                  FontWeight="SemiBold" 
-                                 TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 3: Потребна енергия (ЕИ1) -->
+                    <!-- Row 3: Р В РЎСџР В РЎвЂўР РЋРІР‚С™Р РЋР вЂљР В Р’ВµР В Р’В±Р В Р вЂ¦Р В Р’В° Р В Р’ВµР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР РЋР РЏ (Р В РІР‚СћР В Р’В1) -->
                     <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Потребна енергия (ЕИ1)" Padding="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Потребна енергия (ЕИ1)" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding FinalEnergySource1_kWh_per_m2, Mode=OneWay, StringFormat=0.00}" 
-                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding FinalEnergySource1_kWh, Mode=OneWay, StringFormat=N2}" 
-                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 4: Потребна енергия (ЕИ2) -->
+                    <!-- Row 4: Р В РЎСџР В РЎвЂўР РЋРІР‚С™Р РЋР вЂљР В Р’ВµР В Р’В±Р В Р вЂ¦Р В Р’В° Р В Р’ВµР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР РЋР РЏ (Р В РІР‚СћР В Р’В2) -->
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Потребна енергия (ЕИ2)" Padding="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Потребна енергия (ЕИ2)" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding FinalEnergySource2_kWh_per_m2, Mode=OneWay, StringFormat=0.00}" 
-                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding FinalEnergySource2_kWh, Mode=OneWay, StringFormat=N2}" 
-                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 5: Обща потребна енергия (след преустройства/ефективности) -->
+                    <!-- Row 5: Р В РЎвЂєР В Р’В±Р РЋРІР‚В°Р В Р’В° Р В РЎвЂ”Р В РЎвЂўР РЋРІР‚С™Р РЋР вЂљР В Р’ВµР В Р’В±Р В Р вЂ¦Р В Р’В° Р В Р’ВµР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР РЋР РЏ (Р РЋР С“Р В Р’В»Р В Р’ВµР В РўвЂ Р В РЎвЂ”Р РЋР вЂљР В Р’ВµР РЋРЎвЂњР РЋР С“Р РЋРІР‚С™Р РЋР вЂљР В РЎвЂўР В РІвЂћвЂ“Р РЋР С“Р РЋРІР‚С™Р В Р вЂ Р В Р’В°/Р В Р’ВµР РЋРІР‚С›Р В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™Р В РЎвЂ) -->
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Обща потребна енергия" Padding="10" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="Обща потребна енергия" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
                     </Border>
-                    <!-- Покажи общата крайна енергия след преобразуване (ЕИ1+ЕИ2) на m² -->
+                    <!-- Р В РЎСџР В РЎвЂўР В РЎвЂќР В Р’В°Р В Р’В¶Р В РЎвЂ Р В РЎвЂўР В Р’В±Р РЋРІР‚В°Р В Р’В°Р РЋРІР‚С™Р В Р’В° Р В РЎвЂќР РЋР вЂљР В Р’В°Р В РІвЂћвЂ“Р В Р вЂ¦Р В Р’В° Р В Р’ВµР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР РЋР РЏ Р РЋР С“Р В Р’В»Р В Р’ВµР В РўвЂ Р В РЎвЂ”Р РЋР вЂљР В Р’ВµР В РЎвЂўР В Р’В±Р РЋР вЂљР В Р’В°Р В Р’В·Р РЋРЎвЂњР В Р вЂ Р В Р’В°Р В Р вЂ¦Р В Р’Вµ (Р В РІР‚СћР В Р’В1+Р В РІР‚СћР В Р’В2) Р В Р вЂ¦Р В Р’В° mР вЂ™Р вЂ  -->
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
                         <TextBox Text="{Binding SpecificFinalEnergy_kWh_m2a, Mode=OneWay, StringFormat=0.00}" 
-                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
-                    <!-- Общата енергия в kWh/a (както беше) -->
+                    <!-- Р В РЎвЂєР В Р’В±Р РЋРІР‚В°Р В Р’В°Р РЋРІР‚С™Р В Р’В° Р В Р’ВµР В Р вЂ¦Р В Р’ВµР РЋР вЂљР В РЎвЂ“Р В РЎвЂР РЋР РЏ Р В Р вЂ  kWh/a (Р В РЎвЂќР В Р’В°Р В РЎвЂќР РЋРІР‚С™Р В РЎвЂў Р В Р’В±Р В Р’ВµР РЋРІвЂљВ¬Р В Р’Вµ) -->
                     <Border Grid.Row="5" Grid.Column="2" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding TotalFinalEnergy_kWh_a, Mode=OneWay, StringFormat=N2}" 
-                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Center" Width="120"/>
+                                 Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
                 </Grid>
             </Border>
@@ -539,12 +563,12 @@
 
             </StackPanel> <!-- End of IsEnabled wrapper -->
 
-            <!-- Информационна бележка -->
+            <!-- Р В Р’ВР В Р вЂ¦Р РЋРІР‚С›Р В РЎвЂўР РЋР вЂљР В РЎВР В Р’В°Р РЋРІР‚В Р В РЎвЂР В РЎвЂўР В Р вЂ¦Р В Р вЂ¦Р В Р’В° Р В Р’В±Р В Р’ВµР В Р’В»Р В Р’ВµР В Р’В¶Р В РЎвЂќР В Р’В° -->
             <Border Background="#FFEBEE" BorderBrush="#D32F2F" BorderThickness="1" Padding="15" Margin="0,10,0,0">
                 <StackPanel>
                     <TextBlock Text="ℹ Забележки:" FontWeight="Bold" Foreground="#C62828" Margin="0,0,0,10"/>
-                    <TextBlock TextWrapping="Wrap" Foreground="#B71C1C" FontSize="11">
-                        <Run Text="• Изчислението следва Наредба RD-02-20-3, Секция 12 – Вентилация (формули 3.26, 3.27, 3.28 и item 3.5)."/>
+                    <TextBlock TextWrapping="Wrap" Foreground="#B71C1C" FontSize="10">
+                        <Run Text="• Изчислението следва Наредба RD-02-20-3, Секция 13 – Вентилация Отопление."/>
                         <LineBreak/>
                         <Run Text="• Методология: BG (Българска) - пълно имплементиране; DIN - не е имплементирана."/>
                         <LineBreak/>
@@ -562,7 +586,7 @@
                     Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
                 <StackPanel>
                     <TextBlock Text="⚠ Грешка при изчислението:" FontWeight="Bold" Foreground="#C62828" Margin="0,0,0,10"/>
-                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="#B71C1C" FontSize="11"/>
+                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="#B71C1C" FontSize="10"/>
                 </StackPanel>
             </Border>
         </StackPanel>
