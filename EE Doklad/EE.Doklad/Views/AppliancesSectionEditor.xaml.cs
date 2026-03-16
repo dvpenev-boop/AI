@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using EE.Doklad.Models;
 using EE.Doklad.Services;
 
@@ -19,10 +20,26 @@ namespace EE.Doklad.Views
         {
             InitializeComponent();
             DataContextChanged += OnDataContextChanged;
+            Loaded += OnLoaded;
 
             // Initialize appliance service
             _applianceService = new ApplianceService(new JsonApplianceRepository());
             LoadApplianceOptions();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            if (AppliancesGrid.Columns.Count <= 7)
+            {
+                return;
+            }
+
+            AppliancesGrid.Columns[6].HeaderStyle = new Style(typeof(DataGridColumnHeader));
+
+            var daysPerYearHeaderStyle = new Style(typeof(DataGridColumnHeader));
+            daysPerYearHeaderStyle.Setters.Add(
+                new Setter(ToolTipProperty, "Работен режим [days/y] = 365 - почивните дни по месеци от секция 5."));
+            AppliancesGrid.Columns[7].HeaderStyle = daysPerYearHeaderStyle;
         }
 
         private void LoadApplianceOptions()

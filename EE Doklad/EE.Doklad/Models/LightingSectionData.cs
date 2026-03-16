@@ -62,6 +62,16 @@ namespace EE.Doklad.Models
             }
         }
 
+        public double RoundedWorkRegimeHoursPerWeek
+        {
+            get
+            {
+                var weeklyHours = AverageHoursPerDay * AverageDaysPerWeek;
+                if (weeklyHours <= 0) return 0.0;
+                return Math.Round(weeklyHours);
+            }
+        }
+
         /// <summary>
         /// Обща консумирана енергия [kWh/y] = Σ AnnualEnergy_kWh от всички редове
         /// </summary>
@@ -110,6 +120,7 @@ namespace EE.Doklad.Models
         // ========== Външни данни от секция 5 "Данни за обекта" ==========
         private int _holidaysPerYear;
         private double _heatedArea_m2;
+        private int _occupancyWorkingDaysPerYear;
 
         /// <summary>
         /// Задава HolidaysPerYear от Секция 5 "Данни за обекта"
@@ -153,6 +164,21 @@ namespace EE.Doklad.Models
             }
         }
 
+        public void SetOccupancyWorkingDaysPerYear(int workingDaysPerYear)
+        {
+            if (_occupancyWorkingDaysPerYear == workingDaysPerYear)
+            {
+                return;
+            }
+
+            _occupancyWorkingDaysPerYear = workingDaysPerYear;
+
+            foreach (var item in LineItems)
+            {
+                item.SetOccupancyWorkingDaysPerYear(_occupancyWorkingDaysPerYear);
+            }
+        }
+
         public LightingSectionData()
         {
             LineItems.CollectionChanged += LineItems_CollectionChanged;
@@ -175,6 +201,7 @@ namespace EE.Doklad.Models
                     item.PropertyChanged += LineItem_PropertyChanged;
                     // Set external params
                     item.SetHolidaysPerYear(_holidaysPerYear);
+                    item.SetOccupancyWorkingDaysPerYear(_occupancyWorkingDaysPerYear);
                 }
             }
 
@@ -196,6 +223,7 @@ namespace EE.Doklad.Models
             OnPropertyChanged(nameof(TotalPower_kW));
             OnPropertyChanged(nameof(AverageHoursPerDay));
             OnPropertyChanged(nameof(AverageDaysPerWeek));
+            OnPropertyChanged(nameof(RoundedWorkRegimeHoursPerWeek));
             OnPropertyChanged(nameof(TotalAnnualEnergy_kWh));
             OnPropertyChanged(nameof(SimultaneousPower_W_per_m2));
             OnPropertyChanged(nameof(SimultaneousPower_W));
@@ -290,6 +318,9 @@ namespace EE.Doklad.Models
         {
             get
             {
+                if (_occupancyWorkingDaysPerYear.HasValue)
+                    return _occupancyWorkingDaysPerYear.Value >= 0 ? _occupancyWorkingDaysPerYear.Value : 0.0;
+
                 if (DaysPerWeek < 0 || DaysPerWeek > 7) return 0.0;
                 
                 // Работни дни в годината (автоматично изключва уикендите)
@@ -322,6 +353,7 @@ namespace EE.Doklad.Models
         }
 
         private int _holidaysPerYear;
+        private int? _occupancyWorkingDaysPerYear;
 
         /// <summary>
         /// Задава HolidaysPerYear от секция "Данни за обекта"
@@ -338,6 +370,18 @@ namespace EE.Doklad.Models
                 OnPropertyChanged(nameof(WorkingDaysPerYear));
                 OnPropertyChanged(nameof(AnnualEnergy_kWh));
             }
+        }
+
+        public void SetOccupancyWorkingDaysPerYear(int workingDaysPerYear)
+        {
+            if (_occupancyWorkingDaysPerYear == workingDaysPerYear)
+            {
+                return;
+            }
+
+            _occupancyWorkingDaysPerYear = workingDaysPerYear;
+            OnPropertyChanged(nameof(WorkingDaysPerYear));
+            OnPropertyChanged(nameof(AnnualEnergy_kWh));
         }
 
         partial void OnSelectedLightingComponentNameChanged(string? value)
@@ -359,11 +403,25 @@ namespace EE.Doklad.Models
 
         partial void OnHoursPerDayChanged(double value)
         {
+            double clampedValue = Math.Clamp(value, 0.0, 24.0);
+            if (Math.Abs(clampedValue - value) > 0.0001)
+            {
+                HoursPerDay = clampedValue;
+                return;
+            }
+
             OnPropertyChanged(nameof(AnnualEnergy_kWh));
         }
 
         partial void OnDaysPerWeekChanged(double value)
         {
+            double clampedValue = Math.Clamp(value, 0.0, 7.0);
+            if (Math.Abs(clampedValue - value) > 0.0001)
+            {
+                DaysPerWeek = clampedValue;
+                return;
+            }
+
             OnPropertyChanged(nameof(WorkingDaysPerYear));
             OnPropertyChanged(nameof(AnnualEnergy_kWh));
         }

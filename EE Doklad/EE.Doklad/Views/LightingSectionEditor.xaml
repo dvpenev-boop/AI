@@ -98,7 +98,13 @@
                     <!-- Дни седмично [days/week] -->
                     <DataGridTextColumn Header="Дни&#x0a;седмично&#x0a;[days/week]" 
                                         Binding="{Binding DaysPerWeek, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDoubleConverter}, StringFormat=0.00}" 
-                                        Width="85"/>
+                                        Width="85">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTip" Value="Работен режим [days/y] = 365 - почивните дни по месеци от секция 5."/>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                    </DataGridTextColumn>
                     
                     <!-- Работен режим [days/y] - readonly, показва цяло число но изчислява с десетични -->
                     <DataGridTextColumn Header="Работен&#x0a;режим&#x0a;[days/y]" 
@@ -186,7 +192,7 @@
                             <Run Text=" × "/>
                             <Run Text="{Binding AverageDaysPerWeek, Mode=OneWay, StringFormat='{}{0:0.00}'}"/>
                             <Run Text=" = "/>
-                            <Run Text="{Binding AverageHoursPerDay, Mode=OneWay, StringFormat='{}{0:0.00}'}" FontWeight="Bold"/>
+                            <Run Text="{Binding RoundedWorkRegimeHoursPerWeek, Mode=OneWay, StringFormat='{}{0:0.00}'}" FontWeight="Bold"/>
                             <Run Text=" h/седмица (закръглено, средно от таблицата)"/>
                         </TextBlock>
 
