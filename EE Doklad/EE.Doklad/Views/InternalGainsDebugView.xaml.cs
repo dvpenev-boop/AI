@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using EE.Doklad.Models;
+using EE.Doklad.Sections.Section23InternalGains.Services;
 using EE.Doklad.Services;
 
 namespace EE.Doklad.Views
@@ -13,6 +14,7 @@ namespace EE.Doklad.Views
         private readonly Report? _report;
         private readonly InternalGainsDebugInput _input;
         private readonly ObjectDataSectionData? _objData;
+        private readonly InternalGainsService _service;
         private bool _autoRefreshWired;
 
         private static readonly (int sm, int sd, int em, int ed)[] HeatingSeason =
@@ -40,6 +42,7 @@ namespace EE.Doklad.Views
         {
             InitializeComponent();
             _input = new InternalGainsDebugInput { ZoneId = 1 };
+            _service = new InternalGainsService(_input);
             Initialize();
         }
 
@@ -51,6 +54,7 @@ namespace EE.Doklad.Views
             _input   = input ?? new InternalGainsDebugInput { ZoneId = 1 };
             _objData = objectData;
             _report  = report;
+            _service = new InternalGainsService(_input, _objData, _report);
             Initialize();
         }
 
@@ -59,8 +63,10 @@ namespace EE.Doklad.Views
             PopulateFromObjectData();
             TxtProcessHeat.Text  = _input.ProcessHeat_W.ToString("F1");
             TxtProcessHours.Text = _input.ProcessAnnualHours.ToString("F1");
+            TxtProcessHeat.TextChanged += InputFields_TextChanged;
+            TxtProcessHours.TextChanged += InputFields_TextChanged;
             EnsureAutoRefreshWired();
-            RecalculateAndStoreResults(updateUi: false);
+            RefreshResults(updateUi: true);
         }
 
         private void PopulateFromObjectData()
@@ -137,10 +143,7 @@ namespace EE.Doklad.Views
             }
         }
 
-        private void BtnCalculate_Click(object sender, RoutedEventArgs e)
-            => RecalculateAndStoreResults(updateUi: true);
-
-        private void RecalculateAndStoreResults(bool updateUi)
+        private void RefreshResults(bool updateUi)
         {
             if (updateUi)
             {
@@ -153,18 +156,14 @@ namespace EE.Doklad.Views
             _input.ProcessAnnualHours = ParseDoubleUI(TxtProcessHours.Text);
 
             var inp = BuildAggregatorInput();
+            var result = _service.Recalculate();
 
-            if (inp.A_use_m2 <= 0)
+            if (inp.A_use_m2 <= 0 || result == null)
             {
-                _input.HeatingMonths.Clear();
-                _input.CoolingMonths.Clear();
                 if (updateUi)
                     ShowWarning("A_use (отопляема площ) = 0. Моля попълнете Секция 5.");
                 return;
             }
-
-            var result = InternalGainsAggregator.Compute(inp);
-            StoreMonthlyResults(result);
 
             if (updateUi)
             {
@@ -172,6 +171,9 @@ namespace EE.Doklad.Views
                 PanelResults.Visibility = Visibility.Visible;
             }
         }
+
+        private void InputFields_TextChanged(object sender, TextChangedEventArgs e)
+            => RefreshResults(updateUi: true);
 
         private InternalGainsAggregatorInput BuildAggregatorInput()
         {
@@ -403,35 +405,7 @@ namespace EE.Doklad.Views
         private void SourceSection_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             PopulateFromObjectData();
-            RecalculateAndStoreResults(updateUi: false);
-        }
-
-        private void StoreMonthlyResults(InternalGainsAggregatorResult result)
-        {
-            ReplaceMonthlyResults(_input.HeatingMonths, result.HeatingTable);
-            ReplaceMonthlyResults(_input.CoolingMonths, result.CoolingTable);
-        }
-
-        private static void ReplaceMonthlyResults(
-            System.Collections.ObjectModel.ObservableCollection<InternalGainsMonthlyResult> target,
-            IEnumerable<MonthlyGainsRow> rows)
-        {
-            target.Clear();
-            foreach (var row in rows.Where(r => Math.Abs(r.Total) > 1e-9 || Math.Abs(r.TotalPerM2) > 1e-9))
-            {
-                target.Add(new InternalGainsMonthlyResult
-                {
-                    Month = row.Month,
-                    Oc_kWh = row.Oc,
-                    A_kWh = row.A,
-                    L_kWh = row.L,
-                    WA_kWh = row.WA,
-                    HVAC_kWh = row.HVAC,
-                    Proc_kWh = row.Proc,
-                    Total_kWh = row.Total,
-                    Total_kWh_m2 = row.TotalPerM2
-                });
-            }
+            RefreshResults(updateUi: true);
         }
 
         private Section? GetCoolingSection()

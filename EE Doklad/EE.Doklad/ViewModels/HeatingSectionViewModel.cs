@@ -5,16 +5,20 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows.Media;
 using EE.Doklad.Models;
+using EE.Doklad.Sections.Section11Heating.Models;
+using EE.Doklad.Sections.Section11Heating.Services;
+using EE.Doklad.Sections.Section23InternalGains.Services;
 using EE.Doklad.Sections.Section24SolarGains.Models;
 using EE.Doklad.Services;
 
 namespace EE.Doklad.ViewModels
 {
     /// <summary>
-    /// ViewModel за секция "10. Отопление"
-    /// Управлява ръчните входове, изчислява автоматично топлината от обитатели
-    /// с линейна интерполация на базата на таблица
+    /// ViewModel пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ "10. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    /// пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     /// </summary>
     public class HeatingSectionViewModel : INotifyPropertyChanged
     {
@@ -29,20 +33,26 @@ namespace EE.Doklad.ViewModels
         private readonly VentilationSectionData? _ventilationHeatingData;
         private readonly InternalGainsDebugInput? _section23Data;
         private readonly Section24SolarGainsData? _section24Data;
+        private readonly HeatingCalculationService _calcService = new();
+        private readonly InternalGainsService? _internalGainsService;
         private bool _isAdjustingShares = false; // guard to avoid recursive share updates
         private double _heatingInstallationHours;
+        private HeatingAnnualResult? _lastAnnual;
+        private List<HeatingMonthlyResult> _lastMonthly = new();
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
-        /// Указва дали отоплителният сезон е включен (контролира gating на секцията)
+        /// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ gating пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         /// </summary>
         public bool IsHeatingSeasonEnabled => _objectData?.HeatingSeasonEnabled ?? true;
 
         /// <summary>
-        /// Информационен текст, когато отоплителният сезон не е избран
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
-        public string HeatingSeasonWarning => IsHeatingSeasonEnabled ? string.Empty : "Не е избран отоплителен сезон.";
+        public string HeatingSeasonWarning => IsHeatingSeasonEnabled
+            ? string.Empty
+            : "\u041D\u0435 \u0435 \u0438\u0437\u0431\u0440\u0430\u043D \u043E\u0442\u043E\u043F\u043B\u0438\u0442\u0435\u043B\u0435\u043D \u0441\u0435\u0437\u043E\u043D.";
 
         // ========== PROPERTIES ==========
 
@@ -59,7 +69,58 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        // ========== РЪЧНИ ВХОДОВЕ ==========
+        public bool IsMethodAuer
+        {
+            get => _data.CalculationMethod == HeatingCalculationMethod.AuerSoftware;
+            set
+            {
+                if (value)
+                {
+                    SetMethod(HeatingCalculationMethod.AuerSoftware);
+                }
+            }
+        }
+
+        public bool IsMethodRd
+        {
+            get => _data.CalculationMethod == HeatingCalculationMethod.Rd0220_3;
+            set
+            {
+                if (value)
+                {
+                    SetMethod(HeatingCalculationMethod.Rd0220_3);
+                }
+            }
+        }
+
+        public bool IsMethodAshrae
+        {
+            get => _data.CalculationMethod == HeatingCalculationMethod.Ashrae8760;
+            set
+            {
+                if (value)
+                {
+                    SetMethod(HeatingCalculationMethod.Ashrae8760);
+                }
+            }
+        }
+
+        public string MethodStatusText => _data.CalculationMethod switch
+        {
+            HeatingCalculationMethod.AuerSoftware =>
+                "\u041C\u0435\u0442\u043E\u0434 1: \u0410\u0423\u0415\u0420 - \u0441\u0440\u0430\u0432\u043D\u0438\u0442\u0435\u043B\u0435\u043D \u0440\u0435\u0436\u0438\u043C \u0441\u043F\u0440\u044F\u043C\u043E \u0440\u0435\u0444\u0435\u0440\u0435\u043D\u0442\u043D\u0438\u044F \u0441\u043E\u0444\u0442\u0443\u0435\u0440.",
+            HeatingCalculationMethod.Rd0220_3 =>
+                "\u041C\u0435\u0442\u043E\u0434 2: \u0420\u0414-02-20-3 / \u0411\u0414\u0421 EN ISO 52016-1.",
+            HeatingCalculationMethod.Ashrae8760 =>
+                "\u041C\u0435\u0442\u043E\u0434 3: ASHRAE 8760 - \u0432 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0430, \u0440\u0435\u0437\u0443\u043B\u0442\u0430\u0442\u0438\u0442\u0435 \u043D\u0435 \u0441\u0430 \u043D\u0430\u043B\u0438\u0447\u043D\u0438.",
+            _ => string.Empty
+        };
+
+        public Brush MethodStatusBrush => _data.CalculationMethod == HeatingCalculationMethod.Ashrae8760
+            ? Brushes.DarkOrange
+            : Brushes.DarkGreen;
+
+        // ========== пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ ==========
 
         private string _infiltrationText;
         public string InfiltrationText
@@ -461,10 +522,10 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        // ========== ОБИТАТЕЛИ ==========
+        // ========== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ==========
 
         /// <summary>
-        /// Списък с налични активности за dropdown
+        /// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ dropdown
         /// </summary>
         public List<ActivityLevelOption> ActivityLevelOptions { get; }
 
@@ -483,7 +544,7 @@ namespace EE.Doklad.ViewModels
         }
 
         /// <summary>
-        /// Брой обитатели (read-only, от секция 5)
+        /// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (read-only, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 5)
         /// </summary>
         public int NumberOfOccupants
         {
@@ -499,9 +560,9 @@ namespace EE.Doklad.ViewModels
         }
 
         /// <summary>
-        /// Температура в помещението (read-only, равна на проектна температура)
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (read-only, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         /// </summary>
-        public string RoomTemperatureDisplay => $"{_data.DesignTemperature:F2} °C";
+        public string RoomTemperatureDisplay => $"{_data.DesignTemperature:F2} \u00B0C";
 
         public ObservableCollection<HeatingCharacteristicRow> ThermalCharacteristicsRows { get; } = new();
         public string HeatingInstallationHoursDisplay => $"{_heatingInstallationHours:F0}";
@@ -510,11 +571,20 @@ namespace EE.Doklad.ViewModels
         public double VentilationGainPerArea { get; private set; } = 0.0;
         public double LightingGainPerArea { get; private set; } = 0.0;
         public double AppliancesGainPerArea { get; private set; } = 0.0;
+        public double TimeConstant_h => _lastAnnual?.Tau ?? 0.0;
+        public double UtilizationFactor => _lastAnnual != null && _lastAnnual.Qht_total > 0.0
+            ? 1.0 - (_lastAnnual.QH_total_kWh / _lastAnnual.Qht_total)
+            : 0.0;
+        public double SolarGain_total_kWh => _lastAnnual?.Qsol_total ?? 0.0;
+        public double QH_per_m2 => _lastAnnual?.QH_per_m2 ?? 0.0;
+        public bool IsAshraePlaceholder => _data.CalculationMethod == HeatingCalculationMethod.Ashrae8760;
         public double NetHeatingEnergyAfterGains =>
-            Math.Max(0.0, NetHeatingEnergyNoGainsPerArea
-                - VentilationGainPerArea
-                - LightingGainPerArea
-                - AppliancesGainPerArea);
+            _lastAnnual?.IsValid == true
+                ? Math.Max(0.0, QH_per_m2 - VentilationGainPerArea)
+                : Math.Max(0.0, NetHeatingEnergyNoGainsPerArea
+                    - VentilationGainPerArea
+                    - LightingGainPerArea
+                    - AppliancesGainPerArea);
         public string VentilationGainPerAreaDisplay => VentilationGainPerArea.ToString("F2", CultureInfo.InvariantCulture);
         public string LightingGainPerAreaDisplay => LightingGainPerArea.ToString("F2", CultureInfo.InvariantCulture);
         public string AppliancesGainPerAreaDisplay => AppliancesGainPerArea.ToString("F2", CultureInfo.InvariantCulture);
@@ -557,9 +627,9 @@ namespace EE.Doklad.ViewModels
                 : null;
         public string OverallHeatGenerationEfficiencyDisplay => FormatNullableDouble(OverallHeatGenerationEfficiencyPercent);
         public bool HasEnergySourceShareWarning => Math.Abs(GetTotalEnergySourceShare() - 100.0) > 0.01;
-        public string EnergySourceShareWarning => "Сборът на дяловете трябва да е 100%";
+        public string EnergySourceShareWarning => "\u0421\u0431\u043E\u0440\u044A\u0442 \u043D\u0430 \u0434\u044F\u043B\u043E\u0432\u0435\u0442\u0435 \u0442\u0440\u044F\u0431\u0432\u0430 \u0434\u0430 \u0435 100%";
 
-        // ========== ИЗЧИСЛЕНИ СТОЙНОСТИ ==========
+        // ========== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ==========
 
         private double _sensibleHeatPerPerson;
         public double SensibleHeatPerPerson
@@ -629,10 +699,10 @@ namespace EE.Doklad.ViewModels
 
         public string TotalLatentHeatDisplay => $"{TotalLatentHeat:F2} W";
 
-        // ========== W/m² ИЗЧИСЛЕНИЯ ==========
+        // ========== W/m? пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ==========
 
         /// <summary>
-        /// Отопляема площ от Секция 5
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 5
         /// </summary>
         public double HeatedArea
         {
@@ -648,22 +718,22 @@ namespace EE.Doklad.ViewModels
         }
 
         /// <summary>
-        /// Топлина от обитатели [W/m²]
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ [W/m?]
         /// </summary>
         public double TotalOccupantHeatPerArea => HeatedArea > 0 ? TotalOccupantHeat / HeatedArea : 0;
 
         public string TotalOccupantHeatPerAreaDisplay => HeatedArea > 0 
-            ? $"{TotalOccupantHeatPerArea:F2} W/m²" 
-            : "– (няма площ)";
+            ? $"{TotalOccupantHeatPerArea:F2} W/m\u00B2" 
+            : "\u2014 (\u043D\u044F\u043C\u0430 \u0434\u0430\u043D\u043D\u0438)";
 
         /// <summary>
-        /// Латентна топлина от обитатели [W/m²]
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ [W/m?]
         /// </summary>
         public double TotalLatentHeatPerArea => HeatedArea > 0 ? TotalLatentHeat / HeatedArea : 0;
 
         public string TotalLatentHeatPerAreaDisplay => HeatedArea > 0 
-            ? $"{TotalLatentHeatPerArea:F2} W/m²" 
-            : "– (няма площ)";
+            ? $"{TotalLatentHeatPerArea:F2} W/m\u00B2" 
+            : "\u2014 (\u043D\u044F\u043C\u0430 \u0434\u0430\u043D\u043D\u0438)";
 
         // ========== VALIDATION ERRORS ==========
 
@@ -732,13 +802,17 @@ namespace EE.Doklad.ViewModels
             _ztuData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.UnconditionedZones)?.UnconditionedZoneSectionData;
             _section23Data = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.InternalGainsDebug)?.InternalGainsDebugInput;
             _section24Data = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.SolarGains)?.SolarGainsData;
+            if (_section23Data != null)
+            {
+                _internalGainsService = new InternalGainsService(_section23Data, _objectData, _report);
+            }
             _ventilationHeatingData = _report?.Sections?.FirstOrDefault(s =>
                 s.Type == SectionType.Ventilation &&
                 s.VentilationSectionData != null &&
-                (s.Title?.Contains("Вентилация Отопление", StringComparison.OrdinalIgnoreCase) ?? false))
+                (s.Title?.Contains("\u0412\u0435\u043D\u0442\u0438\u043B\u0430\u0446\u0438\u044F \u041E\u0442\u043E\u043F\u043B\u0435\u043D\u0438\u0435", StringComparison.OrdinalIgnoreCase) ?? false))
                 ?.VentilationSectionData;
 
-            // Инициализация на activity options
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ activity options
             ActivityLevelOptions = ActivityDataService.GetAllActivities()
                 .Select(a => new ActivityLevelOption
                 {
@@ -747,12 +821,12 @@ namespace EE.Doklad.ViewModels
                 })
                 .ToList();
 
-            // Инициализация на текстови полета
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             _infiltrationText = _data.Infiltration.ToString("F2", CultureInfo.InvariantCulture);
             _designTemperatureText = _data.DesignTemperature.ToString("F2", CultureInfo.InvariantCulture);
             _reductionTemperatureText = _data.ReductionTemperature.ToString("F2", CultureInfo.InvariantCulture);
 
-            // Subscribe към промени в ObjectData за брой обитатели
+            // Subscribe пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ ObjectData пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (_objectData != null)
             {
                 _objectData.PropertyChanged += ObjectData_PropertyChanged;
@@ -763,7 +837,7 @@ namespace EE.Doklad.ViewModels
                 _ventilationHeatingData.PropertyChanged += VentilationHeatingData_PropertyChanged;
             }
 
-            // Първоначално изчисление
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             RecalculateOccupantHeat();
             AttachSectionListeners();
             RefreshThermalCharacteristics();
@@ -800,13 +874,29 @@ namespace EE.Doklad.ViewModels
             RefreshThermalCharacteristics();
         }
 
+        private void SetMethod(HeatingCalculationMethod method)
+        {
+            if (_data.CalculationMethod == method)
+            {
+                return;
+            }
+
+            _data.CalculationMethod = method;
+            OnPropertyChanged(nameof(IsMethodAuer));
+            OnPropertyChanged(nameof(IsMethodRd));
+            OnPropertyChanged(nameof(IsMethodAshrae));
+            OnPropertyChanged(nameof(MethodStatusText));
+            OnPropertyChanged(nameof(MethodStatusBrush));
+            RefreshThermalCharacteristics();
+        }
+
         // ========== VALIDATION & PARSING ==========
 
         private void ValidateAndSetInfiltration(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                InfiltrationError = "Полето е задължително";
+                InfiltrationError = "\u041F\u043E\u043B\u0435\u0442\u043E \u0435 \u0437\u0430\u0434\u044A\u043B\u0436\u0438\u0442\u0435\u043B\u043D\u043E";
                 return;
             }
 
@@ -817,7 +907,7 @@ namespace EE.Doklad.ViewModels
             {
                 if (value < 0)
                 {
-                    InfiltrationError = "Стойността трябва да е >= 0";
+                    InfiltrationError = "\u0421\u0442\u043E\u0439\u043D\u043E\u0441\u0442\u0442\u0430 \u0442\u0440\u044F\u0431\u0432\u0430 \u0434\u0430 \u0435 >= 0";
                     return;
                 }
 
@@ -836,7 +926,7 @@ namespace EE.Doklad.ViewModels
             }
             else
             {
-                InfiltrationError = "Невалидно число";
+                InfiltrationError = "\u041D\u0435\u0432\u0430\u043B\u0438\u0434\u043D\u043E \u0447\u0438\u0441\u043B\u043E";
             }
         }
 
@@ -844,7 +934,7 @@ namespace EE.Doklad.ViewModels
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                DesignTemperatureError = "Полето е задължително";
+                DesignTemperatureError = "\u041F\u043E\u043B\u0435\u0442\u043E \u0435 \u0437\u0430\u0434\u044A\u043B\u0436\u0438\u0442\u0435\u043B\u043D\u043E";
                 return;
             }
 
@@ -862,14 +952,14 @@ namespace EE.Doklad.ViewModels
                     OnPropertyChanged(nameof(DesignTemperatureText));
                 }
 
-                // Преизчисли топлината (температурата влияе на интерполацията)
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
                 OnPropertyChanged(nameof(RoomTemperatureDisplay));
                 RecalculateOccupantHeat();
                 RefreshThermalCharacteristics();
             }
             else
             {
-                DesignTemperatureError = "Невалидно число";
+                DesignTemperatureError = "\u041D\u0435\u0432\u0430\u043B\u0438\u0434\u043D\u043E \u0447\u0438\u0441\u043B\u043E";
             }
         }
 
@@ -877,7 +967,7 @@ namespace EE.Doklad.ViewModels
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                ReductionTemperatureError = "Полето е задължително";
+                ReductionTemperatureError = "\u041F\u043E\u043B\u0435\u0442\u043E \u0435 \u0437\u0430\u0434\u044A\u043B\u0436\u0438\u0442\u0435\u043B\u043D\u043E";
                 return;
             }
 
@@ -898,14 +988,14 @@ namespace EE.Doklad.ViewModels
             }
             else
             {
-                ReductionTemperatureError = "Невалидно число";
+                ReductionTemperatureError = "\u041D\u0435\u0432\u0430\u043B\u0438\u0434\u043D\u043E \u0447\u0438\u0441\u043B\u043E";
             }
         }
 
         // ========== CALCULATION ==========
 
         /// <summary>
-        /// Преизчислява топлината от обитатели с линейна интерполация
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         private void RecalculateOccupantHeat()
         {
@@ -913,17 +1003,17 @@ namespace EE.Doklad.ViewModels
             var activityLevel = _data.SelectedActivityLevel;
             var occupantCount = NumberOfOccupants;
 
-            // Изчисли sensible и latent heat per person чрез интерполация
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ sensible пїЅ latent heat per person пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             var (sensible, latent) = ActivityDataService.CalculateHeatForTemperature(activityLevel, temperature);
 
             SensibleHeatPerPerson = sensible;
             LatentHeatPerPerson = latent;
 
-            // Изчисли total heat
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ total heat
             TotalOccupantHeat = sensible * occupantCount;
             TotalLatentHeat = latent * occupantCount;
 
-            // Актуализирай W/m² полета
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ W/m? пїЅпїЅпїЅпїЅпїЅпїЅ
             OnPropertyChanged(nameof(HeatedArea));
             OnPropertyChanged(nameof(TotalOccupantHeatPerArea));
             OnPropertyChanged(nameof(TotalOccupantHeatPerAreaDisplay));
@@ -964,14 +1054,12 @@ namespace EE.Doklad.ViewModels
 
         private void Section23HeatingMonths_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            RefreshSectionGainContributions();
-            NotifyGrossHeatingEnergyChanged();
+            RefreshThermalCharacteristics();
         }
 
         private void Section24MonthlyResults_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            RefreshSectionGainContributions();
-            NotifyGrossHeatingEnergyChanged();
+            RefreshThermalCharacteristics();
         }
 
         private void AttachWallsListeners()
@@ -1290,42 +1378,132 @@ namespace EE.Doklad.ViewModels
             double deltaT = 1.0;
             double energyHours = annualEquivalentHours;
             _heatingInstallationHours = snapshot.HeatingOperatingHours_h;
-            NetHeatingEnergyNoGainsPerArea = snapshot.HeatedArea_m2 > 0.0
-                ? (hTotal * deltaT * energyHours / 1000.0) / snapshot.HeatedArea_m2
-                : 0.0;
+            RecalculateHeating(snapshot, hTrTotal, hVeTotal);
+            NetHeatingEnergyNoGainsPerArea = _lastAnnual?.IsValid == true
+                ? (_lastAnnual.Qht_total / Math.Max(snapshot.HeatedArea_m2, 1e-9))
+                : snapshot.HeatedArea_m2 > 0.0
+                    ? (hTotal * deltaT * energyHours / 1000.0) / snapshot.HeatedArea_m2
+                    : 0.0;
             OnPropertyChanged(nameof(HeatingInstallationHoursDisplay));
             NotifyGrossHeatingEnergyChanged();
 
             ThermalCharacteristicsRows.Clear();
-            ThermalCharacteristicsRows.Add(CreateMetricRow("Външни стени", snapshot.Walls.U, snapshot.Walls.Area, snapshot.Walls.H, snapshot.HeatedArea_m2, deltaT, energyHours));
-            ThermalCharacteristicsRows.Add(CreateMetricRow("Покрив", snapshot.Roof.U, snapshot.Roof.Area, snapshot.Roof.H, snapshot.HeatedArea_m2, deltaT, energyHours));
-            ThermalCharacteristicsRows.Add(CreateMetricRow("Под", snapshot.Floor.U, snapshot.Floor.Area, snapshot.Floor.H, snapshot.HeatedArea_m2, deltaT, energyHours));
-            ThermalCharacteristicsRows.Add(CreateMetricRow("Прозорци и врати", snapshot.Windows.U, snapshot.Windows.Area, snapshot.Windows.H, snapshot.HeatedArea_m2, deltaT, energyHours));
-            ThermalCharacteristicsRows.Add(CreateMetricRow("Топлинни мостове", null, null, snapshot.ThermalBridgesH_WK, snapshot.HeatedArea_m2, deltaT, energyHours));
-            ThermalCharacteristicsRows.Add(CreateMetricRow("ZTU (неотопляеми)", null, null, snapshot.ZtuH_WK, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("\u0412\u044A\u043D\u0448\u043D\u0438 \u0441\u0442\u0435\u043D\u0438", snapshot.Walls.U, snapshot.Walls.Area, snapshot.Walls.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("\u041F\u043E\u043A\u0440\u0438\u0432", snapshot.Roof.U, snapshot.Roof.Area, snapshot.Roof.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("\u041F\u043E\u0434", snapshot.Floor.U, snapshot.Floor.Area, snapshot.Floor.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("\u041F\u0440\u043E\u0437\u043E\u0440\u0446\u0438 \u0438 \u0432\u0440\u0430\u0442\u0438", snapshot.Windows.U, snapshot.Windows.Area, snapshot.Windows.H, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("\u0422\u043E\u043F\u043B\u0438\u043D\u043D\u0438 \u043C\u043E\u0441\u0442\u043E\u0432\u0435", null, null, snapshot.ThermalBridgesH_WK, snapshot.HeatedArea_m2, deltaT, energyHours));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("ZTU (\u043D\u0435\u043A\u043B\u0438\u043C\u0430\u0442.)", null, null, snapshot.ZtuH_WK, snapshot.HeatedArea_m2, deltaT, energyHours));
             ThermalCharacteristicsRows.Add(HeatingCharacteristicRow.Separator());
-            ThermalCharacteristicsRows.Add(CreateMetricRow("H_tr ОБЩО", null, null, hTrTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
-            ThermalCharacteristicsRows.Add(CreateMetricRow("Инфилтрация", snapshot.InfiltrationRate_AirChangesPerHour, snapshot.BuildingVolume_m3, hInf, snapshot.HeatedArea_m2, deltaT, energyHours, uUnit: "1/h", aUnit: "m³"));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("H_tr \u043E\u0431\u0449\u043E", null, null, hTrTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("\u0418\u043D\u0444\u0438\u043B\u0442\u0440\u0430\u0446\u0438\u044F", snapshot.InfiltrationRate_AirChangesPerHour, snapshot.BuildingVolume_m3, hInf, snapshot.HeatedArea_m2, deltaT, energyHours, uUnit: "1/h", aUnit: "m3"));
             ThermalCharacteristicsRows.Add(HeatingCharacteristicRow.Separator());
-            ThermalCharacteristicsRows.Add(CreateMetricRow("H_ve ОБЩО", null, null, hVeTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
+            ThermalCharacteristicsRows.Add(CreateMetricRow("H_ve \u043E\u0431\u0449\u043E", null, null, hVeTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true));
             ThermalCharacteristicsRows.Add(CreateMetricRow("H_TOTAL", null, null, hTotal, snapshot.HeatedArea_m2, deltaT, energyHours, isTotal: true, isHighlighted: true));
         }
 
         private void RefreshSectionGainContributions()
         {
             double area = HeatedArea;
-            if (_section23Data == null || area <= 0.0)
+            if (area <= 0.0)
             {
                 LightingGainPerArea = 0.0;
                 AppliancesGainPerArea = 0.0;
                 return;
             }
 
-            double lightingGainKwh = _section23Data.HeatingMonths.Sum(m => m.L_kWh);
-            double appliancesGainKwh = _section23Data.HeatingMonths.Sum(m => m.A_kWh);
+            double lightingGainKwh = 0.0;
+            double appliancesGainKwh = 0.0;
+
+            if (_internalGainsService != null)
+            {
+                var result = _internalGainsService.Recalculate(persist: false);
+                if (result != null)
+                {
+                    lightingGainKwh = result.HeatingTable.Sum(m => m.L);
+                    appliancesGainKwh = result.HeatingTable.Sum(m => m.A);
+                }
+            }
+            else if (_section23Data != null)
+            {
+                lightingGainKwh = _section23Data.HeatingMonths.Sum(m => m.L_kWh);
+                appliancesGainKwh = _section23Data.HeatingMonths.Sum(m => m.A_kWh);
+            }
 
             LightingGainPerArea = lightingGainKwh / area;
             AppliancesGainPerArea = appliancesGainKwh / area;
+        }
+
+        private void RecalculateHeating(HeatingCharacteristicsSnapshot snapshot, double hTrTotal, double hVeTotal)
+        {
+            if (_objectData == null)
+            {
+                _lastAnnual = null;
+                _lastMonthly = new List<HeatingMonthlyResult>();
+                return;
+            }
+
+            if (IsAshraePlaceholder)
+            {
+                _lastAnnual = new HeatingAnnualResult
+                {
+                    IsValid = false,
+                    ErrorMessage = "\u041C\u0435\u0442\u043E\u0434\u044A\u0442 ASHRAE 8760 \u0435 placeholder \u0438 \u043E\u0449\u0435 \u043D\u0435 \u0435 \u0438\u043C\u043F\u043B\u0435\u043C\u0435\u043D\u0442\u0438\u0440\u0430\u043D.",
+                    Htr = hTrTotal,
+                    Hve = hVeTotal,
+                    Htotal = hTrTotal + hVeTotal,
+                    Cm = _objectData.SpecificHeatCapacityWhPerM2K * snapshot.HeatedArea_m2
+                };
+                _lastMonthly = new List<HeatingMonthlyResult>();
+                return;
+            }
+
+            double cm = Math.Max(0.0, _objectData.SpecificHeatCapacityWhPerM2K) * snapshot.HeatedArea_m2;
+            double heatedArea = snapshot.HeatedArea_m2;
+            var heatingMonths = GetHeatingMonthIndices(_objectData);
+            var internalGainsResult = _internalGainsService?.Recalculate(persist: false);
+
+            double GetQint(int monthIndex)
+            {
+                if (internalGainsResult == null || monthIndex < 0 || monthIndex >= internalGainsResult.HeatingTable.Length)
+                {
+                    return 0.0;
+                }
+
+                return internalGainsResult.HeatingTable[monthIndex].Total;
+            }
+
+            var (monthly, annual) = _calcService.Calculate(
+                _data.CalculationMethod,
+                BuildingElementExtractor.ExtractWalls(_wallsData),
+                BuildingElementExtractor.ExtractWindows(_windowsData),
+                BuildingElementExtractor.ExtractRoofs(_roofData),
+                hTrTotal,
+                hVeTotal,
+                cm,
+                _data.DesignTemperature,
+                heatedArea,
+                _objectData.ClimateZone,
+                heatingMonths,
+                GetQint);
+
+            _lastAnnual = annual;
+            _lastMonthly = monthly;
+        }
+
+        private static List<int> GetHeatingMonthIndices(ObjectDataSectionData objectData)
+        {
+            var climateData = new ClimateService(new JsonClimateRepository()).GetZone(objectData.ClimateZone);
+            var months = new List<int>();
+            for (int month = 1; month <= 12; month++)
+            {
+                if (ScheduleHelper.GetHeatingSeasonDaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month, climateData) > 0)
+                {
+                    months.Add(month - 1);
+                }
+            }
+
+            return months;
         }
 
         private double CalculateVentilationHeatingContributionPerArea()
@@ -1387,8 +1565,8 @@ namespace EE.Doklad.ViewModels
             double operatingHours,
             bool isTotal = false,
             bool isHighlighted = false,
-            string uUnit = "W/m²K",
-            string aUnit = "m²")
+            string uUnit = "W/m\u00B2K",
+            string aUnit = "m\u00B2")
         {
             double kwh = h * deltaT * operatingHours / 1000.0;
             return new HeatingCharacteristicRow
@@ -1434,14 +1612,25 @@ namespace EE.Doklad.ViewModels
         {
             OnPropertyChanged(nameof(NetHeatingEnergyNoGainsPerArea));
             OnPropertyChanged(nameof(NetHeatingEnergyNoGainsPerAreaDisplay));
+            OnPropertyChanged(nameof(TimeConstant_h));
+            OnPropertyChanged(nameof(UtilizationFactor));
+            OnPropertyChanged(nameof(SolarGain_total_kWh));
+            OnPropertyChanged(nameof(QH_per_m2));
+            OnPropertyChanged(nameof(IsAshraePlaceholder));
             OnPropertyChanged(nameof(NetHeatingEnergyAfterGains));
             OnPropertyChanged(nameof(NetHeatingEnergyAfterGainsDisplay));
+            OnPropertyChanged(nameof(VentilationGainPerArea));
             OnPropertyChanged(nameof(NetHeatingEnergyAfterGainsKwh));
             OnPropertyChanged(nameof(NetHeatingEnergyAfterGainsKwhDisplay));
+            OnPropertyChanged(nameof(VentilationGainKwh));
             OnPropertyChanged(nameof(VentilationGainPerAreaDisplay));
             OnPropertyChanged(nameof(VentilationGainKwhDisplay));
+            OnPropertyChanged(nameof(LightingGainPerArea));
+            OnPropertyChanged(nameof(LightingGainKwh));
             OnPropertyChanged(nameof(LightingGainPerAreaDisplay));
             OnPropertyChanged(nameof(LightingGainKwhDisplay));
+            OnPropertyChanged(nameof(AppliancesGainPerArea));
+            OnPropertyChanged(nameof(AppliancesGainKwh));
             OnPropertyChanged(nameof(AppliancesGainPerAreaDisplay));
             OnPropertyChanged(nameof(AppliancesGainKwhDisplay));
             OnPropertyChanged(nameof(EnergySource1RequiredEnergyPerArea));
@@ -1505,7 +1694,7 @@ namespace EE.Doklad.ViewModels
     }
 
     /// <summary>
-    /// Опция за dropdown на активности
+    /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ dropdown пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     /// </summary>
     public class ActivityLevelOption
     {

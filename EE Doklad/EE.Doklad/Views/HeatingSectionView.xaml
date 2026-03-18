@@ -28,6 +28,10 @@
             <Setter Property="Padding" Value="10,3"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+
+        <Style x:Key="WhiteLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource LabelStyle}">
+            <Setter Property="Background" Value="White"/>
+        </Style>
         
         <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="8,3"/>
@@ -109,8 +113,8 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
-            <!-- Заглавие -->
-            <TextBlock Text="11. Отопление"
+            <!-- &#x0420;&#x00A0;&#x0432;&#x0402;&#x201D;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0421;&#x2013;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
+            <TextBlock Text="11. &#x0420;&#x00A0;&#x0421;&#x203A;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5;"
                        FontSize="18" 
                        FontWeight="Bold" 
                        Margin="0,0,0,15"/>
@@ -119,7 +123,7 @@
             <Border Background="#FFF3CD" BorderBrush="#FFC107" BorderThickness="2" Padding="12" Margin="0,0,0,15"
                     Visibility="{Binding HeatingSeasonWarning, Converter={StaticResource StringToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="&#x0420;&#x0406;&#x0421;&#x2122;&#x0412;&#x00A0;&#x0420;&#x0457;&#x0421;&#x2018;&#x0420;&#x040F;" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <TextBlock Text="{Binding HeatingSeasonWarning}" 
                                FontSize="13" FontWeight="SemiBold" 
                                Foreground="#856404" VerticalAlignment="Center"/>
@@ -129,8 +133,8 @@
             <!-- Main content (disabled when heating season is NOT enabled) -->
             <StackPanel IsEnabled="{Binding IsHeatingSeasonEnabled}">
 
-                <!-- Описание (свободен текст) -->
-                <TextBlock Text="Описание:"
+                <!-- &#x0420;&#x00A0;&#x0421;&#x203A;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5; (&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0412;&#x00B1;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026; &#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;) -->
+                <TextBlock Text="&#x041E;&#x043F;&#x0438;&#x0441;&#x0430;&#x043D;&#x0438;&#x0435;:"
                            FontSize="12"
                            FontWeight="SemiBold"
                            Margin="0,0,0,5"/>
@@ -145,7 +149,32 @@
                          BorderBrush="#E0E0E0"
                          BorderThickness="1"/>
 
-            <TextBlock Text="Часове работа на инсталацията" Style="{StaticResource SectionHeaderStyle}"/>
+                <GroupBox Header="&#x041C;&#x0435;&#x0442;&#x043E;&#x0434;&#x0438;&#x043A;&#x0430; &#x043D;&#x0430; &#x0438;&#x0437;&#x0447;&#x0438;&#x0441;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;"
+                          Margin="0,0,0,12"
+                          BorderBrush="#CC2200"
+                          BorderThickness="1">
+                    <StackPanel Orientation="Vertical" Margin="8">
+                        <RadioButton Content="1 - &#x0410;&#x0423;&#x0415;&#x0420; &#x0441;&#x043E;&#x0444;&#x0442;&#x0443;&#x0435;&#x0440;"
+                                     IsChecked="{Binding IsMethodAuer}"
+                                     GroupName="CalcMethod"
+                                     Margin="0,2"/>
+                        <RadioButton Content="2 - &#x0420;&#x0414;-02-20-3 &#x043E;&#x0442; 9.11.2022 &#x0433;."
+                                     IsChecked="{Binding IsMethodRd}"
+                                     GroupName="CalcMethod"
+                                     Margin="0,2"/>
+                        <RadioButton Content="3 - ASHRAE (&#x043C;&#x0435;&#x0436;&#x0434;&#x0443;&#x043D;&#x0430;&#x0440;&#x043E;&#x0434;&#x0435;&#x043D; &#x0441;&#x0442;&#x0430;&#x043D;&#x0434;&#x0430;&#x0440;&#x0442;)"
+                                     IsChecked="{Binding IsMethodAshrae}"
+                                     GroupName="CalcMethod"
+                                     Margin="0,2"/>
+                        <TextBlock Text="{Binding MethodStatusText}"
+                                   Foreground="{Binding MethodStatusBrush}"
+                                   FontStyle="Italic"
+                                   Margin="0,6,0,0"
+                                   FontSize="11"/>
+                    </StackPanel>
+                </GroupBox>
+
+            <TextBlock Text="&#x0427;&#x0430;&#x0441;&#x043E;&#x0432;&#x0435; &#x0440;&#x0430;&#x0431;&#x043E;&#x0442;&#x0430; &#x043D;&#x0430; &#x0438;&#x043D;&#x0441;&#x0442;&#x0430;&#x043B;&#x0430;&#x0446;&#x0438;&#x044F;&#x0442;&#x0430;" Style="{StaticResource SectionHeaderStyle}"/>
             <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0" Width="820" HorizontalAlignment="Left">
                 <Grid Background="White">
                     <Grid.ColumnDefinitions>
@@ -158,14 +187,14 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x044A;&#x0440;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <TextBlock Text="Актуално състояние" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x0410;&#x043A;&#x0442;&#x0443;&#x0430;&#x043B;&#x043D;&#x043E; &#x0441;&#x044A;&#x0441;&#x0442;&#x043E;&#x044F;&#x043D;&#x0438;&#x0435;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
 
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
-                        <TextBlock Text="t_H [h/год]" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Text="t_H [h/&#x0433;&#x043E;&#x0434;]" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0">
                         <TextBox Text="{Binding HeatingInstallationHoursDisplay, Mode=OneWay}"
@@ -176,8 +205,8 @@
                 </Grid>
             </Border>
 
-            <!-- СЕКЦИЯ 1: РЪЧНИ ПАРАМЕТРИ -->
-            <TextBlock Text="Топлинни характеристики" Style="{StaticResource SectionHeaderStyle}"/>
+            <!-- &#x0420;&#x00A0;&#x0420;&#x040B;&#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x00A0;&#x0421;&#x2122;&#x0420;&#x00A0;&#x0412;&#x00A6;&#x0420;&#x00A0;&#x0412;&#x0098;&#x0420;&#x00A0;&#x0420;&#x2021; 1: &#x0420;&#x00A0;&#x0412;&#x00A0;&#x0420;&#x00A0;&#x0420;&#x201E;&#x0420;&#x00A0;&#x0412;&#x00A7;&#x0420;&#x00A0;&#x0421;&#x045A;&#x0420;&#x00A0;&#x0412;&#x0098; &#x0420;&#x00A0;&#x0421;&#x045F;&#x0420;&#x00A0;&#x0421;&#x2019;&#x0420;&#x00A0;&#x0412;&#x00A0;&#x0420;&#x00A0;&#x0421;&#x2019;&#x0420;&#x00A0;&#x0421;&#x0459;&#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x00A0;&#x0421;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00A0;&#x0420;&#x00A0;&#x0412;&#x0098; -->
+            <TextBlock Text="&#x0422;&#x043E;&#x043F;&#x043B;&#x0438;&#x043D;&#x043D;&#x0438; &#x0445;&#x0430;&#x0440;&#x0430;&#x043A;&#x0442;&#x0435;&#x0440;&#x0438;&#x0441;&#x0442;&#x0438;&#x043A;&#x0438;" Style="{StaticResource SectionHeaderStyle}"/>
             <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0" HorizontalAlignment="Left">
                 <DataGrid ItemsSource="{Binding ThermalCharacteristicsRows}"
                           AutoGenerateColumns="False"
@@ -197,15 +226,15 @@
                           Background="White"
                           MinWidth="820">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Параметър" Binding="{Binding Parameter}" Width="344"/>
-                        <DataGridTemplateColumn Header="U (W/m²K)" Width="88">
+                        <DataGridTextColumn Header="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x044A;&#x0440;" Binding="{Binding Parameter}" Width="344"/>
+                        <DataGridTemplateColumn Header="U (W/m&#x00B2;K)" Width="88">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding UDisplay}" Style="{StaticResource HeatingSummaryCellTextStyle}" ToolTip="{Binding UToolTip}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="A (m²)" Width="88">
+                        <DataGridTemplateColumn Header="A (m&#x00B2;)" Width="88">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding ADisplay}" Style="{StaticResource HeatingSummaryCellTextStyle}" ToolTip="{Binding AToolTip}"/>
@@ -213,13 +242,13 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="H (W/K)" Binding="{Binding HDisplay}" Width="88" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
-                        <DataGridTextColumn Header="kWh/m²" Binding="{Binding KwhPerAreaDisplay}" Width="88" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="kWh/m&#x00B2;" Binding="{Binding KwhPerAreaDisplay}" Width="88" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
                         <DataGridTextColumn Header="kWh" Binding="{Binding KwhDisplay}" Width="124" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
 
-            <TextBlock Text="Параметри сграда Отопление" Style="{StaticResource SectionHeaderStyle}"/>
+            <TextBlock Text="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x0440;&#x0438; &#x0441;&#x0433;&#x0440;&#x0430;&#x0434;&#x0430; &#x041E;&#x0442;&#x043E;&#x043F;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;" Style="{StaticResource SectionHeaderStyle}"/>
              
             <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0" Width="820" HorizontalAlignment="Left">
                 <StackPanel>
@@ -230,15 +259,15 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
-                            <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                            <TextBlock Text="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x044A;&#x0440;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                         </Border>
                         <Border Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
-                            <TextBlock Text="Актуално състояние" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                            <TextBlock Text="&#x0410;&#x043A;&#x0442;&#x0443;&#x0430;&#x043B;&#x043D;&#x043E; &#x0441;&#x044A;&#x0441;&#x0442;&#x043E;&#x044F;&#x043D;&#x0438;&#x0435;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                         </Border>
                     </Grid>
 
                     <!-- Keep only the first three manual inputs -->
-                    <!-- Инфилтрация -->
+                    <!-- &#x0420;&#x00A0;&#x0412;&#x0098;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x00A0;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0420;&#x040F; -->
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
@@ -246,18 +275,22 @@
                                 <ColumnDefinition Width="300"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="Инфилтрация [1/ч]" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Column="1">
-                <TextBox Text="{Binding InfiltrationText, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                                <TextBlock Text="{Binding InfiltrationError}"
-                                          Style="{StaticResource ErrorTextStyle}"
-                                          Visibility="{Binding HasInfiltrationError, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </StackPanel>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="&#x0418;&#x043D;&#x0444;&#x0438;&#x043B;&#x0442;&#x0440;&#x0430;&#x0446;&#x0438;&#x044F; [1/&#x0447;]" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="White">
+                                <StackPanel>
+                                    <TextBox Text="{Binding InfiltrationText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                                    <TextBlock Text="{Binding InfiltrationError}"
+                                               Style="{StaticResource ErrorTextStyle}"
+                                               Visibility="{Binding HasInfiltrationError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </Border>
 
-                    <!-- Проектна температура -->
+                    <!-- &#x0420;&#x00A0;&#x0421;&#x045F;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x040E;&#x0421;&#x201C;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0; -->
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
@@ -265,18 +298,22 @@
                                 <ColumnDefinition Width="300"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="Проектна температура [°C]" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Column="1">
-                <TextBox Text="{Binding DesignTemperatureText, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                                <TextBlock Text="{Binding DesignTemperatureError}"
-                                          Style="{StaticResource ErrorTextStyle}"
-                                          Visibility="{Binding HasDesignTemperatureError, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </StackPanel>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="&#x041F;&#x0440;&#x043E;&#x0435;&#x043A;&#x0442;&#x043D;&#x0430; &#x0442;&#x0435;&#x043C;&#x043F;&#x0435;&#x0440;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430; [&#x00B0;C]" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="White">
+                                <StackPanel>
+                                    <TextBox Text="{Binding DesignTemperatureText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                                    <TextBlock Text="{Binding DesignTemperatureError}"
+                                               Style="{StaticResource ErrorTextStyle}"
+                                               Visibility="{Binding HasDesignTemperatureError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </Border>
 
-                    <!-- Температура на понижение -->
+                    <!-- &#x0420;&#x00A0;&#x0421;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x040E;&#x0421;&#x201C;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
@@ -284,14 +321,18 @@
                                 <ColumnDefinition Width="300"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="Температура на понижение [°C]" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Column="1">
-                <TextBox Text="{Binding ReductionTemperatureText, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                                <TextBlock Text="{Binding ReductionTemperatureError}"
-                                          Style="{StaticResource ErrorTextStyle}"
-                                          Visibility="{Binding HasReductionTemperatureError, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </StackPanel>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="&#x0422;&#x0435;&#x043C;&#x043F;&#x0435;&#x0440;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430; &#x043D;&#x0430; &#x043F;&#x043E;&#x043D;&#x0438;&#x0436;&#x0435;&#x043D;&#x0438;&#x0435; [&#x00B0;C]" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="White">
+                                <StackPanel>
+                                    <TextBox Text="{Binding ReductionTemperatureText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                                    <TextBlock Text="{Binding ReductionTemperatureError}"
+                                               Style="{StaticResource ErrorTextStyle}"
+                                               Visibility="{Binding HasReductionTemperatureError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </Border>
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
@@ -301,11 +342,17 @@
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Column="1" Text="kWh/m²" FontWeight="SemiBold" FontSize="11"
-                                       Padding="10,3" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                            <TextBlock Grid.Column="2" Text="kWh" FontWeight="SemiBold" FontSize="11"
-                                       Padding="10,3" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="kWh/m&#x00B2;" FontWeight="SemiBold" FontSize="11"
+                                           Padding="10,3" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="White">
+                                <TextBlock Text="kWh" FontWeight="SemiBold" FontSize="11"
+                                           Padding="10,3" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
                         </Grid>
                     </Border>
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
@@ -315,11 +362,17 @@
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Приноси от вентилация" Style="{StaticResource LabelStyle}"/>
-                            <TextBox Grid.Column="1" Text="{Binding VentilationGainPerAreaDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="2" Text="{Binding VentilationGainKwhDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="&#x041F;&#x0440;&#x0438;&#x043D;&#x043E;&#x0441;&#x0438; &#x043E;&#x0442; &#x0432;&#x0435;&#x043D;&#x0442;&#x0438;&#x043B;&#x0430;&#x0446;&#x0438;&#x044F;" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBox Text="{Binding VentilationGainPerAreaDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="White">
+                                <TextBox Text="{Binding VentilationGainKwhDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
                         </Grid>
                     </Border>
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
@@ -329,11 +382,17 @@
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Приноси от осветление" Style="{StaticResource LabelStyle}"/>
-                            <TextBox Grid.Column="1" Text="{Binding LightingGainPerAreaDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="2" Text="{Binding LightingGainKwhDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="&#x041F;&#x0440;&#x0438;&#x043D;&#x043E;&#x0441;&#x0438; &#x043E;&#x0442; &#x043E;&#x0441;&#x0432;&#x0435;&#x0442;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBox Text="{Binding LightingGainPerAreaDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="White">
+                                <TextBox Text="{Binding LightingGainKwhDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
                         </Grid>
                     </Border>
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
@@ -343,11 +402,17 @@
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Приноси от уреди" Style="{StaticResource LabelStyle}"/>
-                            <TextBox Grid.Column="1" Text="{Binding AppliancesGainPerAreaDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="2" Text="{Binding AppliancesGainKwhDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBlock Text="&#x041F;&#x0440;&#x0438;&#x043D;&#x043E;&#x0441;&#x0438; &#x043E;&#x0442; &#x0443;&#x0440;&#x0435;&#x0434;&#x0438;" Style="{StaticResource WhiteLabelStyle}"/>
+                            </Border>
+                            <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="White">
+                                <TextBox Text="{Binding AppliancesGainPerAreaDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="White">
+                                <TextBox Text="{Binding AppliancesGainKwhDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </Border>
                         </Grid>
                     </Border>
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
@@ -357,20 +422,26 @@
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Нетна енергия" Style="{StaticResource LabelStyle}" FontWeight="Bold"/>
-                            <TextBox Grid.Column="1" Text="{Binding NetHeatingEnergyAfterGainsDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center"
-                                     HorizontalAlignment="Stretch" FontWeight="Bold"/>
-                            <TextBox Grid.Column="2" Text="{Binding NetHeatingEnergyAfterGainsKwhDisplay, Mode=OneWay}"
-                                     Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center"
-                                     HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                            <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="#FFF0E6">
+                                <TextBlock Text="&#x041D;&#x0435;&#x0442;&#x043D;&#x0430; &#x0435;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x044F;" Style="{StaticResource WhiteLabelStyle}" FontWeight="Bold"/>
+                            </Border>
+                            <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0" Background="#FFF0E6">
+                                <TextBox Text="{Binding NetHeatingEnergyAfterGainsDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center"
+                                         HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="#FFF0E6">
+                                <TextBox Text="{Binding NetHeatingEnergyAfterGainsKwhDisplay, Mode=OneWay}"
+                                         Style="{StaticResource ReadOnlyTextBoxStyle}" TextAlignment="Center"
+                                         HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                            </Border>
                         </Grid>
                     </Border>
                 </StackPanel>
             </Border>
 
-            <!-- Енергийни източници за отопление -->
-            <TextBlock Text="Енергийни източници за отопление" Style="{StaticResource SectionHeaderStyle}"/>
+            <!-- &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0421;&#x2013;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0432;&#x201E;&#x2013;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018; &#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B7;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0432;&#x0402;&#x040E;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0432;&#x0402;&#x00A0;&#x0420;&#x00A0;&#x0421;&#x2018; &#x0420;&#x00A0;&#x0412;&#x00B7;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
+            <TextBlock Text="&#x0415;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x0439;&#x043D;&#x0438; &#x0438;&#x0437;&#x0442;&#x043E;&#x0447;&#x043D;&#x0438;&#x0446;&#x0438; &#x0437;&#x0430; &#x043E;&#x0442;&#x043E;&#x043F;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;" Style="{StaticResource SectionHeaderStyle}"/>
             <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0" Width="820" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -391,14 +462,14 @@
 
                     <!-- Header Row -->
                     <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x044A;&#x0440;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <TextBlock Text="Актуално състояние" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x0410;&#x043A;&#x0442;&#x0443;&#x0430;&#x043B;&#x043D;&#x043E; &#x0441;&#x044A;&#x0441;&#x0442;&#x043E;&#x044F;&#x043D;&#x0438;&#x0435;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
 
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергиен източник 1 (ЕИ1)" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x0435;&#x043D; &#x0438;&#x0437;&#x0442;&#x043E;&#x0447;&#x043D;&#x0438;&#x043A; 1 (&#x0415;&#x0418;1)" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <ComboBox x:Name="HeatingEnergyCarrierCombo1"
@@ -427,9 +498,9 @@
                         </ComboBox>
                     </Border>
 
-                    <!-- Row 1: Дял -->
+                    <!-- Row 1: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045C;&#x0420;&#x040E;&#x0420;&#x040F;&#x0420;&#x00A0;&#x0412;&#x00BB; -->
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Дял, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0414;&#x044F;&#x043B;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <StackPanel Margin="1">
@@ -441,45 +512,45 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Row 2: Ефективност на отдаване -->
+                    <!-- Row 2: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
                     <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на отдаване, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x043E;&#x0442;&#x0434;&#x0430;&#x0432;&#x0430;&#x043D;&#x0435;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1EmissionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 3: Ефективност на разпределителната мрежа -->
+                    <!-- Row 3: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0412;&#x00B7;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0412;&#x00B0; -->
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на разпределителната мрежа, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x0440;&#x0430;&#x0437;&#x043F;&#x0440;&#x0435;&#x0434;&#x0435;&#x043B;&#x0438;&#x0442;&#x0435;&#x043B;&#x043D;&#x0430;&#x0442;&#x0430; &#x043C;&#x0440;&#x0435;&#x0436;&#x0430;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1DistributionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 4: Автоматично управление -->
+                    <!-- Row 4: &#x0420;&#x00A0;&#x0421;&#x2019;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0432;&#x0402;&#x040E;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022; &#x0420;&#x040E;&#x0421;&#x201C;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Автоматично управление, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0410;&#x0432;&#x0442;&#x043E;&#x043C;&#x0430;&#x0442;&#x0438;&#x0447;&#x043D;&#x043E; &#x0443;&#x043F;&#x0440;&#x0430;&#x0432;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1AutomaticControl, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 5: Енергиен мениджмънт -->
+                    <!-- Row 5: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0421;&#x2013;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026; &#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x040E;&#x0420;&#x2030;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; -->
                     <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергиен мениджмънт (ЕМ) и поддръжка, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x0435;&#x043D; &#x043C;&#x0435;&#x043D;&#x0438;&#x0434;&#x0436;&#x043C;&#x044A;&#x043D;&#x0442; (&#x0415;&#x041C;) &#x0438; &#x043F;&#x043E;&#x0434;&#x0434;&#x0440;&#x044A;&#x0436;&#x043A;&#x0430;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1EnergyManagement, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 6: Ефективност на генератора на топлина -->
+                    <!-- Row 6: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x2013;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; -->
                     <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на генератора на топлина, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x0433;&#x0435;&#x043D;&#x0435;&#x0440;&#x0430;&#x0442;&#x043E;&#x0440;&#x0430; &#x043D;&#x0430; &#x0442;&#x043E;&#x043F;&#x043B;&#x0438;&#x043D;&#x0430;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="7" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource1GenerationEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
@@ -487,7 +558,7 @@
                     </Border>
 
                     <Border Grid.Row="8" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0">
-                        <TextBlock Text="Потребна енергия (ЕИ1), kWh/m²" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Bold"/>
+                        <TextBlock Text="&#x041F;&#x043E;&#x0442;&#x0440;&#x0435;&#x0431;&#x043D;&#x0430; &#x0435;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x044F; (&#x0415;&#x0418;1), kWh/m&#x00B2;" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Bold"/>
                     </Border>
                     <Border Grid.Row="8" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0">
                         <TextBox Text="{Binding EnergySource1RequiredEnergyPerAreaDisplay, Mode=OneWay}"
@@ -496,7 +567,7 @@
                 </Grid>
             </Border>
 
-            <CheckBox Content="Използвай втори енергиен източник (ЕИ2)" 
+            <CheckBox Content="&#x0418;&#x0437;&#x043F;&#x043E;&#x043B;&#x0437;&#x0432;&#x0430;&#x0439; &#x0432;&#x0442;&#x043E;&#x0440;&#x0438; &#x0435;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x0435;&#x043D; &#x0438;&#x0437;&#x0442;&#x043E;&#x0447;&#x043D;&#x0438;&#x043A; (&#x0415;&#x0418;2)" 
                       IsChecked="{Binding UseSecondEnergySource}" 
                       FontWeight="Bold" 
                       Margin="0"/>
@@ -522,14 +593,14 @@
 
                     <!-- Header Row -->
                     <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x044A;&#x0440;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <TextBlock Text="Актуално състояние" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x0410;&#x043A;&#x0442;&#x0443;&#x0430;&#x043B;&#x043D;&#x043E; &#x0441;&#x044A;&#x0441;&#x0442;&#x043E;&#x044F;&#x043D;&#x0438;&#x0435;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
 
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергиен източник 2 (ЕИ2)" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x0435;&#x043D; &#x0438;&#x0437;&#x0442;&#x043E;&#x0447;&#x043D;&#x0438;&#x043A; 2 (&#x0415;&#x0418;2)" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <ComboBox x:Name="HeatingEnergyCarrierCombo2"
@@ -558,9 +629,9 @@
                         </ComboBox>
                     </Border>
 
-                    <!-- Row 1: Дял -->
+                    <!-- Row 1: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045C;&#x0420;&#x040E;&#x0420;&#x040F;&#x0420;&#x00A0;&#x0412;&#x00BB; -->
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Дял, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0414;&#x044F;&#x043B;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <StackPanel Margin="1">
@@ -572,45 +643,45 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Row 2: Ефективност на отдаване -->
+                    <!-- Row 2: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
                     <Border Grid.Row="3" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на отдаване, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x043E;&#x0442;&#x0434;&#x0430;&#x0432;&#x0430;&#x043D;&#x0435;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="3" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2EmissionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 3: Ефективност на разпределителната мрежа -->
+                    <!-- Row 3: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0412;&#x00B7;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0412;&#x00B0; -->
                     <Border Grid.Row="4" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на разпределителната мрежа, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x0440;&#x0430;&#x0437;&#x043F;&#x0440;&#x0435;&#x0434;&#x0435;&#x043B;&#x0438;&#x0442;&#x0435;&#x043B;&#x043D;&#x0430;&#x0442;&#x0430; &#x043C;&#x0440;&#x0435;&#x0436;&#x0430;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="4" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2DistributionEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 4: Автоматично управление -->
+                    <!-- Row 4: &#x0420;&#x00A0;&#x0421;&#x2019;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x040E;&#x0432;&#x0402;&#x040E;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022; &#x0420;&#x040E;&#x0421;&#x201C;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5; -->
                     <Border Grid.Row="5" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Автоматично управление, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0410;&#x0432;&#x0442;&#x043E;&#x043C;&#x0430;&#x0442;&#x0438;&#x0447;&#x043D;&#x043E; &#x0443;&#x043F;&#x0440;&#x0430;&#x0432;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="5" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2AutomaticControl, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 5: Енергиен мениджмънт -->
+                    <!-- Row 5: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0421;&#x2013;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026; &#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0422;&#x2018;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x040E;&#x0420;&#x2030;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; -->
                     <Border Grid.Row="6" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Енергиен мениджмънт (ЕМ) и поддръжка, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x0435;&#x043D; &#x043C;&#x0435;&#x043D;&#x0438;&#x0434;&#x0436;&#x043C;&#x044A;&#x043D;&#x0442; (&#x0415;&#x041C;) &#x0438; &#x043F;&#x043E;&#x0434;&#x0434;&#x0440;&#x044A;&#x0436;&#x043A;&#x0430;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="6" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2EnergyManagement, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
                                  Style="{StaticResource EditableTextBoxStyle}" TextAlignment="Center" HorizontalAlignment="Stretch"/>
                     </Border>
 
-                    <!-- Row 6: Ефективност на генератора на топлина -->
+                    <!-- Row 6: &#x0420;&#x00A0;&#x0432;&#x0402;&#x045E;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2020;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x0453;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0421;&#x2013;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x040E;&#x0432;&#x0402;&#x0459;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0421;&#x2014;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; -->
                     <Border Grid.Row="7" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Ефективност на генератора на топлина, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="&#x0415;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x0433;&#x0435;&#x043D;&#x0435;&#x0440;&#x0430;&#x0442;&#x043E;&#x0440;&#x0430; &#x043D;&#x0430; &#x0442;&#x043E;&#x043F;&#x043B;&#x0438;&#x043D;&#x0430;, %" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Border>
                     <Border Grid.Row="7" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding EnergySource2GenerationEfficiency, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDoubleConverter}}"
@@ -618,7 +689,7 @@
                     </Border>
 
                     <Border Grid.Row="8" Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="0">
-                        <TextBlock Text="Потребна енергия (ЕИ2), kWh/m²" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Bold"/>
+                        <TextBlock Text="&#x041F;&#x043E;&#x0442;&#x0440;&#x0435;&#x0431;&#x043D;&#x0430; &#x0435;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x044F; (&#x0415;&#x0418;2), kWh/m&#x00B2;" Padding="10,3" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Bold"/>
                     </Border>
                     <Border Grid.Row="8" Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0">
                         <TextBox Text="{Binding EnergySource2RequiredEnergyPerAreaDisplay, Mode=OneWay}"
@@ -640,14 +711,14 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Row="0" Grid.Column="0" Background="#E53935" BorderBrush="White" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Параметър" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x041F;&#x0430;&#x0440;&#x0430;&#x043C;&#x0435;&#x0442;&#x044A;&#x0440;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Background="#E53935" BorderBrush="White" BorderThickness="0,0,0,1">
-                        <TextBlock Text="Актуално състояние" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
+                        <TextBlock Text="&#x0410;&#x043A;&#x0442;&#x0443;&#x0430;&#x043B;&#x043D;&#x043E; &#x0441;&#x044A;&#x0441;&#x0442;&#x043E;&#x044F;&#x043D;&#x0438;&#x0435;" FontWeight="Bold" Foreground="White" Padding="10,4" FontSize="13"/>
                     </Border>
 
                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="#888" BorderThickness="0,0,1,1">
-                        <TextBlock Text="Обща ефективност на генериране на топлина, %" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Text="&#x041E;&#x0431;&#x0449;&#x0430; &#x0435;&#x0444;&#x0435;&#x043A;&#x0442;&#x0438;&#x0432;&#x043D;&#x043E;&#x0441;&#x0442; &#x043D;&#x0430; &#x0433;&#x0435;&#x043D;&#x0435;&#x0440;&#x0438;&#x0440;&#x0430;&#x043D;&#x0435; &#x043D;&#x0430; &#x0442;&#x043E;&#x043F;&#x043B;&#x0438;&#x043D;&#x0430;, %" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="#888" BorderThickness="0,0,0,1">
                         <TextBox Text="{Binding OverallHeatGenerationEfficiencyDisplay, Mode=OneWay}"
@@ -657,7 +728,7 @@
                     </Border>
 
                     <Border Grid.Row="2" Grid.Column="0" BorderBrush="#888" BorderThickness="0,0,1,0">
-                        <TextBlock Text="Обща потребна енергия, kWh/m²" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Text="&#x041E;&#x0431;&#x0449;&#x0430; &#x043F;&#x043E;&#x0442;&#x0440;&#x0435;&#x0431;&#x043D;&#x0430; &#x0435;&#x043D;&#x0435;&#x0440;&#x0433;&#x0438;&#x044F;, kWh/m&#x00B2;" Style="{StaticResource LabelStyle}"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" BorderBrush="#888" BorderThickness="0">
                         <TextBox Text="{Binding TotalGrossHeatingEnergyPerAreaDisplay, Mode=OneWay}"
@@ -670,27 +741,27 @@
             </Border>
 
             <Border Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="1" Padding="12" Margin="0,8,0,0">
-                <TextBlock Text="Панелът &quot;Топлина от обитатели - Отопление&quot; е преместен в секция 5 &quot;Данни за обекта&quot;."
+                <TextBlock Text="&#x041F;&#x0430;&#x043D;&#x0435;&#x043B;&#x044A;&#x0442; &quot;&#x0422;&#x043E;&#x043F;&#x043B;&#x0438;&#x043D;&#x0430; &#x043E;&#x0442; &#x043E;&#x0431;&#x0438;&#x0442;&#x0430;&#x0442;&#x0435;&#x043B;&#x0438; - &#x041E;&#x0442;&#x043E;&#x043F;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;&quot; &#x0435; &#x043F;&#x0440;&#x0435;&#x043C;&#x0435;&#x0441;&#x0442;&#x0435;&#x043D; &#x0432; &#x0441;&#x0435;&#x043A;&#x0446;&#x0438;&#x044F; 5 &quot;&#x0414;&#x0430;&#x043D;&#x043D;&#x0438; &#x0437;&#x0430; &#x043E;&#x0431;&#x0435;&#x043A;&#x0442;&#x0430;&quot;."
                            TextWrapping="Wrap"
                            FontSize="11"/>
             </Border>
 
             </StackPanel> <!-- End of IsEnabled wrapper -->
 
-            <!-- Информационна бележка -->
+            <!-- &#x0420;&#x00A0;&#x0412;&#x0098;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x00A0;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0412;&#x00B1;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x00A0;&#x0412;&#x00B0; -->
             <Border Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="1" Padding="15" Margin="0,10,0,0">
                 <StackPanel>
-                    <TextBlock Text="ℹ Забележки:" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBlock Text="&#x0411;&#x0435;&#x043B;&#x0435;&#x0436;&#x043A;&#x0438; / &#x043F;&#x0440;&#x0435;&#x043F;&#x043E;&#x0440;&#x044A;&#x043A;&#x0438;:" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                     <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="18">
-                        <Run Text="• Стойностите за топлина на човек се изчисляват автоматично чрез линейна интерполация по температура."/>
+                        <Run Text="&#x2022; &#x0421;&#x0442;&#x043E;&#x0439;&#x043D;&#x043E;&#x0441;&#x0442;&#x0438;&#x0442;&#x0435; &#x0437;&#x0430; &#x0442;&#x043E;&#x043F;&#x043B;&#x0438;&#x043D;&#x0430; &#x043D;&#x0430; &#x0447;&#x043E;&#x0432;&#x0435;&#x043A; &#x0441;&#x0435; &#x0438;&#x0437;&#x0447;&#x0438;&#x0441;&#x043B;&#x044F;&#x0432;&#x0430;&#x0442; &#x0430;&#x0432;&#x0442;&#x043E;&#x043C;&#x0430;&#x0442;&#x0438;&#x0447;&#x043D;&#x043E; &#x0447;&#x0440;&#x0435;&#x0437; &#x043B;&#x0438;&#x043D;&#x0435;&#x0439;&#x043D;&#x0430; &#x0438;&#x043D;&#x0442;&#x0435;&#x0440;&#x043F;&#x043E;&#x043B;&#x0430;&#x0446;&#x0438;&#x044F; &#x043F;&#x043E; &#x0442;&#x0435;&#x043C;&#x043F;&#x0435;&#x0440;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430;."/>
                         <LineBreak/>
-                        <Run Text="• Брой обитатели се взима от секция 5 (Данни за обекта)."/>
+                        <Run Text="&#x2022; &#x0411;&#x0440;&#x043E;&#x0439; &#x043E;&#x0431;&#x0438;&#x0442;&#x0430;&#x0442;&#x0435;&#x043B;&#x0438; &#x0441;&#x0435; &#x0432;&#x0437;&#x0438;&#x043C;&#x0430; &#x043E;&#x0442; &#x0441;&#x0435;&#x043A;&#x0446;&#x0438;&#x044F; 5 (&#x0414;&#x0430;&#x043D;&#x043D;&#x0438; &#x0437;&#x0430; &#x043E;&#x0431;&#x0435;&#x043A;&#x0442;&#x0430;)."/>
                         <LineBreak/>
-                        <Run Text="• Температура в помещението е равна на проектната температура."/>
+                        <Run Text="&#x2022; &#x0422;&#x0435;&#x043C;&#x043F;&#x0435;&#x0440;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430; &#x0432; &#x043F;&#x043E;&#x043C;&#x0435;&#x0449;&#x0435;&#x043D;&#x0438;&#x0435;&#x0442;&#x043E; &#x0435; &#x0440;&#x0430;&#x0432;&#x043D;&#x0430; &#x043D;&#x0430; &#x043F;&#x0440;&#x043E;&#x0435;&#x043A;&#x0442;&#x043D;&#x0430;&#x0442;&#x0430; &#x0442;&#x0435;&#x043C;&#x043F;&#x0435;&#x0440;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430;."/>
                         <LineBreak/>
-                        <Run Text="• Десетичните стойности могат да се въвеждат с ',' или '.' като разделител."/>
+                        <Run Text="&#x2022; &#x0414;&#x0435;&#x0441;&#x0435;&#x0442;&#x0438;&#x0447;&#x043D;&#x0438;&#x0442;&#x0435; &#x0441;&#x0442;&#x043E;&#x0439;&#x043D;&#x043E;&#x0441;&#x0442;&#x0438; &#x043C;&#x043E;&#x0433;&#x0430;&#x0442; &#x0434;&#x0430; &#x0441;&#x0435; &#x0432;&#x044A;&#x0432;&#x0435;&#x0436;&#x0434;&#x0430;&#x0442; &#x0441; ',' &#x0438;&#x043B;&#x0438; '.' &#x043A;&#x0430;&#x0442;&#x043E; &#x0440;&#x0430;&#x0437;&#x0434;&#x0435;&#x043B;&#x0438;&#x0442;&#x0435;&#x043B;."/>
                         <LineBreak/>
-                        <Run Text="• Стойностите в W/m² се изчисляват на база отопляемата площ от секция 5."/>
+                        <Run Text="&#x2022; &#x0421;&#x0442;&#x043E;&#x0439;&#x043D;&#x043E;&#x0441;&#x0442;&#x0438;&#x0442;&#x0435; &#x0432; W/m&#x00B2; &#x0441;&#x0435; &#x0438;&#x0437;&#x0447;&#x0438;&#x0441;&#x043B;&#x044F;&#x0432;&#x0430;&#x0442; &#x043D;&#x0430; &#x0431;&#x0430;&#x0437;&#x0430; &#x043E;&#x0442;&#x043E;&#x043F;&#x043B;&#x044F;&#x0435;&#x043C;&#x0430; &#x043F;&#x043B;&#x043E;&#x0449; &#x043E;&#x0442; &#x0441;&#x0435;&#x043A;&#x0446;&#x0438;&#x044F; 5."/>
                     </TextBlock>
                 </StackPanel>
             </Border>

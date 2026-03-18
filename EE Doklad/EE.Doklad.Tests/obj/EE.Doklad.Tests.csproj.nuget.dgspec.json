@@ -10,7 +10,7 @@
         "projectUniqueName": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
         "projectName": "EE.Doklad.Tests",
         "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\EE.Doklad.Tests.csproj",
-        "packagesPath": "C:\\Users\\dimit\\.nuget\\packages\\",
+        "packagesPath": "e:\\AI\\EE Doklad\\.dotnet\\.nuget\\packages\\",
         "outputPath": "E:\\AI\\EE Doklad\\EE.Doklad.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
@@ -101,7 +101,7 @@
         "projectUniqueName": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
         "projectName": "EE.Doklad",
         "projectPath": "E:\\AI\\EE Doklad\\EE.Doklad\\EE.Doklad.csproj",
-        "packagesPath": "C:\\Users\\dimit\\.nuget\\packages\\",
+        "packagesPath": "e:\\AI\\EE Doklad\\.dotnet\\.nuget\\packages\\",
         "outputPath": "E:\\AI\\EE Doklad\\EE.Doklad\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [

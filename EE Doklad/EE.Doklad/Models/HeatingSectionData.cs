@@ -2,91 +2,101 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace EE.Doklad.Models
 {
+    public enum HeatingCalculationMethod
+    {
+        AuerSoftware = 1,
+        Rd0220_3 = 2,
+        Ashrae8760 = 3
+    }
+
     /// <summary>
-    /// Данни за раздел №10 - "Отопление"
+    /// ����� �� ������ �10 - "���������"
     /// </summary>
     public partial class HeatingSectionData : ObservableObject
     {
         [ObservableProperty]
-        private string _title = "Отопление";
+        private string _title = "\u041E\u0442\u043E\u043F\u043B\u0435\u043D\u0438\u0435";
 
         [ObservableProperty]
         private string? _description;
 
-        // ========== РЪЧНИ ВХОДОВЕ ==========
+        public HeatingCalculationMethod CalculationMethod { get; set; }
+            = HeatingCalculationMethod.AuerSoftware;
+
+        // ========== ����� ������� ==========
 
         /// <summary>
-        /// Инфилтрация [1/ч] - десетична стойност, >= 0
+        /// ����������� [1/�] - ��������� ��������, >= 0
         /// </summary>
         [ObservableProperty]
         private double _infiltration = 0.5;
 
         /// <summary>
-        /// Проектна температура [°C] - може да има дробна стойност (напр. 21.00)
+        /// �������� ����������� [�C] - ���� �� ��� ������ �������� (����. 21.00)
         /// </summary>
         [ObservableProperty]
         private double _designTemperature = 20.0;
 
         /// <summary>
-        /// Temperatura на понижение [°C]
+        /// Temperatura �� ��������� [�C]
         /// </summary>
         [ObservableProperty]
         private double _reductionTemperature = 16.0;
 
         /// <summary>
-        /// Ефективност на отдаване [%] (0-100)
+        /// ����������� �� �������� [%] (0-100)
         /// </summary>
         [ObservableProperty]
         private double _emissionEfficiency = 100.0;
 
         /// <summary>
-        /// Ефективност на разпределителна мрежа [%] (0-100)
+        /// ����������� �� ��������������� ����� [%] (0-100)
         /// </summary>
         [ObservableProperty]
         private double _distributionEfficiency = 100.0;
 
         /// <summary>
-        /// Автоматично управление [%] (0-100)
+        /// ����������� ���������� [%] (0-100)
         /// </summary>
         [ObservableProperty]
         private double _automaticControl = 96.0;
 
     /// <summary>
-    /// Енергиен мениджмънт [%] (0-100)
+    /// �������� ���������� [%] (0-100)
     /// </summary>
     [ObservableProperty]
     private double _energyManagement = 96.0;
 
     /// <summary>
-    /// КПД на топлоснабдяване [%] (>=0, може да бъде над 100)
+    /// ��� �� ��������������� [%] (>=0, ���� �� ���� ��� 100)
     /// </summary>
     [ObservableProperty]
     private double _heatingEfficiency = 100.0;
 
-    // ========== ЕНЕРГИЕН ИЗТОЧНИК ЗА ОТОПЛЕНИЕ (по аналог с вентилация) ==========
+    // ========== �������� �������� �� ��������� (�� ������ � ����������) ==========
 
     /// <summary>
-    /// Енергиен източник 1 (ЕИ1)
+    /// �������� �������� 1 (��1)
     /// </summary>
     [ObservableProperty]
     private VentilationEnergySource _energySource1 = new();
 
     /// <summary>
-    /// Енергиен източник 2 (ЕИ2) - опционален
+    /// �������� �������� 2 (��2) - ����������
     /// </summary>
     [ObservableProperty]
     private VentilationEnergySource? _energySource2 = null;
 
     /// <summary>
-    /// Използва ли се втори енергиен източник
+    /// �������� �� �� ����� �������� ��������
     /// </summary>
     [ObservableProperty]
     private bool _useSecondEnergySource = false;
 
-        // ========== ОБИТАТЕЛИ ==========
+        // ========== ��������� ==========
 
         /// <summary>
-        /// Избрана степен на активност
+        /// ������� ������ �� ���������
         /// </summary>
         [ObservableProperty]
         private ActivityLevel _selectedActivityLevel = ActivityLevel.Cinema;
