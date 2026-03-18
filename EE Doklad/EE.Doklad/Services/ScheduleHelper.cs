@@ -50,7 +50,7 @@ namespace EE.Doklad.Services
 
             if (monthNumber == startM)
             {
-                return Math.Max(0, daysInMonth - startD);
+                return Math.Max(0, daysInMonth - startD + 1);
             }
 
             if (monthNumber == endM)
