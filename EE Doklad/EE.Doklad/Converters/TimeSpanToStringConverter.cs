@@ -30,7 +30,7 @@ namespace EE.Doklad.Converters
                 var parts = str.Trim().Split(':');
                 if (parts.Length == 2 && int.TryParse(parts[0], out int h) && int.TryParse(parts[1], out int m))
                 {
-                    if (h >= 0 && h < 24 && m >= 0 && m < 60)
+                    if (h >= 0 && m >= 0 && m < 60 && (h < 24 || (h == 24 && m == 0)))
                     {
                         return new TimeSpan(h, m, 0);
                     }

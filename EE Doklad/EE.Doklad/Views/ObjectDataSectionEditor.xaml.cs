@@ -28,6 +28,10 @@ namespace EE.Doklad.Views
         private void ObjectDataSectionEditor_Loaded(object sender, RoutedEventArgs e)
         {
             BindOccupantPanels();
+            if (DataContext is ObjectDataSectionData objectData)
+            {
+                objectData.EnsureHeatingSchedulesInitialized();
+            }
 
             // Намираме ComboBox за типа сграда и зареждаме ItemsSource с групирани данни
             var buildingTypeCombo = FindName("BuildingTypeCombo") as ComboBox;
@@ -373,6 +377,48 @@ namespace EE.Doklad.Views
             {
                 e.CancelCommand();
             }
+        }
+
+        private void ScheduleTimeTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                SelectScheduleHourPart(textBox);
+            }
+        }
+
+        private void ScheduleTimeTextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            if (!textBox.IsKeyboardFocusWithin)
+            {
+                e.Handled = true;
+                textBox.Focus();
+            }
+        }
+
+        private static void SelectScheduleHourPart(TextBox textBox)
+        {
+            var text = textBox.Text ?? string.Empty;
+            int colonIndex = text.IndexOf(':');
+
+            if (colonIndex > 0)
+            {
+                textBox.Select(0, colonIndex);
+                return;
+            }
+
+            if (text.Length >= 2)
+            {
+                textBox.Select(0, 2);
+                return;
+            }
+
+            textBox.SelectAll();
         }
 
         private void CoolingStartMonthCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

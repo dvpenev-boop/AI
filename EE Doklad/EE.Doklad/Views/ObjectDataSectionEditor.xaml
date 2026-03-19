@@ -371,165 +371,166 @@
                 </StackPanel>
             </Border>
 
-            <!-- ТАБЛИЦА 2: Графици на сградата -->
-            <TextBlock Text="Графици на сградата:"
-                       FontSize="14"
-                       FontWeight="Bold"
-                       Margin="0,20,0,10"/>
-
-            <Border BorderBrush="#666" BorderThickness="2" Margin="0,0,0,20">
+            <!-- Графици на сградата с начало/край -->
+            <Border BorderBrush="#CC6600" BorderThickness="2" Margin="0,20,0,20">
+                <Border.Resources>
+                    <Style TargetType="TextBox">
+                        <EventSetter Event="GotKeyboardFocus" Handler="ScheduleTimeTextBox_GotKeyboardFocus"/>
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ScheduleTimeTextBox_PreviewMouseLeftButtonDown"/>
+                    </Style>
+                </Border.Resources>
                 <StackPanel>
-                    <!-- Row 0: График обитаване - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
-                        <Grid Background="#D0D0D0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Text="График на обитаване" Padding="12,8" FontWeight="Bold" FontSize="13"/>
-                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
+                    <TextBlock Text="Графици на сградата"
+                               FontSize="14" FontWeight="Bold" Padding="12,10"
+                               Background="#FFF1E0" Foreground="#B85C00"/>
+
+                    <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="A) График за обитаване"
+                                       FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Работни дни:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Grid.Column="1" Text="{Binding HeatingSchedules.OccupancyHeatingSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="3" Text="{Binding HeatingSchedules.OccupancyHeatingSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+
+                                <TextBlock Grid.Column="5" Text="Събота:" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                                <TextBox Grid.Column="6" Text="{Binding HeatingSchedules.OccupancyHeatingSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="8" Text="{Binding HeatingSchedules.OccupancyHeatingSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+
+                                <TextBlock Grid.Column="10" Text="Неделя:" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                                <TextBox Grid.Column="11" Text="{Binding HeatingSchedules.OccupancyHeatingSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="13" Text="{Binding HeatingSchedules.OccupancyHeatingSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
-                    <!-- Row 1: График обитаване - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
-                        <Grid Background="White">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
-                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding OccupancyWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding OccupancySaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding OccupancySundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                        </Grid>
+                    <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10"
+                            Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="B) График за отопление"
+                                       FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Работни дни:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Grid.Column="1" Text="{Binding HeatingSchedules.HeatingSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="3" Text="{Binding HeatingSchedules.HeatingSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+
+                                <TextBlock Grid.Column="5" Text="Събота:" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                                <TextBox Grid.Column="6" Text="{Binding HeatingSchedules.HeatingSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="8" Text="{Binding HeatingSchedules.HeatingSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+
+                                <TextBlock Grid.Column="10" Text="Неделя:" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                                <TextBox Grid.Column="11" Text="{Binding HeatingSchedules.HeatingSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="13" Text="{Binding HeatingSchedules.HeatingSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
-                    <!-- Row 2: График отопление - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid Background="#D0D0D0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Text="График на отопление" Padding="12,8" FontWeight="Bold" FontSize="13"/>
-                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </Border>
+                    <Border BorderBrush="#CCC" BorderThickness="0,1,0,0" Padding="10"
+                            Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="C) График за вентилация отопление"
+                                       FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Работни дни:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Grid.Column="1" Text="{Binding HeatingSchedules.VentilationHeatingSchedule.Workdays.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="3" Text="{Binding HeatingSchedules.VentilationHeatingSchedule.Workdays.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
 
-                    <!-- Row 3: График отопление - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid Background="White">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
-                                <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding HeatingWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                                <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding HeatingSaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                                <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding HeatingSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                        </Grid>
-                    </Border>
-                    <!-- Row 6: График вентилация - заглавия -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid Background="#D0D0D0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Text="График за вентилация Отопление" Padding="12,8" FontWeight="Bold" FontSize="13"/>
-                            <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Работни дни" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Събота" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBlock Text="Неделя" Padding="12,8" FontWeight="Bold" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </Border>
+                                <TextBlock Grid.Column="5" Text="Събота:" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                                <TextBox Grid.Column="6" Text="{Binding HeatingSchedules.VentilationHeatingSchedule.Saturday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="7" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="8" Text="{Binding HeatingSchedules.VentilationHeatingSchedule.Saturday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
 
-                    <!-- Row 7: График вентилация - входни полета -->
-                    <Border BorderBrush="#888" BorderThickness="0,0,0,1" Visibility="{Binding HeatingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid Background="White">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" Background="#F0F0F0" Padding="12,10" VerticalAlignment="Center" Text="(ч./ден)"/>
-                                <Border Grid.Column="1" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding VentilationWorkdaysHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                                <Border Grid.Column="2" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding VentilationSaturdayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                                <Border Grid.Column="3" BorderBrush="#888" BorderThickness="1,0,0,0">
-                                <TextBox Text="{Binding VentilationSundayHours, UpdateSourceTrigger=PropertyChanged}" Padding="12,10" VerticalAlignment="Center" Background="White" FontSize="12" 
-                                         TextAlignment="Center" BorderThickness="0" PreviewTextInput="NumberOnly_PreviewTextInput" DataObject.Pasting="NumberOnly_Pasting"/>
-                            </Border>
-                        </Grid>
+                                <TextBlock Grid.Column="10" Text="Неделя:" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                                <TextBox Grid.Column="11" Text="{Binding HeatingSchedules.VentilationHeatingSchedule.Sunday.StartTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="12" Text="–" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox Grid.Column="13" Text="{Binding HeatingSchedules.VentilationHeatingSchedule.Sunday.EndTime, Converter={StaticResource TimeSpanToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6" TextAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
             </Border>
 
-            <!-- НОВИ ГРАФИЦИ ЗА ОХЛАДИТЕЛЕН ПЕРИОД (само ако CoolingSeasonEnabled == true) -->
             <Border BorderBrush="#0066CC" BorderThickness="2" Margin="0,20,0,20" 
                     Visibility="{Binding CoolingSeasonEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border.Resources>
+                    <Style TargetType="TextBox">
+                        <EventSetter Event="GotKeyboardFocus" Handler="ScheduleTimeTextBox_GotKeyboardFocus"/>
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ScheduleTimeTextBox_PreviewMouseLeftButtonDown"/>
+                    </Style>
+                </Border.Resources>
                 <StackPanel>
                     <!-- Заглавие на блока -->
                     <TextBlock Text="Графици за охладителен период" 

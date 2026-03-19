@@ -104,4 +104,25 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private WeeklySchedule _outdoorAirVentSchedule = new();
     }
+
+    /// <summary>
+    /// График за отопление (секция 5).
+    /// Start==End==Zero = не е зададено (0 h).
+    /// Start=00:00, End=24:00 = 24 h/ден (TimeSpan(24,0,0).TotalHours == 24.0).
+    /// Същата логика като CoolingSchedulesModel.
+    /// </summary>
+    public partial class HeatingSchedulesModel : ObservableObject
+    {
+        /// <summary>А) График за обитаване – отоплителен период</summary>
+        [ObservableProperty]
+        private WeeklySchedule _occupancyHeatingSchedule = new();
+
+        /// <summary>Б) График за отопление</summary>
+        [ObservableProperty]
+        private WeeklySchedule _heatingSchedule = new();
+
+        /// <summary>Р’) Р“СЂР°С„РёРє Р·Р° РІРµРЅС‚РёР»Р°С†РёСЏ РѕС‚РѕРїР»РµРЅРёРµ</summary>
+        [ObservableProperty]
+        private WeeklySchedule _ventilationHeatingSchedule = new();
+    }
 }

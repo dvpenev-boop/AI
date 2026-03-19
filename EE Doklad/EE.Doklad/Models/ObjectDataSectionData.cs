@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace EE.Doklad.Models
 {
@@ -9,6 +11,18 @@ namespace EE.Doklad.Models
     /// </summary>
     public partial class ObjectDataSectionData : ObservableObject
     {
+        private HeatingSchedulesModel? _subscribedHeatingSchedules;
+        private WeeklySchedule? _subscribedOccupancyHeatingWeeklySchedule;
+        private WeeklySchedule? _subscribedHeatingWeeklySchedule;
+        private WeeklySchedule? _subscribedVentilationHeatingWeeklySchedule;
+        private bool _syncingHeatingLegacyFromSchedule;
+        private bool _syncingHeatingScheduleFromLegacy;
+
+        public ObjectDataSectionData()
+        {
+            EnsureHeatingSchedulesInitialized();
+        }
+
         [ObservableProperty]
         private string _title = "Данни за обекта";
 
@@ -129,6 +143,9 @@ namespace EE.Doklad.Models
         /// </summary>
         [ObservableProperty]
         private CoolingSchedulesModel _coolingSchedules = new();
+
+        [ObservableProperty]
+        private HeatingSchedulesModel? _heatingSchedules;
 
         [ObservableProperty]
         private int _climateZone = 1; // Климатична зона (1-9)
@@ -451,6 +468,353 @@ namespace EE.Doklad.Models
             }
         }
 
+        partial void OnHeatingSchedulesChanged(HeatingSchedulesModel? value)
+        {
+            AttachHeatingSchedules(value);
+            SyncOccupancyScheduleCompatibility();
+            SyncHeatingScheduleCompatibility();
+            SyncVentilationHeatingScheduleCompatibility();
+        }
+
+        public void EnsureHeatingSchedulesInitialized()
+        {
+            if (HeatingSchedules == null)
+            {
+                HeatingSchedules = new HeatingSchedulesModel();
+                return;
+            }
+
+            AttachHeatingSchedules(HeatingSchedules);
+            SyncOccupancyScheduleCompatibility();
+            SyncHeatingScheduleCompatibility();
+            SyncVentilationHeatingScheduleCompatibility();
+        }
+
+        private void AttachHeatingSchedules(HeatingSchedulesModel? value)
+        {
+            if (!ReferenceEquals(_subscribedHeatingSchedules, value))
+            {
+                if (_subscribedHeatingSchedules != null)
+                {
+                    _subscribedHeatingSchedules.PropertyChanged -= OnHeatingSchedulesPropertyChanged;
+                }
+
+                _subscribedHeatingSchedules = value;
+
+                if (_subscribedHeatingSchedules != null)
+                {
+                    _subscribedHeatingSchedules.PropertyChanged += OnHeatingSchedulesPropertyChanged;
+                }
+            }
+
+            AttachOccupancyHeatingWeeklySchedule(value?.OccupancyHeatingSchedule);
+            AttachHeatingWeeklySchedule(value?.HeatingSchedule);
+            AttachVentilationHeatingWeeklySchedule(value?.VentilationHeatingSchedule);
+        }
+
+        private void AttachOccupancyHeatingWeeklySchedule(WeeklySchedule? schedule)
+        {
+            if (ReferenceEquals(_subscribedOccupancyHeatingWeeklySchedule, schedule))
+                return;
+
+            if (_subscribedOccupancyHeatingWeeklySchedule != null)
+            {
+                _subscribedOccupancyHeatingWeeklySchedule.PropertyChanged -= OnOccupancyHeatingWeeklySchedulePropertyChanged;
+                _subscribedOccupancyHeatingWeeklySchedule.Workdays.PropertyChanged -= OnOccupancyHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedOccupancyHeatingWeeklySchedule.Saturday.PropertyChanged -= OnOccupancyHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedOccupancyHeatingWeeklySchedule.Sunday.PropertyChanged -= OnOccupancyHeatingWeeklyTimeRangePropertyChanged;
+            }
+
+            _subscribedOccupancyHeatingWeeklySchedule = schedule;
+
+            if (_subscribedOccupancyHeatingWeeklySchedule != null)
+            {
+                _subscribedOccupancyHeatingWeeklySchedule.PropertyChanged += OnOccupancyHeatingWeeklySchedulePropertyChanged;
+                _subscribedOccupancyHeatingWeeklySchedule.Workdays.PropertyChanged += OnOccupancyHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedOccupancyHeatingWeeklySchedule.Saturday.PropertyChanged += OnOccupancyHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedOccupancyHeatingWeeklySchedule.Sunday.PropertyChanged += OnOccupancyHeatingWeeklyTimeRangePropertyChanged;
+            }
+        }
+
+        private void AttachHeatingWeeklySchedule(WeeklySchedule? schedule)
+        {
+            if (ReferenceEquals(_subscribedHeatingWeeklySchedule, schedule))
+                return;
+
+            if (_subscribedHeatingWeeklySchedule != null)
+            {
+                _subscribedHeatingWeeklySchedule.PropertyChanged -= OnHeatingWeeklySchedulePropertyChanged;
+                _subscribedHeatingWeeklySchedule.Workdays.PropertyChanged -= OnHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedHeatingWeeklySchedule.Saturday.PropertyChanged -= OnHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedHeatingWeeklySchedule.Sunday.PropertyChanged -= OnHeatingWeeklyTimeRangePropertyChanged;
+            }
+
+            _subscribedHeatingWeeklySchedule = schedule;
+
+            if (_subscribedHeatingWeeklySchedule != null)
+            {
+                _subscribedHeatingWeeklySchedule.PropertyChanged += OnHeatingWeeklySchedulePropertyChanged;
+                _subscribedHeatingWeeklySchedule.Workdays.PropertyChanged += OnHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedHeatingWeeklySchedule.Saturday.PropertyChanged += OnHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedHeatingWeeklySchedule.Sunday.PropertyChanged += OnHeatingWeeklyTimeRangePropertyChanged;
+            }
+        }
+
+        private void AttachVentilationHeatingWeeklySchedule(WeeklySchedule? schedule)
+        {
+            if (ReferenceEquals(_subscribedVentilationHeatingWeeklySchedule, schedule))
+                return;
+
+            if (_subscribedVentilationHeatingWeeklySchedule != null)
+            {
+                _subscribedVentilationHeatingWeeklySchedule.PropertyChanged -= OnVentilationHeatingWeeklySchedulePropertyChanged;
+                _subscribedVentilationHeatingWeeklySchedule.Workdays.PropertyChanged -= OnVentilationHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedVentilationHeatingWeeklySchedule.Saturday.PropertyChanged -= OnVentilationHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedVentilationHeatingWeeklySchedule.Sunday.PropertyChanged -= OnVentilationHeatingWeeklyTimeRangePropertyChanged;
+            }
+
+            _subscribedVentilationHeatingWeeklySchedule = schedule;
+
+            if (_subscribedVentilationHeatingWeeklySchedule != null)
+            {
+                _subscribedVentilationHeatingWeeklySchedule.PropertyChanged += OnVentilationHeatingWeeklySchedulePropertyChanged;
+                _subscribedVentilationHeatingWeeklySchedule.Workdays.PropertyChanged += OnVentilationHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedVentilationHeatingWeeklySchedule.Saturday.PropertyChanged += OnVentilationHeatingWeeklyTimeRangePropertyChanged;
+                _subscribedVentilationHeatingWeeklySchedule.Sunday.PropertyChanged += OnVentilationHeatingWeeklyTimeRangePropertyChanged;
+            }
+        }
+
+        private void OnHeatingSchedulesPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(HeatingSchedulesModel.OccupancyHeatingSchedule))
+            {
+                AttachOccupancyHeatingWeeklySchedule(HeatingSchedules?.OccupancyHeatingSchedule);
+                SyncOccupancyScheduleCompatibility();
+            }
+            else if (e.PropertyName == nameof(HeatingSchedulesModel.HeatingSchedule))
+            {
+                AttachHeatingWeeklySchedule(HeatingSchedules?.HeatingSchedule);
+                SyncHeatingScheduleCompatibility();
+            }
+            else if (e.PropertyName == nameof(HeatingSchedulesModel.VentilationHeatingSchedule))
+            {
+                AttachVentilationHeatingWeeklySchedule(HeatingSchedules?.VentilationHeatingSchedule);
+                SyncVentilationHeatingScheduleCompatibility();
+            }
+        }
+
+        private void OnOccupancyHeatingWeeklySchedulePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            SyncLegacyOccupancyHoursFromSchedule();
+        }
+
+        private void OnOccupancyHeatingWeeklyTimeRangePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            SyncLegacyOccupancyHoursFromSchedule();
+        }
+
+        private void OnHeatingWeeklySchedulePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            SyncLegacyHeatingHoursFromSchedule();
+        }
+
+        private void OnHeatingWeeklyTimeRangePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            SyncLegacyHeatingHoursFromSchedule();
+        }
+
+        private void OnVentilationHeatingWeeklySchedulePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            SyncLegacyVentilationHeatingHoursFromSchedule();
+        }
+
+        private void OnVentilationHeatingWeeklyTimeRangePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            SyncLegacyVentilationHeatingHoursFromSchedule();
+        }
+
+        private void SyncOccupancyScheduleCompatibility()
+        {
+            if (HasHeatingScheduleHours(HeatingSchedules?.OccupancyHeatingSchedule))
+            {
+                SyncLegacyOccupancyHoursFromSchedule();
+            }
+            else
+            {
+                SyncOccupancyScheduleFromLegacy();
+            }
+        }
+
+        private void SyncHeatingScheduleCompatibility()
+        {
+            if (HasHeatingScheduleHours(HeatingSchedules?.HeatingSchedule))
+            {
+                SyncLegacyHeatingHoursFromSchedule();
+            }
+            else
+            {
+                SyncHeatingScheduleFromLegacy();
+            }
+        }
+
+        private void SyncVentilationHeatingScheduleCompatibility()
+        {
+            if (HasHeatingScheduleHours(HeatingSchedules?.VentilationHeatingSchedule))
+            {
+                SyncLegacyVentilationHeatingHoursFromSchedule();
+            }
+            else
+            {
+                SyncVentilationHeatingScheduleFromLegacy();
+            }
+        }
+
+        private void SyncLegacyOccupancyHoursFromSchedule()
+        {
+            SyncLegacyHoursFromSchedule(
+                HeatingSchedules?.OccupancyHeatingSchedule,
+                hours => OccupancyWorkdaysHours = hours,
+                hours => OccupancySaturdayHours = hours,
+                hours => OccupancySundayHours = hours);
+        }
+
+        private void SyncLegacyHeatingHoursFromSchedule()
+        {
+            SyncLegacyHoursFromSchedule(
+                HeatingSchedules?.HeatingSchedule,
+                hours => HeatingWorkdaysHours = hours,
+                hours => HeatingSaturdayHours = hours,
+                hours => HeatingSundayHours = hours);
+        }
+
+        private void SyncLegacyVentilationHeatingHoursFromSchedule()
+        {
+            SyncLegacyHoursFromSchedule(
+                HeatingSchedules?.VentilationHeatingSchedule,
+                hours => VentilationWorkdaysHours = hours,
+                hours => VentilationSaturdayHours = hours,
+                hours => VentilationSundayHours = hours);
+        }
+
+        private void SyncLegacyHoursFromSchedule(
+            WeeklySchedule? schedule,
+            Action<string?> setWorkdaysHours,
+            Action<string?> setSaturdayHours,
+            Action<string?> setSundayHours)
+        {
+            if (_syncingHeatingScheduleFromLegacy || schedule == null)
+                return;
+
+            _syncingHeatingLegacyFromSchedule = true;
+            try
+            {
+                setWorkdaysHours(FormatScheduleHours(schedule.Workdays.GetHours()));
+                setSaturdayHours(FormatScheduleHours(schedule.Saturday.GetHours()));
+                setSundayHours(FormatScheduleHours(schedule.Sunday.GetHours()));
+            }
+            finally
+            {
+                _syncingHeatingLegacyFromSchedule = false;
+            }
+        }
+
+        private void SyncOccupancyScheduleFromLegacy()
+        {
+            SyncScheduleFromLegacy(
+                HeatingSchedules?.OccupancyHeatingSchedule,
+                OccupancyWorkdaysHours,
+                OccupancySaturdayHours,
+                OccupancySundayHours);
+        }
+
+        private void SyncHeatingScheduleFromLegacy()
+        {
+            SyncScheduleFromLegacy(
+                HeatingSchedules?.HeatingSchedule,
+                HeatingWorkdaysHours,
+                HeatingSaturdayHours,
+                HeatingSundayHours);
+        }
+
+        private void SyncVentilationHeatingScheduleFromLegacy()
+        {
+            SyncScheduleFromLegacy(
+                HeatingSchedules?.VentilationHeatingSchedule,
+                VentilationWorkdaysHours,
+                VentilationSaturdayHours,
+                VentilationSundayHours);
+        }
+
+        private void SyncScheduleFromLegacy(
+            WeeklySchedule? schedule,
+            string? workdaysHours,
+            string? saturdayHours,
+            string? sundayHours)
+        {
+            if (_syncingHeatingLegacyFromSchedule)
+                return;
+
+            if (HeatingSchedules == null)
+            {
+                HeatingSchedules = new HeatingSchedulesModel();
+                return;
+            }
+
+            if (schedule == null)
+                return;
+
+            _syncingHeatingScheduleFromLegacy = true;
+            try
+            {
+                ApplyHoursToTimeRange(schedule.Workdays, ParseHoursOrZero(workdaysHours));
+                ApplyHoursToTimeRange(schedule.Saturday, ParseHoursOrZero(saturdayHours));
+                ApplyHoursToTimeRange(schedule.Sunday, ParseHoursOrZero(sundayHours));
+            }
+            finally
+            {
+                _syncingHeatingScheduleFromLegacy = false;
+            }
+        }
+
+        private static bool HasHeatingScheduleHours(WeeklySchedule? schedule)
+        {
+            return schedule != null &&
+                   (schedule.Workdays.GetHours() > 0.0 ||
+                    schedule.Saturday.GetHours() > 0.0 ||
+                    schedule.Sunday.GetHours() > 0.0);
+        }
+
+        private static void ApplyHoursToTimeRange(WeeklyTimeRange range, double hours)
+        {
+            hours = Math.Clamp(hours, 0.0, 24.0);
+
+            var start = TimeSpan.Zero;
+            var end = hours <= 0.0 ? TimeSpan.Zero : TimeSpan.FromHours(hours);
+
+            if (range.StartTime != start)
+                range.StartTime = start;
+
+            if (range.EndTime != end)
+                range.EndTime = end;
+        }
+
+        private static double ParseHoursOrZero(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return 0.0;
+
+            if (double.TryParse(value.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var invariant))
+                return invariant;
+
+            return double.TryParse(value.Trim(), out var currentCulture) ? currentCulture : 0.0;
+        }
+
+        private static string? FormatScheduleHours(double hours)
+        {
+            hours = Math.Clamp(hours, 0.0, 24.0);
+            return hours <= 0.0 ? null : hours.ToString("G", CultureInfo.InvariantCulture);
+        }
+
         private void ClampCoolingDay(ref int? dayField, int? month)
         {
             if (!dayField.HasValue || !month.HasValue)
@@ -509,31 +873,37 @@ namespace EE.Doklad.Models
         partial void OnOccupancyWorkdaysHoursChanged(string? value)
         {
             ClampHoursString(ref _occupancyWorkdaysHours, value, nameof(OccupancyWorkdaysHours));
+            SyncOccupancyScheduleFromLegacy();
         }
 
         partial void OnOccupancySaturdayHoursChanged(string? value)
         {
             ClampHoursString(ref _occupancySaturdayHours, value, nameof(OccupancySaturdayHours));
+            SyncOccupancyScheduleFromLegacy();
         }
 
         partial void OnOccupancySundayHoursChanged(string? value)
         {
             ClampHoursString(ref _occupancySundayHours, value, nameof(OccupancySundayHours));
+            SyncOccupancyScheduleFromLegacy();
         }
 
         partial void OnHeatingWorkdaysHoursChanged(string? value)
         {
             ClampHoursString(ref _heatingWorkdaysHours, value, nameof(HeatingWorkdaysHours));
+            SyncHeatingScheduleFromLegacy();
         }
 
         partial void OnHeatingSaturdayHoursChanged(string? value)
         {
             ClampHoursString(ref _heatingSaturdayHours, value, nameof(HeatingSaturdayHours));
+            SyncHeatingScheduleFromLegacy();
         }
 
         partial void OnHeatingSundayHoursChanged(string? value)
         {
             ClampHoursString(ref _heatingSundayHours, value, nameof(HeatingSundayHours));
+            SyncHeatingScheduleFromLegacy();
         }
 
         partial void OnCoolingWorkdaysHoursChanged(string? value)
@@ -554,16 +924,19 @@ namespace EE.Doklad.Models
         partial void OnVentilationWorkdaysHoursChanged(string? value)
         {
             ClampHoursString(ref _ventilationWorkdaysHours, value, nameof(VentilationWorkdaysHours));
+            SyncVentilationHeatingScheduleFromLegacy();
         }
 
         partial void OnVentilationSaturdayHoursChanged(string? value)
         {
             ClampHoursString(ref _ventilationSaturdayHours, value, nameof(VentilationSaturdayHours));
+            SyncVentilationHeatingScheduleFromLegacy();
         }
 
         partial void OnVentilationSundayHoursChanged(string? value)
         {
             ClampHoursString(ref _ventilationSundayHours, value, nameof(VentilationSundayHours));
+            SyncVentilationHeatingScheduleFromLegacy();
         }
 
         partial void OnVentilationCoolingWorkdaysHoursChanged(string? value)

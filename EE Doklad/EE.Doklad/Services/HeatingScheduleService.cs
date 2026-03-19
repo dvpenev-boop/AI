@@ -29,6 +29,40 @@ namespace EE.Doklad.Services
                 .ToArray();
         }
 
+        /// <summary>
+        /// Стойности >= 23.98 h (напр. 23:59) се нормализират към 24.0
+        /// за да тригерират isFullTime247 guard-а.
+        /// При вход 00:00–24:00 GetHours() връща точно 24.0 — нормализацията не е нужна,
+        /// но е оставена като safety net за стари данни с 23:59.
+        /// </summary>
+        private static double NormalizeHeatingHours(double h) =>
+            h >= 23.98 ? 24.0 : h;
+
+        /// <summary>
+        /// Извлича ч/ден за всеки тип ден.
+        /// Приоритет: HeatingSchedules (нов модел) → legacy string полета (fallback).
+        /// </summary>
+        private static (double workday, double saturday, double sunday) ResolveHeatingHoursPerDayType(
+            ObjectDataSectionData objectData)
+        {
+            var sched = objectData.HeatingSchedules?.HeatingSchedule;
+            if (sched != null)
+            {
+                double wd = NormalizeHeatingHours(sched.Workdays.GetHours());
+                double sat = NormalizeHeatingHours(sched.Saturday.GetHours());
+                double sun = NormalizeHeatingHours(sched.Sunday.GetHours());
+                if (wd > 0 || sat > 0 || sun > 0)
+                    return (ClampHours(wd), ClampHours(sat), ClampHours(sun));
+            }
+
+            return
+            (
+                ClampHours(ParseDoubleOrZero(objectData.HeatingWorkdaysHours)),
+                ClampHours(ParseDoubleOrZero(objectData.HeatingSaturdayHours)),
+                ClampHours(ParseDoubleOrZero(objectData.HeatingSundayHours))
+            );
+        }
+
         public static HeatingHoursBreakdown[] ComputeHeatingHoursBreakdownPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
             var result = new HeatingHoursBreakdown[12];
@@ -37,9 +71,7 @@ namespace EE.Doklad.Services
                 return result;
             }
 
-            double workdayHours = ClampHours(ParseDoubleOrZero(objectData.HeatingWorkdaysHours));
-            double saturdayHours = ClampHours(ParseDoubleOrZero(objectData.HeatingSaturdayHours));
-            double sundayHours = ClampHours(ParseDoubleOrZero(objectData.HeatingSundayHours));
+            var (workdayHours, saturdayHours, sundayHours) = ResolveHeatingHoursPerDayType(objectData);
 
             if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
             {
