@@ -43,6 +43,18 @@ public class InternalGainsService
 
     public InternalGainsAggregatorResult? LastResult => _lastResult;
 
+    /// <summary>
+    /// Ensures A_use_m2 is current when downstream sections recalculate before
+    /// the ObjectData UI has pushed the heated-area text back into the model.
+    /// </summary>
+    public void UpdateArea(double area)
+    {
+        if (_objectData != null && area > 0)
+        {
+            _objectData.HeatedArea = area.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+    }
+
     public InternalGainsAggregatorResult? Recalculate(bool persist = true)
     {
         var aggregatorInput = BuildAggregatorInput();

@@ -28,6 +28,8 @@ public class HeatingCalculationService
         double area,
         int climateZone,
         IReadOnlyList<int> heatingMonths,
+        IReadOnlyList<double>? monthlyIndoorTemps,
+        IReadOnlyList<int>? seasonalHoursByMonth,
         Func<int, double> getQint)
     {
         var strategy = _strategies[method];
@@ -40,8 +42,13 @@ public class HeatingCalculationService
         foreach (int monthIndex in heatingMonths.Distinct().OrderBy(m => m))
         {
             double te = ClimateDb.GetTe(climateZone, monthIndex);
-            int dt = ClimateDb.DtHours[monthIndex];
-            double qht = Math.Max(0.0, hTotal * Math.Max(0.0, thetaI - te) * dt / 1000.0);
+            double thetaIMonth = monthlyIndoorTemps != null && monthIndex >= 0 && monthIndex < monthlyIndoorTemps.Count
+                ? monthlyIndoorTemps[monthIndex]
+                : thetaI;
+            int dt = seasonalHoursByMonth != null && monthIndex >= 0 && monthIndex < seasonalHoursByMonth.Count
+                ? Math.Max(0, seasonalHoursByMonth[monthIndex])
+                : ClimateDb.DtHours[monthIndex];
+            double qht = Math.Max(0.0, hTotal * Math.Max(0.0, thetaIMonth - te) * dt / 1000.0);
 
             double qsol;
             try
@@ -81,7 +88,7 @@ public class HeatingCalculationService
                 Gamma = gamma,
                 Eta = eta,
                 QH = qh,
-                IsHeating = thetaI > te
+                IsHeating = thetaIMonth > te
             });
         }
 

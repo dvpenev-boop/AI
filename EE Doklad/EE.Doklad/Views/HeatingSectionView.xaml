@@ -746,6 +746,43 @@
                            FontSize="11"/>
             </Border>
 
+            <TextBlock Text="Временна debug секция - приноси от хора по месеци (Метод 1 - АУЕР)"
+                       Style="{StaticResource SectionHeaderStyle}"
+                       Visibility="{Binding IsMethodAuer, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <Border BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    Margin="0,0,0,8"
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding IsMethodAuer, Converter={StaticResource BoolToVisibilityConverter}}">
+                <DataGrid ItemsSource="{Binding HeatingPeopleGainDebugRows}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          CanUserSortColumns="False"
+                          HeadersVisibility="Column"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          AlternationCount="2"
+                          AlternatingRowBackground="#FFF5F5"
+                          RowStyle="{StaticResource HeatingSummaryRowStyle}"
+                          ColumnHeaderStyle="{StaticResource HeatingSummaryHeaderStyle}"
+                          BorderThickness="0"
+                          Background="White"
+                          MinWidth="820">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Месец" Binding="{Binding MonthName}" Width="120" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="Принос от хора [kWh]" Binding="{Binding PeopleGainKwhDisplay}" Width="140" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="Qint общо [kWh]" Binding="{Binding TotalInternalGainsKwhDisplay}" Width="130" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="Qgn [kWh]" Binding="{Binding TotalGainsKwhDisplay}" Width="120" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="γ [-]" Binding="{Binding GammaDisplay}" Width="90" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="Времеконстанта τ [h]" Binding="{Binding TimeConstantHoursDisplay}" Width="120" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                        <DataGridTextColumn Header="η усвояване [-]" Binding="{Binding UtilizationFactorDisplay}" Width="120" ElementStyle="{StaticResource HeatingSummaryCellTextStyle}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
             </StackPanel> <!-- End of IsEnabled wrapper -->
 
             <!-- &#x0420;&#x00A0;&#x0412;&#x0098;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x040E;&#x0432;&#x0402;&#x045B;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x040E;&#x0420;&#x201A;&#x0420;&#x00A0;&#x0421;&#x0098;&#x0420;&#x00A0;&#x0412;&#x00B0;&#x0420;&#x040E;&#x0432;&#x0402;&#x00A0;&#x0420;&#x00A0;&#x0421;&#x2018;&#x0420;&#x00A0;&#x0421;&#x2022;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0420;&#x2026;&#x0420;&#x00A0;&#x0412;&#x00B0; &#x0420;&#x00A0;&#x0412;&#x00B1;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00BB;&#x0420;&#x00A0;&#x0412;&#x00B5;&#x0420;&#x00A0;&#x0412;&#x00B6;&#x0420;&#x00A0;&#x0421;&#x201D;&#x0420;&#x00A0;&#x0412;&#x00B0; -->

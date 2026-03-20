@@ -565,6 +565,7 @@ namespace EE.Doklad.ViewModels
         public string RoomTemperatureDisplay => $"{_data.DesignTemperature:F2} \u00B0C";
 
         public ObservableCollection<HeatingCharacteristicRow> ThermalCharacteristicsRows { get; } = new();
+        public ObservableCollection<HeatingPeopleGainDebugRow> HeatingPeopleGainDebugRows { get; } = new();
         public string HeatingInstallationHoursDisplay => $"{_heatingInstallationHours:F0}";
         public double NetHeatingEnergyNoGainsPerArea { get; private set; }
         public string NetHeatingEnergyNoGainsPerAreaDisplay => NetHeatingEnergyNoGainsPerArea.ToString("F2", CultureInfo.InvariantCulture);
@@ -800,7 +801,13 @@ namespace EE.Doklad.ViewModels
             _floorData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Floor)?.FloorSectionData;
             _windowsData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Windows)?.WindowsSectionData;
             _ztuData = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.UnconditionedZones)?.UnconditionedZoneSectionData;
-            _section23Data = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.InternalGainsDebug)?.InternalGainsDebugInput;
+            _section23Data = _report?.Sections?
+                .FirstOrDefault(s =>
+                    s.Type == SectionType.InternalGainsDebug ||
+                    s.InternalGainsDebugInput != null ||
+                    ((s.Title?.Contains("23.", StringComparison.OrdinalIgnoreCase) ?? false) &&
+                     (s.Title?.Contains("топлинни", StringComparison.OrdinalIgnoreCase) ?? false)))
+                ?.InternalGainsDebugInput;
             _section24Data = _report?.Sections?.FirstOrDefault(s => s.Type == SectionType.SolarGains)?.SolarGainsData;
             if (_section23Data != null)
             {
@@ -1440,6 +1447,7 @@ namespace EE.Doklad.ViewModels
             {
                 _lastAnnual = null;
                 _lastMonthly = new List<HeatingMonthlyResult>();
+                RefreshPeopleGainDebugRows(null);
                 return;
             }
 
@@ -1455,22 +1463,93 @@ namespace EE.Doklad.ViewModels
                     Cm = _objectData.SpecificHeatCapacityWhPerM2K * snapshot.HeatedArea_m2
                 };
                 _lastMonthly = new List<HeatingMonthlyResult>();
+                RefreshPeopleGainDebugRows(null);
                 return;
             }
 
             double cm = Math.Max(0.0, _objectData.SpecificHeatCapacityWhPerM2K) * snapshot.HeatedArea_m2;
             double heatedArea = snapshot.HeatedArea_m2;
             var heatingMonths = GetHeatingMonthIndices(_objectData);
+            var climateData = new ClimateService(new JsonClimateRepository()).GetZone(_objectData.ClimateZone);
+            var seasonalHoursByMonth = new int[12];
+            var monthlyIndoorTemps = new double[12];
+            if (climateData != null)
+            {
+                monthlyIndoorTemps = ScheduleHelper.ComputeThetaIntCalcH(
+                    _objectData,
+                    _data,
+                    climateData,
+                    global::EE.Doklad.CalendarDefaults.ReferenceYear);
+
+                for (int month = 1; month <= 12; month++)
+                {
+                    seasonalHoursByMonth[month - 1] =
+                        Math.Max(0, ScheduleHelper.GetHeatingSeasonDaysInMonth(
+                            global::EE.Doklad.CalendarDefaults.ReferenceYear,
+                            month,
+                            climateData)) * 24;
+                }
+            }
+
+            if (_internalGainsService != null && heatedArea > 0)
+            {
+                _internalGainsService.UpdateArea(heatedArea);
+            }
+
             var internalGainsResult = _internalGainsService?.Recalculate(persist: false);
 
             double GetQint(int monthIndex)
             {
-                if (internalGainsResult == null || monthIndex < 0 || monthIndex >= internalGainsResult.HeatingTable.Length)
+                if (internalGainsResult != null &&
+                    monthIndex >= 0 &&
+                    monthIndex < internalGainsResult.HeatingTable.Length)
                 {
-                    return 0.0;
+                    return internalGainsResult.HeatingTable[monthIndex].Total;
                 }
 
-                return internalGainsResult.HeatingTable[monthIndex].Total;
+                if (_section23Data != null)
+                {
+                    var row = _section23Data.HeatingMonths
+                        .FirstOrDefault(m => m.Month == monthIndex + 1);
+                    if (row != null)
+                    {
+                        return row.Oc_kWh + row.A_kWh + row.L_kWh
+                             + row.WA_kWh + row.HVAC_kWh + row.Proc_kWh;
+                    }
+                }
+
+                return 0.0;
+            }
+
+            // DEBUG
+            var testQint = GetQint(0); // Януари = индекс 0
+            try
+            {
+                string debugPath = System.IO.Path.Combine(
+                    System.AppDomain.CurrentDomain.BaseDirectory,
+                    "heating_debug.txt");
+                string debugText =
+                    $"[{System.DateTime.Now:yyyy-MM-dd HH:mm:ss}] RecalculateHeating{System.Environment.NewLine}" +
+                    $"heatedArea = {heatedArea.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"hTrTotal = {hTrTotal.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"hVeTotal = {hVeTotal.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"cm = {cm.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"GetQint(Jan) = {testQint}{System.Environment.NewLine}" +
+                    $"internalGainsResult = {internalGainsResult}{System.Environment.NewLine}" +
+                    $"_section23Data = {_section23Data}{System.Environment.NewLine}" +
+                    $"_internalGainsService = {_internalGainsService}{System.Environment.NewLine}";
+
+                for (int monthIndex = 0; monthIndex < seasonalHoursByMonth.Length; monthIndex++)
+                {
+                    debugText +=
+                        $"dt[{monthIndex + 1}] = {seasonalHoursByMonth[monthIndex].ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}";
+                }
+
+                System.IO.File.AppendAllText(debugPath, debugText + System.Environment.NewLine);
+            }
+            catch
+            {
+                // Temporary debug logging must not break heating recalculation.
             }
 
             var (monthly, annual) = _calcService.Calculate(
@@ -1485,10 +1564,80 @@ namespace EE.Doklad.ViewModels
                 heatedArea,
                 _objectData.ClimateZone,
                 heatingMonths,
+                monthlyIndoorTemps,
+                seasonalHoursByMonth,
                 GetQint);
+
+            try
+            {
+                string debugPath = System.IO.Path.Combine(
+                    System.AppDomain.CurrentDomain.BaseDirectory,
+                    "heating_debug.txt");
+                string debugText =
+                    $"annual.Qht_total = {annual.Qht_total.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.Qint_total = {annual.Qint_total.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.Qsol_total = {annual.Qsol_total.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.Qgn_total = {annual.Qgn_total.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.QH_total_kWh = {annual.QH_total_kWh.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.QH_per_m2 = {annual.QH_per_m2.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.Tau = {annual.Tau.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}" +
+                    $"annual.AH = {annual.AH.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}";
+
+                foreach (var row in monthly.OrderBy(m => m.MonthIndex))
+                {
+                    debugText +=
+                        $"month={row.MonthName}; te={row.Te.ToString(CultureInfo.InvariantCulture)}; qht={row.Qht.ToString(CultureInfo.InvariantCulture)}; qint={row.Qint.ToString(CultureInfo.InvariantCulture)}; qsol={row.Qsol.ToString(CultureInfo.InvariantCulture)}; qgn={row.Qgn.ToString(CultureInfo.InvariantCulture)}; gamma={row.Gamma.ToString(CultureInfo.InvariantCulture)}; eta={row.Eta.ToString(CultureInfo.InvariantCulture)}; qh={row.QH.ToString(CultureInfo.InvariantCulture)}{System.Environment.NewLine}";
+                }
+
+                System.IO.File.AppendAllText(debugPath, debugText + System.Environment.NewLine);
+            }
+            catch
+            {
+                // Temporary debug logging must not break heating recalculation.
+            }
 
             _lastAnnual = annual;
             _lastMonthly = monthly;
+            RefreshPeopleGainDebugRows(internalGainsResult);
+        }
+
+        private void RefreshPeopleGainDebugRows(InternalGainsAggregatorResult? internalGainsResult)
+        {
+            HeatingPeopleGainDebugRows.Clear();
+
+            if (_lastAnnual == null || _lastMonthly.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var month in _lastMonthly.OrderBy(m => m.MonthIndex))
+            {
+                double peopleGainKwh = 0.0;
+
+                if (internalGainsResult != null &&
+                    month.MonthIndex >= 0 &&
+                    month.MonthIndex < internalGainsResult.HeatingTable.Length)
+                {
+                    peopleGainKwh = internalGainsResult.HeatingTable[month.MonthIndex].Oc;
+                }
+                else if (_section23Data != null)
+                {
+                    peopleGainKwh = _section23Data.HeatingMonths
+                        .FirstOrDefault(m => m.Month == month.MonthIndex + 1)
+                        ?.Oc_kWh ?? 0.0;
+                }
+
+                HeatingPeopleGainDebugRows.Add(new HeatingPeopleGainDebugRow
+                {
+                    MonthName = month.MonthName,
+                    PeopleGainKwhDisplay = peopleGainKwh.ToString("F2", CultureInfo.InvariantCulture),
+                    TotalInternalGainsKwhDisplay = month.Qint.ToString("F2", CultureInfo.InvariantCulture),
+                    TotalGainsKwhDisplay = month.Qgn.ToString("F2", CultureInfo.InvariantCulture),
+                    GammaDisplay = month.Gamma.ToString("F4", CultureInfo.InvariantCulture),
+                    TimeConstantHoursDisplay = _lastAnnual.Tau.ToString("F2", CultureInfo.InvariantCulture),
+                    UtilizationFactorDisplay = month.Eta.ToString("F4", CultureInfo.InvariantCulture)
+                });
+            }
         }
 
         private static List<int> GetHeatingMonthIndices(ObjectDataSectionData objectData)
@@ -1729,5 +1878,16 @@ namespace EE.Doklad.ViewModels
                 KwhDisplay = string.Empty
             };
         }
+    }
+
+    public class HeatingPeopleGainDebugRow
+    {
+        public string MonthName { get; set; } = string.Empty;
+        public string PeopleGainKwhDisplay { get; set; } = "0.00";
+        public string TotalInternalGainsKwhDisplay { get; set; } = "0.00";
+        public string TotalGainsKwhDisplay { get; set; } = "0.00";
+        public string GammaDisplay { get; set; } = "0.0000";
+        public string TimeConstantHoursDisplay { get; set; } = "0.00";
+        public string UtilizationFactorDisplay { get; set; } = "0.0000";
     }
 }
