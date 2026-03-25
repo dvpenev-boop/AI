@@ -363,8 +363,14 @@ namespace EE.Doklad.ViewModels
             int climateZoneId = _objectData?.ClimateZone ?? 3;
             var climateData = climateService.GetZone(climateZoneId);
 
+            var heatingBreakdown = climateData != null
+                ? HeatingScheduleService.ComputeBreakdown(
+                    _objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3,
+                    _objectData,
+                    climateData)
+                : Array.Empty<HeatingScheduleService.HeatingHoursBreakdown>();
             double[] thetaIntWinterCalc = climateData != null
-                ? ScheduleHelper.ComputeThetaIntCalcH(_objectData, _heatingData, climateData)
+                ? ScheduleHelper.ComputeThetaIntCalcH(_heatingData, heatingBreakdown)
                 : Enumerable.Repeat(20.0, 12).ToArray();
             double[] thetaIntCoolingCalc = ScheduleHelper.ComputeThetaIntCalcC(_objectData, _coolingData);
 
@@ -590,7 +596,11 @@ namespace EE.Doklad.ViewModels
                 return;
             }
 
-            double[] thetaIntWinterCalc = ScheduleHelper.ComputeThetaIntCalcH(_objectData, _heatingData, climateData);
+            var heatingBreakdown = HeatingScheduleService.ComputeBreakdown(
+                _objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3,
+                _objectData,
+                climateData);
+            double[] thetaIntWinterCalc = ScheduleHelper.ComputeThetaIntCalcH(_heatingData, heatingBreakdown);
             double[] thetaIntCoolingCalc = ScheduleHelper.ComputeThetaIntCalcC(_objectData, _coolingData);
 
             CalculationResults = _calculator.CalculateWithSeasonalTemps(

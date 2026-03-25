@@ -94,7 +94,8 @@ namespace EE.Doklad.Tests
             var climate = climateService.GetZone(3);
 
             // With no schedule defined, ComputeThetaIntCalcH should return design temp (fallback)
-            var theta = ScheduleHelper.ComputeThetaIntCalcH(obj, heating, climate!);
+            var breakdown = HeatingScheduleService.ComputeBreakdown(obj.CalculationMethod, obj, climate!);
+            var theta = ScheduleHelper.ComputeThetaIntCalcH(heating, breakdown);
             bool ok = Math.Abs(theta[0] - 21.0) < 1e-6;
 
             Console.WriteLine(ok ? "✓ OK" : "✗ FAIL");

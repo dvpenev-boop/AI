@@ -17,16 +17,34 @@ namespace EE.Doklad.Services
         /// </summary>
         public static double[] ComputeHeatingHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
-            return ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef)
+            return ComputeBreakdown(
+                    objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3,
+                    objectData,
+                    climateData)
                 .Select(x => x.FullHours)
                 .ToArray();
         }
 
         public static double[] ComputeHeatingSetbackHoursPerMonth(ObjectDataSectionData? objectData, ClimateZoneData? climateData, int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
         {
-            return ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef)
+            return ComputeBreakdown(
+                    objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3,
+                    objectData,
+                    climateData)
                 .Select(x => x.SetbackHours)
                 .ToArray();
+        }
+
+        public static HeatingHoursBreakdown[] ComputeBreakdown(
+            HeatingCalculationMethod method,
+            ObjectDataSectionData? objectData,
+            ClimateZoneData? climateData)
+        {
+            return method switch
+            {
+                HeatingCalculationMethod.AuerSoftware => ComputeHeatingHoursBreakdownPerMonth_Auer(objectData, climateData),
+                _ => ComputeHeatingHoursBreakdownPerMonth_RD(objectData, climateData)
+            };
         }
 
         /// <summary>
@@ -124,6 +142,186 @@ namespace EE.Doklad.Services
             return result;
         }
 
+        public static HeatingHoursBreakdown[] ComputeHeatingHoursBreakdownPerMonth_Auer(
+            ObjectDataSectionData? objectData,
+            ClimateZoneData? climateData)
+        {
+            const int referenceYear = 2006;
+            var result = new HeatingHoursBreakdown[12];
+            if (objectData == null || climateData == null)
+            {
+                return result;
+            }
+
+            var (workdayHours, saturdayHours, sundayHours) = ResolveHeatingHoursPerDayType(objectData);
+            if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
+            {
+                return result;
+            }
+
+            int[] monthlyDaysOff = ParseMonthlyDaysOff(objectData);
+            bool isFullTime247 = workdayHours >= 24.0 && saturdayHours >= 24.0 && sundayHours >= 24.0;
+
+            for (int month = 0; month < 12; month++)
+            {
+                int monthNumber = month + 1;
+                int daysInMonth = DateTime.DaysInMonth(referenceYear, monthNumber);
+                var (startDay, endDay) = GetHeatingSeasonDayRange(referenceYear, monthNumber, climateData);
+                if (endDay < startDay)
+                {
+                    result[month] = new HeatingHoursBreakdown(0.0, 0.0);
+                    continue;
+                }
+
+                int seasonDays = endDay - startDay + 1;
+                if (seasonDays <= 0)
+                {
+                    result[month] = new HeatingHoursBreakdown(0.0, 0.0);
+                    continue;
+                }
+
+                if (isFullTime247)
+                {
+                    result[month] = new HeatingHoursBreakdown(seasonDays * 24.0, 0.0);
+                    continue;
+                }
+
+                int workDays;
+                int saturdays;
+                int sundays;
+
+                if (startDay == 1 && endDay == daysInMonth)
+                {
+                    (workDays, saturdays, sundays) = CountDayTypesInRange(referenceYear, monthNumber, startDay, endDay);
+                }
+                else if (startDay > 1 && endDay == daysInMonth)
+                {
+                    int remaining = daysInMonth - startDay + 1;
+                    if (startDay > 21)
+                    {
+                        workDays = 0;
+                        saturdays = 0;
+                        sundays = 0;
+                    }
+                    else if (startDay > 14)
+                    {
+                        saturdays = 1;
+                        sundays = 1;
+                        workDays = remaining - 2;
+                    }
+                    else if (startDay > 7)
+                    {
+                        saturdays = 2;
+                        sundays = 2;
+                        workDays = remaining - 4;
+                    }
+                    else
+                    {
+                        (workDays, saturdays, sundays) = CountDayTypesInRange(referenceYear, monthNumber, startDay, endDay);
+                    }
+                }
+                else if (startDay == 1 && endDay < daysInMonth)
+                {
+                    int remaining = endDay;
+                    if (endDay < 7)
+                    {
+                        workDays = 0;
+                        saturdays = 0;
+                        sundays = 0;
+                    }
+                    else if (endDay < 14)
+                    {
+                        saturdays = 1;
+                        sundays = 1;
+                        workDays = remaining - 2;
+                    }
+                    else if (endDay < 21)
+                    {
+                        saturdays = 2;
+                        sundays = 2;
+                        workDays = remaining - 4;
+                    }
+                    else
+                    {
+                        (workDays, saturdays, sundays) = CountDayTypesInRange(referenceYear, monthNumber, startDay, endDay);
+                    }
+                }
+                else
+                {
+                    (workDays, saturdays, sundays) = CountDayTypesInRange(referenceYear, monthNumber, startDay, endDay);
+                }
+
+                workDays = Math.Max(0, workDays);
+                result[month] = BuildBreakdown(
+                    workDays,
+                    saturdays,
+                    sundays,
+                    monthlyDaysOff[month],
+                    workdayHours,
+                    saturdayHours,
+                    sundayHours);
+            }
+
+            return result;
+        }
+
+        public static HeatingHoursBreakdown[] ComputeHeatingHoursBreakdownPerMonth_RD(
+            ObjectDataSectionData? objectData,
+            ClimateZoneData? climateData)
+        {
+            const int referenceYear = global::EE.Doklad.CalendarDefaults.ReferenceYear;
+            var result = new HeatingHoursBreakdown[12];
+            if (objectData == null || climateData == null)
+            {
+                return result;
+            }
+
+            var (workdayHours, saturdayHours, sundayHours) = ResolveHeatingHoursPerDayType(objectData);
+            if (workdayHours <= 0 && saturdayHours <= 0 && sundayHours <= 0)
+            {
+                return result;
+            }
+
+            int[] monthlyDaysOff = ParseMonthlyDaysOff(objectData);
+            bool isFullTime247 = workdayHours >= 24.0 && saturdayHours >= 24.0 && sundayHours >= 24.0;
+
+            for (int month = 0; month < 12; month++)
+            {
+                int monthNumber = month + 1;
+                var (startDay, endDay) = GetHeatingSeasonDayRange(referenceYear, monthNumber, climateData);
+                if (endDay < startDay)
+                {
+                    result[month] = new HeatingHoursBreakdown(0.0, 0.0);
+                    continue;
+                }
+
+                int seasonDays = endDay - startDay + 1;
+                if (seasonDays <= 0)
+                {
+                    result[month] = new HeatingHoursBreakdown(0.0, 0.0);
+                    continue;
+                }
+
+                if (isFullTime247)
+                {
+                    result[month] = new HeatingHoursBreakdown(seasonDays * 24.0, 0.0);
+                    continue;
+                }
+
+                var (workDays, saturdays, sundays) = CountDayTypesInRange(referenceYear, monthNumber, startDay, endDay);
+                result[month] = BuildBreakdown(
+                    workDays,
+                    saturdays,
+                    sundays,
+                    monthlyDaysOff[month],
+                    workdayHours,
+                    saturdayHours,
+                    sundayHours);
+            }
+
+            return result;
+        }
+
         private static double ParseDoubleOrZero(string? s)
         {
             if (string.IsNullOrWhiteSpace(s)) return 0.0;
@@ -213,12 +411,12 @@ namespace EE.Doklad.Services
 
             if (startM == endM && !wrapsYear)
             {
-                return (Math.Min(daysInMonth + 1, startD + 1), Math.Min(endD, daysInMonth));
+                return (Math.Min(startD, daysInMonth), Math.Min(endD, daysInMonth));
             }
 
             if (monthNumber == startM)
             {
-                return (Math.Min(daysInMonth + 1, startD + 1), daysInMonth);
+                return (Math.Min(startD, daysInMonth), daysInMonth);
             }
 
             if (monthNumber == endM)
@@ -227,6 +425,61 @@ namespace EE.Doklad.Services
             }
 
             return (1, daysInMonth);
+        }
+
+        private static (int WorkDays, int Saturdays, int Sundays) CountDayTypesInRange(
+            int year,
+            int month,
+            int startDay,
+            int endDay)
+        {
+            int workDays = 0;
+            int saturdays = 0;
+            int sundays = 0;
+
+            for (int day = startDay; day <= endDay; day++)
+            {
+                switch (new DateTime(year, month, day).DayOfWeek)
+                {
+                    case DayOfWeek.Saturday:
+                        saturdays++;
+                        break;
+                    case DayOfWeek.Sunday:
+                        sundays++;
+                        break;
+                    default:
+                        workDays++;
+                        break;
+                }
+            }
+
+            return (workDays, saturdays, sundays);
+        }
+
+        private static HeatingHoursBreakdown BuildBreakdown(
+            int workDays,
+            int saturdays,
+            int sundays,
+            int monthlyDaysOff,
+            double workdayHours,
+            double saturdayHours,
+            double sundayHours)
+        {
+            int holidayDays = Math.Min(Math.Max(0, monthlyDaysOff), Math.Max(0, workDays));
+            workDays = Math.Max(0, workDays - holidayDays);
+
+            double fullHours =
+                workDays * workdayHours +
+                saturdays * saturdayHours +
+                sundays * sundayHours;
+
+            double setbackHours =
+                workDays * Math.Max(0.0, 24.0 - workdayHours) +
+                saturdays * Math.Max(0.0, 24.0 - saturdayHours) +
+                sundays * Math.Max(0.0, 24.0 - sundayHours) +
+                holidayDays * 24.0;
+
+            return new HeatingHoursBreakdown(fullHours, setbackHours);
         }
 
         private static bool IsDateInRange(DateTime dt, DateTime start, DateTime end)

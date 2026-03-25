@@ -1006,6 +1006,9 @@ namespace EE.Doklad.Models
             }
         }
 
+        [ObservableProperty]
+        private HeatingCalculationMethod _calculationMethod = HeatingCalculationMethod.Rd0220_3;
+
         public string HeatingSeasonInfo => HeatingSeasonEnabled ? ClimateZone switch
         {
             1 => "Начало: 21 октомври; Край: 20 април",
@@ -1063,6 +1066,49 @@ namespace EE.Doklad.Models
                 // wrap around year
                 return (365 - start + 1) + end;
             }
+        }
+
+        public bool IsCalculationMethodAuer
+        {
+            get => CalculationMethod == HeatingCalculationMethod.AuerSoftware;
+            set
+            {
+                if (value)
+                {
+                    CalculationMethod = HeatingCalculationMethod.AuerSoftware;
+                }
+            }
+        }
+
+        public bool IsCalculationMethodRd
+        {
+            get => CalculationMethod == HeatingCalculationMethod.Rd0220_3;
+            set
+            {
+                if (value)
+                {
+                    CalculationMethod = HeatingCalculationMethod.Rd0220_3;
+                }
+            }
+        }
+
+        public bool IsCalculationMethodAshrae
+        {
+            get => CalculationMethod == HeatingCalculationMethod.Ashrae8760;
+            set
+            {
+                if (value)
+                {
+                    CalculationMethod = HeatingCalculationMethod.Ashrae8760;
+                }
+            }
+        }
+
+        partial void OnCalculationMethodChanged(HeatingCalculationMethod value)
+        {
+            OnPropertyChanged(nameof(IsCalculationMethodAuer));
+            OnPropertyChanged(nameof(IsCalculationMethodRd));
+            OnPropertyChanged(nameof(IsCalculationMethodAshrae));
         }
 
         private static int DayOfYear(int month, int day)

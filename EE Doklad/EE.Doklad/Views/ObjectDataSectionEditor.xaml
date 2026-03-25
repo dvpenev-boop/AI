@@ -187,7 +187,37 @@
                         </Grid>
                     </Border>
 
-                    <!-- Row 7: Отоплителен сезон (visual layout matched to cooling season) -->
+                    <!-- Row 7: Метод за изчисление на отоплението -->
+                    <Border BorderBrush="#888" BorderThickness="0,0,0,1">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Метод за изчисление на отоплението"
+                                       Padding="12,10"
+                                       VerticalAlignment="Stretch"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Background="#F0F0F0"/>
+                            <StackPanel Grid.Column="1" Margin="12,8">
+                                <RadioButton GroupName="HeatingCalculationMethod"
+                                             Content="Метод 1 — Ауер (EECalc съвместим)"
+                                             IsChecked="{Binding IsCalculationMethodAuer, Mode=TwoWay}"
+                                             Margin="0,0,0,6"/>
+                                <RadioButton GroupName="HeatingCalculationMethod"
+                                             Content="Метод 2 — РД-02-20-3 / БДС EN ISO 52016-1"
+                                             IsChecked="{Binding IsCalculationMethodRd, Mode=TwoWay}"
+                                             Margin="0,0,0,6"/>
+                                <RadioButton GroupName="HeatingCalculationMethod"
+                                             Content="Метод 3 — ASHRAE 8760 (в разработка)"
+                                             IsChecked="{Binding IsCalculationMethodAshrae, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 8: Отоплителен сезон (visual layout matched to cooling season) -->
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
@@ -218,7 +248,7 @@
                             </Border>
                         </Grid>
                     </Border>
-                    <!-- Row 8: Охладителен сезон (start/end) -->
+                    <!-- Row 9: Охладителен сезон (start/end) -->
                     <Border BorderBrush="#888" BorderThickness="0,0,0,1" Height="37">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>

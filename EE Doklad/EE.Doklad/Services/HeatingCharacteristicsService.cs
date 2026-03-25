@@ -24,7 +24,7 @@ namespace EE.Doklad.Services
         public double HeatingOperatingHours_h { get; init; }
         public double HeatingSeasonHours_h { get; init; }
         public double[] MonthlyOutdoorTemps_C { get; init; } = new double[12];
-        public double[] MonthlyOperatingHours_h { get; init; } = new double[12];
+        public double[] MonthlyFullHours_h { get; init; } = new double[12];
         public double[] MonthlySetbackHours_h { get; init; } = new double[12];
         public double SetbackIndoorTemp_C { get; init; }
     }
@@ -44,15 +44,24 @@ namespace EE.Doklad.Services
         public static HeatingCharacteristicsSnapshot Build(
             Report? report,
             ObjectDataSectionData? objectData,
-            HeatingSectionData? heatingData)
+            HeatingSectionData? heatingData,
+            ClimateZoneData? climateData,
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown>? breakdown)
         {
-            var climateData = GetClimateData(objectData);
-            var monthlyOperatingHours = HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climateData);
-            var monthlySetbackHours = HeatingScheduleService.ComputeHeatingSetbackHoursPerMonth(objectData, climateData);
-            var heatingOperatingHours = monthlyOperatingHours.Sum();
-            var heatingSeasonHoursByMonth = ComputeHeatingSeasonHoursPerMonth(objectData, climateData);
+            var monthlyFullHours = (breakdown ?? Array.Empty<HeatingScheduleService.HeatingHoursBreakdown>())
+                .Select(x => x.FullHours)
+                .Concat(Enumerable.Repeat(0.0, 12))
+                .Take(12)
+                .ToArray();
+            var monthlySetbackHours = (breakdown ?? Array.Empty<HeatingScheduleService.HeatingHoursBreakdown>())
+                .Select(x => x.SetbackHours)
+                .Concat(Enumerable.Repeat(0.0, 12))
+                .Take(12)
+                .ToArray();
+            var heatingOperatingHours = monthlyFullHours.Sum();
+            var heatingSeasonHoursByMonth = ComputeHeatingSeasonHoursPerMonth(breakdown);
             var heatingSeasonHours = heatingSeasonHoursByMonth.Sum();
-            var effectiveIndoorTemp = ComputeAnnualEffectiveIndoorTemperature(objectData, heatingData, climateData, heatingSeasonHoursByMonth);
+            var effectiveIndoorTemp = ComputeAnnualEffectiveIndoorTemperature(heatingData, breakdown, heatingSeasonHoursByMonth);
             var wallsMetric = BuildWallsMetric(report?.Sections?.FirstOrDefault(s => s.Type == SectionType.ExternalWalls)?.ExternalWallsSectionData);
             var roofMetric = BuildRoofMetric(report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Roof)?.RoofSectionData);
             var windowsMetric = BuildWindowsMetric(report?.Sections?.FirstOrDefault(s => s.Type == SectionType.Windows)?.WindowsSectionData);
@@ -72,7 +81,7 @@ namespace EE.Doklad.Services
                     objectData,
                     heatingData,
                     report?.Sections?.FirstOrDefault(s => s.CoolingSectionData != null)?.CoolingSectionData,
-                    climateData),
+                    breakdown),
                 InfiltrationRate_AirChangesPerHour = heatingData?.Infiltration ?? 0.0,
                 BuildingVolume_m3 = ParseDoubleOrZero(objectData?.GrossHeatedVolume) > 0
                     ? ParseDoubleOrZero(objectData?.GrossHeatedVolume)
@@ -88,20 +97,9 @@ namespace EE.Doklad.Services
                 MonthlyOutdoorTemps_C = climateData?.Monthly?.AvgMonthlyTempC?.Length == 12
                     ? climateData.Monthly.AvgMonthlyTempC.ToArray()
                     : new double[12],
-                MonthlyOperatingHours_h = monthlyOperatingHours,
+                MonthlyFullHours_h = monthlyFullHours,
                 MonthlySetbackHours_h = monthlySetbackHours
             };
-        }
-
-        private static ClimateZoneData? GetClimateData(ObjectDataSectionData? objectData)
-        {
-            if (objectData == null)
-            {
-                return null;
-            }
-
-            var climateService = new ClimateService(new JsonClimateRepository());
-            return climateService.GetZone(objectData.ClimateZone);
         }
 
         private static EnvelopeMetric BuildWallsMetric(ExternalWallsSectionData? data)
@@ -210,16 +208,14 @@ namespace EE.Doklad.Services
             ObjectDataSectionData? objectData,
             HeatingSectionData? heatingData,
             CoolingSectionData? coolingData,
-            ClimateZoneData? climateData)
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown>? breakdown)
         {
             if (data == null)
             {
                 return 0.0;
             }
 
-            double[] thetaIntWinterCalc = climateData != null
-                ? ScheduleHelper.ComputeThetaIntCalcH(objectData, heatingData, climateData)
-                : Enumerable.Repeat(20.0, 12).ToArray();
+            double[] thetaIntWinterCalc = ScheduleHelper.ComputeThetaIntCalcH(heatingData, breakdown);
             double[] thetaIntCoolingCalc = ScheduleHelper.ComputeThetaIntCalcC(objectData, coolingData);
 
             double sumHel = 0.0;
@@ -244,42 +240,22 @@ namespace EE.Doklad.Services
         }
 
         private static double[] ComputeHeatingSeasonHoursPerMonth(
-            ObjectDataSectionData? objectData,
-            ClimateZoneData? climateData,
-            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown>? breakdown)
         {
-            var result = new double[12];
-            int[] monthlyDaysOff = ParseMonthlyDaysOff(objectData);
-
-            for (int month = 0; month < 12; month++)
-            {
-                int daysInHeatingSeason = ScheduleHelper.GetHeatingSeasonDaysInMonth(yearRef, month + 1, climateData);
-                int holidays = Math.Max(0, monthlyDaysOff[month]);
-                if (holidays > 0 && daysInHeatingSeason > 0)
-                {
-                    daysInHeatingSeason = Math.Max(0, daysInHeatingSeason - Math.Min(holidays, daysInHeatingSeason));
-                }
-
-                result[month] = daysInHeatingSeason * 24.0;
-            }
-
-            return result;
+            return (breakdown ?? Array.Empty<HeatingScheduleService.HeatingHoursBreakdown>())
+                .Select(x => x.FullHours + x.SetbackHours)
+                .Concat(Enumerable.Repeat(0.0, 12))
+                .Take(12)
+                .ToArray();
         }
 
         private static double ComputeAnnualEffectiveIndoorTemperature(
-            ObjectDataSectionData? objectData,
             HeatingSectionData? heatingData,
-            ClimateZoneData? climateData,
-            double[] heatingSeasonHoursByMonth,
-            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown>? breakdown,
+            double[] heatingSeasonHoursByMonth)
         {
             double designTemp = heatingData?.DesignTemperature ?? 20.0;
-            if (climateData == null)
-            {
-                return designTemp;
-            }
-
-            var monthlyEffectiveTemps = ScheduleHelper.ComputeThetaIntCalcH(objectData, heatingData, climateData, yearRef);
+            var monthlyEffectiveTemps = ScheduleHelper.ComputeThetaIntCalcH(heatingData, breakdown);
             double totalSeasonHours = heatingSeasonHoursByMonth.Sum();
             if (totalSeasonHours <= 0.0)
             {
@@ -293,37 +269,6 @@ namespace EE.Doklad.Services
             }
 
             return weightedTheta / totalSeasonHours;
-        }
-
-        private static int[] ParseMonthlyDaysOff(ObjectDataSectionData? objectData)
-        {
-            return new[]
-            {
-                ParseIntOrZero(objectData?.DaysOffJanuary),
-                ParseIntOrZero(objectData?.DaysOffFebruary),
-                ParseIntOrZero(objectData?.DaysOffMarch),
-                ParseIntOrZero(objectData?.DaysOffApril),
-                ParseIntOrZero(objectData?.DaysOffMay),
-                ParseIntOrZero(objectData?.DaysOffJune),
-                ParseIntOrZero(objectData?.DaysOffJuly),
-                ParseIntOrZero(objectData?.DaysOffAugust),
-                ParseIntOrZero(objectData?.DaysOffSeptember),
-                ParseIntOrZero(objectData?.DaysOffOctober),
-                ParseIntOrZero(objectData?.DaysOffNovember),
-                ParseIntOrZero(objectData?.DaysOffDecember)
-            };
-        }
-
-        private static int ParseIntOrZero(string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return 0;
-            }
-
-            return int.TryParse(value.Trim(), out int result)
-                ? Math.Max(0, result)
-                : 0;
         }
 
         private static double ParseDoubleOrZero(string? value)

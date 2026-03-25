@@ -252,7 +252,11 @@ namespace EE.Doklad.Services
             var coolingHours = EE.Doklad.Services.HeatingScheduleService.ComputeCoolingHoursPerMonth(objectData, yearRef);
 
             // Compute thetaIntCalcHeating (effective indoor temperature for heating) from heating module/object data
-            var thetaIntCalcHeating = ScheduleHelper.ComputeThetaIntCalcH(objectData, heatingData, climateData, yearRef);
+            var heatingBreakdown = EE.Doklad.Services.HeatingScheduleService.ComputeBreakdown(
+                objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3,
+                objectData,
+                climateData);
+            var thetaIntCalcHeating = ScheduleHelper.ComputeThetaIntCalcH(heatingData, heatingBreakdown);
             var thetaIntCalcCooling = ScheduleHelper.ComputeThetaIntCalcC(objectData, coolingData, yearRef);
 
             for (int m = 0; m < 12; m++)

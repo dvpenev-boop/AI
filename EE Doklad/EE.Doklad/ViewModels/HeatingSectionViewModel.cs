@@ -69,43 +69,16 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        public bool IsMethodAuer
-        {
-            get => _data.CalculationMethod == HeatingCalculationMethod.AuerSoftware;
-            set
-            {
-                if (value)
-                {
-                    SetMethod(HeatingCalculationMethod.AuerSoftware);
-                }
-            }
-        }
+        private HeatingCalculationMethod SelectedCalculationMethod =>
+            _objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3;
 
-        public bool IsMethodRd
-        {
-            get => _data.CalculationMethod == HeatingCalculationMethod.Rd0220_3;
-            set
-            {
-                if (value)
-                {
-                    SetMethod(HeatingCalculationMethod.Rd0220_3);
-                }
-            }
-        }
+        public bool IsMethodAuer => SelectedCalculationMethod == HeatingCalculationMethod.AuerSoftware;
 
-        public bool IsMethodAshrae
-        {
-            get => _data.CalculationMethod == HeatingCalculationMethod.Ashrae8760;
-            set
-            {
-                if (value)
-                {
-                    SetMethod(HeatingCalculationMethod.Ashrae8760);
-                }
-            }
-        }
+        public bool IsMethodRd => SelectedCalculationMethod == HeatingCalculationMethod.Rd0220_3;
 
-        public string MethodStatusText => _data.CalculationMethod switch
+        public bool IsMethodAshrae => SelectedCalculationMethod == HeatingCalculationMethod.Ashrae8760;
+
+        public string MethodStatusText => SelectedCalculationMethod switch
         {
             HeatingCalculationMethod.AuerSoftware =>
                 "\u041C\u0435\u0442\u043E\u0434 1: \u0410\u0423\u0415\u0420 - \u0441\u0440\u0430\u0432\u043D\u0438\u0442\u0435\u043B\u0435\u043D \u0440\u0435\u0436\u0438\u043C \u0441\u043F\u0440\u044F\u043C\u043E \u0440\u0435\u0444\u0435\u0440\u0435\u043D\u0442\u043D\u0438\u044F \u0441\u043E\u0444\u0442\u0443\u0435\u0440.",
@@ -116,7 +89,7 @@ namespace EE.Doklad.ViewModels
             _ => string.Empty
         };
 
-        public Brush MethodStatusBrush => _data.CalculationMethod == HeatingCalculationMethod.Ashrae8760
+        public Brush MethodStatusBrush => SelectedCalculationMethod == HeatingCalculationMethod.Ashrae8760
             ? Brushes.DarkOrange
             : Brushes.DarkGreen;
 
@@ -578,7 +551,7 @@ namespace EE.Doklad.ViewModels
             : 0.0;
         public double SolarGain_total_kWh => _lastAnnual?.Qsol_total ?? 0.0;
         public double QH_per_m2 => _lastAnnual?.QH_per_m2 ?? 0.0;
-        public bool IsAshraePlaceholder => _data.CalculationMethod == HeatingCalculationMethod.Ashrae8760;
+        public bool IsAshraePlaceholder => SelectedCalculationMethod == HeatingCalculationMethod.Ashrae8760;
         public double NetHeatingEnergyAfterGains =>
             _lastAnnual?.IsValid == true
                 ? Math.Max(0.0, QH_per_m2 - VentilationGainPerArea)
@@ -872,28 +845,21 @@ namespace EE.Doklad.ViewModels
                 OnPropertyChanged(nameof(IsHeatingSeasonEnabled));
                 OnPropertyChanged(nameof(HeatingSeasonWarning));
             }
+            else if (e.PropertyName == nameof(ObjectDataSectionData.CalculationMethod))
+            {
+                OnPropertyChanged(nameof(IsMethodAuer));
+                OnPropertyChanged(nameof(IsMethodRd));
+                OnPropertyChanged(nameof(IsMethodAshrae));
+                OnPropertyChanged(nameof(MethodStatusText));
+                OnPropertyChanged(nameof(MethodStatusBrush));
+                OnPropertyChanged(nameof(IsAshraePlaceholder));
+            }
 
             RefreshThermalCharacteristics();
         }
 
         private void VentilationHeatingData_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            RefreshThermalCharacteristics();
-        }
-
-        private void SetMethod(HeatingCalculationMethod method)
-        {
-            if (_data.CalculationMethod == method)
-            {
-                return;
-            }
-
-            _data.CalculationMethod = method;
-            OnPropertyChanged(nameof(IsMethodAuer));
-            OnPropertyChanged(nameof(IsMethodRd));
-            OnPropertyChanged(nameof(IsMethodAshrae));
-            OnPropertyChanged(nameof(MethodStatusText));
-            OnPropertyChanged(nameof(MethodStatusBrush));
             RefreshThermalCharacteristics();
         }
 
@@ -1373,7 +1339,14 @@ namespace EE.Doklad.ViewModels
 
         private void RefreshThermalCharacteristics()
         {
-            var snapshot = HeatingCharacteristicsService.Build(_report, _objectData, _data);
+            var climateData = _objectData != null
+                ? new ClimateService(new JsonClimateRepository()).GetZone(_objectData.ClimateZone)
+                : null;
+            var breakdown = HeatingScheduleService.ComputeBreakdown(
+                _objectData?.CalculationMethod ?? HeatingCalculationMethod.Rd0220_3,
+                _objectData,
+                climateData);
+            var snapshot = HeatingCharacteristicsService.Build(_report, _objectData, _data, climateData, breakdown);
             VentilationGainPerArea = CalculateVentilationHeatingContributionPerArea();
             RefreshSectionGainContributions();
 
@@ -1381,11 +1354,11 @@ namespace EE.Doklad.ViewModels
             double hInf = 0.34 * snapshot.InfiltrationRate_AirChangesPerHour * snapshot.BuildingVolume_m3;
             double hVeTotal = hInf;
             double hTotal = hTrTotal + hVeTotal;
-            double annualEquivalentHours = CalculateAnnualEquivalentHours(snapshot);
+            double annualEquivalentHours = CalculateAnnualEquivalentHours(snapshot, breakdown);
             double deltaT = 1.0;
             double energyHours = annualEquivalentHours;
             _heatingInstallationHours = snapshot.HeatingOperatingHours_h;
-            RecalculateHeating(snapshot, hTrTotal, hVeTotal);
+            RecalculateHeating(snapshot, breakdown, hTrTotal, hVeTotal);
             NetHeatingEnergyNoGainsPerArea = _lastAnnual?.IsValid == true
                 ? (_lastAnnual.Qht_total / Math.Max(snapshot.HeatedArea_m2, 1e-9))
                 : snapshot.HeatedArea_m2 > 0.0
@@ -1441,7 +1414,11 @@ namespace EE.Doklad.ViewModels
             AppliancesGainPerArea = appliancesGainKwh / area;
         }
 
-        private void RecalculateHeating(HeatingCharacteristicsSnapshot snapshot, double hTrTotal, double hVeTotal)
+        private void RecalculateHeating(
+            HeatingCharacteristicsSnapshot snapshot,
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown> breakdown,
+            double hTrTotal,
+            double hVeTotal)
         {
             if (_objectData == null)
             {
@@ -1469,27 +1446,13 @@ namespace EE.Doklad.ViewModels
 
             double cm = Math.Max(0.0, _objectData.SpecificHeatCapacityWhPerM2K) * snapshot.HeatedArea_m2;
             double heatedArea = snapshot.HeatedArea_m2;
-            var heatingMonths = GetHeatingMonthIndices(_objectData);
-            var climateData = new ClimateService(new JsonClimateRepository()).GetZone(_objectData.ClimateZone);
-            var seasonalHoursByMonth = new int[12];
-            var monthlyIndoorTemps = new double[12];
-            if (climateData != null)
-            {
-                monthlyIndoorTemps = ScheduleHelper.ComputeThetaIntCalcH(
-                    _objectData,
-                    _data,
-                    climateData,
-                    global::EE.Doklad.CalendarDefaults.ReferenceYear);
-
-                for (int month = 1; month <= 12; month++)
-                {
-                    seasonalHoursByMonth[month - 1] =
-                        Math.Max(0, ScheduleHelper.GetHeatingSeasonDaysInMonth(
-                            global::EE.Doklad.CalendarDefaults.ReferenceYear,
-                            month,
-                            climateData)) * 24;
-                }
-            }
+            var heatingMonths = GetHeatingMonthIndices(breakdown);
+            double[] fullHoursByMonth = breakdown.Select(x => x.FullHours).ToArray();
+            double[] setbackHoursByMonth = breakdown.Select(x => x.SetbackHours).ToArray();
+            int[] seasonalHoursByMonth = breakdown
+                .Select(x => (int)Math.Round(x.FullHours + x.SetbackHours))
+                .ToArray();
+            double[] monthlyIndoorTemps = ScheduleHelper.ComputeThetaIntCalcH(_data, breakdown);
 
             if (_internalGainsService != null && heatedArea > 0)
             {
@@ -1553,7 +1516,7 @@ namespace EE.Doklad.ViewModels
             }
 
             var (monthly, annual) = _calcService.Calculate(
-                _data.CalculationMethod,
+                SelectedCalculationMethod,
                 BuildingElementExtractor.ExtractWalls(_wallsData),
                 BuildingElementExtractor.ExtractWindows(_windowsData),
                 BuildingElementExtractor.ExtractRoofs(_roofData),
@@ -1640,15 +1603,14 @@ namespace EE.Doklad.ViewModels
             }
         }
 
-        private static List<int> GetHeatingMonthIndices(ObjectDataSectionData objectData)
+        private static List<int> GetHeatingMonthIndices(IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown> breakdown)
         {
-            var climateData = new ClimateService(new JsonClimateRepository()).GetZone(objectData.ClimateZone);
             var months = new List<int>();
-            for (int month = 1; month <= 12; month++)
+            for (int month = 0; month < breakdown.Count; month++)
             {
-                if (ScheduleHelper.GetHeatingSeasonDaysInMonth(global::EE.Doklad.CalendarDefaults.ReferenceYear, month, climateData) > 0)
+                if (breakdown[month].FullHours > 0.0 || breakdown[month].SetbackHours > 0.0)
                 {
-                    months.Add(month - 1);
+                    months.Add(month);
                 }
             }
 
@@ -1733,14 +1695,15 @@ namespace EE.Doklad.ViewModels
             };
         }
 
-        private static double CalculateAnnualEquivalentHours(HeatingCharacteristicsSnapshot snapshot)
+        private static double CalculateAnnualEquivalentHours(
+            HeatingCharacteristicsSnapshot snapshot,
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown> breakdown)
         {
             double annualEquivalentHours = 0.0;
             int monthCount = new[]
             {
                 snapshot.MonthlyOutdoorTemps_C.Length,
-                snapshot.MonthlyOperatingHours_h.Length,
-                snapshot.MonthlySetbackHours_h.Length
+                breakdown.Count
             }.Min();
 
             for (int month = 0; month < monthCount; month++)
@@ -1748,8 +1711,8 @@ namespace EE.Doklad.ViewModels
                 double te = snapshot.MonthlyOutdoorTemps_C[month];
                 double fullDelta = Math.Max(0.0, snapshot.DesignIndoorTemp_C - te);
                 double setbackDelta = Math.Max(0.0, snapshot.SetbackIndoorTemp_C - te);
-                double fullHours = Math.Max(0.0, snapshot.MonthlyOperatingHours_h[month]);
-                double setbackHours = Math.Max(0.0, snapshot.MonthlySetbackHours_h[month]);
+                double fullHours = Math.Max(0.0, breakdown[month].FullHours);
+                double setbackHours = Math.Max(0.0, breakdown[month].SetbackHours);
 
                 annualEquivalentHours += fullDelta * fullHours + setbackDelta * setbackHours;
             }

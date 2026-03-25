@@ -20,9 +20,6 @@ namespace EE.Doklad.Models
         [ObservableProperty]
         private string? _description;
 
-        public HeatingCalculationMethod CalculationMethod { get; set; }
-            = HeatingCalculationMethod.AuerSoftware;
-
         // ========== ����� ������� ==========
 
         /// <summary>

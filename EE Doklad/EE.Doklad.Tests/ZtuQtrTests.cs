@@ -49,8 +49,8 @@ namespace EE.Doklad.Tests
         [Fact]
         public void HeatingHours_Holiday_Reduction_Test()
         {
-            // Schedule: workday 8h, no weekend hours -> hoursPerWeek=40 => per day=40/7
-            // July days 31, holidays=10 -> active days=21
+            // Schedule: workday 8h, no weekend hours.
+            // For the default RD method holidays reduce only workdays.
             var objectData = new ObjectDataSectionData
             {
                 HeatingWorkdaysHours = "8",
@@ -64,29 +64,26 @@ namespace EE.Doklad.Tests
             climate.HeatingSeason = new HeatingSeasonInfo { Start = "1-1", End = "12-31" };
 
             var hours = HeatingScheduleService.ComputeHeatingHoursPerMonth(objectData, climate, global::EE.Doklad.CalendarDefaults.ReferenceYear);
-            // Compute expected using calendar counts (consistent with implementation)
             int month = 7; // July
             int year = global::EE.Doklad.CalendarDefaults.ReferenceYear;
-            int workdayCount = 0, satCount = 0, sunCount = 0, heatingSeasonDays = 0;
+            int workdayCount = 0;
             for (int d = 1; d <= DateTime.DaysInMonth(year, month); d++)
             {
                 var dt = new DateTime(year, month, d);
-                // heating season set to full year in this test
-                heatingSeasonDays++;
                 switch (dt.DayOfWeek)
                 {
-                    case DayOfWeek.Saturday: satCount++; break;
-                    case DayOfWeek.Sunday: sunCount++; break;
-                    default: workdayCount++; break;
+                    case DayOfWeek.Saturday:
+                    case DayOfWeek.Sunday:
+                        break;
+                    default:
+                        workdayCount++;
+                        break;
                 }
             }
 
-            double baseHours = workdayCount * 8.0 + satCount * 0.0 + sunCount * 0.0;
-            double avgDaily = baseHours / (double)heatingSeasonDays;
-            double reduction = Math.Min(baseHours, 10 * avgDaily);
-            double expected = baseHours - reduction;
+            double expected = Math.Max(0, workdayCount - 10) * 8.0;
 
-            Assert.InRange(hours[6], expected - 0.5, expected + 0.5);
+            Assert.InRange(hours[6], expected - 0.1, expected + 0.1);
         }
 
         [Fact]

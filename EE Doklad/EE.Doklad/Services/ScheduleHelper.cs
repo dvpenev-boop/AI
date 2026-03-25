@@ -180,34 +180,24 @@ namespace EE.Doklad.Services
         /// Holidays (monthlyDaysOff) reduce heating-season days similarly to other modules.
         /// </summary>
         public static double[] ComputeThetaIntCalcH(
-            ObjectDataSectionData? objectData,
             HeatingSectionData? heatingData,
-            ClimateZoneData? climateData,
-            int yearRef = global::EE.Doklad.CalendarDefaults.ReferenceYear)
+            IReadOnlyList<HeatingScheduleService.HeatingHoursBreakdown>? monthlyBreakdown)
         {
             var result = new double[12];
-
-            // Fallbacks
             double fallbackDesign = heatingData != null ? heatingData.DesignTemperature : 20.0;
-
-            var monthlyBreakdown = HeatingScheduleService.ComputeHeatingHoursBreakdownPerMonth(objectData, climateData, yearRef);
-            bool hasSchedule = monthlyBreakdown.Any(x => x.FullHours > 0.0 || x.SetbackHours > 0.0);
+            bool hasSchedule = monthlyBreakdown != null &&
+                               monthlyBreakdown.Any(x => x.FullHours > 0.0 || x.SetbackHours > 0.0);
 
             for (int m = 0; m < 12; m++)
             {
-                int daysInHeatingSeason = GetHeatingSeasonDaysInMonth(yearRef, m + 1, climateData);
-
-                if (!hasSchedule || daysInHeatingSeason == 0)
+                if (!hasSchedule || monthlyBreakdown == null || m >= monthlyBreakdown.Count)
                 {
-                    // insufficient data -> fallback to design temperature
                     result[m] = fallbackDesign;
                     continue;
                 }
 
                 double heatedHours = monthlyBreakdown[m].FullHours;
                 double totalHours = monthlyBreakdown[m].FullHours + monthlyBreakdown[m].SetbackHours;
-
-                // If for some reason totalHours is zero, fallback
                 if (totalHours <= 0.0)
                 {
                     result[m] = fallbackDesign;
@@ -216,8 +206,6 @@ namespace EE.Doklad.Services
 
                 double designTemp = heatingData != null ? heatingData.DesignTemperature : fallbackDesign;
                 double reductionTemp = heatingData != null ? heatingData.ReductionTemperature : Math.Max(0.0, fallbackDesign - 4.0);
-
-                // Use the small utility to compute effective indoor temperature for the month
                 result[m] = GetEffectiveHeatingIndoorTemp(designTemp, reductionTemp, heatedHours, totalHours);
             }
 

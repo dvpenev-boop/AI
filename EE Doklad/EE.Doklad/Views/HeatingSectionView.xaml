@@ -149,30 +149,22 @@
                          BorderBrush="#E0E0E0"
                          BorderThickness="1"/>
 
-                <GroupBox Header="&#x041C;&#x0435;&#x0442;&#x043E;&#x0434;&#x0438;&#x043A;&#x0430; &#x043D;&#x0430; &#x0438;&#x0437;&#x0447;&#x0438;&#x0441;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435;"
-                          Margin="0,0,0,12"
-                          BorderBrush="#CC2200"
-                          BorderThickness="1">
-                    <StackPanel Orientation="Vertical" Margin="8">
-                        <RadioButton Content="1 - &#x0410;&#x0423;&#x0415;&#x0420; &#x0441;&#x043E;&#x0444;&#x0442;&#x0443;&#x0435;&#x0440;"
-                                     IsChecked="{Binding IsMethodAuer}"
-                                     GroupName="CalcMethod"
-                                     Margin="0,2"/>
-                        <RadioButton Content="2 - &#x0420;&#x0414;-02-20-3 &#x043E;&#x0442; 9.11.2022 &#x0433;."
-                                     IsChecked="{Binding IsMethodRd}"
-                                     GroupName="CalcMethod"
-                                     Margin="0,2"/>
-                        <RadioButton Content="3 - ASHRAE (&#x043C;&#x0435;&#x0436;&#x0434;&#x0443;&#x043D;&#x0430;&#x0440;&#x043E;&#x0434;&#x0435;&#x043D; &#x0441;&#x0442;&#x0430;&#x043D;&#x0434;&#x0430;&#x0440;&#x0442;)"
-                                     IsChecked="{Binding IsMethodAshrae}"
-                                     GroupName="CalcMethod"
-                                     Margin="0,2"/>
+                <Border BorderBrush="#CC2200"
+                        BorderThickness="1"
+                        Background="#FFF8F5"
+                        Padding="10"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="&#x041C;&#x0435;&#x0442;&#x043E;&#x0434;&#x0438;&#x043A;&#x0430; &#x043D;&#x0430; &#x0438;&#x0437;&#x0447;&#x0438;&#x0441;&#x043B;&#x0435;&#x043D;&#x0438;&#x0435; (&#x0438;&#x0437;&#x0431;&#x0438;&#x0440;&#x0430; &#x0441;&#x0435; &#x0432; &#x0441;&#x0435;&#x043A;&#x0446;&#x0438;&#x044F; 5)"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"/>
                         <TextBlock Text="{Binding MethodStatusText}"
                                    Foreground="{Binding MethodStatusBrush}"
                                    FontStyle="Italic"
                                    Margin="0,6,0,0"
                                    FontSize="11"/>
                     </StackPanel>
-                </GroupBox>
+                </Border>
 
             <TextBlock Text="&#x0427;&#x0430;&#x0441;&#x043E;&#x0432;&#x0435; &#x0440;&#x0430;&#x0431;&#x043E;&#x0442;&#x0430; &#x043D;&#x0430; &#x0438;&#x043D;&#x0441;&#x0442;&#x0430;&#x043B;&#x0430;&#x0446;&#x0438;&#x044F;&#x0442;&#x0430;" Style="{StaticResource SectionHeaderStyle}"/>
             <Border BorderBrush="#E0E0E0" BorderThickness="1" Margin="0" Width="820" HorizontalAlignment="Left">
