@@ -1,0 +1,23 @@
+{
+  "id": "zone7_minimal_heating_from_climate_json",
+  "scenario": "Actual",
+  "climateSource": "EE.Doklad/Data/climate_zones.json",
+  "zoneId": 7,
+  "zoneName": "7 - София и Подбалканската долина",
+  "heatingSeason": {
+    "start": "10-15",
+    "end": "04-23"
+  },
+  "heatedArea": 1000.0,
+  "heatedVolume": 2500.0,
+  "infiltration": 0.5,
+  "expectedHve": 425.0,
+  "projectTemperature": 21.0,
+  "nonProjectTemperature": 17.0,
+  "schedule": {
+    "workday": { "startHour": 0, "endHour": 20 },
+    "saturday": { "startHour": 0, "endHour": 12 },
+    "sunday": { "startHour": 0, "endHour": 0 }
+  },
+  "holidays": 0
+}

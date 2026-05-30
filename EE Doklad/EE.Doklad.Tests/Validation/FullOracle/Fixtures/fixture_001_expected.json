@@ -1,0 +1,94 @@
+{
+  "fixtureId": "fixture_001",
+  "variant": "Actual",
+  "source": "Real EECalc UI snapshot transcription from Decompile proba.pdf/docx",
+  "finalTables": {
+    "NeededEnergyTable": {
+      "Heating": {
+        "Actual": 10.835
+      },
+      "Cooling": {
+        "Actual": 0.0
+      },
+      "HeatingVentilation": {
+        "Actual": 0.0
+      },
+      "CoolingVentilation": {
+        "Actual": 0.0
+      },
+      "BGV": {
+        "Actual": 0.0
+      },
+      "BGVPumps": {
+        "Actual": 0.0
+      },
+      "FansAndPumps": {
+        "Actual": 0.0
+      },
+      "Lights": {
+        "Actual": 0.0
+      },
+      "HeatAffectingDevices": {
+        "Actual": 0.0
+      },
+      "NonHeatAffectingDevices": {
+        "Actual": 0.0
+      },
+      "Other": {
+        "Actual": 0.0
+      },
+      "Total": {
+        "Actual": 10.835
+      }
+    },
+    "NetEnergyTable": {
+      "Total": {
+        "Actual": 35.314
+      }
+    },
+    "NoInputsNetEnergyTable": {
+      "Total": {
+        "Actual": 35.314
+      }
+    },
+    "PrimaryEnergyTable": {
+      "Total": {
+        "Actual": 32.505
+      }
+    },
+    "PrimaryEnergyFuelTable": {
+      "Total": {
+        "ActualArea": 32.505
+      }
+    },
+    "FuelEnergyTable": {
+      "Total": {
+        "ActualArea": 10.835
+      }
+    },
+    "EmissionNeededEnergyTable": {
+      "Total": {
+        "Actual": 8.87
+      }
+    },
+    "EmissionEnergySupplyTable": {
+      "Total": {
+        "ActualArea": 8.87
+      }
+    },
+    "VEI": {
+      "Total": 0.0
+    },
+    "EnergyClassScale": {
+      "PoiterValue": 32.0,
+      "PoiterValueBaseLine": 32.0
+    }
+  },
+  "transcriptionNotes": {
+    "conditionedAreaM2": 1000.0,
+    "neededEnergyYearKWh": 10835.142,
+    "netEnergyYearKWh": 35313.894,
+    "energyClass": "A+",
+    "sourcePages": "Decompile proba.pdf pages/images: needed=image12, net=image13, primary=image14, CO2=image19, scale=image18"
+  }
+}

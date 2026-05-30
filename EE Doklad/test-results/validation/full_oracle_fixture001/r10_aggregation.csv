@@ -1,0 +1,13 @@
+﻿FixtureId,Mode,Variant,ZoneIndex,Month,Module,Source,FuelInputEnum,FuelReportBucket,FuelQuantityBeforeBucket,PrimaryFuelBucket,EmissionSupplyBucket,TotalFuelIncludesDuplicateFuel1,FormulaField,Reason
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel1,Fuel8,0,Fuel8,Fuel8,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel2,Fuel2,17.969912569007846,Fuel2,Fuel2,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel3,Fuel3,0,Fuel3,Fuel3,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel4,Fuel4,0,Fuel4,Fuel4,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel5,Fuel5,0,Fuel5,Fuel5,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel6,Fuel6,0,Fuel6,Fuel6,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel7,Fuel7,0,Fuel7,Fuel7,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel8,Fuel1,0,Fuel1,Fuel1,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel9,Fuel9,0,Fuel9,Fuel9,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel10,Fuel10,0,Fuel10,Fuel10,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcLegacyAggregation,Fuel11,Fuel11,0,Fuel11,Fuel11,True,,
+fixture_001,LegacyEECalcStrict,Actual,7,0,R10_AggregationPrimaryCo2Class,EECalcFullOracle,,,,,,,EnergyClassScaleUnavailable,Ref1/Ref2 primary totals are not calculated yet.

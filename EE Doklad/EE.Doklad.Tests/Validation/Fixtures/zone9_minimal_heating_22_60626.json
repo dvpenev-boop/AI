@@ -1,0 +1,48 @@
+{
+  "id": "zone9_minimal_heating_22_60626",
+  "scenario": "Actual",
+  "source": "EECalc-compatible R1/R2 oracle",
+  "period": {
+    "firstMonth": 10,
+    "firstDay": 28,
+    "lastMonth": 4,
+    "lastDay": 5,
+    "referenceYear": 2006
+  },
+  "geometry": {
+    "heatedArea": 1000.0,
+    "heatedVolume": 1250.0
+  },
+  "ventilation": {
+    "infiltration": 1.0,
+    "hve": 425.0
+  },
+  "temperatures": {
+    "projectTemperature": 20.0,
+    "nonProjectTemperature": 20.0,
+    "averageOutdoorTemperature": 6.148125
+  },
+  "schedule": {
+    "workday": { "startHour": 0, "endHour": 24 },
+    "saturday": { "startHour": 0, "endHour": 24 },
+    "sunday": { "startHour": 0, "endHour": 24 }
+  },
+  "holidaysByMonth": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "10": 0,
+    "11": 0,
+    "12": 0
+  },
+  "expected": {
+    "hve": 425.0,
+    "qndPerArea": 22.60626
+  },
+  "provenance": {
+    "monthlyDays": "reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs:48",
+    "hve": "reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3687",
+    "qve": "reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3663"
+  }
+}

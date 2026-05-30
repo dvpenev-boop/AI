@@ -1,0 +1,9 @@
+﻿FixtureId,Mode,Variant,ZoneIndex,Month,Module,Source,MixedWater,ResulNetEnergy,ResultEnergyForHeating,ResultSourceEnergy,ResultSourceEnergy2,ResultNeededEnergy,HeatEfficiencyGenerating,HotWaterPumpsNeededEnergy,BGVSunEnergy,BGVPumpsTotal,TotalUsedSunEnergy,LegacyNotes,CollectorsArea,Ht,X,Y,CorrectedX,F,QhotWater,QsunWater,Fm,UsedSunEnergy,BGVPumps
+fixture_001,LegacyEECalcStrict,Actual,7,0,R8_DhwBgv,EECalcDhwBgvOracle,0,0,0,0,0,0,0,0,0,0,0,first-zone BGV; BGVPumpsTotal; ordinary DHW omits TransmitTempEfficiency; MixedWater/ResulNetEnergy difference,,,,,,,,,,,
+fixture_001,LegacyEECalcStrict,Actual,7,10,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,2.2671780058208699,0,0,0,0,0,0,0,0,0
+fixture_001,LegacyEECalcStrict,Actual,7,11,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,1.2391556131533215,0,0,0,0,0,0,0,0,0
+fixture_001,LegacyEECalcStrict,Actual,7,12,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,0.86638203030627892,0,0,0,0,0,0,0,0,0
+fixture_001,LegacyEECalcStrict,Actual,7,1,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,1.1423481305784757,0,0,0,0,0,0,0,0,0
+fixture_001,LegacyEECalcStrict,Actual,7,2,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,1.8932855842103091,0,0,0,0,0,0,0,0,0
+fixture_001,LegacyEECalcStrict,Actual,7,3,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,2.8823733095851614,0,0,0,0,0,0,0,0,0
+fixture_001,LegacyEECalcStrict,Actual,7,4,R8_DhwBgv,SunEnergyResTable,,,,,,,,,,,,,0,3.2846165730063928,0,0,0,0,0,0,0,0,0

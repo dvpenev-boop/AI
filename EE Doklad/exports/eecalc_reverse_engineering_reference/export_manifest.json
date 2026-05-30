@@ -1,0 +1,14 @@
+{
+  "project": "EE.Doklad",
+  "package": "eecalc_reverse_engineering_reference",
+  "status": "reverse_engineering_complete",
+  "parity_status": "not_started",
+  "current_mode": "LegacyEECalcStrict",
+  "oracle_status": "planned",
+  "provider_rewiring": false,
+  "confirmed_findings": [
+    "KD-A001",
+    "KD-A009",
+    "KD-DATA-001"
+  ]
+}

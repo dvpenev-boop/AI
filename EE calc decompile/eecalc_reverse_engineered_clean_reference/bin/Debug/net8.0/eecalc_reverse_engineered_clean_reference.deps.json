@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "eecalc_reverse_engineered_clean_reference/1.0.0": {
+        "runtime": {
+          "eecalc_reverse_engineered_clean_reference.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "eecalc_reverse_engineered_clean_reference/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

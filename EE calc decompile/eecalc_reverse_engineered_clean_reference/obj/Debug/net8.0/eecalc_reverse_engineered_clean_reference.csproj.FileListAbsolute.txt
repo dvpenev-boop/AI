@@ -1,0 +1,15 @@
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\bin\Debug\net8.0\eecalc_reverse_engineered_clean_reference.exe
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\bin\Debug\net8.0\eecalc_reverse_engineered_clean_reference.deps.json
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\bin\Debug\net8.0\eecalc_reverse_engineered_clean_reference.runtimeconfig.json
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\bin\Debug\net8.0\eecalc_reverse_engineered_clean_reference.dll
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\bin\Debug\net8.0\eecalc_reverse_engineered_clean_reference.pdb
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.GeneratedMSBuildEditorConfig.editorconfig
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.AssemblyInfoInputs.cache
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.AssemblyInfo.cs
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.csproj.CoreCompileInputs.cache
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.sourcelink.json
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.dll
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\refint\eecalc_reverse_engineered_clean_reference.dll
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.pdb
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\eecalc_reverse_engineered_clean_reference.genruntimeconfig.cache
+E:\AI\EE calc decompile\eecalc_reverse_engineered_clean_reference\obj\Debug\net8.0\ref\eecalc_reverse_engineered_clean_reference.dll

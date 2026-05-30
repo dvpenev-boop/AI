@@ -1,0 +1,1382 @@
+# 99 — Method index from HeatingAndCoolingResultCalc.cs
+
+Общо извлечени метода: 689
+
+- `CoolingCalculations` — lines 122-135
+  - `public static void CoolingCalculations(this CalculationData calcData, Section section, CalculationInput calcInput, BuildingZone zone, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `GetWeekHoursCoolingResultActual` — lines 136-143
+  - `public static void GetWeekHoursCoolingResultActual(this CalculationData coolingCalc, Section section)`
+- `GetWeekHoursCoolingResultBaseLine` — lines 144-151
+  - `public static void GetWeekHoursCoolingResultBaseLine(this CalculationData coolingCalc, Section section)`
+- `GetWeekHoursCoolingResultEsm` — lines 152-159
+  - `public static void GetWeekHoursCoolingResultEsm(this CalculationData coolingCalc, Section section)`
+- `GetWeekHoursCoolingResultReferences` — lines 160-167
+  - `public static void GetWeekHoursCoolingResultReferences(this CalculationData coolingCalc, Section section)`
+- `CalculateCoolingEnergyRef1` — lines 168-208
+  - `private static void CalculateCoolingEnergyRef1(List<MonthlyDays> monthslist, CalculationData calcData, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `CalculateCoolingEnergyRef2` — lines 209-249
+  - `private static void CalculateCoolingEnergyRef2(List<MonthlyDays> monthslist, CalculationData calcData, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `CalculateCoolingEnergyActual` — lines 250-288
+  - `private static void CalculateCoolingEnergyActual(List<MonthlyDays> monthslist, CalculationData calcData, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `CalculateCoolingEnergyBaseLine` — lines 289-313
+  - `private static void CalculateCoolingEnergyBaseLine(List<MonthlyDays> monthslist, CalculationData calcData, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `CalculateCoolingEnergyESM` — lines 314-338
+  - `private static void CalculateCoolingEnergyESM(List<MonthlyDays> monthslist, CalculationData calcData, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `CalculateLatentHeatsInfRef1` — lines 339-402
+  - `private static double CalculateLatentHeatsInfRef1(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `CalculateLatentHeatsInfRef2` — lines 403-466
+  - `private static double CalculateLatentHeatsInfRef2(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `CalculateLatentHeatsInf` — lines 467-530
+  - `private static double CalculateLatentHeatsInf(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `CalculateLatentHeatsInfBaseLine` — lines 531-594
+  - `private static double CalculateLatentHeatsInfBaseLine(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `CalculateLatentHeatsInfESM` — lines 595-658
+  - `private static double CalculateLatentHeatsInfESM(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `CalculateLatentHeatsVentRef1` — lines 659-719
+  - `private static double CalculateLatentHeatsVentRef1(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone, CalculationData ventCool)`
+- `CalculateLatentHeatsVentRef2` — lines 720-780
+  - `private static double CalculateLatentHeatsVentRef2(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone, CalculationData ventCool)`
+- `CalculateLatentHeatsVent` — lines 781-841
+  - `private static double CalculateLatentHeatsVent(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone, CalculationData ventCool)`
+- `CalculateLatentHeatsVentBaseLine` — lines 842-902
+  - `private static double CalculateLatentHeatsVentBaseLine(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone, CalculationData ventCool)`
+- `CalculateLatentHeatsVentESM` — lines 903-963
+  - `private static double CalculateLatentHeatsVentESM(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone, CalculationData ventCool)`
+- `CalcAirX` — lines 964-971
+  - `private static double CalcAirX(double temp, double humidity)`
+- `CalcRoW` — lines 972-977
+  - `private static double CalcRoW(double temp)`
+- `CalcRo` — lines 978-983
+  - `private static double CalcRo(double temp, double humidity)`
+- `CalculateETA` — lines 984-1002
+  - `private static double CalculateETA(double parameterAc, double loses, double gainings, Section section)`
+- `CalculateAcRef1` — lines 1003-1012
+  - `private static double CalculateAcRef1(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateAcRef2` — lines 1013-1022
+  - `private static double CalculateAcRef2(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateAc` — lines 1023-1032
+  - `private static double CalculateAc(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateAcBaseLine` — lines 1033-1042
+  - `private static double CalculateAcBaseLine(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateAcESM` — lines 1043-1052
+  - `private static double CalculateAcESM(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `GetNightWorkingHours` — lines 1053-1080
+  - `private static IEnumerable<int> GetNightWorkingHours(int strat, int end)`
+- `ClaculateQfreecoolingRef1` — lines 1081-1119
+  - `private static double ClaculateQfreecoolingRef1(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `ClaculateQfreecoolingRef2` — lines 1120-1158
+  - `private static double ClaculateQfreecoolingRef2(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `ClaculateQfreecooling` — lines 1159-1197
+  - `private static double ClaculateQfreecooling(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `ClaculateQfreecoolingBaseLine` — lines 1198-1236
+  - `private static double ClaculateQfreecoolingBaseLine(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `ClaculateQfreecoolingEsm` — lines 1237-1275
+  - `private static double ClaculateQfreecoolingEsm(Section section, CalculationData calcData, MonthlyDays month, ClimateZones climateZone)`
+- `CalculateQgainRef1` — lines 1276-1283
+  - `private static double CalculateQgainRef1(Section section, ClimateZones climateZone, MonthlyDays month, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateQgainRef2` — lines 1284-1291
+  - `private static double CalculateQgainRef2(Section section, ClimateZones climateZone, MonthlyDays month, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateQgain` — lines 1292-1299
+  - `private static double CalculateQgain(Section section, ClimateZones climateZone, MonthlyDays month, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateQgainBaseLine` — lines 1300-1307
+  - `private static double CalculateQgainBaseLine(Section section, ClimateZones climateZone, MonthlyDays month, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateQgainESM` — lines 1308-1315
+  - `private static double CalculateQgainESM(Section section, ClimateZones climateZone, MonthlyDays month, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateQintRef1` — lines 1316-1322
+  - `private static double CalculateQintRef1(CalculationData lightsAndDevicesCalculationData, MonthlyDays month, double area)`
+- `CalculateQintRef2` — lines 1323-1329
+  - `private static double CalculateQintRef2(CalculationData lightsAndDevicesCalculationData, MonthlyDays month, double area)`
+- `CalculateQint` — lines 1330-1336
+  - `private static double CalculateQint(CalculationData lightsAndDevicesCalculationData, MonthlyDays month, double area)`
+- `CalculateQintBaseLine` — lines 1337-1343
+  - `private static double CalculateQintBaseLine(CalculationData lightsAndDevicesCalculationData, MonthlyDays month, double area)`
+- `CalculateQintESM` — lines 1344-1350
+  - `private static double CalculateQintESM(CalculationData lightsAndDevicesCalculationData, MonthlyDays month, double area)`
+- `CalculateQoccupants` — lines 1351-1357
+  - `private static double CalculateQoccupants(Section section, MonthlyDays month)`
+- `CalculateQoccupantsBaseLine` — lines 1358-1364
+  - `private static double CalculateQoccupantsBaseLine(Section section, MonthlyDays month)`
+- `CalculateQoccupantsESM` — lines 1365-1371
+  - `private static double CalculateQoccupantsESM(Section section, MonthlyDays month)`
+- `CalculateQLatentOccupantsRef1` — lines 1372-1378
+  - `private static double CalculateQLatentOccupantsRef1(Section section, MonthlyDays month)`
+- `CalculateQLatentOccupantsRef2` — lines 1379-1385
+  - `private static double CalculateQLatentOccupantsRef2(Section section, MonthlyDays month)`
+- `CalculateQLatentOccupants` — lines 1386-1392
+  - `private static double CalculateQLatentOccupants(Section section, MonthlyDays month)`
+- `CalculateQLatentOccupantsBaseLine` — lines 1393-1399
+  - `private static double CalculateQLatentOccupantsBaseLine(Section section, MonthlyDays month)`
+- `CalculateQLatentOccupantsESM` — lines 1400-1406
+  - `private static double CalculateQLatentOccupantsESM(Section section, MonthlyDays month)`
+- `CalculateOccupantshours` — lines 1407-1414
+  - `private static double CalculateOccupantshours(Section section, MonthlyDays month)`
+- `CalculateOccupantshoursBaseLine` — lines 1415-1422
+  - `private static double CalculateOccupantshoursBaseLine(Section section, MonthlyDays month)`
+- `CalculateOccupantshoursESM` — lines 1423-1430
+  - `private static double CalculateOccupantshoursESM(Section section, MonthlyDays month)`
+- `CalculateQveRef1` — lines 1431-1489
+  - `private static double CalculateQveRef1(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateQveRef2` — lines 1490-1554
+  - `private static double CalculateQveRef2(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateQve` — lines 1555-1619
+  - `private static double CalculateQve(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateQveBaseLine` — lines 1620-1684
+  - `private static double CalculateQveBaseLine(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateQveESM` — lines 1685-1749
+  - `private static double CalculateQveESM(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateHveRef1` — lines 1750-1754
+  - `private static double CalculateHveRef1(CalculationData ventCool)`
+- `CalculateHveRef2` — lines 1755-1759
+  - `private static double CalculateHveRef2(CalculationData ventCool)`
+- `CalculateHve` — lines 1760-1764
+  - `private static double CalculateHve(CalculationData ventCool)`
+- `CalculateHveBaseLine` — lines 1765-1769
+  - `private static double CalculateHveBaseLine(CalculationData ventCool)`
+- `CalculateHveESM` — lines 1770-1774
+  - `private static double CalculateHveESM(CalculationData ventCool)`
+- `CalculateQsolRef1` — lines 1775-1788
+  - `private static double CalculateQsolRef1(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateQsolRef2` — lines 1789-1802
+  - `private static double CalculateQsolRef2(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateQsol` — lines 1803-1816
+  - `private static double CalculateQsol(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateQsolBaseLine` — lines 1817-1830
+  - `private static double CalculateQsolBaseLine(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateQsolESM` — lines 1831-1844
+  - `private static double CalculateQsolESM(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateQinfRef1` — lines 1845-1850
+  - `private static double CalculateQinfRef1(Section section, ClimateZones climateZone, CalculationData calcData, MonthlyDays month)`
+- `CalculateQinfRef2` — lines 1851-1856
+  - `private static double CalculateQinfRef2(Section section, ClimateZones climateZone, CalculationData calcData, MonthlyDays month)`
+- `CalculateQinf` — lines 1857-1862
+  - `private static double CalculateQinf(Section section, ClimateZones climateZone, CalculationData calcData, MonthlyDays month)`
+- `CalculateQinfBaseLine` — lines 1863-1868
+  - `private static double CalculateQinfBaseLine(Section section, ClimateZones climateZone, CalculationData calcData, MonthlyDays month)`
+- `CalculateQinfESM` — lines 1869-1874
+  - `private static double CalculateQinfESM(Section section, ClimateZones climateZone, CalculationData calcData, MonthlyDays month)`
+- `CalculateHinfRef1` — lines 1875-1879
+  - `private static double CalculateHinfRef1(Section section, CalculationData calcData)`
+- `CalculateHinfRef2` — lines 1880-1884
+  - `private static double CalculateHinfRef2(Section section, CalculationData calcData)`
+- `CalculateHinf` — lines 1885-1889
+  - `private static double CalculateHinf(Section section, CalculationData calcData)`
+- `CalculateHinfBaseLine` — lines 1890-1894
+  - `private static double CalculateHinfBaseLine(Section section, CalculationData calcData)`
+- `CalculateHinfESM` — lines 1895-1899
+  - `private static double CalculateHinfESM(Section section, CalculationData calcData)`
+- `CalculateCoolingQtrRef1` — lines 1900-1908
+  - `private static double CalculateCoolingQtrRef1(CalculationData calcData, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateCoolingQtrRef2` — lines 1909-1917
+  - `private static double CalculateCoolingQtrRef2(CalculationData calcData, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateCoolingQtr` — lines 1918-1926
+  - `private static double CalculateCoolingQtr(CalculationData calcData, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateCoolingQtrBaseLine` — lines 1927-1934
+  - `private static double CalculateCoolingQtrBaseLine(CalculationData calculationData, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateCoolingQtrESM` — lines 1935-1942
+  - `private static double CalculateCoolingQtrESM(CalculationData calculationData, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateCoolingHtr` — lines 1943-1956
+  - `private static double CalculateCoolingHtr(Section section, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `CalculateCoolingHtrESM` — lines 1957-1970
+  - `private static double CalculateCoolingHtrESM(Section section, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `CalculateAverageCoolingTempRef1` — lines 1971-1984
+  - `private static double CalculateAverageCoolingTempRef1(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalculateAverageCoolingTempRef2` — lines 1985-1998
+  - `private static double CalculateAverageCoolingTempRef2(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalculateAverageCoolingTempCurrent` — lines 1999-2012
+  - `private static double CalculateAverageCoolingTempCurrent(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalculateAverageCoolingTempBaseLine` — lines 2013-2026
+  - `private static double CalculateAverageCoolingTempBaseLine(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalculateAverageCoolingTempESM` — lines 2027-2040
+  - `private static double CalculateAverageCoolingTempESM(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgProjectTempCoolingRef1` — lines 2041-2048
+  - `private static double CalcAvgProjectTempCoolingRef1(Section section, double averageMontlyTemp, CalculationData calcData, MonthlyDays month)`
+- `CalcAvgProjectTempCoolingRef2` — lines 2049-2056
+  - `private static double CalcAvgProjectTempCoolingRef2(Section section, double averageMontlyTemp, CalculationData calcData, MonthlyDays month)`
+- `CalcAvgProjectTempCooling` — lines 2057-2064
+  - `private static double CalcAvgProjectTempCooling(Section section, double averageMontlyTemp, CalculationData calcData, MonthlyDays month)`
+- `CalcAvgProjectTempCoolingBaseLine` — lines 2065-2072
+  - `private static double CalcAvgProjectTempCoolingBaseLine(Section section, double averageMontlyTemp, CalculationData calcData, MonthlyDays month)`
+- `CalcAvgProjectTempCoolingESM` — lines 2073-2080
+  - `private static double CalcAvgProjectTempCoolingESM(Section section, double averageMontlyTemp, CalculationData calcData, MonthlyDays month)`
+- `CalcAvgNonProjectTempCoolingRef1` — lines 2081-2089
+  - `private static double CalcAvgNonProjectTempCoolingRef1(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempCoolingRef2` — lines 2090-2098
+  - `private static double CalcAvgNonProjectTempCoolingRef2(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempCooling` — lines 2099-2107
+  - `private static double CalcAvgNonProjectTempCooling(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempCoolingBaseLine` — lines 2108-2116
+  - `private static double CalcAvgNonProjectTempCoolingBaseLine(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempCoolingESM` — lines 2117-2125
+  - `private static double CalcAvgNonProjectTempCoolingESM(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `SumWallDirecrionsHu1Cooling` — lines 2126-2138
+  - `private static double SumWallDirecrionsHu1Cooling(Section section, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `SumWallDirecrionsHu1CoolingESM` — lines 2139-2151
+  - `private static double SumWallDirecrionsHu1CoolingESM(Section section, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `CalcWallDirectionParameterHu1Cooling` — lines 2152-2185
+  - `private static double CalcWallDirectionParameterHu1Cooling(Walls wall, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `CalcCeilingsParameterHu2Cooling` — lines 2186-2219
+  - `private static double CalcCeilingsParameterHu2Cooling(Roof roof, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `CalcFloorsParameterHu3Cooling` — lines 2220-2253
+  - `private static double CalcFloorsParameterHu3Cooling(Floor floor, double averageMontlyTemp, double averageInnerCoolTemp)`
+- `CalculateFansAndPumpsHeatingRef1` — lines 2254-2269
+  - `public static void CalculateFansAndPumpsHeatingRef1(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsHeatingRef2` — lines 2270-2285
+  - `public static void CalculateFansAndPumpsHeatingRef2(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsHeatingActual` — lines 2286-2301
+  - `public static void CalculateFansAndPumpsHeatingActual(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsHeatingBaseLine` — lines 2302-2318
+  - `public static void CalculateFansAndPumpsHeatingBaseLine(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsHeatingEsm` — lines 2319-2336
+  - `public static void CalculateFansAndPumpsHeatingEsm(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsCoolingRef1` — lines 2337-2363
+  - `public static void CalculateFansAndPumpsCoolingRef1(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsCoolingRef2` — lines 2364-2389
+  - `public static void CalculateFansAndPumpsCoolingRef2(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsCoolingActual` — lines 2390-2415
+  - `public static void CalculateFansAndPumpsCoolingActual(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsCoolingBaseLine` — lines 2416-2441
+  - `public static void CalculateFansAndPumpsCoolingBaseLine(this HeatingCalculations calc, Section section)`
+- `CalculateFansAndPumpsCoolingEsm` — lines 2442-2468
+  - `public static void CalculateFansAndPumpsCoolingEsm(this HeatingCalculations calc, Section section)`
+- `GetWeekHeatingVentilationHoursActual` — lines 2469-2475
+  - `private static double GetWeekHeatingVentilationHoursActual(Section section)`
+- `GetWeekHeatingVentilationHoursBaseLine` — lines 2476-2482
+  - `private static double GetWeekHeatingVentilationHoursBaseLine(Section section)`
+- `GetWeekHeatingVentilationHoursEsm` — lines 2483-2489
+  - `private static double GetWeekHeatingVentilationHoursEsm(Section section)`
+- `GetWeekHeatingSeasonHoursActual` — lines 2490-2496
+  - `private static double GetWeekHeatingSeasonHoursActual(Section section)`
+- `GetWeekHeatingSeasonHoursBaseLine` — lines 2497-2503
+  - `private static double GetWeekHeatingSeasonHoursBaseLine(Section section)`
+- `GetWeekHeatingSeasonHoursEsm` — lines 2504-2510
+  - `private static double GetWeekHeatingSeasonHoursEsm(Section section)`
+- `GetWeekCoolingSeasonHoursActual` — lines 2511-2517
+  - `private static double GetWeekCoolingSeasonHoursActual(Section section)`
+- `GetWeekCoolingSeasonHoursBaseLine` — lines 2518-2524
+  - `private static double GetWeekCoolingSeasonHoursBaseLine(Section section)`
+- `GetWeekCoolingSeasonHoursEsm` — lines 2525-2531
+  - `private static double GetWeekCoolingSeasonHoursEsm(Section section)`
+- `GetWeekCoolingVentilationHoursActual` — lines 2532-2538
+  - `private static double GetWeekCoolingVentilationHoursActual(Section section)`
+- `GetWeekCoolingVentilationHoursBaseLine` — lines 2539-2545
+  - `private static double GetWeekCoolingVentilationHoursBaseLine(Section section)`
+- `GetWeekCoolingVentilationHoursEsm` — lines 2546-2552
+  - `private static double GetWeekCoolingVentilationHoursEsm(Section section)`
+- `CalculateUouterWallsCurrent` — lines 2553-2581
+  - `public static void CalculateUouterWallsCurrent(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateUouterWallsEsm` — lines 2582-2609
+  - `public static void CalculateUouterWallsEsm(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateUinnerWallsCurrent` — lines 2610-2638
+  - `public static void CalculateUinnerWallsCurrent(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateUinnerWallsEsm` — lines 2639-2666
+  - `public static void CalculateUinnerWallsEsm(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateUwindowsCurrent` — lines 2667-2698
+  - `public static void CalculateUwindowsCurrent(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateUwindowsEsm` — lines 2699-2729
+  - `public static void CalculateUwindowsEsm(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateGcurrent` — lines 2730-2761
+  - `public static void CalculateGcurrent(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateGesm` — lines 2762-2792
+  - `public static void CalculateGesm(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `GetUnonTrasparentRoof` — lines 2793-2799
+  - `public static void GetUnonTrasparentRoof(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `GetUceiling` — lines 2800-2806
+  - `public static void GetUceiling(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `GetUfloor` — lines 2807-2813
+  - `public static void GetUfloor(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `GetUotherFloor` — lines 2814-2820
+  - `public static void GetUotherFloor(this CalculationData heatingAndCoolingCalculations, Section section)`
+- `CalculateNetEnergy` — lines 2821-2829
+  - `public static void CalculateNetEnergy(this CalculationData heatingCalculations)`
+- `CalculateNeededEnergyRef1` — lines 2830-2846
+  - `public static void CalculateNeededEnergyRef1(this CalculationData heatgCalc)`
+- `CalculateNeededEnergyRef2` — lines 2847-2863
+  - `public static void CalculateNeededEnergyRef2(this CalculationData heatgCalc)`
+- `CalculateNeededEnergyActual` — lines 2864-2880
+  - `public static void CalculateNeededEnergyActual(this CalculationData heatgCalc)`
+- `CalculateNeededEnergyBaseLine` — lines 2881-2897
+  - `public static void CalculateNeededEnergyBaseLine(this CalculationData heatgCalc)`
+- `CalculateNeededEnergyEsm` — lines 2898-2915
+  - `public static void CalculateNeededEnergyEsm(this CalculationData heatgCalc)`
+- `CalculateGeneratorHeatEfficiencyRef1` — lines 2916-2931
+  - `public static void CalculateGeneratorHeatEfficiencyRef1(this CalculationData heatgCalc)`
+- `CalculateGeneratorHeatEfficiencyRef2` — lines 2932-2947
+  - `public static void CalculateGeneratorHeatEfficiencyRef2(this CalculationData heatgCalc)`
+- `CalculateGeneratorHeatEfficiencyActual` — lines 2948-2963
+  - `public static void CalculateGeneratorHeatEfficiencyActual(this CalculationData heatgCalc)`
+- `CalculateGeneratorHeatEfficiencyBaseLine` — lines 2964-2979
+  - `public static void CalculateGeneratorHeatEfficiencyBaseLine(this CalculationData heatgCalc)`
+- `CalculateGeneratorHeatEfficiencyEsm` — lines 2980-2995
+  - `public static void CalculateGeneratorHeatEfficiencyEsm(this CalculationData heatgCalc)`
+- `CalculateGeneratorVentilationCoolEfficiencyRef1` — lines 2996-3011
+  - `public static void CalculateGeneratorVentilationCoolEfficiencyRef1(this CalculationData coolCalc)`
+- `CalculateGeneratorVentilationCoolEfficiencyRef2` — lines 3012-3027
+  - `public static void CalculateGeneratorVentilationCoolEfficiencyRef2(this CalculationData coolCalc)`
+- `CalculateGeneratorVentilationCoolEfficiencyActual` — lines 3028-3043
+  - `public static void CalculateGeneratorVentilationCoolEfficiencyActual(this CalculationData coolCalc)`
+- `CalculateGeneratorVentilationCoolEfficiencyBaseLine` — lines 3044-3059
+  - `public static void CalculateGeneratorVentilationCoolEfficiencyBaseLine(this CalculationData coolCalc)`
+- `CalculateGeneratorVentilationCoolEfficiencyESM` — lines 3060-3075
+  - `public static void CalculateGeneratorVentilationCoolEfficiencyESM(this CalculationData coolCalc)`
+- `CalculateGeneratorCoolEfficiencyRef1` — lines 3076-3091
+  - `public static void CalculateGeneratorCoolEfficiencyRef1(this CalculationData coolCalc)`
+- `CalculateGeneratorCoolEfficiencyRef2` — lines 3092-3107
+  - `public static void CalculateGeneratorCoolEfficiencyRef2(this CalculationData coolCalc)`
+- `CalculateGeneratorCoolEfficiencyActual` — lines 3108-3123
+  - `public static void CalculateGeneratorCoolEfficiencyActual(this CalculationData coolCalc)`
+- `CalculateGeneratorCoolEfficiencyBaseLine` — lines 3124-3139
+  - `public static void CalculateGeneratorCoolEfficiencyBaseLine(this CalculationData coolCalc)`
+- `CalculateGeneratorCoolEfficiencyESM` — lines 3140-3155
+  - `public static void CalculateGeneratorCoolEfficiencyESM(this CalculationData coolCalc)`
+- `CalculateNeededEnergyCoolingRef1` — lines 3156-3172
+  - `public static void CalculateNeededEnergyCoolingRef1(this CalculationData coolCalc)`
+- `CalculateNeededEnergyCoolingRef2` — lines 3173-3189
+  - `public static void CalculateNeededEnergyCoolingRef2(this CalculationData coolCalc)`
+- `CalculateNeededEnergyCoolingActual` — lines 3190-3206
+  - `public static void CalculateNeededEnergyCoolingActual(this CalculationData coolCalc)`
+- `CalculateNeededEnergyCoolingBaseLine` — lines 3207-3223
+  - `public static void CalculateNeededEnergyCoolingBaseLine(this CalculationData coolCalc)`
+- `CalculateNeededEnergyCoolingESM` — lines 3224-3241
+  - `public static void CalculateNeededEnergyCoolingESM(this CalculationData coolCalc)`
+- `Calculations` — lines 3242-3400
+  - `public static void Calculations(this CalculationData calcData, Section section, CalculationInput calcInput, BuildingZone zone, CalculationData lightsAndDevicesCalculationData)`
+- `GetWeekHoursResultReferences` — lines 3401-3417
+  - `public static void GetWeekHoursResultReferences(this CalculationData heatgCalc, Section section)`
+- `GetWeekHoursResultActual` — lines 3418-3433
+  - `public static void GetWeekHoursResultActual(this CalculationData heatgCalc, Section section)`
+- `GetWeekHoursResultBaseLine` — lines 3434-3449
+  - `public static void GetWeekHoursResultBaseLine(this CalculationData heatgCalc, Section section)`
+- `GetWeekHoursResultEsm` — lines 3450-3465
+  - `public static void GetWeekHoursResultEsm(this CalculationData heatgCalc, Section section)`
+- `OccupantHours` — lines 3466-3470
+  - `private static int OccupantHours(Section section, MonthlyDays month)`
+- `GetTestValue` — lines 3471-3481
+  - `private static void GetTestValue(Section section, CalculationInput calcInput, MonthData monthData, MonthlyDays month)`
+- `CalculateActual` — lines 3482-3492
+  - `private static void CalculateActual(CalculationData calcData, Section section, CalculationInput calcInput, MonthData monthData, MonthlyDays month, double latentHeatPerMonth)`
+- `CalculateLightsAndDevicesInputs` — lines 3493-3560
+  - `private static void CalculateLightsAndDevicesInputs(CalculationData lightsAndDevicesCalculationData, MonthlyDays month, double parameterEtaRef1, double parameterEtaRef2, double parameterEta, double parameterEtaBaseLine, double parameterEtaESM)`
+- `GetLightsAndDevicesInputs` — lines 3561-3620
+  - `private static void GetLightsAndDevicesInputs(CalculationData calcData)`
+- `SumItemsList` — lines 3621-3630
+  - `private static double SumItemsList(List<double> itemsList)`
+- `CalculateParameterNign` — lines 3631-3648
+  - `private static double CalculateParameterNign(CalculationData calculationdata, ClimateZones climateZone, MonthlyDays month, double gamma, Section section)`
+- `CalculateaH` — lines 3649-3661
+  - `private static double CalculateaH(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateParameterQve` — lines 3662-3666
+  - `private static double CalculateParameterQve(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgProjectTemp` — lines 3667-3675
+  - `private static double CalcAvgProjectTemp(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTemp` — lines 3676-3685
+  - `private static double CalcAvgNonProjectTemp(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalcParameterHve` — lines 3686-3691
+  - `private static double CalcParameterHve(Section section, CalculationData calculationData)`
+- `CalculateParameterQtr` — lines 3692-3700
+  - `private static double CalculateParameterQtr(CalculationData calculationData, Section section, ClimateZones climateZone, MonthlyDays month, out double parameterHtr)`
+- `CalculateParameterHtr` — lines 3701-3711
+  - `private static double CalculateParameterHtr(Section section, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalculateParameterHdCurrent` — lines 3712-3716
+  - `private static double CalculateParameterHdCurrent(Section section)`
+- `CalculateParameterHgCurrent` — lines 3717-3721
+  - `private static double CalculateParameterHgCurrent(Section section)`
+- `SumAllDirectionsWallsCurrent` — lines 3722-3734
+  - `private static double SumAllDirectionsWallsCurrent(Section section)`
+- `CalculateItemsWalls` — lines 3735-3760
+  - `private static double CalculateItemsWalls(Walls walls)`
+- `SumAllDirectionWindowsCurrent` — lines 3761-3773
+  - `private static double SumAllDirectionWindowsCurrent(Section section)`
+- `SumNonTrasparentRoof` — lines 3774-3808
+  - `private static double SumNonTrasparentRoof(Roof roof)`
+- `SumTrasparentRoof` — lines 3809-3822
+  - `private static double SumTrasparentRoof(Roof roof)`
+- `CalculateAverageHeatTempCurrent` — lines 3823-3836
+  - `private static double CalculateAverageHeatTempCurrent(Section section, CalculationData calculationData, MonthlyDays month)`
+- `SumWallDirecrionsHu1` — lines 3837-3849
+  - `private static double SumWallDirecrionsHu1(Section section, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalcWallDirectionParameterHu1` — lines 3850-3879
+  - `private static double CalcWallDirectionParameterHu1(Walls wall, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalcCeilingsParameterHu2` — lines 3880-3909
+  - `private static double CalcCeilingsParameterHu2(Roof roof, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalcFloorsParameterHu3` — lines 3910-3939
+  - `private static double CalcFloorsParameterHu3(Floor floor, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalculateParameterQgn` — lines 3940-3951
+  - `private static double CalculateParameterQgn(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateTransparentFsol` — lines 3952-3963
+  - `private static double CalculateTransparentFsol(double windowA, double windowG, double windowE, double sunShiningIntensity, bool horizontal = false)`
+- `CalculateTrasparentFsol` — lines 3964-3995
+  - `private static double CalculateTrasparentFsol(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateNonTransparentFsol` — lines 3996-4008
+  - `private static double CalculateNonTransparentFsol(double outerWallAlfa, double outerWallU, double outerWallEpsi, double outerWallArea, double sunShiningIntensity, bool horizontal = false)`
+- `CalculateNonTrasparentFsol` — lines 4009-4032
+  - `private static double CalculateNonTrasparentFsol(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `OccupantsHoursEsm` — lines 4033-4037
+  - `private static int OccupantsHoursEsm(Section section, MonthlyDays month)`
+- `CalculateEsm` — lines 4038-4048
+  - `private static double CalculateEsm(this CalculationData heatingAndCoolingCalculations, Section section, CalculationInput calcInput, MonthlyDays month, double latentHeatPerMonth)`
+- `CalculateParameterNiEsm` — lines 4049-4066
+  - `private static double CalculateParameterNiEsm(CalculationData calculationdata, ClimateZones climateZone, MonthlyDays month, double gamma, Section section)`
+- `CalculateaHesm` — lines 4067-4079
+  - `private static double CalculateaHesm(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateParameterQveEsm` — lines 4080-4085
+  - `private static double CalculateParameterQveEsm(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalculateParameterHtrEsm` — lines 4086-4096
+  - `private static double CalculateParameterHtrEsm(Section section, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalcParameterHveEsm` — lines 4097-4101
+  - `private static double CalcParameterHveEsm(Section section, CalculationData heatingAndCoolingCalculations)`
+- `CalculateParameterQtrEsm` — lines 4102-4112
+  - `private static double CalculateParameterQtrEsm(CalculationData claculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateAverageHeatTempEsm` — lines 4113-4126
+  - `private static double CalculateAverageHeatTempEsm(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempEsm` — lines 4127-4135
+  - `private static double CalcAvgNonProjectTempEsm(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgProjectTempEsm` — lines 4136-4143
+  - `private static double CalcAvgProjectTempEsm(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalculateParameterHdEsm` — lines 4144-4148
+  - `private static double CalculateParameterHdEsm(Section section)`
+- `SumAllDirectionsWallsEsm` — lines 4149-4161
+  - `private static double SumAllDirectionsWallsEsm(Section section)`
+- `SumAllDirectionWindowsEsm` — lines 4162-4174
+  - `private static double SumAllDirectionWindowsEsm(Section section)`
+- `CalculateParameterHgEsm` — lines 4175-4179
+  - `private static double CalculateParameterHgEsm(Section section)`
+- `SumWallDirecrionsHu1Esm` — lines 4180-4192
+  - `private static double SumWallDirecrionsHu1Esm(Section section, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalculateParameterQgnEsm` — lines 4193-4204
+  - `private static double CalculateParameterQgnEsm(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateTrasparentFsolEsm` — lines 4205-4244
+  - `private static double CalculateTrasparentFsolEsm(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateNonTrasparentFsolEsm` — lines 4245-4268
+  - `private static double CalculateNonTrasparentFsolEsm(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `OccupantsHoursBaseLine` — lines 4269-4273
+  - `private static int OccupantsHoursBaseLine(Section section, MonthlyDays month)`
+- `CalculateBaseLine` — lines 4274-4284
+  - `private static double CalculateBaseLine(this CalculationData heatingAndCoolingCalculations, Section section, CalculationInput calcInput, MonthlyDays month, double latentHeatPerMonth)`
+- `CalculateaHbaseLine` — lines 4285-4297
+  - `private static double CalculateaHbaseLine(CalculationData calculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateParameterNignBaseLine` — lines 4298-4315
+  - `private static double CalculateParameterNignBaseLine(CalculationData calculationdata, ClimateZones climateZone, MonthlyDays month, double gamma, Section section)`
+- `CalculateParameterQtrBaseLine` — lines 4316-4326
+  - `private static double CalculateParameterQtrBaseLine(CalculationData claculationdata, Section section, ClimateZones climateZone, MonthlyDays month)`
+- `CalcAvgNonProjectTempBaseLine` — lines 4327-4335
+  - `private static double CalcAvgNonProjectTempBaseLine(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgProjectTempBaseLine` — lines 4336-4343
+  - `private static double CalcAvgProjectTempBaseLine(Section section, double averageMontlyTemp, CalculationData calculationData, MonthlyDays month)`
+- `CalculateAverageHeatTempBaseLine` — lines 4344-4357
+  - `private static double CalculateAverageHeatTempBaseLine(Section section, CalculationData calculationData, MonthlyDays month)`
+- `CalculateParameterQveBaseLIne` — lines 4358-4363
+  - `private static double CalculateParameterQveBaseLIne(Section section, CalculationData calculationData, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateParameterHtrBaseLine` — lines 4364-4374
+  - `private static double CalculateParameterHtrBaseLine(Section section, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalcParameterHveBaseLine` — lines 4375-4380
+  - `private static double CalcParameterHveBaseLine(Section section, CalculationData heatingAndCoolingCalculations)`
+- `CalculateParameterQgnBaseLine` — lines 4381-4392
+  - `private static double CalculateParameterQgnBaseLine(Section section, ClimateZones climateZone, MonthlyDays month)`
+- `OccupantsHoursRef1` — lines 4393-4397
+  - `private static int OccupantsHoursRef1(MonthlyDays month, Section tempSectionRef1)`
+- `CalculateRef1` — lines 4398-4411
+  - `private static double CalculateRef1(CalculationData calcData, Section section, CalculationInput calcInput, MonthlyDays month)`
+- `CalculateRef1` — lines 4412-4419
+  - `private static void CalculateRef1(CalculationData calcData, Section section, CalculationInput calcInput, List<double> energyByMonthsListRef1, Section tempSectionRef1, MonthlyDays month, List<double> latentHeatListRef1)`
+- `CalculateParameterQveRef1` — lines 4420-4424
+  - `private static double CalculateParameterQveRef1(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalcParameterHveRef1` — lines 4425-4429
+  - `private static double CalcParameterHveRef1(Section section, CalculationData heatingAndCoolingCalculations)`
+- `CalculateParameterQtrRef1` — lines 4430-4438
+  - `private static double CalculateParameterQtrRef1(CalculationData calculationdata, Section tempSection, ClimateZones climateZone, MonthlyDays month, out double parameterHtr)`
+- `CalculateParameterHtrRef` — lines 4439-4449
+  - `private static double CalculateParameterHtrRef(Section tempSection, double averageMontlyTemp, double averageInnerHeatTemp)`
+- `CalculateAverageHeatTempRef1` — lines 4450-4463
+  - `private static double CalculateAverageHeatTempRef1(Section section, CalculationData calculationdata, MonthlyDays month)`
+- `CalcAvgProjectTempRef1` — lines 4464-4472
+  - `private static double CalcAvgProjectTempRef1(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempRef1` — lines 4473-4482
+  - `private static double CalcAvgNonProjectTempRef1(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalculateaHref1` — lines 4483-4492
+  - `private static double CalculateaHref1(CalculationData calculationdata, Section tempSection, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateParameterNignRef1` — lines 4493-4510
+  - `private static double CalculateParameterNignRef1(CalculationData calculationdata, ClimateZones climateZone, MonthlyDays month, double gamma, Section section)`
+- `ApplyValuesToTempSectionRef1` — lines 4511-4517
+  - `private static void ApplyValuesToTempSectionRef1(Section tempSection, CalculationData calcData)`
+- `ApplyCoefficientG` — lines 4518-4540
+  - `private static void ApplyCoefficientG(Section tempSection, double gRef)`
+- `ApplyUroofsAndCeilings` — lines 4541-4582
+  - `private static void ApplyUroofsAndCeilings(Section tempSection, double unontransparentRef, double ufloorRef, double uceilingRef, double ufloorOtherRef)`
+- `ApplyUdirectionWalls` — lines 4583-4595
+  - `private static void ApplyUdirectionWalls(Section tempSection, double uOuterWallsRef, double uInnerWallsRef, double windowsRef)`
+- `ApplyToTrasparentRoofs` — lines 4596-4610
+  - `private static void ApplyToTrasparentRoofs(RoofStates roof, double windowsRef)`
+- `CopyByOrientation` — lines 4611-4638
+  - `private static void CopyByOrientation(WallsStates wall, double uouterWallsRef, double uInnerWallsRef, double windowsRef)`
+- `CopyGbyOrientation` — lines 4639-4650
+  - `private static void CopyGbyOrientation(WallsStates wall, double gRef)`
+- `OccupantsHoursRef2` — lines 4651-4655
+  - `private static int OccupantsHoursRef2(MonthlyDays month, Section tempSectionRef2)`
+- `CalculateRef2` — lines 4656-4669
+  - `private static double CalculateRef2(CalculationData heatingAndCoolingCalculations, Section section, CalculationInput calcInput, MonthlyDays month)`
+- `CalculateRef2` — lines 4670-4677
+  - `private static void CalculateRef2(CalculationData calcData, Section section, CalculationInput calcInput, List<double> energyByMonthsListRef2, Section tempSectionRef2, MonthlyDays month, List<double> latentHeatListRef2)`
+- `CalculateParameterQveRef2` — lines 4678-4683
+  - `private static double CalculateParameterQveRef2(Section section, CalculationData calculationData, ClimateZones climateZone, MonthlyDays month)`
+- `CalcParameterHveRef2` — lines 4684-4688
+  - `private static double CalcParameterHveRef2(Section section, CalculationData heatingAndCoolingCalculations)`
+- `CalculateParameterQtrRef2` — lines 4689-4697
+  - `private static double CalculateParameterQtrRef2(CalculationData calculationdata, Section tempSection, ClimateZones climateZone, MonthlyDays month, out double parameterHtr)`
+- `CalculateAverageHeatTempRef2` — lines 4698-4711
+  - `private static double CalculateAverageHeatTempRef2(Section section, CalculationData calculationdata, MonthlyDays month)`
+- `CalcAvgProjectTempRef2` — lines 4712-4720
+  - `private static double CalcAvgProjectTempRef2(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalcAvgNonProjectTempRef2` — lines 4721-4730
+  - `private static double CalcAvgNonProjectTempRef2(Section section, ClimateZones climateZone, CalculationData calculationData, MonthlyDays month)`
+- `CalculateaHref2` — lines 4731-4740
+  - `private static double CalculateaHref2(CalculationData calculationdata, Section tempSection, ClimateZones climateZone, MonthlyDays month)`
+- `CalculateParameterNignRef2` — lines 4741-4758
+  - `private static double CalculateParameterNignRef2(CalculationData calculationdata, ClimateZones climateZone, MonthlyDays month, double gamma, Section section)`
+- `ApplyValuesToTempSectionRef2` — lines 4759-4765
+  - `private static void ApplyValuesToTempSectionRef2(Section tempSection, CalculationData calcData)`
+- `HotWaterCalculationReferences` — lines 4766-4776
+  - `public static void HotWaterCalculationReferences(this CalculationData calc, Section section, CalculationInput calcInput)`
+- `HotWaterCalculationActual` — lines 4777-4784
+  - `public static void HotWaterCalculationActual(this CalculationData calc, Section section, CalculationInput calcInput)`
+- `HotWaterCalculationBaseLine` — lines 4785-4792
+  - `public static void HotWaterCalculationBaseLine(this CalculationData calc, Section section, CalculationInput calcInput)`
+- `HotWaterCalculationESM` — lines 4793-4800
+  - `public static void HotWaterCalculationESM(this CalculationData calc, Section section, CalculationInput calcInput)`
+- `CalculateGeneratorHotWaterEfficiencyRef1` — lines 4801-4816
+  - `public static void CalculateGeneratorHotWaterEfficiencyRef1(this CalculationData calc)`
+- `CalculateGeneratorHotWaterEfficiencyRef2` — lines 4817-4832
+  - `public static void CalculateGeneratorHotWaterEfficiencyRef2(this CalculationData calc)`
+- `CalculateGeneratorHotWaterEfficiencyActual` — lines 4833-4848
+  - `public static void CalculateGeneratorHotWaterEfficiencyActual(this CalculationData calc)`
+- `CalculateGeneratorHotWaterEfficiencyBaseLine` — lines 4849-4864
+  - `public static void CalculateGeneratorHotWaterEfficiencyBaseLine(this CalculationData calc)`
+- `CalculateGeneratorHotWaterEfficiencyEsm` — lines 4865-4880
+  - `public static void CalculateGeneratorHotWaterEfficiencyEsm(this CalculationData calc)`
+- `CalculateHotWaterNeededEnergyRef1` — lines 4881-4897
+  - `public static void CalculateHotWaterNeededEnergyRef1(this CalculationData calc)`
+- `CalculateHotWaterNeededEnergyRef2` — lines 4898-4914
+  - `public static void CalculateHotWaterNeededEnergyRef2(this CalculationData calc)`
+- `CalculateHotWaterNeededEnergyActual` — lines 4915-4931
+  - `public static void CalculateHotWaterNeededEnergyActual(this CalculationData calc)`
+- `CalculateHotWaterNeededEnergyBaseLine` — lines 4932-4948
+  - `public static void CalculateHotWaterNeededEnergyBaseLine(this CalculationData calc)`
+- `CalculateHotWaterNeededEnergyEsm` — lines 4949-4966
+  - `public static void CalculateHotWaterNeededEnergyEsm(this CalculationData calc)`
+- `CalculatePeriodsReference` — lines 4967-4976
+  - `public static void CalculatePeriodsReference(this CalculationData calcData, Section section)`
+- `CalculatePeriodsActual` — lines 4977-4983
+  - `public static void CalculatePeriodsActual(this CalculationData calcData, Section section)`
+- `CalculatePeriodsBaseLine` — lines 4984-4990
+  - `public static void CalculatePeriodsBaseLine(this CalculationData calcData, Section section)`
+- `CalculatePeriodsESM` — lines 4991-4997
+  - `public static void CalculatePeriodsESM(this CalculationData calcData, Section section)`
+- `CalculatePeriodsReferenceBalanced` — lines 4998-5007
+  - `public static void CalculatePeriodsReferenceBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsActualBalanced` — lines 5008-5014
+  - `public static void CalculatePeriodsActualBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsBaseLineBalanced` — lines 5015-5021
+  - `public static void CalculatePeriodsBaseLineBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsESMBalanced` — lines 5022-5028
+  - `public static void CalculatePeriodsESMBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsReferenceNonBalanced` — lines 5029-5038
+  - `public static void CalculatePeriodsReferenceNonBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsActualNonBalanced` — lines 5039-5045
+  - `public static void CalculatePeriodsActualNonBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsBaseLineNonBalanced` — lines 5046-5052
+  - `public static void CalculatePeriodsBaseLineNonBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsESMNonBalanced` — lines 5053-5059
+  - `public static void CalculatePeriodsESMNonBalanced(this CalculationData calcData, Section section)`
+- `CalculatePeriodsReferenceHotWaterPumps` — lines 5060-5069
+  - `public static void CalculatePeriodsReferenceHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculatePeriodsActualHotWaterPumps` — lines 5070-5076
+  - `public static void CalculatePeriodsActualHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculatePeriodsBaseLineHotWaterPumps` — lines 5077-5083
+  - `public static void CalculatePeriodsBaseLineHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculatePeriodsESMHotWaterPumps` — lines 5084-5090
+  - `public static void CalculatePeriodsESMHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef1` — lines 5091-5097
+  - `private static void CalculateHeatingPeriodRef1(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef2` — lines 5098-5104
+  - `private static void CalculateHeatingPeriodRef2(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef1` — lines 5105-5111
+  - `private static void CalculateCoolingPeriodRef1(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef2` — lines 5112-5118
+  - `private static void CalculateCoolingPeriodRef2(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef1` — lines 5119-5125
+  - `private static void CalculateAnnualPeriodRef1(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef2` — lines 5126-5132
+  - `private static void CalculateAnnualPeriodRef2(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodActual` — lines 5133-5176
+  - `private static void CalculateHeatingPeriodActual(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodActual` — lines 5177-5220
+  - `private static void CalculateCoolingPeriodActual(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodActual` — lines 5221-5264
+  - `private static void CalculateAnnualPeriodActual(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodBaseLine` — lines 5265-5308
+  - `private static void CalculateHeatingPeriodBaseLine(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodBaseLine` — lines 5309-5352
+  - `private static void CalculateCoolingPeriodBaseLine(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodBaseLine` — lines 5353-5396
+  - `private static void CalculateAnnualPeriodBaseLine(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodESM` — lines 5397-5440
+  - `private static void CalculateHeatingPeriodESM(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodESM` — lines 5441-5484
+  - `private static void CalculateCoolingPeriodESM(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodESM` — lines 5485-5528
+  - `private static void CalculateAnnualPeriodESM(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef1Balanced` — lines 5529-5535
+  - `private static void CalculateHeatingPeriodRef1Balanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef1Balanced` — lines 5536-5542
+  - `private static void CalculateCoolingPeriodRef1Balanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef1Balanced` — lines 5543-5549
+  - `private static void CalculateAnnualPeriodRef1Balanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef2Balanced` — lines 5550-5556
+  - `private static void CalculateHeatingPeriodRef2Balanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef2Balanced` — lines 5557-5563
+  - `private static void CalculateCoolingPeriodRef2Balanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef2Balanced` — lines 5564-5570
+  - `private static void CalculateAnnualPeriodRef2Balanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodActualBalanced` — lines 5571-5614
+  - `private static void CalculateHeatingPeriodActualBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodActualBalanced` — lines 5615-5658
+  - `private static void CalculateCoolingPeriodActualBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodActualBalanced` — lines 5659-5702
+  - `private static void CalculateAnnualPeriodActualBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodBaseLineBalanced` — lines 5703-5746
+  - `private static void CalculateHeatingPeriodBaseLineBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodBaseLineBalanced` — lines 5747-5790
+  - `private static void CalculateCoolingPeriodBaseLineBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodBaseLineBalanced` — lines 5791-5834
+  - `private static void CalculateAnnualPeriodBaseLineBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodESMBalanced` — lines 5835-5878
+  - `private static void CalculateHeatingPeriodESMBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodESMBalanced` — lines 5879-5922
+  - `private static void CalculateCoolingPeriodESMBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodESMBalanced` — lines 5923-5966
+  - `private static void CalculateAnnualPeriodESMBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef1NonBalanced` — lines 5967-5973
+  - `private static void CalculateHeatingPeriodRef1NonBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef2NonBalanced` — lines 5974-5980
+  - `private static void CalculateHeatingPeriodRef2NonBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef1NonBalanced` — lines 5981-5987
+  - `private static void CalculateCoolingPeriodRef1NonBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef2NonBalanced` — lines 5988-5994
+  - `private static void CalculateCoolingPeriodRef2NonBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef1NonBalanced` — lines 5995-6001
+  - `private static void CalculateAnnualPeriodRef1NonBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef2NonBalanced` — lines 6002-6008
+  - `private static void CalculateAnnualPeriodRef2NonBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodActualNonBalanced` — lines 6009-6044
+  - `private static void CalculateHeatingPeriodActualNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodActualNonBalanced` — lines 6045-6080
+  - `private static void CalculateCoolingPeriodActualNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodActualNonBalanced` — lines 6081-6116
+  - `private static void CalculateAnnualPeriodActualNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodBaseLineNonBalanced` — lines 6117-6160
+  - `private static void CalculateHeatingPeriodBaseLineNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodBaseLineNonBalanced` — lines 6161-6204
+  - `private static void CalculateCoolingPeriodBaseLineNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodBaseLineNonBalanced` — lines 6205-6248
+  - `private static void CalculateAnnualPeriodBaseLineNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodESMNonBalanced` — lines 6249-6292
+  - `private static void CalculateHeatingPeriodESMNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodESMNonBalanced` — lines 6293-6336
+  - `private static void CalculateCoolingPeriodESMNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodESMNonBalanced` — lines 6337-6380
+  - `private static void CalculateAnnualPeriodESMNonBalanced(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef1HotWaterPumps` — lines 6381-6387
+  - `private static void CalculateHeatingPeriodRef1HotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef1HotWaterPumps` — lines 6388-6394
+  - `private static void CalculateCoolingPeriodRef1HotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef1HotWaterPumps` — lines 6395-6401
+  - `private static void CalculateAnnualPeriodRef1HotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodRef2HotWaterPumps` — lines 6402-6408
+  - `private static void CalculateHeatingPeriodRef2HotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodRef2HotWaterPumps` — lines 6409-6415
+  - `private static void CalculateCoolingPeriodRef2HotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodRef2HotWaterPumps` — lines 6416-6422
+  - `private static void CalculateAnnualPeriodRef2HotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodActualHotWaterPumps` — lines 6423-6458
+  - `private static void CalculateHeatingPeriodActualHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodActualHotWaterPumps` — lines 6459-6494
+  - `private static void CalculateCoolingPeriodActualHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodActualHotWaterPumps` — lines 6495-6530
+  - `private static void CalculateAnnualPeriodActualHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodBaseLineHotWaterPumps` — lines 6531-6574
+  - `private static void CalculateHeatingPeriodBaseLineHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodBaseLineHotWaterPumps` — lines 6575-6618
+  - `private static void CalculateCoolingPeriodBaseLineHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodBaseLineHotWaterPumps` — lines 6619-6662
+  - `private static void CalculateAnnualPeriodBaseLineHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateHeatingPeriodESMHotWaterPumps` — lines 6663-6707
+  - `private static void CalculateHeatingPeriodESMHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateCoolingPeriodESMHotWaterPumps` — lines 6708-6752
+  - `private static void CalculateCoolingPeriodESMHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalculateAnnualPeriodESMHotWaterPumps` — lines 6753-6797
+  - `private static void CalculateAnnualPeriodESMHotWaterPumps(this CalculationData calcData, Section section)`
+- `CalcAvgMonthPower` — lines 6798-6817
+  - `private static double CalcAvgMonthPower(ScheduleMonth schedule, MonthlyDays month)`
+- `CalcWeekPower` — lines 6818-6834
+  - `private static double CalcWeekPower(MonthState month)`
+- `CalculateZonePowerEnergy` — lines 6835-6852
+  - `public static void CalculateZonePowerEnergy(this Results zoneBalanceResult, Section section, BuildingZone zone, Results results)`
+- `CalculateBuildingPowerEnergy` — lines 6853-6862
+  - `public static void CalculateBuildingPowerEnergy(CalculationInput calcInput, Results buildingBalanceResult)`
+- `CalculateBuildingHeatingPower` — lines 6863-6876
+  - `public static void CalculateBuildingHeatingPower(CalculationInput calcInput, Results buildingBalanceResult)`
+- `CalculateBuildingSourcePower` — lines 6877-6913
+  - `public static void CalculateBuildingSourcePower(CalculationInput calcInput, Results buildingBalanceResult)`
+- `CalculateHeatingPower` — lines 6914-6939
+  - `public static void CalculateHeatingPower(this CalculationData calcData, Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel1` — lines 6940-6979
+  - `public static void CalculateEnergySourcePowerFuel1(BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel1Area` — lines 6980-7019
+  - `public static void CalculateEnergySourcePowerFuel1Area(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel2` — lines 7020-7059
+  - `public static void CalculateEnergySourcePowerFuel2(BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel2Area` — lines 7060-7099
+  - `public static void CalculateEnergySourcePowerFuel2Area(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel1BaseLine` — lines 7100-7139
+  - `public static void CalculateEnergySourcePowerFuel1BaseLine(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel1BaseLineArea` — lines 7140-7179
+  - `public static void CalculateEnergySourcePowerFuel1BaseLineArea(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel2BaseLine` — lines 7180-7219
+  - `public static void CalculateEnergySourcePowerFuel2BaseLine(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel2BaseLineArea` — lines 7220-7259
+  - `public static void CalculateEnergySourcePowerFuel2BaseLineArea(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel1Esm` — lines 7260-7299
+  - `public static void CalculateEnergySourcePowerFuel1Esm(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel1EsmArea` — lines 7300-7339
+  - `public static void CalculateEnergySourcePowerFuel1EsmArea(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel2Esm` — lines 7340-7379
+  - `public static void CalculateEnergySourcePowerFuel2Esm(Section section, BuildingZone zone, Results results)`
+- `CalculateEnergySourcePowerFuel2EsmArea` — lines 7380-7419
+  - `public static void CalculateEnergySourcePowerFuel2EsmArea(Section section, BuildingZone zone, Results results)`
+- `ClearFuelCellsPowerTable` — lines 7420-7489
+  - `public static void ClearFuelCellsPowerTable(Results zoneBalanceResult)`
+- `ClearFuelCellsPowerTableBuilding` — lines 7490-7559
+  - `public static void ClearFuelCellsPowerTableBuilding(this CalculationData calcData, Results buildingBalanceResult)`
+- `CalculateFuelValue` — lines 7560-7565
+  - `private static double CalculateFuelValue(BuildingZone zone, Results results)`
+- `CalculateFuelValueBaseLine` — lines 7566-7571
+  - `private static double CalculateFuelValueBaseLine(BuildingZone zone, Results results)`
+- `CalculateFuelValueEsm` — lines 7572-7577
+  - `private static double CalculateFuelValueEsm(BuildingZone zone, Results results)`
+- `CalculateFuel2Value` — lines 7578-7583
+  - `private static double CalculateFuel2Value(BuildingZone zone, Results results)`
+- `CalculateFuel2ValueBaseLine` — lines 7584-7589
+  - `private static double CalculateFuel2ValueBaseLine(BuildingZone zone, Results results)`
+- `CalculateFuel2ValueEsm` — lines 7590-7595
+  - `private static double CalculateFuel2ValueEsm(BuildingZone zone, Results results)`
+- `CalculateFuelAreaValue` — lines 7596-7600
+  - `private static double CalculateFuelAreaValue(BuildingZone zone, Results results, Section section)`
+- `CalculateFuelAreaValueBaseLine` — lines 7601-7605
+  - `private static double CalculateFuelAreaValueBaseLine(BuildingZone zone, Results results, Section section)`
+- `CalculateFuelAreaValueEsm` — lines 7606-7610
+  - `private static double CalculateFuelAreaValueEsm(BuildingZone zone, Results results, Section section)`
+- `CalculateFuel2AreaValue` — lines 7611-7615
+  - `private static double CalculateFuel2AreaValue(BuildingZone zone, Results results, Section section)`
+- `CalculateFuel2AreaValueBaseLine` — lines 7616-7620
+  - `private static double CalculateFuel2AreaValueBaseLine(BuildingZone zone, Results results, Section section)`
+- `CalculateFuel2AreaValueEsm` — lines 7621-7625
+  - `private static double CalculateFuel2AreaValueEsm(BuildingZone zone, Results results, Section section)`
+- `ClearPrimaryEnergy` — lines 7626-7684
+  - `private static void ClearPrimaryEnergy(Results zoneBalanceResult)`
+- `CalculatePrimaryEnergyByTechnologies` — lines 7685-7914
+  - `private static void CalculatePrimaryEnergyByTechnologies(Results zoneBalanceResult, BuildingZone zone, bool isBGVused, double totalArea = 1.0, bool isFirstBuildingZone = true)`
+- `CalculatePrimaryEnergyPerArea` — lines 7915-8012
+  - `private static void CalculatePrimaryEnergyPerArea(Results buildingBalanceResult, double area, bool isBGVused)`
+- `CalculatePrimaryFuelTypeAndValuesPerArea` — lines 8013-8082
+  - `private static void CalculatePrimaryFuelTypeAndValuesPerArea(Results buildingBalanceResult, double area)`
+- `CalculatePrimaryTotalEnergy` — lines 8083-8091
+  - `private static void CalculatePrimaryTotalEnergy(Results buildingBalanceResult)`
+- `CalculateTotalPrimaryRef1` — lines 8092-8096
+  - `private static void CalculateTotalPrimaryRef1(Results buildingBalanceResult)`
+- `CalculateTotalPrimaryRef2` — lines 8097-8101
+  - `private static void CalculateTotalPrimaryRef2(Results buildingBalanceResult)`
+- `CalculateTotalPrimaryEsm` — lines 8102-8106
+  - `private static void CalculateTotalPrimaryEsm(Results buildingBalanceResult)`
+- `CalculateTotalPrimaryBaseLine` — lines 8107-8111
+  - `private static void CalculateTotalPrimaryBaseLine(Results buildingBalanceResult)`
+- `CalculateTotalPrimaryActual` — lines 8112-8116
+  - `private static void CalculateTotalPrimaryActual(Results buildingBalanceResult)`
+- `CalculateFuelSavings` — lines 8117-8131
+  - `private static void CalculateFuelSavings(Results zoneBalanceResult)`
+- `GetPrimaryFuelTypeAndValues` — lines 8132-8243
+  - `private static void GetPrimaryFuelTypeAndValues(Results zoneBalanceResult, BuildingZone zone, bool isBGVused, double totalArea, bool isFirstBuildingZone = true)`
+- `GetPrimaryFuelTypeRef1` — lines 8244-8287
+  - `private static void GetPrimaryFuelTypeRef1(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetPrimaryFuelTypeRef2` — lines 8288-8327
+  - `private static void GetPrimaryFuelTypeRef2(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetPrimaryFuelType` — lines 8328-8371
+  - `private static void GetPrimaryFuelType(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetPrimaryFuelTypeBaseLine` — lines 8372-8415
+  - `private static void GetPrimaryFuelTypeBaseLine(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetPrimaryFuelTypeEsm` — lines 8416-8459
+  - `private static void GetPrimaryFuelTypeEsm(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `CalculatePrimaryEnergyFuelTotal` — lines 8460-8469
+  - `private static void CalculatePrimaryEnergyFuelTotal(Results zoneBalanceResult)`
+- `CalculateTotalPrimaryFuelRef1` — lines 8470-8474
+  - `private static void CalculateTotalPrimaryFuelRef1(Results zoneBalanceResult)`
+- `CalculateTotalPrimaryFuelRef2` — lines 8475-8479
+  - `private static void CalculateTotalPrimaryFuelRef2(Results zoneBalanceResult)`
+- `CalculateTotalPrimaryFuelActual` — lines 8480-8484
+  - `private static void CalculateTotalPrimaryFuelActual(Results zoneBalanceResult)`
+- `CalculateTotalPrimaryFuelBaseLine` — lines 8485-8489
+  - `private static void CalculateTotalPrimaryFuelBaseLine(Results zoneBalanceResult)`
+- `CalculateTotalPrimaryFuelESM` — lines 8490-8494
+  - `private static void CalculateTotalPrimaryFuelESM(Results zoneBalanceResult)`
+- `CalculateTotalPrimaryFuelSavings` — lines 8495-8499
+  - `private static void CalculateTotalPrimaryFuelSavings(Results zoneBalanceResult)`
+- `GetPrimaryEnergyCoeficient` — lines 8500-8522
+  - `private static double GetPrimaryEnergyCoeficient(Fuel fuel, double quantity)`
+- `BuildingCalculations` — lines 8523-8565
+  - `public static void BuildingCalculations(this Results buildingBalanceResult, CalculationInput calcInput, Results zoneBalanceResult)`
+- `ZoneCalculations` — lines 8566-8592
+  - `public static void ZoneCalculations(this Results zoneBalanceResult, CalculationInput calcInput, BuildingZone zone)`
+- `SetScaleValues` — lines 8593-8598
+  - `private static void SetScaleValues(CalculationInput calcInput)`
+- `BuildingCO2Calculations` — lines 8599-8618
+  - `private static void BuildingCO2Calculations(this Results buildingBalanceResult, CalculationInput calcInput)`
+- `ZoneCO2Calculations` — lines 8619-8629
+  - `private static void ZoneCO2Calculations(this Results zoneBalanceResult, BuildingZone zone, bool isBGVused)`
+- `GetBuildingData` — lines 8630-8643
+  - `private static void GetBuildingData(Results buildingBalanceResult, CalculationInput calcInput)`
+- `ClearPrimaryEnergyFuelTableValues` — lines 8644-8652
+  - `private static void ClearPrimaryEnergyFuelTableValues(Results zoneBalanceResult)`
+- `ClearValuesFuelRef1` — lines 8653-8667
+  - `private static void ClearValuesFuelRef1(Results zoneBalanceResult)`
+- `ClearValuesFuelRef2` — lines 8668-8682
+  - `private static void ClearValuesFuelRef2(Results zoneBalanceResult)`
+- `ClearValuesFuelActual` — lines 8683-8697
+  - `private static void ClearValuesFuelActual(Results zoneBalanceResult)`
+- `ClearValuesFuelBaseLine` — lines 8698-8712
+  - `private static void ClearValuesFuelBaseLine(Results zoneBalanceResult)`
+- `ClearValuesFuelESM` — lines 8713-8727
+  - `private static void ClearValuesFuelESM(Results zoneBalanceResult)`
+- `UpdateRefsState` — lines 8728-8779
+  - `private static void UpdateRefsState(Results buildingBalanceResult, CalculationInput calcInput)`
+- `UpdateActualState` — lines 8780-8809
+  - `private static void UpdateActualState(Results buildingBalanceResult, CalculationInput calcInput)`
+- `UpdateBaseLineState` — lines 8810-8839
+  - `private static void UpdateBaseLineState(Results buildingBalanceResult, CalculationInput calcInput)`
+- `UpdateEsmState` — lines 8840-8869
+  - `private static void UpdateEsmState(Results buildingBalanceResult, CalculationInput calcInput)`
+- `GetVeiHeating` — lines 8870-8887
+  - `private static void GetVeiHeating(Results zoneBalanceResult, Fuel fuel, double efficiency, double quantity, double area)`
+- `GetVeiHeatVentilation` — lines 8888-8905
+  - `private static void GetVeiHeatVentilation(Results zoneBalanceResult, Fuel fuel, double efficiency, double quantity, double heatedArea)`
+- `GetVeiBGV` — lines 8906-8923
+  - `private static void GetVeiBGV(Results zoneBalanceResult, Fuel fuel, double efficiency, double quantity, double heatedArea)`
+- `CalculateElectricityVEI` — lines 8924-8928
+  - `private static double CalculateElectricityVEI(double efficiency, double quantity)`
+- `CalculateTotalsNeededEnergyTable` — lines 8929-8940
+  - `private static void CalculateTotalsNeededEnergyTable(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalRefsYearly` — lines 8941-8953
+  - `private static void CalculateTotalRefsYearly(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalRefs` — lines 8954-8966
+  - `private static void CalculateTotalRefs(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalEsmYearly` — lines 8967-8976
+  - `private static void CalculateTotalEsmYearly(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalVei` — lines 8977-8989
+  - `private static void CalculateTotalVei(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalEsm` — lines 8990-8999
+  - `private static void CalculateTotalEsm(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalBaseLineYearly` — lines 9000-9009
+  - `private static void CalculateTotalBaseLineYearly(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalBaseLine` — lines 9010-9019
+  - `private static void CalculateTotalBaseLine(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalActualYearly` — lines 9020-9029
+  - `private static void CalculateTotalActualYearly(Results buildingBalanceResult, bool isBGVused)`
+- `CalculateTotalActual` — lines 9030-9039
+  - `private static void CalculateTotalActual(Results buildingBalanceResult, bool isBGVused)`
+- `GetFuelTypeAndValues` — lines 9040-9189
+  - `private static void GetFuelTypeAndValues(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused, double area, double totalArea, bool isFirstBuildingZone = true)`
+- `GetFuelTypeRef1` — lines 9190-9233
+  - `private static void GetFuelTypeRef1(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeRef2` — lines 9234-9277
+  - `private static void GetFuelTypeRef2(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelType` — lines 9278-9321
+  - `private static void GetFuelType(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeBaseLine` — lines 9322-9365
+  - `private static void GetFuelTypeBaseLine(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeEsm` — lines 9366-9409
+  - `private static void GetFuelTypeEsm(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `CalculateTotalFuelEnergy` — lines 9410-9418
+  - `private static void CalculateTotalFuelEnergy(Results zoneBalanceResult)`
+- `CalculateTotalFuelRef1` — lines 9419-9423
+  - `private static void CalculateTotalFuelRef1(Results zoneBalanceResult)`
+- `CalculateTotalFuelRef2` — lines 9424-9428
+  - `private static void CalculateTotalFuelRef2(Results zoneBalanceResult)`
+- `CalculateTotalFuelActual` — lines 9429-9433
+  - `private static void CalculateTotalFuelActual(Results zoneBalanceResult)`
+- `CalculateTotalFuelBaseLine` — lines 9434-9438
+  - `private static void CalculateTotalFuelBaseLine(Results zoneBalanceResult)`
+- `CalculateTotalFuelESM` — lines 9439-9443
+  - `private static void CalculateTotalFuelESM(Results zoneBalanceResult)`
+- `ClearFuelCells` — lines 9444-9524
+  - `private static void ClearFuelCells(Results zoneBalanceResult)`
+- `ClearFuelCellsCO2` — lines 9525-9583
+  - `private static void ClearFuelCellsCO2(Results zoneBalanceResult)`
+- `CheckForNaN` — lines 9584-9592
+  - `private static double CheckForNaN(double value)`
+- `CalculateNetEnergyByTechnologies` — lines 9593-9653
+  - `private static void CalculateNetEnergyByTechnologies(Results zoneResults, BuildingZone buldingZone)`
+- `CalculateNetEnergyPerArea` — lines 9654-9685
+  - `private static void CalculateNetEnergyPerArea(this Results buildingBalanceResult)`
+- `CalculateNetWithoutInputsEnergyByTechnologiesPerArea` — lines 9686-9713
+  - `private static void CalculateNetWithoutInputsEnergyByTechnologiesPerArea(this Results buildingBalanceResult)`
+- `CalculateNetEnergyByTechnologiesBuilding` — lines 9714-9794
+  - `private static void CalculateNetEnergyByTechnologiesBuilding(Results zoneResults, BuildingZone buldingZone)`
+- `ClearNeededVEIenergy` — lines 9795-9806
+  - `private static void ClearNeededVEIenergy(Results zoneResults)`
+- `ClearNetEnergy` — lines 9807-9860
+  - `private static void ClearNetEnergy(Results zoneResults)`
+- `CalculateNetWithoutInputsEnergyByTechnologies` — lines 9861-9921
+  - `private static void CalculateNetWithoutInputsEnergyByTechnologies(Results zoneResults, BuildingZone buldingZone)`
+- `ClearNetEnergyWithoutInputs` — lines 9922-9973
+  - `private static void ClearNetEnergyWithoutInputs(Results zoneResults)`
+- `ClearValuesCO2` — lines 9974-9982
+  - `private static void ClearValuesCO2(Results zoneBalanceResult)`
+- `ClearValuesCO2Ref1` — lines 9983-9999
+  - `private static void ClearValuesCO2Ref1(Results zoneBalanceResult)`
+- `ClearValuesCO2Ref2` — lines 10000-10016
+  - `private static void ClearValuesCO2Ref2(Results zoneBalanceResult)`
+- `ClearValuesCO2Actual` — lines 10017-10033
+  - `private static void ClearValuesCO2Actual(Results zoneBalanceResult)`
+- `ClearValuesCO2BaseLine` — lines 10034-10050
+  - `private static void ClearValuesCO2BaseLine(Results zoneBalanceResult)`
+- `ClearValuesCO2ESM` — lines 10051-10067
+  - `private static void ClearValuesCO2ESM(Results zoneBalanceResult)`
+- `CalculateCO2Emissions` — lines 10068-10076
+  - `private static void CalculateCO2Emissions(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `CalculateCO2EmissionsRef1` — lines 10077-10117
+  - `private static void CalculateCO2EmissionsRef1(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `CalculateTotalCO2Ref1` — lines 10118-10123
+  - `private static void CalculateTotalCO2Ref1(Results zoneBalanceResult)`
+- `CalculateCO2EmissionsRef2` — lines 10124-10164
+  - `private static void CalculateCO2EmissionsRef2(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `CalculateTotalCO2Ref2` — lines 10165-10170
+  - `private static void CalculateTotalCO2Ref2(Results zoneBalanceResult)`
+- `CalculateCO2EmissionsActual` — lines 10171-10217
+  - `private static void CalculateCO2EmissionsActual(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `CalculateTotalCO2Actual` — lines 10218-10223
+  - `private static void CalculateTotalCO2Actual(Results zoneBalanceResult)`
+- `CalculateCO2EmissionsBaseLine` — lines 10224-10270
+  - `private static void CalculateCO2EmissionsBaseLine(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `CalculateTotalCO2BaseLine` — lines 10271-10276
+  - `private static void CalculateTotalCO2BaseLine(Results zoneBalanceResult)`
+- `CalculateCO2EmissionsESM` — lines 10277-10323
+  - `private static void CalculateCO2EmissionsESM(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `CalculateTotalCO2ESM` — lines 10324-10329
+  - `private static void CalculateTotalCO2ESM(Results zoneBalanceResult)`
+- `CalculateSavings` — lines 10330-10345
+  - `private static void CalculateSavings(GeneralResultTable emmTable)`
+- `CalculateFuelSavings` — lines 10346-10361
+  - `private static void CalculateFuelSavings(GeneralResultTable fuelTable)`
+- `CO2EnergyZoneCalculations` — lines 10362-10370
+  - `private static void CO2EnergyZoneCalculations(Results zoneBalanceResult, BuildingZone zone, bool isBGVused)`
+- `Co2EnergyCalculationZoneRef1` — lines 10371-10411
+  - `private static void Co2EnergyCalculationZoneRef1(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationZoneRef2` — lines 10412-10452
+  - `private static void Co2EnergyCalculationZoneRef2(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationZoneActual` — lines 10453-10499
+  - `private static void Co2EnergyCalculationZoneActual(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationZoneBaseLine` — lines 10500-10546
+  - `private static void Co2EnergyCalculationZoneBaseLine(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationZoneESM` — lines 10547-10593
+  - `private static void Co2EnergyCalculationZoneESM(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2GetFuelTypesBuilding` — lines 10594-10602
+  - `private static void Co2GetFuelTypesBuilding(Results buildingResults, BuildingZone buildZone)`
+- `Co2EnergyCalculationBuildingRef1` — lines 10603-10632
+  - `private static void Co2EnergyCalculationBuildingRef1(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationBuildingRef2` — lines 10633-10662
+  - `private static void Co2EnergyCalculationBuildingRef2(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationBuildingActual` — lines 10663-10698
+  - `private static void Co2EnergyCalculationBuildingActual(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationBuildingBaseLine` — lines 10699-10734
+  - `private static void Co2EnergyCalculationBuildingBaseLine(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2EnergyCalculationBuildingESM` — lines 10735-10770
+  - `private static void Co2EnergyCalculationBuildingESM(Results zoneBalanceResult, BuildingZone buildZone, bool isBGVused)`
+- `Co2CalculateEmissionEnergySupplyBuilding` — lines 10771-10779
+  - `private static void Co2CalculateEmissionEnergySupplyBuilding(Results buildingResults)`
+- `Co2EnergyCalcBuildingRef1` — lines 10780-10795
+  - `private static void Co2EnergyCalcBuildingRef1(Results zoneBalanceResult)`
+- `Co2EnergyCalcBuildingRef2` — lines 10796-10811
+  - `private static void Co2EnergyCalcBuildingRef2(Results zoneBalanceResult)`
+- `Co2EnergyCalcBuildingActual` — lines 10812-10827
+  - `private static void Co2EnergyCalcBuildingActual(Results zoneBalanceResult)`
+- `Co2EnergyCalcBuildingBaseLine` — lines 10828-10843
+  - `private static void Co2EnergyCalcBuildingBaseLine(Results zoneBalanceResult)`
+- `Co2EnergyCalcBuildingESM` — lines 10844-10859
+  - `private static void Co2EnergyCalcBuildingESM(Results zoneBalanceResult)`
+- `Co2EnergyCalculateTotal` — lines 10860-10868
+  - `private static void Co2EnergyCalculateTotal(Results zoneBalanceResult)`
+- `GetFuelTypeCo2Ref1` — lines 10869-10912
+  - `private static void GetFuelTypeCo2Ref1(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeCo2Ref2` — lines 10913-10956
+  - `private static void GetFuelTypeCo2Ref2(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeCo2Actual` — lines 10957-11000
+  - `private static void GetFuelTypeCo2Actual(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeCo2BaseLine` — lines 11001-11044
+  - `private static void GetFuelTypeCo2BaseLine(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetFuelTypeCo2ESM` — lines 11045-11088
+  - `private static void GetFuelTypeCo2ESM(Results zoneBalanceResult, Fuel fuel, double quantity, double area)`
+- `GetEkoCoeficient` — lines 11089-11111
+  - `private static double GetEkoCoeficient(Fuel fuel, double quantity)`
+- `CalcTotalArea` — lines 11112-11116
+  - `private static double CalcTotalArea(CalculationInput calcInput)`
+- `GetConditionedArea` — lines 11117-11122
+  - `private static void GetConditionedArea(CalculationInput calcInput, Results buildingBalanceResult)`
+- `SetFuelValue` — lines 11123-11131
+  - `private static void SetFuelValue(Results buildingBalanceResult, double area)`
+- `CalculateFuelESM` — lines 11132-11146
+  - `private static void CalculateFuelESM(Results buildingBalanceResult, double area)`
+- `CalculateFuelBaseLine` — lines 11147-11161
+  - `private static void CalculateFuelBaseLine(Results buildingBalanceResult, double area)`
+- `CalculateFuelActual` — lines 11162-11176
+  - `private static void CalculateFuelActual(Results buildingBalanceResult, double area)`
+- `CalculateFuelRef2` — lines 11177-11191
+  - `private static void CalculateFuelRef2(Results buildingBalanceResult, double area)`
+- `CalculateFuelRef1` — lines 11192-11206
+  - `private static void CalculateFuelRef1(Results buildingBalanceResult, double area)`
+- `CalculateHeatingSavings` — lines 11207-11312
+  - `public static void CalculateHeatingSavings(this CalculationData calcData, Section section, CalculationInput calcInput, BuildingZone zone, CalculationData lightsAndDevicesCalculationData)`
+- `CheckForDifferentFuelSources` — lines 11313-11360
+  - `public static void CheckForDifferentFuelSources(CalculationData tempCalculationdata)`
+- `CheckForDifferentFuelSourcesESM` — lines 11361-11408
+  - `public static void CheckForDifferentFuelSourcesESM(CalculationData tempCalculationdata)`
+- `CreateHeatingVirtualBaseLine` — lines 11409-11431
+  - `public static List<DataRow> CreateHeatingVirtualBaseLine(CalculationData tempCalculationdata, Section section, CalculationInput calcInput, BuildingZone zone, CalculationData lightsAndDevicesCalculationData)`
+- `CreateHeatingVirtualESM` — lines 11432-11454
+  - `public static List<DataRow> CreateHeatingVirtualESM(CalculationData tempCalculationdata, Section section, CalculationInput calcInput, BuildingZone zone, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateCoolingSavings` — lines 11455-11558
+  - `public static void CalculateCoolingSavings(this CalculationData calcData, Section section, CalculationInput calcInput, BuildingZone zone, CalculationData lightsAndDevicesCalculationData, CalculationData ventCool)`
+- `CreateCoolingVirtualBaseLine` — lines 11559-11576
+  - `public static List<DataRow> CreateCoolingVirtualBaseLine(CalculationData tempCalculationdata, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, List<MonthlyDays> monthslist, CalculationData ventCool)`
+- `CreateCoolingVirtualESM` — lines 11577-11594
+  - `public static List<DataRow> CreateCoolingVirtualESM(CalculationData tempCalculationdata, Section section, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData, List<MonthlyDays> monthslist, CalculationData ventCool)`
+- `CalculateVentilationHeatingSavings` — lines 11595-11692
+  - `public static void CalculateVentilationHeatingSavings(this CalculationData calcData, Section section, CalculationInput calcInput, BuildingZone zone, HeatingCalculations heatCalculations)`
+- `CalculateVentilationCoolingSavings` — lines 11693-11790
+  - `public static void CalculateVentilationCoolingSavings(this CalculationData calcData, Section section, CalculationInput calcInput, BuildingZone zone, CoolingCalculations coolCalculations)`
+- `CalculateFansAndPumpsHeatingSavings` — lines 11791-11842
+  - `public static void CalculateFansAndPumpsHeatingSavings(this HeatingCalculations calc, Section section, BuildingZone zone)`
+- `SetHeatingFansAndPumpsSavingsValues` — lines 11843-11850
+  - `public static void SetHeatingFansAndPumpsSavingsValues(IList<SavingsData> savings)`
+- `CheckHeatingForFansAndPumpsSavings` — lines 11851-11900
+  - `public static IList<SavingsData> CheckHeatingForFansAndPumpsSavings(string technology)`
+- `CalculateFansAndPumpsCoolingSavings` — lines 11901-11962
+  - `public static void CalculateFansAndPumpsCoolingSavings(this HeatingCalculations calc, Section section, BuildingZone zone)`
+- `SetCoolingFansAndPumpsSavingsValues` — lines 11963-11972
+  - `public static void SetCoolingFansAndPumpsSavingsValues(IList<SavingsData> savings)`
+- `CheckCoolingForFansAndPumpsSavings` — lines 11973-12044
+  - `public static IList<SavingsData> CheckCoolingForFansAndPumpsSavings(string technology)`
+- `CalculateLightsSavings` — lines 12045-12065
+  - `public static void CalculateLightsSavings(this CalculationData calcData, Section section, BuildingZone zone)`
+- `CalculateBalancedDevicesSavings` — lines 12066-12086
+  - `public static void CalculateBalancedDevicesSavings(this CalculationData calcData, Section section, BuildingZone zone)`
+- `CalculateNonBalancedDevicesSavings` — lines 12087-12107
+  - `public static void CalculateNonBalancedDevicesSavings(this CalculationData calcData, Section section, BuildingZone zone)`
+- `CalculateHotWaterPumpsSavings` — lines 12108-12125
+  - `public static void CalculateHotWaterPumpsSavings(this CalculationData calcData, Section section, BuildingZone zone)`
+- `CalculatePeriod` — lines 12126-12195
+  - `public static void CalculatePeriod(LightsAndDevicesPeriods period, double totalWeeks, string technology, BuildingZone zone)`
+- `SetLightsAndDevicesSavingsvalues` — lines 12196-12201
+  - `public static void SetLightsAndDevicesSavingsvalues(LightsAndDevicesPeriods period, IList<SavingsData> savings)`
+- `CheckLightsAndDevicesSavings` — lines 12202-12229
+  - `public static IList<SavingsData> CheckLightsAndDevicesSavings(LightsAndDevicesPeriods period, string technology)`
+- `CalculateHotWaterSavings` — lines 12230-12317
+  - `public static void CalculateHotWaterSavings(this CalculationData calcData, Section section, CalculationInput calcInput)`
+- `CheckForHotWaterSavings` — lines 12318-12356
+  - `private static IList<SavingsData> CheckForHotWaterSavings(string technology)`
+- `SetHotWaterSavingsValues` — lines 12357-12375
+  - `private static void SetHotWaterSavingsValues(IList<SavingsData> savings)`
+- `AddSavingsToZone` — lines 12376-12406
+  - `private static void AddSavingsToZone(IList<SavingsData> savings, BuildingZone zone, string technology)`
+- `AddSavingsToBuilding` — lines 12407-12452
+  - `private static void AddSavingsToBuilding(IList<SavingsData> savings, CalculationInput calcInput, string technology)`
+- `SetSavingsValues` — lines 12453-12484
+  - `private static void SetSavingsValues(IList<SavingsData> savings)`
+- `CheckForSavings` — lines 12485-12646
+  - `private static IList<SavingsData> CheckForSavings(string technology)`
+- `CheckForFuelSavings` — lines 12647-12796
+  - `private static IList<SavingsData> CheckForFuelSavings(string technology, CalculationData tempCalcData)`
+- `SetVentilationSavingsValues` — lines 12797-12823
+  - `private static void SetVentilationSavingsValues(IList<SavingsData> savings)`
+- `CheckForVentilationSavings` — lines 12824-12928
+  - `private static IList<SavingsData> CheckForVentilationSavings(string technology)`
+- `CheckAndCalculateNegativeSavings` — lines 12929-12943
+  - `private static void CheckAndCalculateNegativeSavings(IList<SavingsData> savings)`
+- `GetValue` — lines 12944-12954
+  - `private static double GetValue(IEnumerable<DataRow> baseLine, string tag)`
+- `GetSaving` — lines 12955-12964
+  - `private static string GetSaving(IEnumerable<SavingsData> savings, string tag)`
+- `CalculateEnergy` — lines 12965-12972
+  - `private static void CalculateEnergy(CalculationData calcData, Section section, BuildingZone zone, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData)`
+- `CalculateEnergyESM` — lines 12973-12980
+  - `private static void CalculateEnergyESM(CalculationData calcData, Section section, BuildingZone zone, CalculationInput calcInput, CalculationData lightsAndDevicesCalculationData)`
+- `GetBaseLine` — lines 12981-13187
+  - `private static List<DataRow> GetBaseLine(CalculationData tempCalculationData)`
+- `GetESM` — lines 13188-13394
+  - `private static List<DataRow> GetESM(CalculationData tempCalculationData)`
+- `GetVentilationBaseLine` — lines 13395-13561
+  - `private static List<DataRow> GetVentilationBaseLine(CalculationData tempCalculationData)`
+- `SetBaseLine` — lines 13562-13621
+  - `private static CalculationData SetBaseLine(IList<DataRow> baseLine, CalculationData toCalcData)`
+- `SetESM` — lines 13622-13681
+  - `private static CalculationData SetESM(IList<DataRow> esm, CalculationData toCalcData)`
+- `SetVentilationBaseLine` — lines 13682-13734
+  - `private static CalculationData SetVentilationBaseLine(IList<DataRow> baseLine, CalculationData toCalcData)`
+- `GetHotWaterBaseLine` — lines 13735-13866
+  - `private static List<DataRow> GetHotWaterBaseLine(CalculationData tempCalculationData)`
+- `SetHotWaterBaseLine` — lines 13867-13910
+  - `private static CalculationData SetHotWaterBaseLine(IList<DataRow> baseLine, CalculationData toCalcData)`
+- `CalculateUsavingType` — lines 13911-13939
+  - `private static void CalculateUsavingType(string tag, Section tempSection, Section section)`
+- `CalculateUsavingTypeESM` — lines 13940-13970
+  - `private static void CalculateUsavingTypeESM(string tag, Section tempSection, Section section)`
+- `CopyHeatingWorkingSchedule` — lines 13971-13980
+  - `private static void CopyHeatingWorkingSchedule(Section tempSection, Section section)`
+- `CopyHeatingWorkingScheduleESM` — lines 13981-13990
+  - `private static void CopyHeatingWorkingScheduleESM(Section tempSection, Section section)`
+- `CopyVentilationHeatingWorkingSchedule` — lines 13991-14000
+  - `private static void CopyVentilationHeatingWorkingSchedule(Section tempSection, Section section)`
+- `CopyCoolingWorkingSchedule` — lines 14001-14010
+  - `private static void CopyCoolingWorkingSchedule(Section tempSection, Section section)`
+- `CopyCoolingWorkingScheduleESM` — lines 14011-14020
+  - `private static void CopyCoolingWorkingScheduleESM(Section tempSection, Section section)`
+- `CopyVentilationCoolingWorkingSchedule` — lines 14021-14030
+  - `private static void CopyVentilationCoolingWorkingSchedule(Section tempSection, Section section)`
+- `CalculateGsavings` — lines 14031-14043
+  - `private static void CalculateGsavings(Section tempSection, Section section)`
+- `CalculateGsavingsESM` — lines 14044-14056
+  - `private static void CalculateGsavingsESM(Section tempSection, Section section)`
+- `CopyWindowselements` — lines 14057-14067
+  - `private static void CopyWindowselements(WallsStates tempWall, WallsStates wall)`
+- `CopyWindowselementsESM` — lines 14068-14078
+  - `private static void CopyWindowselementsESM(WallsStates tempWall, WallsStates wall)`
+- `CopyTrasparentGelements` — lines 14079-14092
+  - `private static void CopyTrasparentGelements(RoofStates tempRoof, RoofStates roof)`
+- `CopyTrasparentGelementsESM` — lines 14093-14106
+  - `private static void CopyTrasparentGelementsESM(RoofStates tempRoof, RoofStates roof)`
+- `CalculateUfloorSavings` — lines 14107-14111
+  - `private static void CalculateUfloorSavings(Section tempSection, Section section)`
+- `CalculateUfloorSavingsESM` — lines 14112-14116
+  - `private static void CalculateUfloorSavingsESM(Section tempSection, Section section)`
+- `CopyFloorElements` — lines 14117-14127
+  - `private static void CopyFloorElements(FloorStates tempfloor, FloorStates floor)`
+- `CopyFloorElementsESM` — lines 14128-14138
+  - `private static void CopyFloorElementsESM(FloorStates tempfloor, FloorStates floor)`
+- `CalculateUfloorOthersavings` — lines 14139-14143
+  - `private static void CalculateUfloorOthersavings(Section tempSection, Section section)`
+- `CalculateUfloorOthersavingsESM` — lines 14144-14148
+  - `private static void CalculateUfloorOthersavingsESM(Section tempSection, Section section)`
+- `CopyOtherFloorElements` — lines 14149-14159
+  - `private static void CopyOtherFloorElements(FloorStates tempfloor, FloorStates floor)`
+- `CopyOtherFloorElementsESM` — lines 14160-14170
+  - `private static void CopyOtherFloorElementsESM(FloorStates tempfloor, FloorStates floor)`
+- `CalculateUOuterWallsSaving` — lines 14171-14182
+  - `private static void CalculateUOuterWallsSaving(Section tempSection, Section section)`
+- `CalculateUOuterWallsSavingESM` — lines 14183-14194
+  - `private static void CalculateUOuterWallsSavingESM(Section tempSection, Section section)`
+- `CalculateUInnerWallsSaving` — lines 14195-14206
+  - `private static void CalculateUInnerWallsSaving(Section tempSection, Section section)`
+- `CalculateUInnerWallsSavingESM` — lines 14207-14218
+  - `private static void CalculateUInnerWallsSavingESM(Section tempSection, Section section)`
+- `CopyOuterWallsElements` — lines 14219-14229
+  - `private static void CopyOuterWallsElements(WallsStates tempWall, WallsStates wall)`
+- `CopyOuterWallsElementsESM` — lines 14230-14240
+  - `private static void CopyOuterWallsElementsESM(WallsStates tempWall, WallsStates wall)`
+- `CopyInnerWallsElements` — lines 14241-14251
+  - `private static void CopyInnerWallsElements(WallsStates tempWall, WallsStates wall)`
+- `CopyInnerWallsElementsESM` — lines 14252-14262
+  - `private static void CopyInnerWallsElementsESM(WallsStates tempWall, WallsStates wall)`
+- `CalculateUwindowsSavings` — lines 14263-14274
+  - `private static void CalculateUwindowsSavings(Section tempSection, Section section)`
+- `CalculateUwindowsSavingsESM` — lines 14275-14286
+  - `private static void CalculateUwindowsSavingsESM(Section tempSection, Section section)`
+- `CopyWindowsElements` — lines 14287-14297
+  - `private static void CopyWindowsElements(WallsStates tempWall, WallsStates wall)`
+- `CopyWindowsElementsESM` — lines 14298-14308
+  - `private static void CopyWindowsElementsESM(WallsStates tempWall, WallsStates wall)`
+- `CalculateUnonTransparentSavings` — lines 14309-14313
+  - `private static void CalculateUnonTransparentSavings(Section tempSection, Section section)`
+- `CalculateUnonTransparentSavingsESM` — lines 14314-14318
+  - `private static void CalculateUnonTransparentSavingsESM(Section tempSection, Section section)`
+- `CopyNonTrasparentElements` — lines 14319-14332
+  - `private static void CopyNonTrasparentElements(RoofStates tempRoof, RoofStates roof)`
+- `CopyNonTrasparentElementsESM` — lines 14333-14346
+  - `private static void CopyNonTrasparentElementsESM(RoofStates tempRoof, RoofStates roof)`
+- `CalculateUceilingsavings` — lines 14347-14351
+  - `private static void CalculateUceilingsavings(Section tempSection, Section section)`
+- `CalculateUceilingsavingsESM` — lines 14352-14356
+  - `private static void CalculateUceilingsavingsESM(Section tempSection, Section section)`
+- `CopyCeilingElements` — lines 14357-14370
+  - `private static void CopyCeilingElements(RoofStates tempRoof, RoofStates roof)`
+- `CopyCeilingElementsESM` — lines 14371-14384
+  - `private static void CopyCeilingElementsESM(RoofStates tempRoof, RoofStates roof)`
+- `SetScaleType` — lines 14385-14429
+  - `public static void SetScaleType(Scale investigationMethod, Results buildingResults)`
+- `CalculateHotWaterNeededPower` — lines 14430-14512
+  - `public static bool CalculateHotWaterNeededPower(this SunEnergyCalculationData sunEnergyCalculationData, Section section, CalculationInput calcInput)`
+- `CalculateXwithCorrection` — lines 14513-14526
+  - `private static double CalculateXwithCorrection(double x)`
+- `ClearTableValues` — lines 14527-14573
+  - `private static void ClearTableValues(SunEnergyCalculationData energyCalcdata, IEnumerable<MonthlyDays> monthsList)`
+- `SetNullValues` — lines 14574-14585
+  - `private static void SetNullValues(SunEnergyResMonth month)`
+- `SetTableResults` — lines 14586-14629
+  - `private static void SetTableResults(SunEnergyCalculationData energyCalcdata, Month month, SunMonth sunMonth)`
+- `SetMonthRowValues` — lines 14630-14642
+  - `private static void SetMonthRowValues(SunEnergyResMonth month, SunMonth sunMonth)`
+- `SumCollectorsArea` — lines 14643-14647
+  - `private static void SumCollectorsArea()`
+- `CalculateParameterF` — lines 14648-14652
+  - `private static double CalculateParameterF(double x, double y)`
+- `CalculateParameterX` — lines 14653-14664
+  - `private static double CalculateParameterX(CalculationInput calcInput, MonthlyDays month, double neededHotWaterEnergyforMonth)`
+- `CalculateParameterY` — lines 14665-14679
+  - `private static double CalculateParameterY(CalculationInput calcInput, MonthlyDays month, double neededHotWaterEnergyforMonth)`
+- `CalculateTOAeffect` — lines 14680-14704
+  - `private static double CalculateTOAeffect()`
+- `HotWaterNeededPower` — lines 14705-14709
+  - `private static double HotWaterNeededPower(SunEnergyCalculationData calcData, MonthlyDays month)`
+- `HotWaterNeededPowerTotal` — lines 14710-14714
+  - `private static double HotWaterNeededPowerTotal(SunEnergyCalculationData calcData, MonthlyDays month)`
+- `DefuseradiationHd` — lines 14715-14720
+  - `private static double DefuseradiationHd(CalculationInput calcInput, MonthlyDays month)`
+- `SunDeclination` — lines 14721-14765
+  - `private static double SunDeclination(Month month)`
+- `SunsetHour` — lines 14766-14771
+  - `private static double SunsetHour(Month month)`
+- `SunsetHourPrim` — lines 14772-14781
+  - `private static double SunsetHourPrim(Month month)`
+- `CalculateMonthlyHorizontalRadiation` — lines 14782-14793
+  - `private static double CalculateMonthlyHorizontalRadiation(Month month)`
+- `SubAngles` — lines 14794-14798
+  - `private static double SubAngles(double anglefi, double angleBeta)`
+- `CalculateProjectionCoeficient` — lines 14799-14807
+  - `private static double CalculateProjectionCoeficient(CalculationInput calcInput, MonthlyDays month)`
+- `CalculateParameterHtMonthly` — lines 14808-14812
+  - `private static double CalculateParameterHtMonthly(CalculationInput calcInput, MonthlyDays month)`
+- `VentilationCoolEnergyRef1` — lines 14813-14840
+  - `public static void VentilationCoolEnergyRef1(this CalculationData calcData, Section section, CalculationInput calcInput, CoolingCalculations ventCoolingCalculations)`
+- `VentilationCoolEnergyRef2` — lines 14841-14868
+  - `public static void VentilationCoolEnergyRef2(this CalculationData calcData, Section section, CalculationInput calcInput, CoolingCalculations ventCoolingCalculations)`
+- `VentilationCoolEnergyActual` — lines 14869-14896
+  - `public static void VentilationCoolEnergyActual(this CalculationData calcData, Section section, CalculationInput calcInput, CoolingCalculations ventCoolingCalculations)`
+- `VentilationCoolEnergyBaseLine` — lines 14897-14924
+  - `public static void VentilationCoolEnergyBaseLine(this CalculationData calcData, Section section, CalculationInput calcInput, CoolingCalculations ventCoolingCalculations)`
+- `VentilationCoolEnergyEsm` — lines 14925-14952
+  - `public static void VentilationCoolEnergyEsm(this CalculationData calcData, Section section, CalculationInput calcInput, CoolingCalculations ventCoolingCalculations)`
+- `GetWeekHoursCoolingReferences` — lines 14953-14960
+  - `public static void GetWeekHoursCoolingReferences(this CalculationData coolingCalc, Section section)`
+- `GetWeekHoursCoolingActual` — lines 14961-14968
+  - `public static void GetWeekHoursCoolingActual(this CalculationData coolingCalc, Section section)`
+- `GetWeekHoursCoolingBaseLine` — lines 14969-14976
+  - `public static void GetWeekHoursCoolingBaseLine(this CalculationData coolingCalc, Section section)`
+- `GetWeekHoursCoolingEsm` — lines 14977-14984
+  - `public static void GetWeekHoursCoolingEsm(this CalculationData coolingCalc, Section section)`
+- `CalculateVentCoolNeededEnergyRef1` — lines 14985-15003
+  - `public static void CalculateVentCoolNeededEnergyRef1(this CalculationData coolCalc)`
+- `CalculateVentCoolNeededEnergyRef2` — lines 15004-15022
+  - `public static void CalculateVentCoolNeededEnergyRef2(this CalculationData coolCalc)`
+- `CalculateVentCoolNeededEnergyActual` — lines 15023-15041
+  - `public static void CalculateVentCoolNeededEnergyActual(this CalculationData coolCalc)`
+- `CalculateVentCoolNeededEnergyBaseLine` — lines 15042-15060
+  - `public static void CalculateVentCoolNeededEnergyBaseLine(this CalculationData coolCalc)`
+- `CalculateVentCoolNeededEnergyEsm` — lines 15061-15080
+  - `public static void CalculateVentCoolNeededEnergyEsm(this CalculationData coolCalc)`
+- `CalculateCoolingInputsRef1` — lines 15081-15106
+  - `private static double CalculateCoolingInputsRef1(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateCoolingInputsRef2` — lines 15107-15132
+  - `private static double CalculateCoolingInputsRef2(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateCoolingInputs` — lines 15133-15158
+  - `private static double CalculateCoolingInputs(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateCoolingInputsBaseLine` — lines 15159-15184
+  - `private static double CalculateCoolingInputsBaseLine(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `CalculateCoolingInputsESM` — lines 15185-15210
+  - `private static double CalculateCoolingInputsESM(Section section, CalculationData calcData, CalculationData ventCool, MonthlyDays month)`
+- `GetDaysHours` — lines 15211-15218
+  - `private static List<TempHumidityPerDay> GetDaysHours(ClimateZones climateZone, int month)`
+- `CalculateMontlyCoolEnergyRef1` — lines 15219-15273
+  - `private static void CalculateMontlyCoolEnergyRef1(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month, out double powHeating, out double powCooling)`
+- `CalculateWitheringEnergyRef1` — lines 15274-15300
+  - `private static double CalculateWitheringEnergyRef1(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month)`
+- `CalculateMontlyCoolEnergyRef2` — lines 15301-15355
+  - `private static void CalculateMontlyCoolEnergyRef2(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month, out double powHeating, out double powCooling)`
+- `CalculateWitheringEnergyRef2` — lines 15356-15382
+  - `private static double CalculateWitheringEnergyRef2(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month)`
+- `CalculateMontlyCoolEnergyActual` — lines 15383-15437
+  - `private static void CalculateMontlyCoolEnergyActual(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month, out double powHeating, out double powCooling)`
+- `CalculateWitheringEnergyActual` — lines 15438-15464
+  - `private static double CalculateWitheringEnergyActual(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month)`
+- `CalculateMontlyCoolEnergyBaseLine` — lines 15465-15519
+  - `private static void CalculateMontlyCoolEnergyBaseLine(Section section, CalculationInput calcInput, CalculationData calcData, MonthlyDays month, out double powHeating, out double powCooling)`
+- `CalculateWitheringEnergyBaseLine` — lines 15520-15546
+  - `private static double CalculateWitheringEnergyBaseLine(Section section, CalculationInput calcInput, CalculationData calcData, MonthlyDays month)`
+- `CalculateMontlyCoolEnergyESM` — lines 15547-15601
+  - `private static void CalculateMontlyCoolEnergyESM(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month, out double powHeating, out double powCooling)`
+- `CalculateWitheringEnergyESM` — lines 15602-15628
+  - `private static double CalculateWitheringEnergyESM(Section section, CalculationInput calcInput, CoolingCalculations ventCoolCalculations, MonthlyDays month)`
+- `CalculateEntalpia` — lines 15629-15634
+  - `private static double CalculateEntalpia(double temp, double humidity)`
+- `CalculateWitheringEntalpia` — lines 15635-15640
+  - `private static double CalculateWitheringEntalpia(double temp, double humidity)`
+- `VentilationHeatEnergyRef1` — lines 15641-15674
+  - `public static void VentilationHeatEnergyRef1(this CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations)`
+- `VentilationHeatEnergyRef2` — lines 15675-15708
+  - `public static void VentilationHeatEnergyRef2(this CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations)`
+- `VentilationHeatEnergyActual` — lines 15709-15751
+  - `public static void VentilationHeatEnergyActual(this CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations)`
+- `VentilationHeatEnergyBaseLine` — lines 15752-15794
+  - `public static void VentilationHeatEnergyBaseLine(this CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations)`
+- `VentilationHeatEnergyESM` — lines 15795-15837
+  - `public static void VentilationHeatEnergyESM(this CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations)`
+- `CalculateVentNeededEnergyRef1` — lines 15838-15869
+  - `public static void CalculateVentNeededEnergyRef1(this CalculationData heatgCalc)`
+- `CalculateVentNeededEnergyRef2` — lines 15870-15901
+  - `public static void CalculateVentNeededEnergyRef2(this CalculationData heatgCalc)`
+- `CalculateVentNeededEnergyActual` — lines 15902-15933
+  - `public static void CalculateVentNeededEnergyActual(this CalculationData heatgCalc)`
+- `CalculateVentNeededEnergyBaseLine` — lines 15934-15965
+  - `public static void CalculateVentNeededEnergyBaseLine(this CalculationData heatgCalc)`
+- `CalculateVentNeededEnergyEsm` — lines 15966-15998
+  - `public static void CalculateVentNeededEnergyEsm(this CalculationData heatgCalc)`
+- `GetWeekHoursReferences` — lines 15999-16015
+  - `public static void GetWeekHoursReferences(this CalculationData heatgCalc, Section section)`
+- `GetWeekHoursActual` — lines 16016-16031
+  - `public static void GetWeekHoursActual(this CalculationData heatgCalc, Section section)`
+- `GetWeekHoursBaseLine` — lines 16032-16047
+  - `public static void GetWeekHoursBaseLine(this CalculationData heatgCalc, Section section)`
+- `GetWeekHoursESM` — lines 16048-16063
+  - `public static void GetWeekHoursESM(this CalculationData heatgCalc, Section section)`
+- `CalculateMontlyHeatEnergyRef1` — lines 16064-16101
+  - `private static double CalculateMontlyHeatEnergyRef1(CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations ventHeatCalculations, MonthlyDays month, out double thermoPumpEnergy)`
+- `CalculateMontlyHeatEnergyRef2` — lines 16102-16139
+  - `private static double CalculateMontlyHeatEnergyRef2(CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations ventHeatCalculations, MonthlyDays month, out double thermoPumpEnergy)`
+- `CalculateMontlyHeatEnergyActual` — lines 16140-16177
+  - `private static double CalculateMontlyHeatEnergyActual(CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations, MonthlyDays month, out double thermoPumpEnergy)`
+- `CalculateMontlyHeatEnergyBaseLine` — lines 16178-16215
+  - `private static double CalculateMontlyHeatEnergyBaseLine(CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations heatCalculations, MonthlyDays month, out double thermoPumpEnergy)`
+- `CalculateMontlyHeatEnergyESM` — lines 16216-16253
+  - `private static double CalculateMontlyHeatEnergyESM(CalculationData calcData, Section section, CalculationInput calcInput, HeatingCalculations ventHeatCalculations, MonthlyDays month, out double thermoPumpEnergy)`
+- `CalculateAverageVentHeatTempRef1` — lines 16254-16258
+  - `private static double CalculateAverageVentHeatTempRef1(Section section, HeatingCalculations heatCalcData, MonthlyDays month)`
+- `CalculateAverageVentHeatTempRef2` — lines 16259-16263
+  - `private static double CalculateAverageVentHeatTempRef2(Section section, HeatingCalculations heatCalcData, MonthlyDays month)`
+- `CalculateAverageVentHeatTempActual` — lines 16264-16318
+  - `private static double CalculateAverageVentHeatTempActual(Section section, HeatingCalculations heatCalcData, MonthlyDays month)`
+- `CalculateAverageVentHeatTempBaseLine` — lines 16319-16373
+  - `private static double CalculateAverageVentHeatTempBaseLine(Section section, HeatingCalculations heatCalcData, MonthlyDays month)`
+- `CalculateAverageVentHeatTempESM` — lines 16374-16428
+  - `private static double CalculateAverageVentHeatTempESM(Section section, HeatingCalculations heatCalcData, MonthlyDays month)`
+- `GetMonthHoursActual` — lines 16429-16436
+  - `private static double GetMonthHoursActual(MonthlyDays month, Section section)`
+- `GetMonthHoursBaseLine` — lines 16437-16444
+  - `private static double GetMonthHoursBaseLine(MonthlyDays month, Section section)`
+- `GetMonthHoursESM` — lines 16445-16452
+  - `private static double GetMonthHoursESM(MonthlyDays month, Section section)`
+- `CalcEntalpia` — lines 16453-16461
+  - `private static double CalcEntalpia(double temp, double humidity, double pb)`

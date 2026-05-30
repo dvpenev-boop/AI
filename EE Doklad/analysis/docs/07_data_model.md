@@ -1,0 +1,1111 @@
+# 07 Data Model
+
+This document lists classes, public auto-properties, private fields, and dependency types visible from the decompiled C# files. Missing domain models are inferred only from references in method signatures and property chains.
+
+## BaseLineData
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.BaseLineData.cs`
+- Fields:
+  - `public DataRow WorkingSchedule` at line `10`
+  - `public DataRow UouterWalls` at line `12`
+  - `public DataRow Uwindows` at line `14`
+  - `public DataRow Unontransparent` at line `16`
+  - `public DataRow Ufloor` at line `18`
+  - `public DataRow G` at line `20`
+  - `public DataRow UinnerWalls` at line `22`
+  - `public DataRow Uceiling` at line `24`
+  - `public DataRow UfloorOther` at line `26`
+  - `public DataRow Infiltracion` at line `28`
+  - `public DataRow ProjectTemperature` at line `30`
+  - `public DataRow NonProjectTemperature` at line `32`
+  - `public DataRow ResulNoInputsNetEnergy` at line `34`
+  - `public DataRow ResulVentilationInputs` at line `36`
+  - `public DataRow ResulLightInputs` at line `38`
+  - `public DataRow ResulAppliancesInputs` at line `40`
+  - `public DataRow ResulNetEnergy` at line `42`
+  - `public Fuel Fuel1` at line `44`
+  - `public DataRow Part1` at line `46`
+  - `public DataRow TransmitTempEfficiency1` at line `48`
+  - `public DataRow SupplyNetEfficiency1` at line `50`
+  - `public DataRow Automatic1` at line `52`
+  - `public DataRow EnergyManagement1` at line `54`
+  - `public DataRow GeneratorHeatEfficiency1` at line `56`
+  - `public DataRow ResultSourceEnergy` at line `58`
+  - `public Fuel Fuel2` at line `60`
+  - `public DataRow Part2` at line `62`
+  - `public DataRow TransmitTempEfficiency2` at line `64`
+  - `public DataRow SupplyNetEfficiency2` at line `66`
+  - `public DataRow Automatic2` at line `68`
+  - `public DataRow EnergyManagement2` at line `70`
+  - `public DataRow ResultSourceEnergy2` at line `72`
+  - `public DataRow GeneratorHeatEfficiency2` at line `74`
+  - `public DataRow HeatEfficiencyGenerating` at line `76`
+  - `public DataRow ResultNeededEnergy` at line `78`
+- Public auto-properties:
+  - `DataRow WorkingSchedule` at line `10`
+  - `DataRow UouterWalls` at line `12`
+  - `DataRow Uwindows` at line `14`
+  - `DataRow Unontransparent` at line `16`
+  - `DataRow Ufloor` at line `18`
+  - `DataRow G` at line `20`
+  - `DataRow UinnerWalls` at line `22`
+  - `DataRow Uceiling` at line `24`
+  - `DataRow UfloorOther` at line `26`
+  - `DataRow Infiltracion` at line `28`
+  - `DataRow ProjectTemperature` at line `30`
+  - `DataRow NonProjectTemperature` at line `32`
+  - `DataRow ResulNoInputsNetEnergy` at line `34`
+  - `DataRow ResulVentilationInputs` at line `36`
+  - `DataRow ResulLightInputs` at line `38`
+  - `DataRow ResulAppliancesInputs` at line `40`
+  - `DataRow ResulNetEnergy` at line `42`
+  - `Fuel Fuel1` at line `44`
+  - `DataRow Part1` at line `46`
+  - `DataRow TransmitTempEfficiency1` at line `48`
+  - `DataRow SupplyNetEfficiency1` at line `50`
+  - `DataRow Automatic1` at line `52`
+  - `DataRow EnergyManagement1` at line `54`
+  - `DataRow GeneratorHeatEfficiency1` at line `56`
+  - `DataRow ResultSourceEnergy` at line `58`
+  - `Fuel Fuel2` at line `60`
+  - `DataRow Part2` at line `62`
+  - `DataRow TransmitTempEfficiency2` at line `64`
+  - `DataRow SupplyNetEfficiency2` at line `66`
+  - `DataRow Automatic2` at line `68`
+  - `DataRow EnergyManagement2` at line `70`
+  - `DataRow ResultSourceEnergy2` at line `72`
+  - `DataRow GeneratorHeatEfficiency2` at line `74`
+  - `DataRow HeatEfficiencyGenerating` at line `76`
+  - `DataRow ResultNeededEnergy` at line `78`
+
+## BuildingTypesManager
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.BuildingTypesManager.cs`
+- Fields:
+  - `public BuildingCategories Parameters` at line `13`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `BuildingTypesManager.GetClimateZoneParams` (public, `Scale`) at `reference/eecalc-decompiled/EECalcCore.Calculations.BuildingTypesManager.cs:27`
+
+## Calculator
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.Calculator.cs`
+- Fields: _None detected_
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `Calculator.Calculate` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.Calculator.cs:12`
+  - `Calculator.AcumulateWeight` (public, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.Calculator.cs:16`
+  - `Calculator.SumFields` (public, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.Calculator.cs:43`
+
+## DataRow
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.DataRow.cs`
+- Fields:
+  - `private double valuee` at line `10`
+  - `private string tag` at line `12`
+  - `private Fuel fuel` at line `14`
+  - `public event PropertyChangedEventHandler PropertyChanged` at line `55`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `DataRow.OnPropertyChanged` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.DataRow.cs:57`
+
+## FloorTableCalc
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs`
+- Fields:
+  - `private List<double> floorAreaValuesList` at line `11`
+  - `private List<double> otherFloorAreaValuesList` at line `13`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `FloorTableCalc.CalculateFloorArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs:15`
+  - `FloorTableCalc.CalculateFloorU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs:20`
+  - `FloorTableCalc.CalculateOtherFloorArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs:26`
+  - `FloorTableCalc.CalculateOtherFloorU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs:31`
+  - `FloorTableCalc.SumX` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs:37`
+  - `FloorTableCalc.SumL` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.FloorTableCalc.cs:51`
+
+## HeatingAndCoolingResultCalc
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs`
+- Fields:
+  - `private BuildingZone buildingZone` at line `19`
+  - `private double north` at line `21`
+  - `private double northEast` at line `23`
+  - `private double east` at line `25`
+  - `private double southEast` at line `27`
+  - `private double south` at line `29`
+  - `private double southWest` at line `31`
+  - `private double west` at line `33`
+  - `private double northWest` at line `35`
+  - `private double northU` at line `37`
+  - `private double northEastU` at line `39`
+  - `private double eastU` at line `41`
+  - `private double southEastU` at line `43`
+  - `private double southU` at line `45`
+  - `private double southWestU` at line `47`
+  - `private double westU` at line `49`
+  - `private double northWestU` at line `51`
+  - `private double areaNorth` at line `53`
+  - `private double areaNorthEast` at line `55`
+  - `private double areaEast` at line `57`
+  - `private double areaSouthEast` at line `59`
+  - `private double areaSouth` at line `61`
+  - `private double areaSouthWest` at line `63`
+  - `private double areaWest` at line `65`
+  - `private double areaNorthWest` at line `67`
+  - `private double parameterNiRef1` at line `69`
+  - `private double parameterNiRef2` at line `71`
+  - `private double parameterNiBaseLine` at line `73`
+  - `private double parameterNiESM` at line `75`
+  - `private BuildingZone currentZone` at line `77`
+  - `private double weekRegime` at line `99`
+  - `private CalculationData publicCalculationData` at line `101`
+  - `private double virtualBaseLineNetEnergy` at line `103`
+  - `private double virtualESMNetEnergy` at line `105`
+  - `private CalculationData fansAndPumnps` at line `107`
+  - `private const double Corr` at line `109`
+  - `private SunEnergyCalculationData sunEnergyCalcdata` at line `111`
+  - `private double innerTemp` at line `113`
+  - `private double monthHours` at line `115`
+  - `public List<MonthDataCooling> MonthDataCoolingList` at line `117`
+  - `public List<MonthData> MonthDataList` at line `119`
+  - `public object MessageBoxButton` at line `121`
+- Public auto-properties:
+  - `static List<MonthDataCooling> MonthDataCoolingList` at line `117`
+  - `static List<MonthData> MonthDataList` at line `119`
+- Methods:
+  - `HeatingAndCoolingResultCalc.CoolingCalculations` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:123`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingResultActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:137`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingResultBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:145`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingResultEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:153`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingResultReferences` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:161`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingEnergyRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:169`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingEnergyRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:210`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingEnergyActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:251`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingEnergyBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:290`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingEnergyESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:315`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsInfRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:340`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsInfRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:404`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsInf` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:468`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsInfBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:532`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsInfESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:596`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsVentRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:660`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsVentRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:721`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsVent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:782`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsVentBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:843`
+  - `HeatingAndCoolingResultCalc.CalculateLatentHeatsVentESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:904`
+  - `HeatingAndCoolingResultCalc.CalcAirX` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:965`
+  - `HeatingAndCoolingResultCalc.CalcRoW` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:973`
+  - `HeatingAndCoolingResultCalc.CalcRo` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:979`
+  - `HeatingAndCoolingResultCalc.CalculateETA` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:985`
+  - `HeatingAndCoolingResultCalc.CalculateAcRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1004`
+  - `HeatingAndCoolingResultCalc.CalculateAcRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1014`
+  - `HeatingAndCoolingResultCalc.CalculateAc` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1024`
+  - `HeatingAndCoolingResultCalc.CalculateAcBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1034`
+  - `HeatingAndCoolingResultCalc.CalculateAcESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1044`
+  - `HeatingAndCoolingResultCalc.GetNightWorkingHours` (private, `IEnumerable<int>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1054`
+  - `HeatingAndCoolingResultCalc.ClaculateQfreecoolingRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1082`
+  - `HeatingAndCoolingResultCalc.ClaculateQfreecoolingRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1121`
+  - `HeatingAndCoolingResultCalc.ClaculateQfreecooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1160`
+  - `HeatingAndCoolingResultCalc.ClaculateQfreecoolingBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1199`
+  - `HeatingAndCoolingResultCalc.ClaculateQfreecoolingEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1238`
+  - `HeatingAndCoolingResultCalc.CalculateQgainRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1277`
+  - `HeatingAndCoolingResultCalc.CalculateQgainRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1285`
+  - `HeatingAndCoolingResultCalc.CalculateQgain` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1293`
+  - `HeatingAndCoolingResultCalc.CalculateQgainBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1301`
+  - `HeatingAndCoolingResultCalc.CalculateQgainESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1309`
+  - `HeatingAndCoolingResultCalc.CalculateQintRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1317`
+  - `HeatingAndCoolingResultCalc.CalculateQintRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1324`
+  - `HeatingAndCoolingResultCalc.CalculateQint` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1331`
+  - `HeatingAndCoolingResultCalc.CalculateQintBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1338`
+  - `HeatingAndCoolingResultCalc.CalculateQintESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1345`
+  - `HeatingAndCoolingResultCalc.CalculateQoccupants` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1352`
+  - `HeatingAndCoolingResultCalc.CalculateQoccupantsBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1359`
+  - `HeatingAndCoolingResultCalc.CalculateQoccupantsESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1366`
+  - `HeatingAndCoolingResultCalc.CalculateQLatentOccupantsRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1373`
+  - `HeatingAndCoolingResultCalc.CalculateQLatentOccupantsRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1380`
+  - `HeatingAndCoolingResultCalc.CalculateQLatentOccupants` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1387`
+  - `HeatingAndCoolingResultCalc.CalculateQLatentOccupantsBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1394`
+  - `HeatingAndCoolingResultCalc.CalculateQLatentOccupantsESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1401`
+  - `HeatingAndCoolingResultCalc.CalculateOccupantshours` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1408`
+  - `HeatingAndCoolingResultCalc.CalculateOccupantshoursBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1416`
+  - `HeatingAndCoolingResultCalc.CalculateOccupantshoursESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1424`
+  - `HeatingAndCoolingResultCalc.CalculateQveRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1432`
+  - `HeatingAndCoolingResultCalc.CalculateQveRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1491`
+  - `HeatingAndCoolingResultCalc.CalculateQve` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1556`
+  - `HeatingAndCoolingResultCalc.CalculateQveBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1621`
+  - `HeatingAndCoolingResultCalc.CalculateQveESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1686`
+  - `HeatingAndCoolingResultCalc.CalculateHveRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1751`
+  - `HeatingAndCoolingResultCalc.CalculateHveRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1756`
+  - `HeatingAndCoolingResultCalc.CalculateHve` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1761`
+  - `HeatingAndCoolingResultCalc.CalculateHveBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1766`
+  - `HeatingAndCoolingResultCalc.CalculateHveESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1771`
+  - `HeatingAndCoolingResultCalc.CalculateQsolRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1776`
+  - `HeatingAndCoolingResultCalc.CalculateQsolRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1790`
+  - `HeatingAndCoolingResultCalc.CalculateQsol` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1804`
+  - `HeatingAndCoolingResultCalc.CalculateQsolBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1818`
+  - `HeatingAndCoolingResultCalc.CalculateQsolESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1832`
+  - `HeatingAndCoolingResultCalc.CalculateQinfRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1846`
+  - `HeatingAndCoolingResultCalc.CalculateQinfRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1852`
+  - `HeatingAndCoolingResultCalc.CalculateQinf` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1858`
+  - `HeatingAndCoolingResultCalc.CalculateQinfBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1864`
+  - `HeatingAndCoolingResultCalc.CalculateQinfESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1870`
+  - `HeatingAndCoolingResultCalc.CalculateHinfRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1876`
+  - `HeatingAndCoolingResultCalc.CalculateHinfRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1881`
+  - `HeatingAndCoolingResultCalc.CalculateHinf` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1886`
+  - `HeatingAndCoolingResultCalc.CalculateHinfBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1891`
+  - `HeatingAndCoolingResultCalc.CalculateHinfESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1896`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingQtrRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1901`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingQtrRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1910`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingQtr` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1919`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingQtrBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1928`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingQtrESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1936`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingHtr` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1944`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingHtrESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1958`
+  - `HeatingAndCoolingResultCalc.CalculateAverageCoolingTempRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1972`
+  - `HeatingAndCoolingResultCalc.CalculateAverageCoolingTempRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:1986`
+  - `HeatingAndCoolingResultCalc.CalculateAverageCoolingTempCurrent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2000`
+  - `HeatingAndCoolingResultCalc.CalculateAverageCoolingTempBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2014`
+  - `HeatingAndCoolingResultCalc.CalculateAverageCoolingTempESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2028`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempCoolingRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2042`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempCoolingRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2050`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempCooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2058`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempCoolingBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2066`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempCoolingESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2074`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempCoolingRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2082`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempCoolingRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2091`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempCooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2100`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempCoolingBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2109`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempCoolingESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2118`
+  - `HeatingAndCoolingResultCalc.SumWallDirecrionsHu1Cooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2127`
+  - `HeatingAndCoolingResultCalc.SumWallDirecrionsHu1CoolingESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2140`
+  - `HeatingAndCoolingResultCalc.CalcWallDirectionParameterHu1Cooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2153`
+  - `HeatingAndCoolingResultCalc.CalcCeilingsParameterHu2Cooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2187`
+  - `HeatingAndCoolingResultCalc.CalcFloorsParameterHu3Cooling` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2221`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsHeatingRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2255`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsHeatingRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2271`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsHeatingActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2287`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsHeatingBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2303`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsHeatingEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2320`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsCoolingRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2338`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsCoolingRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2365`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsCoolingActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2391`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsCoolingBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2417`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsCoolingEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2443`
+  - `HeatingAndCoolingResultCalc.GetWeekHeatingVentilationHoursActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2470`
+  - `HeatingAndCoolingResultCalc.GetWeekHeatingVentilationHoursBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2477`
+  - `HeatingAndCoolingResultCalc.GetWeekHeatingVentilationHoursEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2484`
+  - `HeatingAndCoolingResultCalc.GetWeekHeatingSeasonHoursActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2491`
+  - `HeatingAndCoolingResultCalc.GetWeekHeatingSeasonHoursBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2498`
+  - `HeatingAndCoolingResultCalc.GetWeekHeatingSeasonHoursEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2505`
+  - `HeatingAndCoolingResultCalc.GetWeekCoolingSeasonHoursActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2512`
+  - `HeatingAndCoolingResultCalc.GetWeekCoolingSeasonHoursBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2519`
+  - `HeatingAndCoolingResultCalc.GetWeekCoolingSeasonHoursEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2526`
+  - `HeatingAndCoolingResultCalc.GetWeekCoolingVentilationHoursActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2533`
+  - `HeatingAndCoolingResultCalc.GetWeekCoolingVentilationHoursBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2540`
+  - `HeatingAndCoolingResultCalc.GetWeekCoolingVentilationHoursEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2547`
+  - `HeatingAndCoolingResultCalc.CalculateUouterWallsCurrent` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2554`
+  - `HeatingAndCoolingResultCalc.CalculateUouterWallsEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2583`
+  - `HeatingAndCoolingResultCalc.CalculateUinnerWallsCurrent` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2611`
+  - `HeatingAndCoolingResultCalc.CalculateUinnerWallsEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2640`
+  - `HeatingAndCoolingResultCalc.CalculateUwindowsCurrent` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2668`
+  - `HeatingAndCoolingResultCalc.CalculateUwindowsEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2700`
+  - `HeatingAndCoolingResultCalc.CalculateGcurrent` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2731`
+  - `HeatingAndCoolingResultCalc.CalculateGesm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2763`
+  - `HeatingAndCoolingResultCalc.GetUnonTrasparentRoof` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2794`
+  - `HeatingAndCoolingResultCalc.GetUceiling` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2801`
+  - `HeatingAndCoolingResultCalc.GetUfloor` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2808`
+  - `HeatingAndCoolingResultCalc.GetUotherFloor` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2815`
+  - `HeatingAndCoolingResultCalc.CalculateNetEnergy` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2822`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2831`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2848`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2865`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2882`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2899`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHeatEfficiencyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2917`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHeatEfficiencyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2933`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHeatEfficiencyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2949`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHeatEfficiencyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2965`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHeatEfficiencyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2981`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorVentilationCoolEfficiencyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:2997`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorVentilationCoolEfficiencyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3013`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorVentilationCoolEfficiencyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3029`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorVentilationCoolEfficiencyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3045`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorVentilationCoolEfficiencyESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3061`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorCoolEfficiencyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3077`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorCoolEfficiencyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3093`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorCoolEfficiencyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3109`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorCoolEfficiencyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3125`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorCoolEfficiencyESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3141`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyCoolingRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3157`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyCoolingRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3174`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyCoolingActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3191`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyCoolingBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3208`
+  - `HeatingAndCoolingResultCalc.CalculateNeededEnergyCoolingESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3225`
+  - `HeatingAndCoolingResultCalc.Calculations` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3243`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursResultReferences` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3402`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursResultActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3419`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursResultBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3435`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursResultEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3451`
+  - `HeatingAndCoolingResultCalc.OccupantHours` (private, `int`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3467`
+  - `HeatingAndCoolingResultCalc.GetTestValue` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3472`
+  - `HeatingAndCoolingResultCalc.CalculateActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3483`
+  - `HeatingAndCoolingResultCalc.CalculateLightsAndDevicesInputs` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3494`
+  - `HeatingAndCoolingResultCalc.GetLightsAndDevicesInputs` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3562`
+  - `HeatingAndCoolingResultCalc.SumItemsList` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3622`
+  - `HeatingAndCoolingResultCalc.CalculateParameterNign` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3632`
+  - `HeatingAndCoolingResultCalc.CalculateaH` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3650`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQve` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3663`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTemp` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3668`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTemp` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3677`
+  - `HeatingAndCoolingResultCalc.CalcParameterHve` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3687`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQtr` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3693`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHtr` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3702`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHdCurrent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3713`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHgCurrent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3718`
+  - `HeatingAndCoolingResultCalc.SumAllDirectionsWallsCurrent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3723`
+  - `HeatingAndCoolingResultCalc.CalculateItemsWalls` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3736`
+  - `HeatingAndCoolingResultCalc.SumAllDirectionWindowsCurrent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3762`
+  - `HeatingAndCoolingResultCalc.SumNonTrasparentRoof` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3775`
+  - `HeatingAndCoolingResultCalc.SumTrasparentRoof` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3810`
+  - `HeatingAndCoolingResultCalc.CalculateAverageHeatTempCurrent` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3824`
+  - `HeatingAndCoolingResultCalc.SumWallDirecrionsHu1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3838`
+  - `HeatingAndCoolingResultCalc.CalcWallDirectionParameterHu1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3851`
+  - `HeatingAndCoolingResultCalc.CalcCeilingsParameterHu2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3881`
+  - `HeatingAndCoolingResultCalc.CalcFloorsParameterHu3` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3911`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQgn` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3941`
+  - `HeatingAndCoolingResultCalc.CalculateTransparentFsol` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3953`
+  - `HeatingAndCoolingResultCalc.CalculateTrasparentFsol` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3965`
+  - `HeatingAndCoolingResultCalc.CalculateNonTransparentFsol` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:3997`
+  - `HeatingAndCoolingResultCalc.CalculateNonTrasparentFsol` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4010`
+  - `HeatingAndCoolingResultCalc.OccupantsHoursEsm` (private, `int`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4034`
+  - `HeatingAndCoolingResultCalc.CalculateEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4039`
+  - `HeatingAndCoolingResultCalc.CalculateParameterNiEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4050`
+  - `HeatingAndCoolingResultCalc.CalculateaHesm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4068`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQveEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4081`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHtrEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4087`
+  - `HeatingAndCoolingResultCalc.CalcParameterHveEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4098`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQtrEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4103`
+  - `HeatingAndCoolingResultCalc.CalculateAverageHeatTempEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4114`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4128`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4137`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHdEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4145`
+  - `HeatingAndCoolingResultCalc.SumAllDirectionsWallsEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4150`
+  - `HeatingAndCoolingResultCalc.SumAllDirectionWindowsEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4163`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHgEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4176`
+  - `HeatingAndCoolingResultCalc.SumWallDirecrionsHu1Esm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4181`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQgnEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4194`
+  - `HeatingAndCoolingResultCalc.CalculateTrasparentFsolEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4206`
+  - `HeatingAndCoolingResultCalc.CalculateNonTrasparentFsolEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4246`
+  - `HeatingAndCoolingResultCalc.OccupantsHoursBaseLine` (private, `int`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4270`
+  - `HeatingAndCoolingResultCalc.CalculateBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4275`
+  - `HeatingAndCoolingResultCalc.CalculateaHbaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4286`
+  - `HeatingAndCoolingResultCalc.CalculateParameterNignBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4299`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQtrBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4317`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4328`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4337`
+  - `HeatingAndCoolingResultCalc.CalculateAverageHeatTempBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4345`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQveBaseLIne` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4359`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHtrBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4365`
+  - `HeatingAndCoolingResultCalc.CalcParameterHveBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4376`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQgnBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4382`
+  - `HeatingAndCoolingResultCalc.OccupantsHoursRef1` (private, `int`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4394`
+  - `HeatingAndCoolingResultCalc.CalculateRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4399`
+  - `HeatingAndCoolingResultCalc.CalculateRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4413`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQveRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4421`
+  - `HeatingAndCoolingResultCalc.CalcParameterHveRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4426`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQtrRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4431`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHtrRef` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4440`
+  - `HeatingAndCoolingResultCalc.CalculateAverageHeatTempRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4451`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4465`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4474`
+  - `HeatingAndCoolingResultCalc.CalculateaHref1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4484`
+  - `HeatingAndCoolingResultCalc.CalculateParameterNignRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4494`
+  - `HeatingAndCoolingResultCalc.ApplyValuesToTempSectionRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4512`
+  - `HeatingAndCoolingResultCalc.ApplyCoefficientG` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4519`
+  - `HeatingAndCoolingResultCalc.ApplyUroofsAndCeilings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4542`
+  - `HeatingAndCoolingResultCalc.ApplyUdirectionWalls` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4584`
+  - `HeatingAndCoolingResultCalc.ApplyToTrasparentRoofs` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4597`
+  - `HeatingAndCoolingResultCalc.CopyByOrientation` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4612`
+  - `HeatingAndCoolingResultCalc.CopyGbyOrientation` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4640`
+  - `HeatingAndCoolingResultCalc.OccupantsHoursRef2` (private, `int`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4652`
+  - `HeatingAndCoolingResultCalc.CalculateRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4657`
+  - `HeatingAndCoolingResultCalc.CalculateRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4671`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQveRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4679`
+  - `HeatingAndCoolingResultCalc.CalcParameterHveRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4685`
+  - `HeatingAndCoolingResultCalc.CalculateParameterQtrRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4690`
+  - `HeatingAndCoolingResultCalc.CalculateAverageHeatTempRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4699`
+  - `HeatingAndCoolingResultCalc.CalcAvgProjectTempRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4713`
+  - `HeatingAndCoolingResultCalc.CalcAvgNonProjectTempRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4722`
+  - `HeatingAndCoolingResultCalc.CalculateaHref2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4732`
+  - `HeatingAndCoolingResultCalc.CalculateParameterNignRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4742`
+  - `HeatingAndCoolingResultCalc.ApplyValuesToTempSectionRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4760`
+  - `HeatingAndCoolingResultCalc.HotWaterCalculationReferences` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4767`
+  - `HeatingAndCoolingResultCalc.HotWaterCalculationActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4778`
+  - `HeatingAndCoolingResultCalc.HotWaterCalculationBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4786`
+  - `HeatingAndCoolingResultCalc.HotWaterCalculationESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4794`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHotWaterEfficiencyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4802`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHotWaterEfficiencyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4818`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHotWaterEfficiencyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4834`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHotWaterEfficiencyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4850`
+  - `HeatingAndCoolingResultCalc.CalculateGeneratorHotWaterEfficiencyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4866`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterNeededEnergyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4882`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterNeededEnergyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4899`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterNeededEnergyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4916`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterNeededEnergyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4933`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterNeededEnergyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4950`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsReference` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4968`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4978`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4985`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4992`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsReferenceBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:4999`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsActualBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5009`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsBaseLineBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5016`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsESMBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5023`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsReferenceNonBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5030`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsActualNonBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5040`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsBaseLineNonBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5047`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsESMNonBalanced` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5054`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsReferenceHotWaterPumps` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5061`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsActualHotWaterPumps` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5071`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsBaseLineHotWaterPumps` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5078`
+  - `HeatingAndCoolingResultCalc.CalculatePeriodsESMHotWaterPumps` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5085`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5092`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5099`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5106`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5113`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5120`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5127`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5134`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5178`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5222`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5266`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5310`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5354`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5398`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5442`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5486`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef1Balanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5530`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef1Balanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5537`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef1Balanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5544`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef2Balanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5551`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef2Balanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5558`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef2Balanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5565`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodActualBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5572`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodActualBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5616`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodActualBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5660`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodBaseLineBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5704`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodBaseLineBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5748`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodBaseLineBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5792`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodESMBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5836`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodESMBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5880`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodESMBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5924`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef1NonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5968`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef2NonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5975`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef1NonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5982`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef2NonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5989`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef1NonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:5996`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef2NonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6003`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodActualNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6010`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodActualNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6046`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodActualNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6082`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodBaseLineNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6118`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodBaseLineNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6162`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodBaseLineNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6206`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodESMNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6250`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodESMNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6294`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodESMNonBalanced` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6338`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef1HotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6382`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef1HotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6389`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef1HotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6396`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodRef2HotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6403`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodRef2HotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6410`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodRef2HotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6417`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodActualHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6424`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodActualHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6460`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodActualHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6496`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodBaseLineHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6532`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodBaseLineHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6576`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodBaseLineHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6620`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPeriodESMHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6664`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingPeriodESMHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6709`
+  - `HeatingAndCoolingResultCalc.CalculateAnnualPeriodESMHotWaterPumps` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6754`
+  - `HeatingAndCoolingResultCalc.CalcAvgMonthPower` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6799`
+  - `HeatingAndCoolingResultCalc.CalcWeekPower` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6819`
+  - `HeatingAndCoolingResultCalc.CalculateZonePowerEnergy` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6836`
+  - `HeatingAndCoolingResultCalc.CalculateBuildingPowerEnergy` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6854`
+  - `HeatingAndCoolingResultCalc.CalculateBuildingHeatingPower` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6864`
+  - `HeatingAndCoolingResultCalc.CalculateBuildingSourcePower` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6878`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingPower` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6915`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6941`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel1Area` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:6981`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7021`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel2Area` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7061`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel1BaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7101`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel1BaseLineArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7141`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel2BaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7181`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel2BaseLineArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7221`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel1Esm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7261`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel1EsmArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7301`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel2Esm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7341`
+  - `HeatingAndCoolingResultCalc.CalculateEnergySourcePowerFuel2EsmArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7381`
+  - `HeatingAndCoolingResultCalc.ClearFuelCellsPowerTable` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7421`
+  - `HeatingAndCoolingResultCalc.ClearFuelCellsPowerTableBuilding` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7491`
+  - `HeatingAndCoolingResultCalc.CalculateFuelValue` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7561`
+  - `HeatingAndCoolingResultCalc.CalculateFuelValueBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7567`
+  - `HeatingAndCoolingResultCalc.CalculateFuelValueEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7573`
+  - `HeatingAndCoolingResultCalc.CalculateFuel2Value` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7579`
+  - `HeatingAndCoolingResultCalc.CalculateFuel2ValueBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7585`
+  - `HeatingAndCoolingResultCalc.CalculateFuel2ValueEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7591`
+  - `HeatingAndCoolingResultCalc.CalculateFuelAreaValue` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7597`
+  - `HeatingAndCoolingResultCalc.CalculateFuelAreaValueBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7602`
+  - `HeatingAndCoolingResultCalc.CalculateFuelAreaValueEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7607`
+  - `HeatingAndCoolingResultCalc.CalculateFuel2AreaValue` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7612`
+  - `HeatingAndCoolingResultCalc.CalculateFuel2AreaValueBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7617`
+  - `HeatingAndCoolingResultCalc.CalculateFuel2AreaValueEsm` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7622`
+  - `HeatingAndCoolingResultCalc.ClearPrimaryEnergy` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7627`
+  - `HeatingAndCoolingResultCalc.CalculatePrimaryEnergyByTechnologies` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7686`
+  - `HeatingAndCoolingResultCalc.CalculatePrimaryEnergyPerArea` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:7916`
+  - `HeatingAndCoolingResultCalc.CalculatePrimaryFuelTypeAndValuesPerArea` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8014`
+  - `HeatingAndCoolingResultCalc.CalculatePrimaryTotalEnergy` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8084`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8093`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8098`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryEsm` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8103`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8108`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8113`
+  - `HeatingAndCoolingResultCalc.CalculateFuelSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8118`
+  - `HeatingAndCoolingResultCalc.GetPrimaryFuelTypeAndValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8133`
+  - `HeatingAndCoolingResultCalc.GetPrimaryFuelTypeRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8245`
+  - `HeatingAndCoolingResultCalc.GetPrimaryFuelTypeRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8289`
+  - `HeatingAndCoolingResultCalc.GetPrimaryFuelType` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8329`
+  - `HeatingAndCoolingResultCalc.GetPrimaryFuelTypeBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8373`
+  - `HeatingAndCoolingResultCalc.GetPrimaryFuelTypeEsm` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8417`
+  - `HeatingAndCoolingResultCalc.CalculatePrimaryEnergyFuelTotal` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8461`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryFuelRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8471`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryFuelRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8476`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryFuelActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8481`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryFuelBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8486`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryFuelESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8491`
+  - `HeatingAndCoolingResultCalc.CalculateTotalPrimaryFuelSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8496`
+  - `HeatingAndCoolingResultCalc.GetPrimaryEnergyCoeficient` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8501`
+  - `HeatingAndCoolingResultCalc.BuildingCalculations` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8524`
+  - `HeatingAndCoolingResultCalc.ZoneCalculations` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8567`
+  - `HeatingAndCoolingResultCalc.SetScaleValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8594`
+  - `HeatingAndCoolingResultCalc.BuildingCO2Calculations` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8600`
+  - `HeatingAndCoolingResultCalc.ZoneCO2Calculations` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8620`
+  - `HeatingAndCoolingResultCalc.GetBuildingData` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8631`
+  - `HeatingAndCoolingResultCalc.ClearPrimaryEnergyFuelTableValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8645`
+  - `HeatingAndCoolingResultCalc.ClearValuesFuelRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8654`
+  - `HeatingAndCoolingResultCalc.ClearValuesFuelRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8669`
+  - `HeatingAndCoolingResultCalc.ClearValuesFuelActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8684`
+  - `HeatingAndCoolingResultCalc.ClearValuesFuelBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8699`
+  - `HeatingAndCoolingResultCalc.ClearValuesFuelESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8714`
+  - `HeatingAndCoolingResultCalc.UpdateRefsState` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8729`
+  - `HeatingAndCoolingResultCalc.UpdateActualState` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8781`
+  - `HeatingAndCoolingResultCalc.UpdateBaseLineState` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8811`
+  - `HeatingAndCoolingResultCalc.UpdateEsmState` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8841`
+  - `HeatingAndCoolingResultCalc.GetVeiHeating` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8871`
+  - `HeatingAndCoolingResultCalc.GetVeiHeatVentilation` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8889`
+  - `HeatingAndCoolingResultCalc.GetVeiBGV` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8907`
+  - `HeatingAndCoolingResultCalc.CalculateElectricityVEI` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8925`
+  - `HeatingAndCoolingResultCalc.CalculateTotalsNeededEnergyTable` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8930`
+  - `HeatingAndCoolingResultCalc.CalculateTotalRefsYearly` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8942`
+  - `HeatingAndCoolingResultCalc.CalculateTotalRefs` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8955`
+  - `HeatingAndCoolingResultCalc.CalculateTotalEsmYearly` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8968`
+  - `HeatingAndCoolingResultCalc.CalculateTotalVei` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8978`
+  - `HeatingAndCoolingResultCalc.CalculateTotalEsm` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:8991`
+  - `HeatingAndCoolingResultCalc.CalculateTotalBaseLineYearly` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9001`
+  - `HeatingAndCoolingResultCalc.CalculateTotalBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9011`
+  - `HeatingAndCoolingResultCalc.CalculateTotalActualYearly` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9021`
+  - `HeatingAndCoolingResultCalc.CalculateTotalActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9031`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeAndValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9041`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9191`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9235`
+  - `HeatingAndCoolingResultCalc.GetFuelType` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9279`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9323`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeEsm` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9367`
+  - `HeatingAndCoolingResultCalc.CalculateTotalFuelEnergy` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9411`
+  - `HeatingAndCoolingResultCalc.CalculateTotalFuelRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9420`
+  - `HeatingAndCoolingResultCalc.CalculateTotalFuelRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9425`
+  - `HeatingAndCoolingResultCalc.CalculateTotalFuelActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9430`
+  - `HeatingAndCoolingResultCalc.CalculateTotalFuelBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9435`
+  - `HeatingAndCoolingResultCalc.CalculateTotalFuelESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9440`
+  - `HeatingAndCoolingResultCalc.ClearFuelCells` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9445`
+  - `HeatingAndCoolingResultCalc.ClearFuelCellsCO2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9526`
+  - `HeatingAndCoolingResultCalc.CheckForNaN` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9585`
+  - `HeatingAndCoolingResultCalc.CalculateNetEnergyByTechnologies` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9594`
+  - `HeatingAndCoolingResultCalc.CalculateNetEnergyPerArea` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9655`
+  - `HeatingAndCoolingResultCalc.CalculateNetWithoutInputsEnergyByTechnologiesPerArea` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9687`
+  - `HeatingAndCoolingResultCalc.CalculateNetEnergyByTechnologiesBuilding` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9715`
+  - `HeatingAndCoolingResultCalc.ClearNeededVEIenergy` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9796`
+  - `HeatingAndCoolingResultCalc.ClearNetEnergy` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9808`
+  - `HeatingAndCoolingResultCalc.CalculateNetWithoutInputsEnergyByTechnologies` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9862`
+  - `HeatingAndCoolingResultCalc.ClearNetEnergyWithoutInputs` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9923`
+  - `HeatingAndCoolingResultCalc.ClearValuesCO2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9975`
+  - `HeatingAndCoolingResultCalc.ClearValuesCO2Ref1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:9984`
+  - `HeatingAndCoolingResultCalc.ClearValuesCO2Ref2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10001`
+  - `HeatingAndCoolingResultCalc.ClearValuesCO2Actual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10018`
+  - `HeatingAndCoolingResultCalc.ClearValuesCO2BaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10035`
+  - `HeatingAndCoolingResultCalc.ClearValuesCO2ESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10052`
+  - `HeatingAndCoolingResultCalc.CalculateCO2Emissions` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10069`
+  - `HeatingAndCoolingResultCalc.CalculateCO2EmissionsRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10078`
+  - `HeatingAndCoolingResultCalc.CalculateTotalCO2Ref1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10119`
+  - `HeatingAndCoolingResultCalc.CalculateCO2EmissionsRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10125`
+  - `HeatingAndCoolingResultCalc.CalculateTotalCO2Ref2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10166`
+  - `HeatingAndCoolingResultCalc.CalculateCO2EmissionsActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10172`
+  - `HeatingAndCoolingResultCalc.CalculateTotalCO2Actual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10219`
+  - `HeatingAndCoolingResultCalc.CalculateCO2EmissionsBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10225`
+  - `HeatingAndCoolingResultCalc.CalculateTotalCO2BaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10272`
+  - `HeatingAndCoolingResultCalc.CalculateCO2EmissionsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10278`
+  - `HeatingAndCoolingResultCalc.CalculateTotalCO2ESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10325`
+  - `HeatingAndCoolingResultCalc.CalculateSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10331`
+  - `HeatingAndCoolingResultCalc.CalculateFuelSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10347`
+  - `HeatingAndCoolingResultCalc.CO2EnergyZoneCalculations` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10363`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationZoneRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10372`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationZoneRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10413`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationZoneActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10454`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationZoneBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10501`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationZoneESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10548`
+  - `HeatingAndCoolingResultCalc.Co2GetFuelTypesBuilding` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10595`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationBuildingRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10604`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationBuildingRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10634`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationBuildingActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10664`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationBuildingBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10700`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculationBuildingESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10736`
+  - `HeatingAndCoolingResultCalc.Co2CalculateEmissionEnergySupplyBuilding` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10772`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalcBuildingRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10781`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalcBuildingRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10797`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalcBuildingActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10813`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalcBuildingBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10829`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalcBuildingESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10845`
+  - `HeatingAndCoolingResultCalc.Co2EnergyCalculateTotal` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10861`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeCo2Ref1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10870`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeCo2Ref2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10914`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeCo2Actual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:10958`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeCo2BaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11002`
+  - `HeatingAndCoolingResultCalc.GetFuelTypeCo2ESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11046`
+  - `HeatingAndCoolingResultCalc.GetEkoCoeficient` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11090`
+  - `HeatingAndCoolingResultCalc.CalcTotalArea` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11113`
+  - `HeatingAndCoolingResultCalc.GetConditionedArea` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11118`
+  - `HeatingAndCoolingResultCalc.SetFuelValue` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11124`
+  - `HeatingAndCoolingResultCalc.CalculateFuelESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11133`
+  - `HeatingAndCoolingResultCalc.CalculateFuelBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11148`
+  - `HeatingAndCoolingResultCalc.CalculateFuelActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11163`
+  - `HeatingAndCoolingResultCalc.CalculateFuelRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11178`
+  - `HeatingAndCoolingResultCalc.CalculateFuelRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11193`
+  - `HeatingAndCoolingResultCalc.CalculateHeatingSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11208`
+  - `HeatingAndCoolingResultCalc.CheckForDifferentFuelSources` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11314`
+  - `HeatingAndCoolingResultCalc.CheckForDifferentFuelSourcesESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11362`
+  - `HeatingAndCoolingResultCalc.CreateHeatingVirtualBaseLine` (public, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11410`
+  - `HeatingAndCoolingResultCalc.CreateHeatingVirtualESM` (public, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11433`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11456`
+  - `HeatingAndCoolingResultCalc.CreateCoolingVirtualBaseLine` (public, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11560`
+  - `HeatingAndCoolingResultCalc.CreateCoolingVirtualESM` (public, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11578`
+  - `HeatingAndCoolingResultCalc.CalculateVentilationHeatingSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11596`
+  - `HeatingAndCoolingResultCalc.CalculateVentilationCoolingSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11694`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsHeatingSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11792`
+  - `HeatingAndCoolingResultCalc.SetHeatingFansAndPumpsSavingsValues` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11844`
+  - `HeatingAndCoolingResultCalc.CheckHeatingForFansAndPumpsSavings` (public, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11852`
+  - `HeatingAndCoolingResultCalc.CalculateFansAndPumpsCoolingSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11902`
+  - `HeatingAndCoolingResultCalc.SetCoolingFansAndPumpsSavingsValues` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11964`
+  - `HeatingAndCoolingResultCalc.CheckCoolingForFansAndPumpsSavings` (public, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:11974`
+  - `HeatingAndCoolingResultCalc.CalculateLightsSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12046`
+  - `HeatingAndCoolingResultCalc.CalculateBalancedDevicesSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12067`
+  - `HeatingAndCoolingResultCalc.CalculateNonBalancedDevicesSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12088`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterPumpsSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12109`
+  - `HeatingAndCoolingResultCalc.CalculatePeriod` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12127`
+  - `HeatingAndCoolingResultCalc.SetLightsAndDevicesSavingsvalues` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12197`
+  - `HeatingAndCoolingResultCalc.CheckLightsAndDevicesSavings` (public, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12203`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterSavings` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12231`
+  - `HeatingAndCoolingResultCalc.CheckForHotWaterSavings` (private, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12319`
+  - `HeatingAndCoolingResultCalc.SetHotWaterSavingsValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12358`
+  - `HeatingAndCoolingResultCalc.AddSavingsToZone` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12377`
+  - `HeatingAndCoolingResultCalc.AddSavingsToBuilding` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12408`
+  - `HeatingAndCoolingResultCalc.SetSavingsValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12454`
+  - `HeatingAndCoolingResultCalc.CheckForSavings` (private, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12486`
+  - `HeatingAndCoolingResultCalc.CheckForFuelSavings` (private, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12648`
+  - `HeatingAndCoolingResultCalc.SetVentilationSavingsValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12798`
+  - `HeatingAndCoolingResultCalc.CheckForVentilationSavings` (private, `IList<SavingsData>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12825`
+  - `HeatingAndCoolingResultCalc.CheckAndCalculateNegativeSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12930`
+  - `HeatingAndCoolingResultCalc.GetValue` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12945`
+  - `HeatingAndCoolingResultCalc.GetSaving` (private, `string`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12956`
+  - `HeatingAndCoolingResultCalc.CalculateEnergy` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12966`
+  - `HeatingAndCoolingResultCalc.CalculateEnergyESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12974`
+  - `HeatingAndCoolingResultCalc.GetBaseLine` (private, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:12982`
+  - `HeatingAndCoolingResultCalc.GetESM` (private, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13189`
+  - `HeatingAndCoolingResultCalc.GetVentilationBaseLine` (private, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13396`
+  - `HeatingAndCoolingResultCalc.SetBaseLine` (private, `CalculationData`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13563`
+  - `HeatingAndCoolingResultCalc.SetESM` (private, `CalculationData`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13623`
+  - `HeatingAndCoolingResultCalc.SetVentilationBaseLine` (private, `CalculationData`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13683`
+  - `HeatingAndCoolingResultCalc.GetHotWaterBaseLine` (private, `List<DataRow>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13736`
+  - `HeatingAndCoolingResultCalc.SetHotWaterBaseLine` (private, `CalculationData`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13868`
+  - `HeatingAndCoolingResultCalc.CalculateUsavingType` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13912`
+  - `HeatingAndCoolingResultCalc.CalculateUsavingTypeESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13941`
+  - `HeatingAndCoolingResultCalc.CopyHeatingWorkingSchedule` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13972`
+  - `HeatingAndCoolingResultCalc.CopyHeatingWorkingScheduleESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13982`
+  - `HeatingAndCoolingResultCalc.CopyVentilationHeatingWorkingSchedule` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:13992`
+  - `HeatingAndCoolingResultCalc.CopyCoolingWorkingSchedule` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14002`
+  - `HeatingAndCoolingResultCalc.CopyCoolingWorkingScheduleESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14012`
+  - `HeatingAndCoolingResultCalc.CopyVentilationCoolingWorkingSchedule` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14022`
+  - `HeatingAndCoolingResultCalc.CalculateGsavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14032`
+  - `HeatingAndCoolingResultCalc.CalculateGsavingsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14045`
+  - `HeatingAndCoolingResultCalc.CopyWindowselements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14058`
+  - `HeatingAndCoolingResultCalc.CopyWindowselementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14069`
+  - `HeatingAndCoolingResultCalc.CopyTrasparentGelements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14080`
+  - `HeatingAndCoolingResultCalc.CopyTrasparentGelementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14094`
+  - `HeatingAndCoolingResultCalc.CalculateUfloorSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14108`
+  - `HeatingAndCoolingResultCalc.CalculateUfloorSavingsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14113`
+  - `HeatingAndCoolingResultCalc.CopyFloorElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14118`
+  - `HeatingAndCoolingResultCalc.CopyFloorElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14129`
+  - `HeatingAndCoolingResultCalc.CalculateUfloorOthersavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14140`
+  - `HeatingAndCoolingResultCalc.CalculateUfloorOthersavingsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14145`
+  - `HeatingAndCoolingResultCalc.CopyOtherFloorElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14150`
+  - `HeatingAndCoolingResultCalc.CopyOtherFloorElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14161`
+  - `HeatingAndCoolingResultCalc.CalculateUOuterWallsSaving` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14172`
+  - `HeatingAndCoolingResultCalc.CalculateUOuterWallsSavingESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14184`
+  - `HeatingAndCoolingResultCalc.CalculateUInnerWallsSaving` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14196`
+  - `HeatingAndCoolingResultCalc.CalculateUInnerWallsSavingESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14208`
+  - `HeatingAndCoolingResultCalc.CopyOuterWallsElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14220`
+  - `HeatingAndCoolingResultCalc.CopyOuterWallsElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14231`
+  - `HeatingAndCoolingResultCalc.CopyInnerWallsElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14242`
+  - `HeatingAndCoolingResultCalc.CopyInnerWallsElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14253`
+  - `HeatingAndCoolingResultCalc.CalculateUwindowsSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14264`
+  - `HeatingAndCoolingResultCalc.CalculateUwindowsSavingsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14276`
+  - `HeatingAndCoolingResultCalc.CopyWindowsElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14288`
+  - `HeatingAndCoolingResultCalc.CopyWindowsElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14299`
+  - `HeatingAndCoolingResultCalc.CalculateUnonTransparentSavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14310`
+  - `HeatingAndCoolingResultCalc.CalculateUnonTransparentSavingsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14315`
+  - `HeatingAndCoolingResultCalc.CopyNonTrasparentElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14320`
+  - `HeatingAndCoolingResultCalc.CopyNonTrasparentElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14334`
+  - `HeatingAndCoolingResultCalc.CalculateUceilingsavings` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14348`
+  - `HeatingAndCoolingResultCalc.CalculateUceilingsavingsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14353`
+  - `HeatingAndCoolingResultCalc.CopyCeilingElements` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14358`
+  - `HeatingAndCoolingResultCalc.CopyCeilingElementsESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14372`
+  - `HeatingAndCoolingResultCalc.SetScaleType` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14386`
+  - `HeatingAndCoolingResultCalc.CalculateHotWaterNeededPower` (public, `bool`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14431`
+  - `HeatingAndCoolingResultCalc.CalculateXwithCorrection` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14514`
+  - `HeatingAndCoolingResultCalc.ClearTableValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14528`
+  - `HeatingAndCoolingResultCalc.SetNullValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14575`
+  - `HeatingAndCoolingResultCalc.SetTableResults` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14587`
+  - `HeatingAndCoolingResultCalc.SetMonthRowValues` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14631`
+  - `HeatingAndCoolingResultCalc.SumCollectorsArea` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14644`
+  - `HeatingAndCoolingResultCalc.CalculateParameterF` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14649`
+  - `HeatingAndCoolingResultCalc.CalculateParameterX` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14654`
+  - `HeatingAndCoolingResultCalc.CalculateParameterY` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14666`
+  - `HeatingAndCoolingResultCalc.CalculateTOAeffect` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14681`
+  - `HeatingAndCoolingResultCalc.HotWaterNeededPower` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14706`
+  - `HeatingAndCoolingResultCalc.HotWaterNeededPowerTotal` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14711`
+  - `HeatingAndCoolingResultCalc.DefuseradiationHd` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14716`
+  - `HeatingAndCoolingResultCalc.SunDeclination` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14722`
+  - `HeatingAndCoolingResultCalc.SunsetHour` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14767`
+  - `HeatingAndCoolingResultCalc.SunsetHourPrim` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14773`
+  - `HeatingAndCoolingResultCalc.CalculateMonthlyHorizontalRadiation` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14783`
+  - `HeatingAndCoolingResultCalc.SubAngles` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14795`
+  - `HeatingAndCoolingResultCalc.CalculateProjectionCoeficient` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14800`
+  - `HeatingAndCoolingResultCalc.CalculateParameterHtMonthly` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14809`
+  - `HeatingAndCoolingResultCalc.VentilationCoolEnergyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14814`
+  - `HeatingAndCoolingResultCalc.VentilationCoolEnergyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14842`
+  - `HeatingAndCoolingResultCalc.VentilationCoolEnergyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14870`
+  - `HeatingAndCoolingResultCalc.VentilationCoolEnergyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14898`
+  - `HeatingAndCoolingResultCalc.VentilationCoolEnergyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14926`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingReferences` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14954`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14962`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14970`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursCoolingEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14978`
+  - `HeatingAndCoolingResultCalc.CalculateVentCoolNeededEnergyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:14986`
+  - `HeatingAndCoolingResultCalc.CalculateVentCoolNeededEnergyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15005`
+  - `HeatingAndCoolingResultCalc.CalculateVentCoolNeededEnergyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15024`
+  - `HeatingAndCoolingResultCalc.CalculateVentCoolNeededEnergyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15043`
+  - `HeatingAndCoolingResultCalc.CalculateVentCoolNeededEnergyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15062`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingInputsRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15082`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingInputsRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15108`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingInputs` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15134`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingInputsBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15160`
+  - `HeatingAndCoolingResultCalc.CalculateCoolingInputsESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15186`
+  - `HeatingAndCoolingResultCalc.GetDaysHours` (private, `List<TempHumidityPerDay>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15212`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyCoolEnergyRef1` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15220`
+  - `HeatingAndCoolingResultCalc.CalculateWitheringEnergyRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15275`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyCoolEnergyRef2` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15302`
+  - `HeatingAndCoolingResultCalc.CalculateWitheringEnergyRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15357`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyCoolEnergyActual` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15384`
+  - `HeatingAndCoolingResultCalc.CalculateWitheringEnergyActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15439`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyCoolEnergyBaseLine` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15466`
+  - `HeatingAndCoolingResultCalc.CalculateWitheringEnergyBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15521`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyCoolEnergyESM` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15548`
+  - `HeatingAndCoolingResultCalc.CalculateWitheringEnergyESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15603`
+  - `HeatingAndCoolingResultCalc.CalculateEntalpia` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15630`
+  - `HeatingAndCoolingResultCalc.CalculateWitheringEntalpia` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15636`
+  - `HeatingAndCoolingResultCalc.VentilationHeatEnergyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15642`
+  - `HeatingAndCoolingResultCalc.VentilationHeatEnergyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15676`
+  - `HeatingAndCoolingResultCalc.VentilationHeatEnergyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15710`
+  - `HeatingAndCoolingResultCalc.VentilationHeatEnergyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15753`
+  - `HeatingAndCoolingResultCalc.VentilationHeatEnergyESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15796`
+  - `HeatingAndCoolingResultCalc.CalculateVentNeededEnergyRef1` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15839`
+  - `HeatingAndCoolingResultCalc.CalculateVentNeededEnergyRef2` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15871`
+  - `HeatingAndCoolingResultCalc.CalculateVentNeededEnergyActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15903`
+  - `HeatingAndCoolingResultCalc.CalculateVentNeededEnergyBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15935`
+  - `HeatingAndCoolingResultCalc.CalculateVentNeededEnergyEsm` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:15967`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursReferences` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16000`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursActual` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16017`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursBaseLine` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16033`
+  - `HeatingAndCoolingResultCalc.GetWeekHoursESM` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16049`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyHeatEnergyRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16065`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyHeatEnergyRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16103`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyHeatEnergyActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16141`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyHeatEnergyBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16179`
+  - `HeatingAndCoolingResultCalc.CalculateMontlyHeatEnergyESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16217`
+  - `HeatingAndCoolingResultCalc.CalculateAverageVentHeatTempRef1` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16255`
+  - `HeatingAndCoolingResultCalc.CalculateAverageVentHeatTempRef2` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16260`
+  - `HeatingAndCoolingResultCalc.CalculateAverageVentHeatTempActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16265`
+  - `HeatingAndCoolingResultCalc.CalculateAverageVentHeatTempBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16320`
+  - `HeatingAndCoolingResultCalc.CalculateAverageVentHeatTempESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16375`
+  - `HeatingAndCoolingResultCalc.GetMonthHoursActual` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16430`
+  - `HeatingAndCoolingResultCalc.GetMonthHoursBaseLine` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16438`
+  - `HeatingAndCoolingResultCalc.GetMonthHoursESM` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16446`
+  - `HeatingAndCoolingResultCalc.CalcEntalpia` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.HeatingAndCoolingResultCalc.cs:16454`
+
+## InputDataCalc
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs`
+- Fields: _None detected_
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `InputDataCalc.CalcPeriod` (public, `List<MonthlyDays>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs:13`
+  - `InputDataCalc.CalcHours` (public, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs:43`
+  - `InputDataCalc.CalculateMonthlyDays` (public, `List<MonthlyDays>`) at `reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs:48`
+  - `InputDataCalc.GetWeeksInMonth` (private, `double`) at `reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs:272`
+  - `InputDataCalc.GetHollydays` (private, `int`) at `reference/eecalc-decompiled/EECalcCore.Calculations.InputDataCalc.cs:281`
+
+## MonthData
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.MonthData.cs`
+- Fields:
+  - `public MonthlyDays Month` at line `9`
+  - `public double AvgTemp` at line `11`
+  - `public double ParameterQtr` at line `13`
+  - `public double ParameterHtr` at line `15`
+  - `public double ParamHd` at line `17`
+  - `public double ParamHg` at line `19`
+  - `public double ParamHu` at line `21`
+  - `public double ParameterHve` at line `23`
+  - `public double ParameterQve` at line `25`
+  - `public double ParameterQgn` at line `27`
+  - `public double ParameterGama` at line `29`
+  - `public double NetEnergyQnd` at line `31`
+  - `public double ParameterQht` at line `33`
+  - `public double ParameterNi` at line `35`
+- Public auto-properties:
+  - `MonthlyDays Month` at line `9`
+  - `double AvgTemp` at line `11`
+  - `double ParameterQtr` at line `13`
+  - `double ParameterHtr` at line `15`
+  - `double ParamHd` at line `17`
+  - `double ParamHg` at line `19`
+  - `double ParamHu` at line `21`
+  - `double ParameterHve` at line `23`
+  - `double ParameterQve` at line `25`
+  - `double ParameterQgn` at line `27`
+  - `double ParameterGama` at line `29`
+  - `double NetEnergyQnd` at line `31`
+  - `double ParameterQht` at line `33`
+  - `double ParameterNi` at line `35`
+
+## MonthDataCooling
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.MonthDataCooling.cs`
+- Fields:
+  - `public MonthlyDays Month` at line `9`
+  - `public double AvgTemp` at line `11`
+  - `public double ParameterQtr` at line `13`
+  - `public double ParameterQsol` at line `15`
+  - `public double ParameterHtr` at line `17`
+  - `public double ParamHd` at line `19`
+  - `public double ParamHg` at line `21`
+  - `public double ParamHu` at line `23`
+  - `public double ParameterHve` at line `25`
+  - `public double ParameterQve` at line `27`
+  - `public double ParameterQgn` at line `29`
+  - `public double ParameterGama` at line `31`
+  - `public double NetEnergyQnd` at line `33`
+  - `public double ParameterQht` at line `35`
+  - `public double ParameterNi` at line `37`
+- Public auto-properties:
+  - `MonthlyDays Month` at line `9`
+  - `double AvgTemp` at line `11`
+  - `double ParameterQtr` at line `13`
+  - `double ParameterQsol` at line `15`
+  - `double ParameterHtr` at line `17`
+  - `double ParamHd` at line `19`
+  - `double ParamHg` at line `21`
+  - `double ParamHu` at line `23`
+  - `double ParameterHve` at line `25`
+  - `double ParameterQve` at line `27`
+  - `double ParameterQgn` at line `29`
+  - `double ParameterGama` at line `31`
+  - `double NetEnergyQnd` at line `33`
+  - `double ParameterQht` at line `35`
+  - `double ParameterNi` at line `37`
+
+## MonthlyDays
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.MonthlyDays.cs`
+- Fields:
+  - `public Month Month` at line `9`
+  - `public int WorkDays` at line `11`
+  - `public int Saturdays` at line `13`
+  - `public int Sundays` at line `15`
+  - `public int Holydays` at line `17`
+  - `public int TotalDays` at line `19`
+  - `public double Weeks` at line `21`
+- Public auto-properties:
+  - `Month Month` at line `9`
+  - `int WorkDays` at line `11`
+  - `int Saturdays` at line `13`
+  - `int Sundays` at line `15`
+  - `int Holydays` at line `17`
+  - `int TotalDays` at line `19`
+  - `double Weeks` at line `21`
+- Methods:
+  - `MonthlyDays.MonthlyDays` (public, `(constructor)`) at `reference/eecalc-decompiled/EECalcCore.Calculations.MonthlyDays.cs:23`
+  - `MonthlyDays.MonthlyDays` (public, `(constructor)`) at `reference/eecalc-decompiled/EECalcCore.Calculations.MonthlyDays.cs:32`
+
+## PreferencesManager
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.PreferencesManager.cs`
+- Fields:
+  - `public Parameters Parameters` at line `13`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `PreferencesManager.GetClimateZoneParams` (public, `ClimateZone`) at `reference/eecalc-decompiled/EECalcCore.Calculations.PreferencesManager.cs:21`
+
+## RoofTableCalc
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs`
+- Fields:
+  - `private List<double> areaValuesList` at line `11`
+  - `private List<double> trasparentAreaValuesList` at line `13`
+  - `private List<double> ceilingAreaValuesList` at line `15`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `RoofTableCalc.CalculateArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:17`
+  - `RoofTableCalc.CalculateNonTranspU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:22`
+  - `RoofTableCalc.SumL` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:28`
+  - `RoofTableCalc.SumX` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:45`
+  - `RoofTableCalc.CalculateEpsilon` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:62`
+  - `RoofTableCalc.CalculateAlfa` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:68`
+  - `RoofTableCalc.SumTrasparentArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:74`
+  - `RoofTableCalc.CalculateTrasparentU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:79`
+  - `RoofTableCalc.CalculateTrasparentG` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:85`
+  - `RoofTableCalc.SumCeilingArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:91`
+  - `RoofTableCalc.CalculateCeilingU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.RoofTableCalc.cs:96`
+
+## SavingsData
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.SavingsData.cs`
+- Fields:
+  - `private string technology` at line `9`
+  - `private double oldValue` at line `11`
+  - `private double valuee` at line `13`
+  - `private string row` at line `15`
+  - `private string tag` at line `17`
+  - `private double netEnergy` at line `19`
+  - `private double netEnergyNMinusOne` at line `21`
+  - `private double saving` at line `23`
+  - `private double savingNMinusOne` at line `25`
+  - `private double part` at line `27`
+  - `private double actualSaving` at line `29`
+  - `public event PropertyChangedEventHandler PropertyChanged` at line `174`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `SavingsData.OnPropertyChanged` (private, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.SavingsData.cs:176`
+
+## SunEnergyPreferencesManager
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.SunEnergyPreferencesManager.cs`
+- Fields:
+  - `public SunParameters SunParameters` at line `13`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `SunEnergyPreferencesManager.GetClimateZoneParams` (public, `ClimateZone`) at `reference/eecalc-decompiled/EECalcCore.Calculations.SunEnergyPreferencesManager.cs:21`
+
+## SunMonth
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.SunMonth.cs`
+- Fields:
+  - `public int Days` at line `7`
+  - `public double H` at line `9`
+  - `public double Ht` at line `11`
+  - `public double Tm` at line `13`
+  - `public double Qhotwater` at line `15`
+  - `public double Fm` at line `17`
+  - `public double Qsunwater` at line `19`
+  - `public double FmRemain` at line `21`
+- Public auto-properties:
+  - `int Days` at line `7`
+  - `double H` at line `9`
+  - `double Ht` at line `11`
+  - `double Tm` at line `13`
+  - `double Qhotwater` at line `15`
+  - `double Fm` at line `17`
+  - `double Qsunwater` at line `19`
+  - `double FmRemain` at line `21`
+
+## TempBridgeCalc
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.TempBridgeCalc.cs`
+- Fields: _None detected_
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `TempBridgeCalc.CalculateSums` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.TempBridgeCalc.cs:9`
+
+## WallsTableCalc
+
+- Source: `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs`
+- Fields:
+  - `private List<double> outerAreaValuesList` at line `11`
+  - `private List<double> innerAreaValuesList` at line `13`
+  - `private List<double> windowAreaValuesList` at line `15`
+- Public auto-properties: _None detected or manually implemented properties_
+- Methods:
+  - `WallsTableCalc.SumColumnOuterArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:17`
+  - `WallsTableCalc.AccumulateOuterU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:22`
+  - `WallsTableCalc.SumColumnOuterL` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:28`
+  - `WallsTableCalc.SumColumnOuterX` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:42`
+  - `WallsTableCalc.AcumulateOuterEpsilon` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:56`
+  - `WallsTableCalc.AcumulateOuterAlfa` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:62`
+  - `WallsTableCalc.SumColumnInnerArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:68`
+  - `WallsTableCalc.CalculateInnerU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:73`
+  - `WallsTableCalc.SumWindowArea` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:79`
+  - `WallsTableCalc.CalculateWindowU` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:84`
+  - `WallsTableCalc.CalculateWindowG` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:90`
+  - `WallsTableCalc.CalculateWindowE` (public, `void`) at `reference/eecalc-decompiled/EECalcCore.Calculations.TableCalculations.WallsTableCalc.cs:96`
+
+## Referenced Types Missing From Decompiled Files
+
+- `BuildingZone`
+- `CalculationData`
+- `CalculationInput`
+- `ClimateZone`
+- `ClimateZones`
+- `CoolingCalculations`
+- `Floor`
+- `FloorStates`
+- `Fuel`
+- `GeneralResultTable`
+- `HeatingCalculations`
+- `InvestigationMethods`
+- `LightsAndDevicesPeriods`
+- `Month`
+- `MonthState`
+- `Results`
+- `Roof`
+- `RoofStates`
+- `Scale`
+- `ScheduleMonth`
+- `Section`
+- `SunEnergyCalculationData`
+- `SunEnergyResMonth`
+- `TempBridge`
+- `TempHumidityPerDay`
+- `Walls`
+- `WallsStates`

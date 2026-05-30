@@ -1,0 +1,8 @@
+fixture,scenario,month,total_days,work_days,saturdays,sundays,holidays,weeks
+zone9_minimal_heating_22_60626,Actual,October,31,4,0,0,0,0.5714285714285714
+zone9_minimal_heating_22_60626,Actual,November,30,22,4,4,0,4.2857142857142856
+zone9_minimal_heating_22_60626,Actual,December,31,21,5,5,0,4.4285714285714288
+zone9_minimal_heating_22_60626,Actual,January,31,22,4,5,0,4.4285714285714288
+zone9_minimal_heating_22_60626,Actual,February,28,20,4,4,0,4
+zone9_minimal_heating_22_60626,Actual,March,31,23,4,4,0,4.4285714285714288
+zone9_minimal_heating_22_60626,Actual,April,30,5,0,0,0,0.7142857142857143

@@ -1,0 +1,2 @@
+ExactMatch,ExpectedValue,ActualValue,AbsoluteDelta,RelativeDelta,Module,FormulaField,Variant,ZoneIndex,Month,Classification
+False,10,12,2,0.20000000000000001,R5_HeatingBalance,Qnd,Actual,1,1,Unclassified

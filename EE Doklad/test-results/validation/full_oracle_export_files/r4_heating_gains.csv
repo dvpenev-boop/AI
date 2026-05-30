@@ -1,0 +1,8 @@
+﻿FixtureId,Mode,Variant,ZoneIndex,Month,Module,Source,TransparentFsol,NonTransparentFsol,QgnRaw,Qgn,OccupantHours,MetabolicHeatPerArea,MetabolicHeat
+fixture_001,LegacyEECalcStrict,Actual,7,10,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,386,1.21976,1219.76
+fixture_001,LegacyEECalcStrict,Actual,7,11,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,632,1.9971200000000002,1997.1200000000001
+fixture_001,LegacyEECalcStrict,Actual,7,12,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,634,2.0034399999999999,2003.4399999999998
+fixture_001,LegacyEECalcStrict,Actual,7,1,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,634,2.0034399999999999,2003.4399999999998
+fixture_001,LegacyEECalcStrict,Actual,7,2,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,584,1.84544,1845.4400000000001
+fixture_001,LegacyEECalcStrict,Actual,7,3,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,656,2.0729600000000001,2072.96
+fixture_001,LegacyEECalcStrict,Actual,7,4,R4_HeatingGains,EecalcMonthlyHeatingOracle,0,0,0,0,464,1.46624,1466.24

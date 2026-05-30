@@ -1,0 +1,8 @@
+﻿FixtureId,Mode,Variant,ZoneIndex,Month,Module,Source,AvgTemp,AvgInnerHeatTemp,Hd,Hg,HuWalls,HuCeilings,HuFloors,Hu,Htr,DegreeHours,Qtr
+fixture_001,LegacyEECalcStrict,Actual,7,10,R3_Transmission,EecalcHtrQtrOracle,11.199999999999999,19.784313725490197,0,0,0,0,0,0,0,3502.4000000000001,0
+fixture_001,LegacyEECalcStrict,Actual,7,11,R3_Transmission,EecalcHtrQtrOracle,5.0999999999999996,19.511111111111113,0,0,0,0,0,0,0,10376.000000000002,0
+fixture_001,LegacyEECalcStrict,Actual,7,12,R3_Transmission,EecalcHtrQtrOracle,0.40000000000000002,19.408602150537636,0,0,0,0,0,0,0,14142.400000000001,0
+fixture_001,LegacyEECalcStrict,Actual,7,1,R3_Transmission,EecalcHtrQtrOracle,-0.40000000000000002,19.408602150537636,0,0,0,0,0,0,0,14737.599999999999,0
+fixture_001,LegacyEECalcStrict,Actual,7,2,R3_Transmission,EecalcHtrQtrOracle,0.20000000000000001,19.476190476190474,0,0,0,0,0,0,0,12953.6,0
+fixture_001,LegacyEECalcStrict,Actual,7,3,R3_Transmission,EecalcHtrQtrOracle,4.5999999999999996,19.526881720430108,0,0,0,0,0,0,0,11105.6,0
+fixture_001,LegacyEECalcStrict,Actual,7,4,R3_Transmission,EecalcHtrQtrOracle,10.4,19.362318840579711,0,0,0,0,0,0,0,4947.1999999999998,0

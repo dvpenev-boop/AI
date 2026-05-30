@@ -1,0 +1,2 @@
+fixture,month,avgTemp,avgInnerHeatTemp,hd,hg,huWalls,huCeilings,huFloors,hu,htr,degreeHours,qtr
+r3_minimal_envelope,January,1,20.333333333333332,4,50,21.379310344827584,0,0,21.379310344827584,75.379310344827587,464,34.975999999999999

@@ -1,0 +1,11 @@
+﻿FixtureId,Mode,Variant,ZoneIndex,Month,Module,Source,TotalDays,WorkDays,Saturdays,Sundays,Holidays,Weeks,AvgTempFromDefaultParamsXml,ConfirmedDefect,AvgTemp
+fixture_001,LegacyEECalcStrict,Actual,7,10,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,31,15,1,1,0,2.4285714285714284,11.199999999999999,,
+fixture_001,LegacyEECalcStrict,Actual,7,11,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,30,22,4,4,0,4.2857142857142856,5.0999999999999996,,
+fixture_001,LegacyEECalcStrict,Actual,7,12,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,31,21,5,5,0,4.4285714285714288,0.40000000000000002,,
+fixture_001,LegacyEECalcStrict,Actual,7,1,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,31,22,4,5,0,4.4285714285714288,-0.40000000000000002,,
+fixture_001,LegacyEECalcStrict,Actual,7,2,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,28,20,4,4,0,4,0.20000000000000001,,
+fixture_001,LegacyEECalcStrict,Actual,7,3,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,31,23,4,4,0,4.4285714285714288,4.5999999999999996,,
+fixture_001,LegacyEECalcStrict,Actual,7,4,R1_R2_CalendarAndDegreeHours,EecalcMonthlyDaysOracle,30,15,4,4,0,3.2857142857142856,10.4,,
+fixture_001,LegacyEECalcStrict,Actual,1,1,R1_R2_CalendarAndDegreeHours,DefaultParams.xml,,,,,,,,KD-DATA-001,-1.8999999999999999
+fixture_001,LegacyEECalcStrict,Actual,2,1,R1_R2_CalendarAndDegreeHours,DefaultParams.xml,,,,,,,,KD-DATA-001,-0.5
+fixture_001,LegacyEECalcStrict,Actual,3,1,R1_R2_CalendarAndDegreeHours,DefaultParams.xml,,,,,,,,KD-DATA-001,-0.10000000000000001

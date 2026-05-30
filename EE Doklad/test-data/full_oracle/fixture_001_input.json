@@ -1,0 +1,113 @@
+{
+  "fixtureId": "fixture_001",
+  "mode": "LegacyEECalcStrict",
+  "general": {
+    "climateZoneId": 7,
+    "conditionedArea": 1000.0,
+    "heatedArea": 1000.0,
+    "otherArea": 0.0,
+    "conditionedVolume": 2500.0,
+    "otherVolume": 0.0,
+    "heatCapacityWhPerM2K": 46.0,
+    "metabolicHeatWPerM2": 3.16,
+    "latentMetabolicHeatWPerM2": 0.84
+  },
+  "season": {
+    "heatingStartDay": 15,
+    "heatingStartMonth": 10,
+    "heatingEndDay": 23,
+    "heatingEndMonth": 4
+  },
+  "envelope": {
+    "wallsAreaActual": 200.0,
+    "wallsAreaEsm": 200.0,
+    "windowsAreaActual": 40.0,
+    "windowsAreaEsm": 40.0,
+    "roofAreaActual": 100.0,
+    "roofAreaEsm": 100.0,
+    "floorAreaActual": 100.0,
+    "floorAreaEsm": 100.0
+  },
+  "holidaysByMonth": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 0,
+    "8": 0,
+    "9": 0,
+    "10": 0,
+    "11": 0,
+    "12": 0
+  },
+  "schedules": {
+    "workday": { "startHour": 0, "endHour": 24 },
+    "saturday": { "startHour": 0, "endHour": 24 },
+    "sunday": { "startHour": 0, "endHour": 2 },
+    "occupantsWorkday": { "startHour": 0, "endHour": 24 },
+    "occupantsSaturday": { "startHour": 0, "endHour": 24 },
+    "occupantsSunday": { "startHour": 0, "endHour": 24 },
+    "ventilationWorkday": { "startHour": 0, "endHour": 0 },
+    "ventilationSaturday": { "startHour": 0, "endHour": 0 },
+    "ventilationSunday": { "startHour": 0, "endHour": 0 },
+    "nightVentilationWorkday": { "startHour": 0, "endHour": 0 },
+    "nightVentilationSaturday": { "startHour": 0, "endHour": 0 },
+    "nightVentilationSunday": { "startHour": 0, "endHour": 0 }
+  },
+  "flags": {
+    "hasHeating": true,
+    "hasCooling": false,
+    "isBgvUsed": false,
+    "hasMechanicalVentilation": false,
+    "hasLighting": false,
+    "hasDevices": false
+  },
+  "heating": {
+    "infiltration": 0.5,
+    "projectTemperature": 20.0,
+    "nonProjectTemperature": 16.0,
+    "fuel1": "Fuel2",
+    "fuel2": "Fuel1",
+    "part1": 100.0,
+    "part2": 0.0,
+    "efficiency1": 100.0,
+    "efficiency2": 100.0
+  },
+  "cooling": {
+    "enabled": false,
+    "projectTemperature": null,
+    "nonProjectTemperature": null,
+    "relativeHumidity": null
+  },
+  "ventilation": {
+    "enabled": false,
+    "debit": null,
+    "flowTemperature": null,
+    "flowRelativeHumidity": null,
+    "firstRecEfficiency": null,
+    "secondRecEfficiency": null,
+    "heatingAirDifference": null
+  },
+  "dhwBgv": {
+    "enabled": false,
+    "consumption": null,
+    "tempDifference": null,
+    "sunEnergy": null,
+    "part1": null,
+    "part2": null,
+    "efficiency1": null,
+    "efficiency2": null
+  },
+  "lightingDevices": {
+    "lightsEnabled": false,
+    "balancedDevicesEnabled": false,
+    "nonBalancedDevicesEnabled": false,
+    "hotWaterPumpsEnabled": false
+  },
+  "aggregation": {
+    "fansAndPumps": 0.0,
+    "other": 0.0
+  }
+}
