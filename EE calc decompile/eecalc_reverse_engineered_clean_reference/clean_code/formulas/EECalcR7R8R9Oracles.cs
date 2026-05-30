@@ -749,6 +749,75 @@ namespace EE.Doklad.Tests.Validation.FullOracle
         }
     }
 
+    public sealed class EECalcCoolingFansAndPumpsOracle
+    {
+        private readonly EecalcMonthlyDaysOracle monthlyDaysOracle = new();
+
+        public EECalcCoolingFansAndPumpsResult Calculate(
+            EecalcValidationFixture coolingFixture,
+            EECalcCoolingFansAndPumpsInput input,
+            EECalcVentilationInput coolingVentilationInput)
+        {
+            var months = monthlyDaysOracle.Calculate(coolingFixture);
+            var coolingWeeks = months.Sum(month => month.Weeks);
+            var weeklyCoolingVentilationHours = WeeklyHours(
+                coolingVentilationInput.WorkdaySchedule,
+                coolingVentilationInput.SaturdaySchedule,
+                coolingVentilationInput.SundaySchedule);
+            var weeklyCoolingSeasonHours = WeeklyHours(
+                coolingFixture.WorkdaySchedule,
+                coolingFixture.SaturdaySchedule,
+                coolingFixture.SundaySchedule);
+            var neededEnergy = EECalcMath.CleanFinite(
+                (input.VentilatorsCool
+                 + input.PumpVentilationCool
+                 + input.VentilatorsOutdoorAirCool)
+                * weeklyCoolingVentilationHours
+                * coolingWeeks
+                / 1000.0
+                / (input.EnergyManagement / 100.0)
+                + input.CoolingPump
+                * 24.0
+                * 7.0
+                * coolingWeeks
+                / 1000.0
+                / (input.EnergyManagement / 100.0));
+            var otherNeededEnergy = EECalcMath.CleanFinite(
+                input.OtherCoolingVentilation
+                * weeklyCoolingVentilationHours
+                * coolingWeeks
+                / 1000.0
+                + input.OtherCooling
+                * weeklyCoolingSeasonHours
+                * coolingWeeks
+                / 1000.0);
+
+            return new EECalcCoolingFansAndPumpsResult
+            {
+                CoolingWeeks = coolingWeeks,
+                WeeklyCoolingVentilationHours = weeklyCoolingVentilationHours,
+                WeeklyCoolingSeasonHours = weeklyCoolingSeasonHours,
+                NeededEnergy = neededEnergy,
+                OtherNeededEnergy = otherNeededEnergy
+            };
+        }
+
+        private static double Duration(EecalcDailySchedule schedule)
+        {
+            return schedule.EndHour > schedule.StartHour
+                ? schedule.EndHour - schedule.StartHour
+                : 0.0;
+        }
+
+        private static double WeeklyHours(
+            EecalcDailySchedule workday,
+            EecalcDailySchedule saturday,
+            EecalcDailySchedule sunday)
+        {
+            return 5.0 * Duration(workday) + Duration(saturday) + Duration(sunday);
+        }
+    }
+
     public sealed class EECalcVentilationOracleResult
     {
         public IReadOnlyList<EECalcVentilationMonthRow> Rows { get; init; } = Array.Empty<EECalcVentilationMonthRow>();

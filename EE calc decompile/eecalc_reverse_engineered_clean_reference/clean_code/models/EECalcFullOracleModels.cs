@@ -204,6 +204,19 @@ namespace EE.Doklad.Tests.Validation.FullOracle
         public double OtherCooling { get; init; }
     }
 
+    public sealed class EECalcCoolingFansAndPumpsResult
+    {
+        public double CoolingWeeks { get; init; }
+
+        public double WeeklyCoolingVentilationHours { get; init; }
+
+        public double WeeklyCoolingSeasonHours { get; init; }
+
+        public double NeededEnergy { get; init; }
+
+        public double OtherNeededEnergy { get; init; }
+    }
+
     public sealed class EECalcEfficiencyChain
     {
         public static EECalcEfficiencyChain OneHundred { get; } = new();

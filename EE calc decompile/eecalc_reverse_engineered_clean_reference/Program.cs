@@ -140,39 +140,8 @@ var coolingVentilationWithering = coolingVentilation.Rows.Sum(row => row.Witheri
 var coolingVentilationNeeded = coolingVentilationPowCooling / (0.96 * 0.97);
 var cooling = new EecalcMonthlyCoolingOracle().Calculate(coolingFixture, coolingVentilationInputs);
 var coolingFansAndPumpsInput = TestFixture.BuildCoolingFansAndPumps();
-var coolingMonths = new EecalcMonthlyDaysOracle().Calculate(coolingCalculation);
-var coolingWeeks = coolingMonths.Sum(month => month.Weeks);
-var weeklyCoolingVentilationHours = WeeklyHours(
-    coolingVentInput.WorkdaySchedule,
-    coolingVentInput.SaturdaySchedule,
-    coolingVentInput.SundaySchedule);
-var weeklyCoolingSeasonHours = WeeklyHours(
-    coolingCalculation.WorkdaySchedule,
-    coolingCalculation.SaturdaySchedule,
-    coolingCalculation.SundaySchedule);
-var coolingFansAndPumpsNeededEnergy = CleanFinite(
-    (coolingFansAndPumpsInput.VentilatorsCool
-     + coolingFansAndPumpsInput.PumpVentilationCool
-     + coolingFansAndPumpsInput.VentilatorsOutdoorAirCool)
-    * weeklyCoolingVentilationHours
-    * coolingWeeks
-    / 1000.0
-    / (coolingFansAndPumpsInput.EnergyManagement / 100.0)
-    + coolingFansAndPumpsInput.CoolingPump
-    * 24.0
-    * 7.0
-    * coolingWeeks
-    / 1000.0
-    / (coolingFansAndPumpsInput.EnergyManagement / 100.0));
-var coolingOtherNeededEnergy = CleanFinite(
-    coolingFansAndPumpsInput.OtherCoolingVentilation
-    * weeklyCoolingVentilationHours
-    * coolingWeeks
-    / 1000.0
-    + coolingFansAndPumpsInput.OtherCooling
-    * weeklyCoolingSeasonHours
-    * coolingWeeks
-    / 1000.0);
+var coolingFansAndPumps = new EECalcCoolingFansAndPumpsOracle()
+    .Calculate(coolingCalculation, coolingFansAndPumpsInput, coolingVentInput);
 var dhwOracle = new EECalcDhwBgvOracle();
 var dhwWithoutSolarInput = TestFixture.BuildDhwBgvWithoutSolar();
 var dhwWithoutSolar = dhwOracle.Calculate(dhwCalculation, dhwWithoutSolarInput);
@@ -320,17 +289,17 @@ Console.WriteLine($"Ventilators outdoor air no treatment: {Format(coolingFansAnd
 Console.WriteLine($"Ventilation pumps: {Format(coolingFansAndPumpsInput.PumpVentilationCool)} W/m2");
 Console.WriteLine($"Cooling pumps: {Format(coolingFansAndPumpsInput.CoolingPump)} W/m2");
 Console.WriteLine($"EM and maintenance: {Format(coolingFansAndPumpsInput.EnergyManagement)} %");
-Console.WriteLine($"Cooling weeks: {Format(coolingWeeks)}");
-Console.WriteLine($"Weekly cooling ventilation hours: {Format(weeklyCoolingVentilationHours)}");
-Console.WriteLine($"Weekly cooling season hours: {Format(weeklyCoolingSeasonHours)}");
+Console.WriteLine($"Cooling weeks: {Format(coolingFansAndPumps.CoolingWeeks)}");
+Console.WriteLine($"Weekly cooling ventilation hours: {Format(coolingFansAndPumps.WeeklyCoolingVentilationHours)}");
+Console.WriteLine($"Weekly cooling season hours: {Format(coolingFansAndPumps.WeeklyCoolingSeasonHours)}");
 Console.WriteLine("Cooling pump weekly hours: 168.000");
-Console.WriteLine($"Needed energy: {Format(coolingFansAndPumpsNeededEnergy)} kWh/m2");
+Console.WriteLine($"Needed energy: {Format(coolingFansAndPumps.NeededEnergy)} kWh/m2");
 
 Console.WriteLine();
 Console.WriteLine("=== OTHER CONSUMERS - COOLING ===");
 Console.WriteLine($"Other ventilation: {Format(coolingFansAndPumpsInput.OtherCoolingVentilation)} W/m2");
 Console.WriteLine($"Other cooling: {Format(coolingFansAndPumpsInput.OtherCooling)} W/m2");
-Console.WriteLine($"Needed energy other: {Format(coolingOtherNeededEnergy)} kWh/m2");
+Console.WriteLine($"Needed energy other: {Format(coolingFansAndPumps.OtherNeededEnergy)} kWh/m2");
 
 Console.WriteLine();
 Console.WriteLine("=== DHW / BGV WITHOUT SOLAR ===");
@@ -458,11 +427,6 @@ static EecalcValidationFixture CopyCalculationWithClimate(
 static string Format(double value)
 {
     return Math.Round(value, 3, MidpointRounding.AwayFromZero).ToString("0.000", CultureInfo.InvariantCulture);
-}
-
-static double CleanFinite(double value)
-{
-    return double.IsNaN(value) || double.IsInfinity(value) ? 0.0 : value;
 }
 
 static double Duration(EecalcDailySchedule schedule)
