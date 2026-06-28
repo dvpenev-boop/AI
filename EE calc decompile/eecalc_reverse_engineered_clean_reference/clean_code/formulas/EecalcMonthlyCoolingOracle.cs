@@ -355,12 +355,12 @@ namespace EE.Doklad.Tests.Validation
 
             for (var hour = 0; hour < ventilation.StartHour; hour++)
             {
-                inactive += fixture.VentilationDebit * LatentVentDelta(fixture, WeatherAt(weather, hour)) * LatentFactor;
+                inactive += fixture.VentilationDebit * LatentVentDelta(fixture, ShiftedWeatherAt(weather, hour)) * LatentFactor;
             }
 
             for (var hour = ventilation.StartHour; hour < ventilation.EndHour; hour++)
             {
-                active += fixture.VentilationDebit * LatentVentDelta(fixture, WeatherAt(weather, hour)) * LatentFactor;
+                active += fixture.VentilationDebit * LatentVentDelta(fixture, ShiftedWeatherAt(weather, hour)) * LatentFactor;
             }
 
             for (var hour = ventilation.EndHour; hour < 24; hour++)
@@ -368,7 +368,7 @@ namespace EE.Doklad.Tests.Validation
                 var multiplier = doubleDebitAfterEnd
                     ? fixture.VentilationDebit * fixture.VentilationDebit
                     : fixture.VentilationDebit;
-                inactive += multiplier * LatentVentDelta(fixture, WeatherAt(weather, hour)) * LatentFactor;
+                inactive += multiplier * LatentVentDelta(fixture, ShiftedWeatherAt(weather, hour)) * LatentFactor;
             }
 
             return active + inactive;
@@ -715,6 +715,22 @@ namespace EE.Doklad.Tests.Validation
         private static EecalcHourlyWeatherFixture WeatherAt(IReadOnlyList<EecalcHourlyWeatherFixture> weather, int hour)
         {
             var index = hour < weather.Count ? hour : 0;
+            return weather[index];
+        }
+
+        private static EecalcHourlyWeatherFixture ShiftedWeatherAt(IReadOnlyList<EecalcHourlyWeatherFixture> weather, int hour)
+        {
+            if (weather.Count == 0)
+            {
+                return new EecalcHourlyWeatherFixture();
+            }
+
+            if (hour == 0)
+            {
+                return weather[Math.Min(23, weather.Count - 1)];
+            }
+
+            var index = hour - 1 < weather.Count ? hour - 1 : 0;
             return weather[index];
         }
 

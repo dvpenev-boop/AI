@@ -57,6 +57,8 @@ namespace EE.Doklad.Tests.Validation.FullOracle
                 ResultEnergyForHeating = heatingTotal + coolingHeating,
                 ResultEnergyForCooling = coolingTotal,
                 ResultEnergyForWithering = withering,
+                HeatingNeededEnergy = sourceHeating1 + sourceHeating2,
+                CoolingNeededEnergy = sourceCooling1 + sourceCooling2,
                 ResultSourceEnergy = sourceHeating1 + sourceCooling1,
                 ResultSourceEnergy2 = sourceHeating2 + sourceCooling2,
                 ResultNeededEnergy = sourceHeating1 + sourceHeating2 + sourceCooling1 + sourceCooling2,
@@ -818,12 +820,82 @@ namespace EE.Doklad.Tests.Validation.FullOracle
         }
     }
 
+    public sealed class EECalcHeatingFansAndPumpsOracle
+    {
+        private readonly EecalcMonthlyDaysOracle monthlyDaysOracle = new();
+
+        public EECalcHeatingFansAndPumpsResult Calculate(
+            EecalcValidationFixture heatingFixture,
+            EECalcHeatingFansAndPumpsInput input,
+            EECalcVentilationInput heatingVentilationInput)
+        {
+            var months = monthlyDaysOracle.Calculate(heatingFixture);
+            var heatingWeeks = months.Sum(month => month.Weeks);
+            var weeklyVentilationHours = WeeklyHours(
+                heatingVentilationInput.WorkdaySchedule,
+                heatingVentilationInput.SaturdaySchedule,
+                heatingVentilationInput.SundaySchedule);
+            var weeklyHeatingSeasonHours = WeeklyHours(
+                heatingFixture.WorkdaySchedule,
+                heatingFixture.SaturdaySchedule,
+                heatingFixture.SundaySchedule);
+            var efficiency = input.EnergyManagement / 100.0;
+            var neededEnergy = EECalcMath.CleanFinite(
+                (input.VentilatorsHeat + input.PumpVentilationHeat)
+                * weeklyVentilationHours
+                * heatingWeeks
+                / 1000.0
+                / efficiency
+                + input.HeatingPump
+                * 24.0
+                * 7.0
+                * heatingWeeks
+                / 1000.0
+                / efficiency);
+            var otherNeededEnergy = EECalcMath.CleanFinite(
+                input.OtherHeatingVentilation
+                * weeklyVentilationHours
+                * heatingWeeks
+                / 1000.0
+                + input.OtherHeating
+                * weeklyHeatingSeasonHours
+                * heatingWeeks
+                / 1000.0);
+
+            return new EECalcHeatingFansAndPumpsResult
+            {
+                HeatingWeeks = heatingWeeks,
+                WeeklyVentilationHours = weeklyVentilationHours,
+                WeeklyHeatingSeasonHours = weeklyHeatingSeasonHours,
+                NeededEnergy = neededEnergy,
+                OtherNeededEnergy = otherNeededEnergy
+            };
+        }
+
+        private static double Duration(EecalcDailySchedule schedule)
+        {
+            return schedule.EndHour > schedule.StartHour
+                ? schedule.EndHour - schedule.StartHour
+                : 0.0;
+        }
+
+        private static double WeeklyHours(
+            EecalcDailySchedule workday,
+            EecalcDailySchedule saturday,
+            EecalcDailySchedule sunday)
+        {
+            return 5.0 * Duration(workday) + Duration(saturday) + Duration(sunday);
+        }
+    }
+
     public sealed class EECalcVentilationOracleResult
     {
         public IReadOnlyList<EECalcVentilationMonthRow> Rows { get; init; } = Array.Empty<EECalcVentilationMonthRow>();
         public double ResultEnergyForHeating { get; init; }
         public double ResultEnergyForCooling { get; init; }
         public double ResultEnergyForWithering { get; init; }
+        public double HeatingNeededEnergy { get; init; }
+        public double CoolingNeededEnergy { get; init; }
         public double ResultSourceEnergy { get; init; }
         public double ResultSourceEnergy2 { get; init; }
         public double ResultNeededEnergy { get; init; }

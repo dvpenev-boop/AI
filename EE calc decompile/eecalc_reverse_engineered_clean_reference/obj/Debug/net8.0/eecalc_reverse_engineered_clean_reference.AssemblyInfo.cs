@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("eecalc_reverse_engineered_clean_reference")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c7e821c150e4ddc65410841b3d6ba2f8e4df6da3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+832a19eebe1ee881004faeb7dc48f2695dd1f7ee")]
 [assembly: System.Reflection.AssemblyProductAttribute("eecalc_reverse_engineered_clean_reference")]
 [assembly: System.Reflection.AssemblyTitleAttribute("eecalc_reverse_engineered_clean_reference")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

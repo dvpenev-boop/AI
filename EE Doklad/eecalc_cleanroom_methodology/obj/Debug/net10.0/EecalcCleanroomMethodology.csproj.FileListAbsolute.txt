@@ -1,0 +1,15 @@
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\bin\Debug\net10.0\EecalcCleanroomMethodology.exe
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\bin\Debug\net10.0\EecalcCleanroomMethodology.deps.json
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\bin\Debug\net10.0\EecalcCleanroomMethodology.runtimeconfig.json
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\bin\Debug\net10.0\EecalcCleanroomMethodology.dll
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\bin\Debug\net10.0\EecalcCleanroomMethodology.pdb
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.GeneratedMSBuildEditorConfig.editorconfig
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.AssemblyInfoInputs.cache
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.AssemblyInfo.cs
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.csproj.CoreCompileInputs.cache
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.sourcelink.json
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.dll
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\refint\EecalcCleanroomMethodology.dll
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.pdb
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\EecalcCleanroomMethodology.genruntimeconfig.cache
+E:\AI\EE Doklad\eecalc_cleanroom_methodology\obj\Debug\net10.0\ref\EecalcCleanroomMethodology.dll
